@@ -1,0 +1,19 @@
+# Same line endings on every OS: LF in the repo and in the working copy (Prettier and roblox-ts expect LF).
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files: never touch them
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ttf binary
+*.otf binary
+*.rbxl binary
+*.rbxm binary
+*.figcraft binary
+*.rgba binary

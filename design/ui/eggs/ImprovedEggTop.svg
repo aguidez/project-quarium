@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="120" viewBox="0 0 100 120">
+	<defs><clipPath id="egg"><path d="M50 4 C76 4 94 46 94 74 C94 100 74 116 50 116 C26 116 6 100 6 74 C6 46 24 4 50 4 Z"/></clipPath><radialGradient id="shell" cx="0.38" cy="0.3" r="0.8">
+			<stop offset="0" stop-color="#F1DDFF"/><stop offset="0.5" stop-color="#B275F5"/><stop offset="1" stop-color="#5E22B4"/>
+		</radialGradient>
+		<linearGradient id="band" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0" stop-color="#FFE98A"/><stop offset="1" stop-color="#E7A21E"/>
+		</linearGradient></defs>
+	<defs><clipPath id="top"><path d="M0 0 H100 V62 100 62 L90 55 L80 67 L70 55 L60 67 L50 55 L40 67 L30 55 L20 67 L10 55 L0 62 Z"/></clipPath></defs><g clip-path="url(#top)"><path d="M50 4 C76 4 94 46 94 74 C94 100 74 116 50 116 C26 116 6 100 6 74 C6 46 24 4 50 4 Z" fill="url(#shell)"/>
+	<g clip-path="url(#egg)"><path d="M0 40 L12 33 L24 40 L36 33 L48 40 L60 33 L72 40 L84 33 L100 40 V49 L84 42 L72 49 L60 42 L48 49 L36 42 L24 49 L12 42 L0 49 Z" fill="url(#band)" stroke="#9A6A0C" stroke-width="1.5"/><path d="M0 88 L12 82 L24 88 L36 82 L48 88 L60 82 L72 88 L84 82 L100 88 V94 L84 88 L72 94 L60 88 L48 94 L36 88 L24 94 L12 88 L0 94 Z" fill="url(#band)" stroke="#9A6A0C" stroke-width="1.2"/><path d="M30 16 Q30 22 36 22 Q30 22 30 28 Q30 22 24 22 Q30 22 30 16 Z" fill="#FFFFFF"/><path d="M72 65 Q72 70 77 70 Q72 70 72 75 Q72 70 67 70 Q72 70 72 65 Z" fill="#FFF3B0"/><path d="M34 100 Q34 104 38 104 Q34 104 34 108 Q34 104 30 104 Q34 104 34 100 Z" fill="#FFFFFF"/><path d="M66 17 Q66 20 69 20 Q66 20 66 23 Q66 20 63 20 Q66 20 66 17 Z" fill="#FFF3B0"/>
+		<path d="M6 92 C20 116 80 116 94 92 L94 120 L6 120 Z" fill="#000000" opacity="0.12"/>
+	</g>
+	<ellipse cx="33" cy="28" rx="7" ry="13" transform="rotate(25 33 28)" fill="#FFFFFF" opacity="0.75"/>
+	<path d="M50 4 C76 4 94 46 94 74 C94 100 74 116 50 116 C26 116 6 100 6 74 C6 46 24 4 50 4 Z" fill="none" stroke="#3E1670" stroke-width="4"/><g clip-path="url(#egg)"><path d="M0 62 L10 55 L20 67 L30 55 L40 67 L50 55 L60 67 L70 55 L80 67 L90 55 L100 62" fill="none" stroke="#3E1670" stroke-width="5" stroke-linejoin="round"/></g></g>
+</svg>

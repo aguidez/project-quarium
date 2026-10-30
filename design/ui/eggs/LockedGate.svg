@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="84" height="62" viewBox="0 0 84 62">
+	<defs>
+		<clipPath id="porthole"><rect x="0" y="0" width="84" height="62" rx="31"/></clipPath>
+		<linearGradient id="iron" x1="0" y1="0" x2="1" y2="1">
+			<stop offset="0" stop-color="#9AA4AC"/><stop offset="1" stop-color="#4A535A"/>
+		</linearGradient>
+		<linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0" stop-color="#FFE07A"/><stop offset="1" stop-color="#C98E32"/>
+		</linearGradient>
+	</defs>
+	<g clip-path="url(#porthole)">
+		<rect x="0" y="0" width="84" height="62" fill="#000000" opacity="0.25"/>
+		<rect x="11" y="-2" width="6" height="66" fill="url(#iron)" stroke="#22292E" stroke-width="1.5"/><rect x="25" y="-2" width="6" height="66" fill="url(#iron)" stroke="#22292E" stroke-width="1.5"/><rect x="39" y="-2" width="6" height="66" fill="url(#iron)" stroke="#22292E" stroke-width="1.5"/><rect x="53" y="-2" width="6" height="66" fill="url(#iron)" stroke="#22292E" stroke-width="1.5"/><rect x="67" y="-2" width="6" height="66" fill="url(#iron)" stroke="#22292E" stroke-width="1.5"/><rect x="-2" y="11.5" width="88" height="5" rx="2" fill="url(#iron)" stroke="#22292E" stroke-width="1.5"/><rect x="-2" y="43.5" width="88" height="5" rx="2" fill="url(#iron)" stroke="#22292E" stroke-width="1.5"/><circle cx="14" cy="14" r="1.6" fill="#D5DCE1"/><circle cx="14" cy="46" r="1.6" fill="#D5DCE1"/><circle cx="28" cy="14" r="1.6" fill="#D5DCE1"/><circle cx="28" cy="46" r="1.6" fill="#D5DCE1"/><circle cx="42" cy="14" r="1.6" fill="#D5DCE1"/><circle cx="42" cy="46" r="1.6" fill="#D5DCE1"/><circle cx="56" cy="14" r="1.6" fill="#D5DCE1"/><circle cx="56" cy="46" r="1.6" fill="#D5DCE1"/><circle cx="70" cy="14" r="1.6" fill="#D5DCE1"/><circle cx="70" cy="46" r="1.6" fill="#D5DCE1"/>
+	</g>
+	<path d="M35 31 V25 A7 7 0 0 1 49 25 V31" fill="none" stroke="#2A2F33" stroke-width="6.5" stroke-linecap="round"/>
+	<path d="M35 31 V25 A7 7 0 0 1 49 25 V31" fill="none" stroke="#C3CBD1" stroke-width="3.5" stroke-linecap="round"/>
+	<rect x="30" y="29" width="24" height="19" rx="4" fill="url(#gold)" stroke="#6E4A12" stroke-width="2"/>
+	<circle cx="42" cy="36.5" r="2.6" fill="#4A2E0A"/>
+	<path d="M40.8 37.5 L43.2 37.5 L44 43 L40 43 Z" fill="#4A2E0A"/>
+</svg>

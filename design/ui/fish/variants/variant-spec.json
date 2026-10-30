@@ -1,0 +1,29 @@
+{
+  "_doc": "[hue rotation in degrees, saturation x, lightness +, optional tint [hue, saturation] for grey fish] per variant, for tools/fish-variant-recolor.js. colorMaps / icons: the uploaded results (colorMaps live in ReplicatedStorage.Assets.FishVariants, icons in src/client/ui/theme.ts). From the Silver Angelfish on, textures are 512x512 (Normal re-uploaded too; the Pirate Fish keeps its generated 1024 one, one upload less) and the icons are the stickers (design/ui/fish/stickers).",
+  "Basic": { "Anomaly": [120, 1, 0], "Shiny": [240, 1.15, 0.03] },
+  "Big": { "Anomaly": [60, 1, 0], "Shiny": [180, 1.15, 0.03] },
+  "RedTetra": { "Anomaly": [120, 1, 0], "Shiny": [240, 1.15, 0.03] },
+  "Clownfish": { "Anomaly": [240, 1, 0], "Shiny": [300, 1.15, 0.03] },
+  "ZebraDanio": { "Anomaly": [240, 1.2, 0], "Shiny": [120, 1.3, 0.03] },
+  "FlameGourami": { "Anomaly": [120, 1, 0], "Shiny": [240, 1.15, 0.03] },
+  "SilverAngelfish": { "Anomaly": [0, 1, -0.22, [230, 0.3]], "Shiny": [0, 1.15, 0.03, [45, 0.8]] },
+  "ImperialDiscus": { "Anomaly": [120, 1, 0], "Shiny": [180, 1.15, 0.03] },
+  "PirateFish": { "Anomaly": [300, 1, 0], "Shiny": [180, 1.15, 0.03] },
+  "Catfish": { "Anomaly": [180, 1.1, 0], "Shiny": [240, 1.2, 0.03] },
+  "BlueTang": { "Anomaly": [120, 1, 0], "Shiny": [180, 1.15, 0.03] },
+  "BabySunfish": { "Anomaly": [0, 1, -0.15, [200, 0.45]], "Shiny": [0, 1.15, 0.03, [45, 0.8]] },
+  "_colorMaps": {
+    "Basic": { "Normal": "rbxassetid://78123515869414", "Anomaly": "rbxassetid://109716399108991", "Shiny": "rbxassetid://122310939672949" },
+    "Big": { "Anomaly": "rbxassetid://77757889934537", "Shiny": "rbxassetid://125921896161201" },
+    "RedTetra": { "Anomaly": "rbxassetid://84083697746298", "Shiny": "rbxassetid://103571238412121" },
+    "Clownfish": { "Anomaly": "rbxassetid://131143617344026", "Shiny": "rbxassetid://114020279860510" },
+    "ZebraDanio": { "Anomaly": "rbxassetid://80818247602891", "Shiny": "rbxassetid://117675805415639" },
+    "FlameGourami": { "Anomaly": "rbxassetid://110951567452656", "Shiny": "rbxassetid://130150111768911" },
+    "SilverAngelfish": { "Normal": "rbxassetid://124024457223524", "Anomaly": "rbxassetid://73783135475446", "Shiny": "rbxassetid://138495246929298" },
+    "ImperialDiscus": { "Normal": "rbxassetid://111478161693746", "Anomaly": "rbxassetid://97998996668617", "Shiny": "rbxassetid://104284077764398" },
+    "PirateFish": { "Normal": "rbxassetid://76837327495535", "Anomaly": "rbxassetid://106089869843984", "Shiny": "rbxassetid://75123395235665" },
+    "Catfish": { "Normal": "rbxassetid://129757555402705", "Anomaly": "rbxassetid://74578300329592", "Shiny": "rbxassetid://105055135846126" },
+    "BlueTang": { "Normal": "rbxassetid://104040134895319", "Anomaly": "rbxassetid://111087086288488", "Shiny": "rbxassetid://73876633319361" },
+    "BabySunfish": { "Normal": "rbxassetid://118313287107044", "Anomaly": "rbxassetid://98165720003132", "Shiny": "rbxassetid://72128905120503" }
+  }
+}

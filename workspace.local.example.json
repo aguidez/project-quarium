@@ -1,0 +1,10 @@
+{
+	"//": "Copy this file to workspace.local.json (git-ignored) and fill in the paths of THIS machine. Every key is optional.",
+
+	"figcraftDir": "C:/Tools/figcraft-0.11.2-windows-x86-portable",
+	"figcraftPort": 7979,
+	"wgpuBackend": "vulkan",
+
+	"robloxStudioMcp": null,
+	"robloxFontsDir": null
+}

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="120" viewBox="0 0 100 120">
+	<defs><clipPath id="egg"><path d="M50 4 C76 4 94 46 94 74 C94 100 74 116 50 116 C26 116 6 100 6 74 C6 46 24 4 50 4 Z"/></clipPath><radialGradient id="shell" cx="0.38" cy="0.3" r="0.8">
+			<stop offset="0" stop-color="#D8FFF0"/><stop offset="0.5" stop-color="#2E9C82"/><stop offset="1" stop-color="#0E4A40"/>
+		</radialGradient>
+		<linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0" stop-color="#B9814A"/><stop offset="1" stop-color="#6E4322"/>
+		</linearGradient>
+		<radialGradient id="coin" cx="0.4" cy="0.35" r="0.7">
+			<stop offset="0" stop-color="#FFF4B0"/><stop offset="1" stop-color="#E2A21A"/>
+		</radialGradient></defs>
+	<defs><clipPath id="bottom"><path d="M0 62 0 62 L10 55 L20 67 L30 55 L40 67 L50 55 L60 67 L70 55 L80 67 L90 55 L100 62 V120 H0 Z"/></clipPath></defs><g clip-path="url(#bottom)"><path d="M50 4 C76 4 94 46 94 74 C94 100 74 116 50 116 C26 116 6 100 6 74 C6 46 24 4 50 4 Z" fill="url(#shell)"/>
+	<g clip-path="url(#egg)"><rect x="0" y="50" width="100" height="9" fill="url(#wood)" stroke="#3E2410" stroke-width="1.5"/><rect x="0" y="59" width="100" height="9" fill="url(#wood)" stroke="#3E2410" stroke-width="1.5"/><circle cx="14" cy="54.5" r="1.8" fill="#F2C14E" stroke="#7A4A06" stroke-width="0.8"/><circle cx="86" cy="54.5" r="1.8" fill="#F2C14E" stroke="#7A4A06" stroke-width="0.8"/><circle cx="36" cy="63.5" r="1.8" fill="#F2C14E" stroke="#7A4A06" stroke-width="0.8"/><circle cx="64" cy="63.5" r="1.8" fill="#F2C14E" stroke="#7A4A06" stroke-width="0.8"/><circle cx="30" cy="92" r="7" fill="url(#coin)" stroke="#8C5E08" stroke-width="1.5"/><circle cx="30" cy="92" r="3.8500000000000005" fill="none" stroke="#B57A0E" stroke-width="1"/><circle cx="48" cy="98" r="6" fill="url(#coin)" stroke="#8C5E08" stroke-width="1.5"/><circle cx="48" cy="98" r="3.3000000000000003" fill="none" stroke="#B57A0E" stroke-width="1"/><circle cx="66" cy="90" r="7" fill="url(#coin)" stroke="#8C5E08" stroke-width="1.5"/><circle cx="66" cy="90" r="3.8500000000000005" fill="none" stroke="#B57A0E" stroke-width="1"/><circle cx="40" cy="106" r="5" fill="url(#coin)" stroke="#8C5E08" stroke-width="1.5"/><circle cx="40" cy="106" r="2.75" fill="none" stroke="#B57A0E" stroke-width="1"/><circle cx="30" cy="30" r="4" fill="#FFFFFF" fill-opacity="0.3" stroke="#FFFFFF" stroke-width="1.3"/><circle cx="38" cy="20" r="2.5" fill="#FFFFFF" fill-opacity="0.3" stroke="#FFFFFF" stroke-width="1.3"/><circle cx="72" cy="36" r="3" fill="#FFFFFF" fill-opacity="0.3" stroke="#FFFFFF" stroke-width="1.3"/><circle cx="78" cy="26" r="2" fill="#FFFFFF" fill-opacity="0.3" stroke="#FFFFFF" stroke-width="1.3"/><path d="M70 74 Q70 78 74 78 Q70 78 70 82 Q70 78 66 78 Q70 78 70 74 Z" fill="#FFF3B0"/><path d="M24 73 Q24 76 27 76 Q24 76 24 79 Q24 76 21 76 Q24 76 24 73 Z" fill="#FFFFFF"/>
+		<path d="M6 92 C20 116 80 116 94 92 L94 120 L6 120 Z" fill="#000000" opacity="0.12"/>
+	</g>
+	<ellipse cx="33" cy="28" rx="7" ry="13" transform="rotate(25 33 28)" fill="#FFFFFF" opacity="0.75"/>
+	<path d="M50 4 C76 4 94 46 94 74 C94 100 74 116 50 116 C26 116 6 100 6 74 C6 46 24 4 50 4 Z" fill="none" stroke="#0B2B26" stroke-width="4"/><g clip-path="url(#egg)"><path d="M0 62 L10 55 L20 67 L30 55 L40 67 L50 55 L60 67 L70 55 L80 67 L90 55 L100 62" fill="none" stroke="#0B2B26" stroke-width="5" stroke-linejoin="round"/></g></g>
+</svg>

@@ -1,0 +1,704 @@
+# PROJECT_CONTEXT — Projet Quarium
+
+> Living map of the project. **Read it before exploring the code, and update it in the same change
+> whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
+> Last updated: 2026-10-30 (portable workspace: SETUP.md, workspace.local.json, cross-platform MCP launchers in tools/mcp, npm run doctor, docs/agent-notes; V0.38, ROADMAP M2: species Catfish / Blue Tang / Baby Sunfish (Epic) with coins Chest / Sapphire /
+> SunMedallion, Wreck and Atlantis eggs, rebirths 3–4 wired to the PirateWreck / Atlantis themes, Ocean milestones
+> 5,000–40,000, Voyage quest line to Atlantis; V0.37, ROADMAP M0 foundations: shared/format.ts (T / Qa, MAX_MONEY), incubators per egg type,
+> 12-egg shelf with arrows, on-demand fish templates (server/fishAssets, templates moved to ServerStorage), Ocean milestone
+> kinds Incubator / VariantLuck / Cosmetic + scrolling list, quest stats / rewards / requiresPass, cosmetics.ts,
+> gamepasses.ts (names only); V0.36, ROADMAP M1: Snail's Ocean upgrade x1.15, Pelican's x1.33 (every 7.5 s); V1 plan rev. 2 in BALANCE.md §5 with the owner's species, aquariums and companions, ROADMAP.md, tools/balance-v1-plan.js, tools/companion-sim.js; aquarium themes PirateWreck and Atlantis built for rebirths 3–4, not wired to REBIRTHS yet;
+> UI V2 "arcade aquatic" applied to the whole UI: client/ui/kit.tsx, V2 tokens in theme.ts,
+> design/ui/redesign-v2.figcraft, sprites in design/ui/v2; French Fish easter egg; rebirth-ready halo and reminder).
+
+**The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
+beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
+into fish of various rarities. Fish drop coins the player clicks to collect, and must be fed (food costs
+money). An unfed fish never dies: it turns weak (very slow) and only lets out 1 $ fart bubbles instead of its
+coins. Around that core loop:
+
+- a story / daily / weekly quest book;
+- companions (the Snail picks up coins);
+- fish variants: every hatch can be an Anomaly (10 %), a Ghost (5 %) or a Shiny (1 %), rarer and richer;
+- a Fish Index (collection): one row per species, one column per variant;
+- the Ocean: release fish (the player picks the kind and the variant) for Ocean Points, a progression score that
+  unlocks milestones (50: the Pelican companion, 100: Snail speed x1.15, 200: a second companion slot, 500: the
+  Pelican feeds x1.33 as often, every 7.5 s, 1,500: the tank holds 15 fish, 5,000: a second incubator, 8,000 / 25,000: 17 / 19 fish, 40,000: rare variants x1.5);
+- events: recurring ones drawn by each server every 5–15 min (the abyssal raid: the world goes dark, a lantern
+  fish steals coins) and admin ones started on every server (the K-pop music event); never during the tutorial;
+- likes between players: a board beside each tank, a like doubles the owner's coins for 5 min;
+- rebirths: restart the run for a permanent coin multiplier and a new aquarium theme (4 levels so far: Lagoon, Neon Coral, Pirate Wreck, Atlantis); while one is
+  affordable the Rebirth button pulses and a bubble reminds the player now and then;
+- easter eggs: secret fish hidden in every egg (the French Fish, see §3.4), their own Fish Index category.
+
+12 species (+ 1 secret), 8 eggs. The game is fast at first and slows down strongly after the first hours: **`BALANCE.md`** holds the
+expected progression (rebirth 1 ~28 min, six species ~1 h, rebirth 2 ~1h40, rebirth 3 ~3h01, rebirth 4 ~4h47, all twelve
+~5h42), the numbers and the rules,
+and the **V1 plan** (§5: 18 species, 12 eggs, 8 rebirths, a tank of 25 fish, the Water Hen / Swordfish / Jellyfish
+companions with paid upgrade quests, a "Voyage" main quest line, ~12h15 to see everything; played by
+`tools/balance-v1-plan.js`). **`ROADMAP.md`** is the development plan of V1 (milestones M0–M7, recipes for a species /
+theme / companion / egg, the moderation watch list of the new designs).
+
+---
+
+## 1. Tech stack & conventions
+
+| Topic | Choice |
+|---|---|
+| Language | TypeScript compiled to Luau by **roblox-ts 3** (`noLib`: no Node/browser globals; use `task.*`, `math.random`, `os.clock`, `print/warn`, `.size()`) |
+| Sync | **Rojo 7.7.1** (aftman). `default.project.json` maps `out/server` → ServerScriptService.TS, `out/shared` → ReplicatedStorage.TS, `out/client` → StarterPlayerScripts.TS, `out/first` → ReplicatedFirst.TS (loading screen). Never edit those scripts in Studio. A change to `default.project.json` needs `rojo serve` restarted (and the plugin reconnected) |
+| Packages | `@rbxts/react` + `react-roblox` (UI), `@rbxts/t` (runtime validation), `@rbxts/janitor` (cleanup), `@rbxts/services`, `@rbxts/profile-store` (player saves, see §3.1) |
+| Build / check | `npx rbxtsc` after every change; it must report zero errors |
+| Workspace | Windows or macOS, set up from `SETUP.md`; `npm run doctor` checks a machine. Machine-specific values (install paths, GPU flags) only in the git-ignored `workspace.local.json` (via `tools/local-config.js`), never in committed files; scripts are cross-platform Node. npm scripts: `build`, `watch`, `serve` (rojo serve), `sim` (economy simulator), `doctor`. `jimp` 0.22 is a devDependency for the image tools |
+| Framework | `shared/framework.ts`: singletons implementing `Lifecycle { onInit (sync), onStart (task.spawn) }`, registered in order in `server/main.server.ts` / `client/main.client.ts` |
+| Server authority | The client only sends **intents**. The server validates each one with `t`, reads prices and odds from shared config, and owns money, inventory, timers and every gameplay state. Even fish positions are server-computed (swim segments): clients only render them, never report them |
+| World ↔ code | Studio models are found by **CollectionService tags** (`shared/tags.ts`) and attributes, never by deep paths. Templates live in `ServerStorage.Assets` / `ReplicatedStorage.Assets` (fish, cloned by clients) in the place file, which Rojo does not manage: **remind the user to save the place** after MCP edits |
+| UI | Designed first in **FigCraft** (`design/ui/redesign-v2.figcraft` for the V2 style, `design/ui/shopbar.figcraft` for older pieces and the icons), then translated to `@rbxts/react` in `src/client/ui/*.tsx`. Colours, fonts and asset ids live in `client/ui/theme.ts`. **V2 style ("arcade aquatic")**: build screens from `client/ui/kit.tsx` (Button3D, Plate, Card, HeaderBanner, CloseButton, ItemSlot, ProgressBar, Chip, CoinIcon, NotifBadge, Sparkle, SoftGlow, TextStroke, Outline); fonts `FONT_TITLE` (Luckiest Guy: titles, buttons, big numbers) and `FONT_BOLD` (Fredoka One: the rest), every text with a `TextStroke`, every surface outlined in `OUTLINE` (3 px); colours from `PALETTES` (light / base / dark / shadow per role: green action, gold buy, red confirm / close, blue / lagoon secondary, navy inactive) and `NAVY`. Relief = a container of face height + depth holding a Shadow (darker, `depth` px lower) and the Face (gradient light → base, gloss); a frame's AutomaticSize ignores scale-sized children, which is how `Plate` / `Card` / `Panel` keep their bevel under content-sized faces. Luckiest Guy's lowercase "s" reads like a 5: short labels mixing digits and letters ("+1s") use Fredoka. Text drawn over a `UIGradient` goes in a child TextLabel, otherwise the gradient tints it. Wrapped text inside a `Panel` gets a fixed height from `getWrappedHeight` (Panel.tsx), never AutomaticSize. **Popups never animate the scale of text**: re-rendered at every size, it wobbles. Panels, the onboarding card, the event banner and the reward window fade in at their final size (CanvasGroup `GroupTransparency`, with padding for their border stroke); only images (rays, eggs, fish, icons) pop with a UIScale |
+| Style | English identifiers and comments; comments explain the *why*. UI text is in English, with **no emoji in texts** (the owner finds them too "AI"); emoji used alone as an icon are being replaced by drawn icons. Tabs, Prettier, eslint-plugin-roblox-ts |
+| Gotchas | Luau reserved words can't be identifiers (`next`, `end`…). Don't use the `in` operator or `??` on a macro union (`map.get(x) ?? []` in a `for…of` fails). In Node edit scripts, `String.replace` treats `$$`, `` $` `` and `$&` specially: prefer `split().join()` or the Edit tool. **A function declaration is not hoisted with its value**: a module-level `const X = f()` above `function f` compiles to a call of nil (declare the function first) |
+
+---
+
+## 2. Annotated tree
+
+```
+ProjetQuarium/
+├─ CLAUDE.md                 Project rules (read first), incl. "keep PROJECT_CONTEXT.md and RELEASE_NOTES.md up to date"
+├─ SETUP.md                  New machine / OS: prerequisites (Node ≥ 20, aftman/rokit → Rojo, Studio + MCP, VS Code,
+│                            Claude Code, FigCraft optional), install steps, machine config, what is shared vs local
+├─ PROJECT_CONTEXT.md        This file
+├─ RELEASE_NOTES.md          Every change of the game, patch by patch (V0.01, V0.02…), newest on top, never deleted
+├─ BALANCE.md                The balance: expected progression (what after how long, why), species / eggs / rebirths /
+│                            Ocean milestones tables, design rules, the V1 plan (§5), history. Updated with every economy change
+├─ ROADMAP.md                V1 development plan: milestones M0 (foundations) → M7 (launch calibration) with checkboxes,
+│                            recipes (species, aquarium theme, companion, egg), moderation watch list of the new designs
+├─ default.project.json      Rojo mapping (see §1)
+├─ .mcp.json                 Project MCP servers (Roblox_Studio, FigCraft), started by `node tools/mcp/*.js` on any OS
+├─ workspace.local.example.json  Template of workspace.local.json (git-ignored): this machine's FigCraft folder / port /
+│                            wgpu backend, Studio MCP and Roblox fonts overrides; read by tools/local-config.js
+├─ .gitattributes            LF everywhere (CRLF for .bat/.cmd), binaries marked; .gitignore keeps local config out
+├─ docs/agent-notes/         The agent's shared working knowledge (owner preferences, asset pipeline, Studio MCP
+│                            testing, lobby decor, moderation), index in its README; replaces the per-machine auto-memory
+├─ design/ui/
+│  ├─ shopbar.figcraft       FigCraft source of every UI (ShopBar, panels, eggs, tutorial bubbles, LikeBoard); fish
+│  │                         pictures in it are the sticker icons (design/ui/fish/stickers)
+│  ├─ redesign-v2.figcraft   UI V2 "arcade aquatic" (in the game since V0.33): UIKit_V2 (palette, 3D buttons normal /
+│  │                         pressed, ribbon banners, square item slots, drawn side icons, Roblox mapping), HUD_V2,
+│  │                         QuestPanel_V2, FishIndex_V2, Assets_V2 (the game's V2 sprites), ShopBar_V1 (hand-made in
+│  │                         FigCraft, not by the build script: shelf arrows, incubator chip "1/2", gold "+"). Built by
+│  │                         redesign-v2.build.js (node → JSON → `figcraft-cli run`; with a preview folder it exports
+│  │                         the boards and the sprites, in the same session: the fonts Luckiest Guy / Fredoka One
+│  │                         are loaded from the Roblox install and a separate render wouldn't have them)
+│  ├─ v2/                    V2 sprites (2x PNG, ids in theme.ts V2_IMAGES): Icon_Quests / FishIndex / Ocean / Rebirth,
+│  │                         RibbonTailLeft / Right (white + grey fold, tinted in game), Sparkle, SoftGlow
+│  ├─ shopbar.build.js       Fish icons Guppy/Neon/RedTetra + shop bar (FigCraft command script)
+│  ├─ fish.build.js          → design/ui/fish/*.svg: Clownfish / ZebraDanio / FlameGourami icons
+│  ├─ fish/variants/         variant-spec.json (hue angles, uploaded texture ids) + the old flat variant icons
+│  ├─ fish/stickers/         Icon_<Type>_<Variant>.png: the UI's fish icons (sticker style), ids in theme.ts FISH_ICONS
+│  ├─ eggs.build.js          → design/ui/eggs/*.svg: egg sprites (whole, top/bottom halves, 3 cracks), Common → Atlantis
+│  │                         (FigCraft shopbar.figcraft frames at y 460: Amazon / NeonCoral x 1200-1800, Wreck / Atlantis
+│  │                         x 2000-2700; imported, exported 2x, never saved there)
+│  ├─ gate.build.js          Locked-gate icon of gated eggs
+│  │  (SVG → FigCraft file.import → export PNG ×2 → upload_image (local http server) → ids in theme.ts)
+│  └─ loading/               LoadingBanner.png (the user's beach banner) → LoadingBannerClean.png (baked bar erased)
+│                            + LoadingTail.png (fish tail of the bar); ids in src/first/LoadingScreen.client.ts.
+│                            FigCraft: LoadingScreen, TailSprite
+├─ tools/mcp/                MCP launchers (Node, any OS; nothing on stdout): figcraft.js starts the FigCraft app with
+│                            its control port if needed then `figcraft-cli mcp --attach`; roblox-studio.js finds Studio's
+│                            MCP server (Windows mcp.bat / macOS StudioMCP / override); run-stdio.js shared stdio pass-through
+├─ tools/local-config.js     Reads workspace.local.json (+ UPPER_SNAKE env overrides), finds the Roblox fonts folder
+├─ tools/check-setup.js      `npm run doctor`: checks Node, packages, Rojo version, Studio MCP, fonts, FigCraft
+├─ tools/economy-sim.js      Monte Carlo balance simulator (node): eggs, fish, variants, every rebirth, the capacity
+│                            milestones; reports each step's median / p10 / p90, each species' discovery, Ocean
+│                            milestones, income and Ocean Points per checkpoint. Keep it in sync with the config and copy
+│                            its results into BALANCE.md. `--plan <file>` plays a planned economy instead (incubator and
+│                            hatch-speed milestones, quest bonuses), `--players n`, JSON overrides (coinBoost / oceanBoost /
+│                            hatchMult: gamepass estimates)
+├─ tools/balance-v1-plan.js  The V1 plan played by the simulators (BALANCE.md §5): 18 species, 12 eggs, 8 rebirths,
+│                            Ocean milestones to 25 fish, second incubator, Water Hen, story quest bonuses, Pelican x1.33,
+│                            Snail x1.15, Jellyfish and Swordfish stages. Not in the game: becomes the config when V1 is built
+├─ tools/companion-sim.js    AFK simulator (node): share of fish-time weak with a feeder (Pelican, planned Jellyfish) per
+│                            tank size (mirrors CompanionService, FishService hunger, FoodService), share of coins a
+│                            collector picks up per coin rate (Snail on the sand, planned Swordfish in the water;
+│                            CoinService); `--plan` adds the plan's companion stages and upgrades
+├─ tools/fish-variant-recolor.js  Hue rotation of a species' texture + icon into its Anomaly / Shiny looks (pipeline in its header);
+│                                optional tint [hue, saturation] for grey fish (Silver Angelfish); species without a flat
+│                                icon get the texture only (their icons are the stickers)
+├─ tools/fish-sticker-icons.js    Sticker icons from black / white Studio captures of a fish sheet (difference matting,
+│                                outline, rim, shadow, shiny sparkles; pipeline in its header)
+└─ src/
+   ├─ first/                 ReplicatedFirst (runs before anything else replicates)
+   │  └─ LoadingScreen.client.ts  Loading screen: banner + live fish-shaped bar; imports NOTHING (no ReplicatedStorage
+   │                         yet), plain instances. Steps: game.IsLoaded → preload ReplicatedStorage.Assets models →
+   │                         wait for the local "DataLoaded" attribute (UiController, first sync). 2.5 s min, 45 s max;
+   │                         also waits for the artwork (≤ 8 s) and shows it ≥ 1.5 s, then fades
+   ├─ shared/                Code + config used by both sides (ReplicatedStorage)
+   │  ├─ framework.ts        Lifecycle + bootstrap
+   │  ├─ format.ts           formatNumber ("1,234,567", from 1e12 "1.23T") / formatShort ("25K", "1.5M", "6.1B", "1.8T", "1Qa"):
+   │  │                      UI and server messages (Luau's tostring breaks from 1e14); Panel.tsx re-exports them
+   │  ├─ network.ts          Remote contracts + getRemoteEvent(name) (Remotes folder in ReplicatedStorage), FishView / FishMessage
+   │  ├─ swim.ts             SwimSegment + getSwimPose: fish movement computed identically by server and clients
+   │  ├─ tags.ts             CollectionService tags and the attributes they carry
+   │  ├─ sounds.ts           Music id + SFX ids (played in 2D by AudioController; CoinStolen = the lantern's gulp)
+   │  └─ types/
+   │     ├─ fish.ts          FishType, FishRarity (… Mythic, Secret = easter eggs), CoinType (… Croissant), HungerState
+   │     │                   (Satiated/Hungry/Weak, no death), FISH_TYPES (income, interval, coin, rarity, oceanPoints,
+   │     │                   cannibal?, growth, hunger, easterEgg?: EasterEggConfig {hatchChance, incomeShare, lifetime,
+   │     │                   leaveMessage}), FART_BUBBLE_VALUE, growth helpers, FOOD_PRICE, DEFAULT_FISH_CAPACITY,
+   │     │                   isEasterEgg, getFishIndexOrder
+   │     ├─ eggs.ts          EggType, EGG_TYPES (price, hatchTime, odds, order, requires: the odds the UI shows),
+   │     │                   getDrawOdds (+ easter eggs, taken from the most common fish), rollEgg, starter egg, balance notes
+   │     ├─ variants.ts      FishVariant (Normal / Anomaly / Ghost / Shiny), FISH_VARIANTS (chance, coinRate,
+   │     │                   specialOddsMultiplier, ghostCoins, sparkles, rank, oceanPointsMultiplier), VARIANT_ORDER,
+   │     │                   GHOST_COIN_MULTIPLIER, RECOLOURED_VARIANTS, rollVariant, getOceanPoints, getSpecialCoinOdds,
+   │     │                   getVariantIncomeMultiplier, balance notes
+   │     ├─ playerData.ts    PlayerData shape + defaults + helpers (getTotalFish, getFishAndEggs, isEggUnlocked,
+   │     │                   getHatchedVariant, getLivingVariant, getIncubating, hasFreeIncubator…), MAX_MONEY (1e15),
+   │     │                   DEFAULT_INCUBATORS (1)
+   │     ├─ cosmetics.ts     CosmeticId / COSMETICS (kind Title / Decor / Finish): the V1 titles, decor and Pearl rims;
+   │     │                   PlayerData.cosmetics. Not displayed yet (nothing grants them before M5 / M6)
+   │     ├─ gamepasses.ts    GamePass / GAME_PASSES: names only (ids and effects come with M3's GamePassService)
+   │     ├─ quests.ts        QUESTS (Story1 Snail, Story2 Ocean, Story3–5 the Snail's line, Story6–8 the Pelican's line,
+   │     │                   Story9 then Voyage1–7 the main "Voyage" line), STORY_LINES (Start / Ocean / Rebirth (shown
+   │     │                   "Voyage") / Snail / Pelican: quests in
+   │     │                   order, requires (a quest),
+   │     │                   requiresCompanion, order), refreshStoryLines(lines, companions), getActiveStoryQuests,
+   │     │                   isStoryQuestDone, getStoryLine, isQuestLocked (line `requiresPass`: shown, never counted
+   │     │                   nor claimed without the pass); stats: counters CoinMoney, OceanPoints, EggsOpened,
+   │     │                   VariantHatched {variant}, FishReleased, CompanionStat {companion} (Snail coins, Pelican feeds),
+   │     │                   gauges (GAUGE_STATS) FishInTank, MoneyHeld, SpeciesHatched {fishType}, Rebirths, IndexCells;
+   │     │                   rewards Money / Companion / Feature / Perk / IncomeMinutes / OceanPoints / Title / Decor;
+   │     │                   daily/weekly periods (UTC)
+   │     ├─ perks.ts         Perk (CoinLinger1 +1 s, CoinLinger2 +2 s, CoinBounce, FishSatiety +15 s full, PelicanDouble
+   │     │                   2 pellets, PelicanCharges 2 charges), PERKS, COIN_BOUNCE_TIME (1.5 s), getGroundTimeBonus,
+   │     │                   hasCoinBounce, getSatietyBonus, getPelicanPellets, getPelicanCharges
+   │     ├─ companions.ts    CompanionType (Snail, Pelican), COMPANION_TYPES (+ sticker `image`), DEFAULT_COMPANION_SLOTS,
+   │     │                   PELICAN_FEED_INTERVAL
+   │     ├─ foodLooks.ts     FoodLook (Pellet, Shrimp), FOOD_LOOKS (min satiety bonus per look: 0, 15), getFoodLook:
+   │     │                   the more a meal feeds (perks' satiety bonus), the more filling the food looks
+   │     ├─ oceanRewards.ts  OCEAN_MILESTONES (id, points, title, description, reward: Companion / CompanionSlot /
+   │     │                   CompanionUpgrade {companion, multiplier} / Capacity {capacity} / Incubator {count} /
+   │     │                   VariantLuck {multiplier} / Cosmetic {cosmetics}), getOceanMilestone, hasClaimableOceanReward,
+   │     │                   getCompanionMultiplier (Snail: speed, Pelican: feeding rate), getVariantLuck (from the claimed list)
+   │     ├─ features.ts      Feature ("Ocean" and "Rebirth" by quest), FEATURES (drawn `image` per feature: quest
+   │     │                   book, reward popup), MIN_FISH_KEPT
+   │     ├─ events.ts        GameEventType (Kpop, Abyss), GAME_EVENTS: kind "Music" (bpm, beat coins) or "Abyss",
+   │     │                   subtitle, optional musicId and coinMultiplier (Abyss x1.5), EVENT_ATTRIBUTES,
+   │     │                   LURKING_ATTRIBUTE, TEST_EVENT_ORDER, getActiveEvent, getEventCoinMultiplier(owner); duration,
+   │     │                   recurring flag, EventSource, getRecurringEvents, getRecurringChance (minutes 5–15),
+   │     │                   EVENT_IMMUNE_ATTRIBUTE + isEventImmune (tutorial)
+   │     ├─ rebirths.ts      REBIRTHS (price, multiplier, start money, theme), AQUARIUM_THEMES (Basic, Lagoon,
+   │     │                   NeonCoral, PirateWreck, Atlantis: rebirths 1–4), getNextRebirth,
+   │     │                   getRebirthMultiplier, getAquariumTheme, getRebirthOceanPoints, rebirth balance notes
+   │     ├─ likes.ts         Like rules (1 per hour given, x2 coins for 5 min, restarted by each like), board offset, helpers
+   │     ├─ onboarding.ts    Onboarding steps + rules (what is allowed / free at each step), ONBOARDING_REWARD,
+   │     │                   STORY_QUEST_HINT_DELAY
+   │     └─ aquarium.ts      Tank dimensions, getAquariumFrame, isInFocusZone (front-of-glass zone)
+   ├─ server/
+   │  ├─ main.server.ts      Registers services (order matters for onInit)
+   │  ├─ templates.ts        loadTemplates(tag, attribute, keys) (Studio templates found by tag), scaleModel
+   │  ├─ fishAssets.ts       FishAssets: on-demand fish templates. Species models and variant textures live in
+   │  │                      ServerStorage.Assets.Fish / FishVariants; require(fishType, variant) copies them into
+   │  │                      ReplicatedStorage.Assets.Fish / FishVariants before a fish's Spawn message, sweep(inUse)
+   │  │                      (FishService, every 10 s) removes copies no tank used for 60 s
+   │  ├─ admins.ts           isGameOwner / isAdmin (owner of the place or its group + ADMIN_USER_IDS), checked server-side
+   │  ├─ saveData.ts         SaveData (profile: PlayerData + saved tank), SavedFish, SAVE_TEMPLATE, sanitizeSave
+   │  └─ services/
+   │     ├─ DataService      ProfileStore sessions (load, auto-save, final save, onLoaded / onSave hooks), sync(),
+   │     │                   notify(), registerAction(), money/fish helpers, resetSave (wipe + kick, see DevCommandService)
+   │     ├─ InteractionService  "Interact" remote: token bucket (10/s) shared by DropFood / CollectCoin
+   │     ├─ AquariumService  Registers Studio tanks, assigns one per player, owner nameplate (base), runtime folders
+   │     │                   (Fish/Food/Coins/Companions), focus reports ("SetFocus") + isTending / isAtOwnAquarium
+   │     ├─ FoodService      Drops / sinks food pellets (DropFood), price per pellet, max 10 per player; throwFood (free
+   │     │                   pellet thrown from above by the Pelican: falls through the air onto the surface, then sinks;
+   │     │                   Food.byCompanion marks it, so FishService's fed callbacks know the Pelican fed that fish);
+   │     │                   look from the owner's satiety bonus (getFoodLook): Pellet = brown ball, others = clone of
+   │     │                   a FoodTemplate MeshPart; random turn, then a slow 120° spin while sinking (CFrame tweens)
+   │     ├─ CoinService      Spawns coin models (sinking, ground lifetime) and fart bubbles (spawnBubble: rise, pop at the
+   │     │                   surface, 1 $), collection + credit, onCollected callbacks, findCoinToFetch / collectForOwner (Snail), clearOwner,
+   │     │                   findCoinToSteal / isCoinAlive / stealCoin (lantern fish: no credit, red "-X$" popup)
+   │     ├─ FishService      Fish as data only (no server model): swim AI as SwimSegments, hunger (weak, never dies),
+   │     │                   growth, coins / farts, cannibal eating, releases, beat coins, AFK freeze; easter egg fish:
+   │     │                   coin from getTankIncomePerMinute, leave after their lifetime (onFishLeft); replication to the
+   │     │                   clients that watch each tank ("WatchAquariums" → FishSync messages)
+   │     ├─ EggService       BuyEgg / OpenEgg: price, gating, incubation (up to PlayerData.incubators eggs per type, the
+   │     │                   soonest opens first), draw (or forceNextHatch, Studio tests), variant with getVariantLuck,
+   │     │                   quest stats EggsOpened / VariantHatched, reveal timing, then FishService.spawnFish;
+   │     │                   isRevealing (a hatched fish not in the tank yet)
+   │     ├─ OnboardingService  Drives onboarding steps from server facts; scripted first coin / first hunger; reward
+   │     ├─ EventService     Events: recurring clock (per server), admin events ("/event <name>" / "/event stop",
+   │     │                   admins only; MessagingService topic QuariumAdminEvent + MemoryStore hash QuariumEvents so
+   │     │                   new servers join; never from Studio), keeps the players' EventImmune attribute. Music: beats on
+   │     │                   server clock, guest fish per tank. Abyss: hands the LanternFish template to AbyssService.
+   │     │                   "StartTestEvent" (Studio only: an admin event of that server)
+   │     ├─ AbyssService     Abyssal raid: one lantern fish raid per owned tank, passes until the event ends, no cap (emerge
+   │     │                   from the back, dart at the most valuable coin, steal it if still there, flee into the dark, despawn)
+   │     ├─ CompanionService Equip / unequip, spawns equipped companions, Snail AI (3.6 studs/s, goes for the coin it can pick up
+   │     │                   soonest: crawl time vs sinking time; picks coins up on the way, never pauses between them),
+   │     │                   Ocean upgrades: Snail speed × getCompanionMultiplier (fetch + stroll),
+   │     │                   Pelican AI (perched on the back rim near the left corner, looks around; every 10 s (÷ its
+   │     │                   upgrade x1.33: 7.5 s), when its
+   │     │                   owner tends the tank, done with the tutorial, turns to a hungry fish (FishService.
+   │     │                   findHungryFishPosition) or a random spot, leans and throws a pellet from its beak;
+   │     │                   PelicanDouble: 2 pellets 1.6 studs apart; PelicanCharges: on demand instead, up to 2
+   │     │                   charges (start full, +1 per interval while not full), spends one at once when a fish is
+   │     │                   hungry (FishService.hasHungryFish) and no food is in the water, never throws otherwise;
+   │     │                   publishes them on the Pelican model: attributes Charges, MaxCharges, NextChargeAt (server
+   │     │                   time, absent when full), ChargeInterval)
+   │     ├─ QuestService     Progress from server stats (addProgress(stat, amount, subject {fishType, variant, companion});
+   │     │                   reportGauges reads every gauge from PlayerData), claims, rewards (money / companion / feature /
+   │     │                   perk / IncomeMinutes: minutes × FishService.getTankIncomePerMinute (at least one fish of the best
+   │     │                   species hatched) × rebirth multiplier / Ocean Points / title / decor), daily / weekly boards;
+   │     │                   quests of a line whose pass isn't owned are skipped
+   │     ├─ OceanService     ReleaseFish (+ Ocean Points), FinishTutorial (any feature's tutorial), credits an easter egg
+   │     │                   fish that leaves on its own (points, popup, its leaveMessage)
+   │     ├─ RebirthService   "Rebirth" intent (needs the "Rebirth" feature, quest "Saving Up"): fish to the ocean,
+   │     │                   run reset, rebirths + 1, reward popup
+   │     ├─ LikeService      Places a like board beside each tank, GiveLike (range / own tank / cooldown),
+   │     │                   keeps each owner's boost in memory (getCoinMultiplier), publishes likes + boost as aquarium attributes
+   │     └─ DevCommandService  Studio-only chat commands (a TextChatCommand created only when RunService.IsStudio(),
+   │                         and only the place's owner may use it): "/datareset" asks, "/datareset confirm" within 15 s
+   │                         empties the tank, wipes the save to the template and kicks (stop / start the playtest);
+   │                         "/nextfrench": the next egg opened hatches a French Fish (EggService.forceNextHatch);
+   │                         "/incubators <n>": incubators per egg type (1–4, saved: "/incubators 1" puts it back)
+   └─ client/
+      ├─ main.client.ts      Registers controllers
+      ├─ fishLook.ts         getFishTemplate / cloneFishTemplate (undefined until the server replicated the species),
+      │                      hasVariantLook, onFishAssetAdded, applyVariantLook (recoloured appearance, ghost
+      │                      translucency, shiny particles), used by FishRenderController (and by the icon captures)
+      ├─ controllers/
+      │  ├─ UiController     Mounts React <App/> in PlayerGui.ReactUi; feeds it PlayerData; queues hatch reveals / rewards;
+      │  │                   turns UI callbacks into RequestAction intents; sets the local "DataLoaded" player attribute;
+      │  │                   preloads every fish and companion icon at start (the hatch reveal shows one instantly)
+      │  ├─ HudController    Toast notifications (Notify remote; V2 navy toast, gold / red border)
+      │  ├─ FocusController  Lobby ↔ 2.5D focus camera, back button (FocusUi: blue V2 3D button in plain instances,
+      │  │                   Global ZIndex so its bevel sits under it), reports SetFocus; isFocused(), getOwnAquarium();
+      │  │                   in the lobby, a "My aquarium" button at the same spot (FocusUi.GoToAquarium) puts the character
+      │  │                   on the ground in the middle of its tank's focus zone, facing the glass, and enters the view;
+      │  │                   "clarity" tween in the view: less atmosphere haze, clearer own GlassFront / Water (local only);
+      │  │                   6 studs of headroom above the tank while one of the player's companions is perched (Pelican)
+      │  ├─ AquariumInteractionController  Clicks in focus view → CollectCoin (coin under cursor) or DropFood
+      │  ├─ FishRenderController  Builds / moves the local fish models of the watched tanks (own tank in 2.5D, else
+      │  │                   tanks within 160 studs of the camera) from FishSync segments; growth, weak tint, exits;
+      │  │                   a fish whose model (or rare variant texture) hasn't arrived waits in `pending` (kept up to
+      │  │                   date by Swim / State), built when the asset arrives, in its normal look after 5 s
+      │  ├─ FishIndicatorController  Hunger / AFK badges above fish (from attributes)
+      │  ├─ PelicanChargesController  Charge gauge above the local player's on-demand Pelican (BillboardGui, local
+      │  │                   child of its Body): one round slot per charge, a pellet when full, a pellet growing from
+      │  │                   the centre while it refills, a pop when one is earned; hidden while MaxCharges is 0
+      │  ├─ FishAnimationController  EditableMesh swim deformation, shared per species, with camera LOD
+      │  │                   (own tank in 2.5D; else tanks on screen within 110 studs; max 6 species) + beat puffs
+      │  ├─ IncomePopupController  Floating "+X$" / "-X$" / "+X Ocean" billboards (MoneyPopup remote)
+      │  ├─ AudioController  Background music, event music crossfade, SFX (PlaySfx remote or UI)
+      │  ├─ OnboardingController  3D onboarding hints (floor marker, pointer over the frozen coin)
+      │  ├─ CapacityPlaqueController  "n / capacity" plaque on the own tank
+      │  ├─ MusicEventController  Follows the replicated event (any kind): its track if any; for music events, beat
+      │  │                   detection, Kpop guest effects, onBeat listeners; getEvent / onEventChanged
+      │  ├─ AbyssEventController  Abyssal raid visuals (local): world darkness (Lighting + AbyssGrade, put back after), abyss
+      │  │                   backdrop SurfaceGui on every tank, navy water, marine snow + cold light, lantern lure light, red eye-socket glows and fades
+      │  └─ LikeBoardController  Local SurfaceGui (React LikeBoard) on every like board + local "Like" ProximityPrompt;
+      │                   getOwnBoostEndsAt / onOwnBoostChanged (own tank's boost, for the pill)
+      └─ ui/                 React components (one FigCraft frame each)
+         ├─ App.tsx          Root: top bar placement, side menus, panels, reveal / reward overlays
+         ├─ theme.ts         Fonts (FONT_TITLE, FONT_BOLD), V2 tokens (OUTLINE, PALETTES, NAVY, VARIANT_PALETTES,
+         │                   V2_IMAGES), asset ids (FISH_ICONS per type and variant, egg sprites), rarity / variant styles,
+         │                   ocean / rebirth / event colours
+         ├─ kit.tsx          UI kit V2 (FigCraft UIKit_V2): Button3D (pressable relief), Plate / Card (relief surfaces,
+         │                   content-sized with autoHeight), HeaderBanner (ribbon title), CloseButton, ItemSlot (square
+         │                   slot, silhouette / "?" when missing, sparkles when shiny), ProgressBar, Chip, CoinIcon,
+         │                   NotifBadge, Sparkle, SoftGlow, TextStroke / Outline
+         ├─ ShopBar / EggSlot / MoneyCounter  Egg shop: navy shelf of 6 square 3D slots coloured by state (buy, timer +
+         │                   cracks + filling tag, OPEN!, FULL, gated, "Soon"), prices shortened (formatShort: 25K), then
+         │                   the money pill with its coin. With more than 6 eggs (V1: 12), arrows on the shelf's sides move
+         │                   the window one egg at a time (navy at the ends, red "!" when a ready egg is out of view); it
+         │                   follows the best unlocked egg + the next gated one until moved. Several incubators: a slot shows
+         │                   its soonest egg, a "n/N" chip and a gold "+" that buys one more (FigCraft ShopBar_V1)
+         ├─ EggReveal        Hatch animation (rarity, odds (an easter egg's are never shown), "NEW!" first discovery)
+         ├─ OnboardingPanel  Onboarding instruction card
+         ├─ RewardPopup      Reward celebration (money / companion / feature)
+         ├─ EventBanner      Running event banner (style per event kind: beat flashes / slow glow; FigCraft EventBanner,
+         │                   EventBannerAbyss) + one Studio test button per event (TEST_EVENT_ORDER)
+         ├─ SideButtons      Left menu (3D squares, icon + label inside the face): Quests, Companions (once one is owned), Fish Index, Ocean (once unlocked), Rebirth
+         │                   (gold halo pulsing + "!" while affordable, "REBIRTH READY!" bubble driven by App: when it
+         │                   becomes affordable, then every 4 min while it stays so, 8 s each) + coach bubbles
+         │                   (Quests: story quest hint after the onboarding; Ocean: just unlocked) and the "AQUARIUM FULL"
+         │                   reminder (FigCraft OceanFullReminder): App shows it when a ready egg is tapped with a full tank,
+         │                   8 s, at most once every 3 min, never again in the session once a fish was released; on the
+         │                   Ocean button, or on Quests ("claim Full House") while the Ocean isn't unlocked; skipped while
+         │                   the Ocean's own "NEW" bubble is up or a panel is open
+         ├─ Panel            Shared modal (backdrop closes): navy window with a bevel, ribbon title (`banner` palette)
+         │                   over its top edge, round close button on its corner, `headerExtra` centred under the ribbon
+         ├─ QuestPanel / CompanionPanel / FishIndexPanel / OceanPanel   The four menus (Fish Index: a scrolling
+         │                   table, one row per species, one cell per variant (its sticker icon once found, else the species' dark silhouette + "?"; no count);
+         │                   then the "EASTER EGGS" category: only the easter egg fish already hatched (nothing at all
+         │                   before), Normal cell only, out of the "Discovered" count; hovering a column header or a cell
+         │                   shows the variant's description under its header (VariantTooltip, VariantConfig.description); FigCraft FishIndexPanel_Variants. Ocean:
+         │                   two columns (Panel `width`): left, one row per kind *and* variant in the tank, a rare variant's
+         │                   Release asks "Sure?" (3 s); right, Ocean milestones (progress bar / CLAIM! / Claimed) in a
+         │                   470 px scrolling list that opens on the first milestone not claimed (V1: ~17 of them);
+         │                   FigCraft OceanPanel / Row_Variant / Milestone_Claimable / Milestone_Locked). Quest book: a quest
+         │                   of a paid line without its pass shows "LOCKED: NEEDS THE <PASS>" instead of its progress bar
+         ├─ LikeBoard        Face of a like board (likes, "a like = x2" hint or boost countdown), mounted by LikeBoardController
+         ├─ RebirthPanel     Rebirth menu: multiplier hero, what is lost / earned (Ocean Points preview), progress, 2-click confirm
+         ├─ LikeBoostPill    The owner's own boost ("Liked! Coins x2 4:32"), under the top HUD
+```
+
+**Studio-side (place file, not in Rojo):**
+
+- **`Workspace.Lobby`**: 6 `Aquarium` models (Aquarium1–6 at x = −64 / 0 / 64, z = ±16). Each has a PrimaryPart
+  `Base`, an `AquariumWater` part and the Studio `Decorations` (basic theme). The owner's nameplate is a SurfaceGui
+  `OwnerPlate` that AquariumService adds on the Base's front face (brass, like the capacity plaque; disabled while
+  the tank is free). Plus the beach decor.
+- **`ServerStorage.Assets.Fish`** (moved from ReplicatedStorage on 2026-10-30, V0.37; tag `FishTemplate`, attr
+  `FishType`; invisible root `Body` + welded `Mesh` with a SurfaceAppearance, head toward −Z): the server reads their
+  size and copies a species into `ReplicatedStorage.Assets.Fish` while one swims on the server (server/fishAssets),
+  the clients clone that copy. `ReplicatedStorage.Assets` is an empty folder in the place (Rojo ignores it), filled at
+  runtime. The Golden Guppy's ColorMap is a 1024² copy (the generated one was 4096²: 64 MB for a tiny fish).
+- **`ServerStorage.Assets.FishVariants`** (tag `FishVariantAppearance`, attrs `FishType` + `Variant`): one
+  SurfaceAppearance per species for Anomaly and Shiny (recoloured ColorMap), copied on demand into
+  `ReplicatedStorage.Assets.FishVariants` like the models. A game script can't set a texture, so
+  FishRenderController swaps a clone of it in place of the template's.
+- **`ServerStorage.Assets`**:
+  - `Coins/` (tag `CoinTemplate`, attr `CoinType`; root `Hitbox` ×1.25);
+  - `EventFish/` (tag `EventFishTemplate`, attr `EventType`): `KpopIdol` (Kpop), `LanternFish` (Abyss: generated
+    anglerfish mesh tinted near-black (SurfaceAppearance Color), model scale 1.15, root `Body` 4.2×6.4×6.9, head −Z,
+    welded parts lit / faded by the client: `Lure` (pale cyan Neon ball on the antenna tip) and per eye an `EyeShell`
+    (glossy black ball, R 0.44, hiding the mesh's cartoon eye), a red Neon `Eye` iris and a black slit `Pupil`
+    (SpecialMesh ellipsoids sunk into the shell, facing 20° forward of the side). Eye / Pupil glow with the lure);
+  - `Companions/` (tag `CompanionTemplate`, attr `CompanionType`; root `Body` + welded `Mesh`, head −Z): `Snail`,
+    `Pelican` (generated mesh, 3.6×6.4×6 studs); `Lobby/` (decor);
+  - `Food/` (tag `FoodTemplate`, attr `FoodLook`; a single anchored MeshPart, its size is the food's): `Shrimp`
+    (generated mesh, 0.46×0.95×0.82 studs, curled pink and white shrimp: food of the Hearty meals perk);
+  - `LikeBoards/LikeBoard` (tag `LikeBoardTemplate`): driftwood lectern, PrimaryPart `Root` at ground level, front
+    −Z, invisible `Board` part whose Front face carries the counter. LikeService clones it into each aquarium at
+    `aquarium frame × LIKE_BOARD_OFFSET` (beside the front corner, outside the focus camera's frame);
+  - `AquariumThemes/<Theme>` (tag `AquariumThemeTemplate`, attr `Theme`): PrimaryPart `Origin` = the tank frame,
+    `Style/` parts named like the tank's (Sand, Backdrop, Base, Plinth, Rim*: look + children such as the Lagoon's
+    painted backdrop SurfaceGui copied onto the tank), `Decor/` cloned into the tank (all CanQuery off). `Basic` =
+    the original look (the tanks' Studio `Decorations` are removed at runtime); `Lagoon` = rebirth 1: light sand,
+    teal plinth, gold rims, painted backdrop, sandcastle / coral / rocks / starfish / shells (lobby props scaled down),
+    thin sea grass, pebbles, bubbler. Decor stays low along the back and the sides: fish and coins stay visible.
+- **Rebirth 2 content** (2026-10-29): fish `SilverAngelfish` (5 × 6.5 studs, 4.1k vertices), `PirateFish` (4.2 × 4.9,
+  3.6k, round), `ImperialDiscus` (5.8 × 5.1, 4.2k), with their `FishVariants` (Anomaly, Shiny); textures 512², except
+  the Pirate's generated 1024² one (one upload less); coins `PearlShell` (CoinType Pearl), `RubyGem` (Ruby),
+  `RoyalCrown` (Crown), mesh rotated so the generated front faces the glass, Ruby / Crown tinted by SurfaceAppearance
+  Color like the Gold coin; theme `NeonCoral` (rebirth 2; clone of the Lagoon's layout: Neon cyan rims, Neon magenta
+  plinth, indigo sand, `NeonReefPainting` backdrop SurfaceGui, corals with PointLights, `GlowPebbles` Neon balls, Bubbler).
+- **Rebirth 3–4 content** (2026-10-30, V0.38): fish `Catfish` (corydoras-like, beige with dark spots and red fins, 4 short
+  whiskers hanging under the chin, 3.4 × 3.3 × 6.5 studs), `BlueTang` (2 × 3.6 × 5.6), `BabySunfish` (round, pale with
+  pastel spots, 2.2 × 5 × 5.5), generated meshes (≤ 4,000 triangles), Normal / Anomaly / Shiny textures re-uploaded
+  at 512² (ids in design/ui/fish/variants/variant-spec.json); coins `TreasureChest` (CoinType Chest, generated grey,
+  tinted gold), `SapphireGem` (Sapphire), `SunMedallion` (mesh turned -90° on X so the sun face looks at the glass,
+  tinted gold like the Crown).
+- **Rebirth 3–4 themes** (2026-10-30, wired to REBIRTHS 3–4 since V0.38). Props are
+  generated meshes (texture as SurfaceAppearance, tinted by its Color), the backdrops are SurfaceGuis drawn with Frames
+  only (no uploaded image). `PirateWreck` ("Sunken Pirate Wreck"): dark wet sand, dark wood base / plinth, rusty brass
+  Metal rims, `WreckPainting` (green-blue water, light rays, sunken ship silhouette, rocks, bubbles); decor: sunken
+  rowboat `Hull`, fallen `Mast` with its torn sail, `Chest` (PointLight) with `Loot` (Foil gold coins, pearls),
+  iron-tinted `Anchor`, `Wheel`, `Crates`, darker sea grass, `Stones`, Bubbler. `Atlantis` ("Atlantis Ruins"): pale
+  sand, Marble base, Neon turquoise plinth, gold Metal rims, `AtlantisPainting` (domes, towers, colonnades, a golden
+  dome, glowing windows); decor: marble `Arch` on `Steps`, two standing `Column`s, three `FallenColumn` pieces,
+  `Crystal` (turquoise PointLight) in a ring of Neon `GlowTiles`, marble slabs with round Neon inlays, Lagoon corals and
+  sea grass, gold / marble `Pebbles`, Bubbler. Deliberately absent (CLAUDE.md §7): cannons, skulls / Jolly Roger,
+  swords, bottles / barrels, trident, faces, torches; inlays are discs, not crosses.
+- **Easter egg content** (2026-10-30): fish `FrenchFish` (4.2 × 4.6 × 4.4 studs, round, beret / Breton shirt / red
+  scarf / baguette on its back, generated 1024² texture, no FishVariants), coin `CroissantCoin` (CoinType Croissant,
+  mesh tilted −50° on X so the crescent faces the glass, SurfaceAppearance Color 1/0.86/0.55 so it reads golden, not
+  like the pink Shrimp food). Sticker `design/ui/fish/stickers/Icon_FrenchFish_Normal.png`: front three-quarter view
+  (yaw 60°), so the scarf reads as a scarf (in pure profile it is a red tube at mouth level, see CLAUDE.md §7).
+- `Workspace.StreamingEnabled = true`. All tanks are within ~130 studs of each other, so streaming does not cull them.
+
+---
+
+## 3. Data & events flow
+
+### 3.1 Player state
+
+- **Saving (ProfileStore).** `DataService` opens one profile per player (store `PlayerData_v1`, key
+  `Player_<UserId>`), holding a `SaveData` (`server/saveData.ts`): `player` (the PlayerData below, synced to the
+  client) and `tank` (the fish: type, adult scale, age, hunger, variant — undefined = Normal in older saves). On load: `Reconcile()` (fields added to
+  `DEFAULT_PLAYER_DATA` since), then `sanitizeSave` (drops ids removed from the config, restarts the story where it
+  was). A failed load kicks the player (never play on unsaved default data). `getData` is undefined until loaded:
+  actions sent before are ignored.
+- **When it saves.** Auto-save every 60 s (`AUTO_SAVE_PERIOD`, the most a server crash can lose), on leave
+  (`EndSession`) and on shutdown (ProfileStore's BindToClose). The session lock prevents two servers from using the
+  same profile (the older one ends its session and kicks the player). Right before each save, `onSave` hooks write
+  runtime state into the profile: FishService writes the tank (also in its own PlayerRemoving, before cleaning up).
+- **Restoring.** `onLoaded` hooks: FishService waits for the aquarium, then respawns `PlayerData.fish` (the count
+  is the authority) using the saved fish for age / size / hunger (extra ones are newborn). Companions come back
+  through CompanionService's refresh loop, the onboarding resumes at its saved step (its timers restart), eggs keep
+  their absolute hatch time. Not saved: coins and food in the water, the frozen onboarding coin (dropped again).
+- **Offline rules.** Eggs keep incubating offline (absolute hatch time). A like boost is lost when its owner leaves.
+  Nothing else moves: no offline income or
+  coins, and hunger and growth are frozen (saved as time left / age, like the AFK freeze). Events live on
+  each server (ReplicatedStorage attributes) and are never saved: a player who rejoins gets whatever event that server
+  is running (an admin event runs on every server).
+- **Adding a PlayerData field**: add it to `PlayerData` and `DEFAULT_PLAYER_DATA` (Reconcile fills it in old saves);
+  validate it in `sanitizeSave` if it holds ids. Never make an existing field `undefined` on purpose: Reconcile
+  would put the default back (that's why the last story quest stays, claimed). State that lives in a service
+  (like the tank) goes in `SaveData` through `onSave` / `onLoaded`.
+- Every mutation goes through a service and ends with `DataService.sync(player)`. That fires **`SyncPlayerData`**
+  with the full snapshot, and `UiController` re-renders `<App/>` from it.
+- `PlayerData` fields:
+
+  | Field | Content |
+  |---|---|
+  | `money` | Current money, never above `MAX_MONEY` (1e15: DataService.addMoney clamps, sanitizeSave too) |
+  | `fish` | Count of living fish per type |
+  | `fishVariants` | Of those, per type, the living rare variants (normal = fish − these; `getLivingVariant`). DataService keeps it (hatch / removal), RebirthService clears it, `sanitizeSave` rebuilds it from the tank the way restoreTank picks saved fish |
+  | `hatched` | Count ever hatched, per type (Fish Index) |
+  | `hatchedVariants` | Of those, per type, the rare variants (no `Normal` key: normal = hatched − these; `getHatchedVariant`) |
+  | `incubating` | Per egg type, the hatch times of its eggs (soonest first, at most `incubators`). Saves with one number per type are migrated by `sanitizeSave` (sanitizeIncubating) |
+  | `incubators` | Eggs of the same type that can incubate at once (1; Ocean milestone kind `Incubator`), kept through rebirths |
+  | `eggsBought` | Eggs bought per type (unlocks the next egg) |
+  | `onboarding` | Current onboarding step |
+  | `capacity` | Max living fish in the tank |
+  | `quests` | `{lines, daily, weekly}`: `lines` = current quest per open story line (a finished line keeps its last quest, claimed). Saves with the old single `story` are migrated once in `sanitizeSave` (migrateStory; runs even though Reconcile already filled `lines` from the template) |
+  | `companions`, `equippedCompanions`, `companionSlots` | Owned companions, equipped ones, slots |
+  | `oceanPoints` | Ocean score (only grows) |
+  | `oceanRewardsClaimed` | Ocean milestones claimed (kept through rebirths) |
+  | `features`, `tutorialsDone` | Unlocked features, and those whose tutorial was seen |
+  | `likesReceived`, `lastLikeGivenAt` | Likes received, last like given (cooldown, server time). The boost itself is not saved |
+  | `rebirths` | Rebirths done: coin multiplier and aquarium theme |
+  | `perks` | Permanent quest bonuses (shared/types/perks), kept through rebirths |
+  | `cosmetics` | Titles, decor and finishes earned (shared/types/cosmetics), kept forever |
+  | `passes` | Gamepasses owned: written only by the server from Roblox (GamePassService, M3), empty until then |
+
+### 3.2 Client → server (intents only)
+
+| Remote | Name / payload | Handled by |
+|---|---|---|
+| `RequestAction` | `BuyEgg` / `OpenEgg` (EggType) | EggService |
+| | `SetFocus` (boolean) | AquariumService |
+| | `RequestSync` | DataService |
+| | `ClaimQuest` (quest id) | QuestService |
+| | `EquipCompanion` / `UnequipCompanion` (CompanionType) | CompanionService |
+| | `ReleaseFish` ({fishType, variant}), `FinishTutorial` (Feature), `ClaimOceanReward` (milestone id) | OceanService |
+| | `StartTestEvent` (GameEventType, **Studio only**) | EventService |
+| | `WatchAquariums` (PlotIndex[], ≤ 6, debounced 0.25 s): only changes what this client receives | FishService |
+| | `GiveLike` (PlotIndex, from the board's prompt) | LikeService |
+| | `Rebirth` (no payload) | RebirthService |
+| `Interact` (rate-limited) | `DropFood` (Vector3) | FoodService |
+| | `CollectCoin` (coin hitbox) | CoinService (must stand at own tank) |
+
+New actions: `DataService.registerAction(name, tCheck, handler)` on the server, then a callback in `AppProps` →
+`UiController` that fires `RequestAction`. Document them in `network.ts`.
+
+### 3.3 Server → client
+
+| Remote | Content | Consumer |
+|---|---|---|
+| `SyncPlayerData` | Full PlayerData | UiController (+ CapacityPlaque…) |
+| `Notify` | `(message, "info"\|"warning")` | HudController toast |
+| `EggHatched` | `{eggType, fishType, variant, firstTime}` (first of that type *and* variant) | UiController → EggReveal (the server drops the fish after `HATCH_REVEAL_TIME`) |
+| `Reward` | `{title, subtitle, amount, item?: {icon, name, image?}}` | RewardPopup (after any reveal; shows `image` when given) |
+| `MoneyPopup` | `{position, amount, special, ocean?, stolen?, ghost?}` | IncomePopupController |
+| `PlaySfx` | `(SfxName, pitch)` | AudioController |
+| `FishSync` | `FishMessage`: `Tank` (full state of a newly watched tank), `Spawn`, `Swim` (new segment), `State` (hunger, growth, paused), `Remove` (Eaten / Released / Gone) | FishRenderController |
+
+**Replicated state outside remotes:**
+
+- **Tag / attribute replication:** `Coin` hitboxes carry `Special`, `Frozen`, `Bubble` and `Ghost`. `Companion` models carry `Owner` and `CompanionType`.
+  `EventFish` models carry `EventType` (the lantern fish also `Lurking`: true while hidden in the dark). Tanks carry `OwnerUserId`, plus `Likes` and `LikeBoostEndsAt` once their
+  owner's data is loaded, and `Theme` (the AquariumTheme they wear). `LikeBoard` models carry `PlotIndex`.
+- **Events:** ReplicatedStorage attributes `EventType`, `EventStartsAt`, `EventEndsAt` and `EventSource`
+  ("Recurring" / "Admin") (`EVENT_ATTRIBUTES`), with beats computed from `Workspace.GetServerTimeNow()`. Players carry
+  `EventImmune` (true until loaded and while in the tutorial; absent = immune).
+- **Fish movement:** nothing is replicated per frame. Each SwimSegment (start pose, target, start time, turn / move
+  durations) is sent once to the watchers of the tank, and both sides evaluate
+  `getSwimPose(segment, Workspace.GetServerTimeNow())`. `Fish` models are client-local (attributes `FishId`,
+  `FishType`, `Variant`, `Hunger`, `GrowthStage`, `Paused`, `Dead`). `FishView` carries the `variant`. Companions, event guests, coins and food are still server
+  parts moved by server tweens.
+
+### 3.4 Key flows
+
+- **Egg.** The player buys an egg: `BuyEgg` → the server checks that an incubator of that type is free
+  (`hasFreeIncubator`), the price and the gate, debits the money and starts the incubation (pushed into the type's
+  sorted list). Once the timer ends, the player opens it: `OpenEgg` → the server takes the soonest egg of the type,
+  checks it is ready and the capacity, draws the fish and bumps `fish` and `hatched`. It then fires `EggHatched` and, after the reveal,
+  `FishService.spawnFish`, which runs the `onFishSpawned` callbacks (onboarding, quest gauges).
+- **Variants.** At `OpenEgg`, after the species, `rollVariant` draws Shiny 1 % → Ghost 5 % → Anomaly 10 % → Normal
+  (the onboarding egg is always Normal). `hatchEgg` counts it in `hatchedVariants`, `EggHatched` carries it (reveal:
+  "You hatched a Shiny Clownfish!", a "SHINY • 1%" line, rays in the variant's colour) and `spawnFish` keeps it
+  on the entity (saved with the tank). Effects, server-side: Anomaly drops coins 1.2× as often; Ghost's sparkling
+  coins become ghost coins (translucent, wisps, worth `GHOST_COIN_MULTIPLIER` = 3 sparkling ones, pale popup);
+  Shiny has the anomaly pace and one sparkling coin out of 5 instead of 15. Income vs a normal fish: +20 % / +25 %
+  / +35 % (+3.6 % on average: rebirth 28.9 → 27.7 min, six species 61.5 → 58.2 min; prices untouched, see
+  variants.ts). Looks, client-side: Anomaly / Shiny wear their FishVariantAppearance, a ghost turns 50 % translucent
+  and pale, a shiny twinkles like a sparkling coin. The Ocean releases the variant the player picks; a rebirth still
+  sends every fish, variants included, to the ocean (rare ones worth more Ocean Points). A variant fish whose owner
+  leaves during its hatch reveal comes back as a newborn normal one (the tank is saved before it spawns).
+  New species: run tools/fish-variant-recolor.js, upload, add the two FishVariantAppearance and the icons in theme.ts.
+- **Easter eggs (the French Fish).** `OpenEgg` draws with `getDrawOdds`: every egg hides each easter egg fish at
+  its `hatchChance` (0.1 %), taken from the egg's most common fish; the shop, the index and the reveal only ever show
+  `EGG_TYPES` odds (the reveal shows just "SECRET"). It hatches Normal (no variant roll), counts as a fish of the tank
+  (capacity, saves, releases, rebirth points). Its coin, every 60 s, is a croissant worth `incomeShare` (0.5) of
+  `FishService.getTankIncomePerMinute` (the other fish: income/s × growth × variant income, sparkling coins on average,
+  × 60), then the usual rebirth / like / event multipliers; it sparkles 1/15 (x2). Its stay is its age (`bornAt`,
+  pushed back while frozen and saved as age, so offline and paused time don't count): at `lifetime` (1 h) `tick`
+  removes it ("Released" exit) and `onFishLeft` lets OceanService credit its Ocean Points (100) with the popup and a
+  notice ("went off to join a protest"). Released by hand or at a rebirth like any fish.
+- **Coins.** `FishService.tick` (every 0.25 s) calls `dropCoin`, which uses `CoinService.spawnCoin`; the coin sinks
+  and expires 5 s after reaching the sand. A coin is collected by a click (`CollectCoin`) or by the Snail, and
+  `credit()` then adds the money, fires `MoneyPopup` and runs the `onCollected` callbacks (quests, onboarding).
+- **Hunger.** A fish goes Satiated (30 s) → Hungry (15 s) → Weak (until fed; it never dies). A weak fish swims at
+  35 % speed, is tinted dull on the client and, at its coin interval, farts a bubble instead of a coin
+  (`CoinService.spawnBubble`: 1 $, rises and pops; "Fart" SFX at most every 2.5 s per player, "FishWeak" SFX and a
+  notice at most every 30 s). The player clicks the water (`DropFood`) to drop a pellet that costs money; a fish
+  chases it and eats it, which resets it to Satiated. Species flagged `cannibal` eat smaller fish when weak (none yet). Hunger, growth and coins all stop while
+  the owner is AFK (not tending) or still in the onboarding.
+- **Quests.** `QuestService.addProgress(stat, amount, subject)` handles counters (`CoinMoney`, excluding the onboarding
+  coin; `OceanPoints`; `EggsOpened` and `VariantHatched` from EggService.openEgg; `FishReleased` from OceanService's
+  releases; `CompanionStat` with the companion): a quest with a `fishType` / `variant` / `companion` only counts its own.
+  `reportGauges` reads every gauge from PlayerData (`FishInTank`, `MoneyHeld`, `SpeciesHatched`, `Rebirths`,
+  `IndexCells`) on each coin, spawn, claim, rebirth and every 5 s: a gauge quest already met completes as it opens.
+  A line with `requiresPass` opens like the others, but its quests count nothing and can't be claimed without the
+  pass (`isQuestLocked`; PlayerData.passes). A completed quest gets a notification and a badge;
+  the player then sends `ClaimQuest`, which grants the reward (money, companion via CompanionService, or feature
+  via `DataService.unlockFeature`, or perk). **Story lines run in parallel** (STORY_LINES): each open line has one current
+  quest, all shown in the Story tab with a line tag; claiming one starts its line's next quest (the last one stays,
+  claimed, and a quest added later to the line starts on the next join) and opens the lines that `requires` it
+  (`refreshStoryLines`, also run on load). Lines: Start (Story1 "Coin Collector", 300 $ → the Snail), then, all
+  opened by Story1, Ocean (Story2 "Full House", 10 fish → the Ocean), Rebirth (Story9 "Saving Up": gauge `MoneyHeld`,
+  the most money held at once while active, reported on every coin and every 5 s; 5,000 $ = REBIRTHS[0].price,
+  written out because rebirths.ts can't be imported by quests.ts → the "Rebirth" feature; saves that already had the
+  feature get Saving Up done on load, and only it), then the Voyage quests (gauges: a goal already met completes as the
+  quest opens): Freshwater Finds (a Flame Gourami → 5 min of income), Deeper Waters (rebirth 2 → 500 Ocean Points),
+  Crown of the Reef (Imperial Discus → 5 min), Sunken Secrets (rebirth 3 → 1,500), Treasure of the Wreck (Catfish → 5
+  min), The Lost City (rebirth 4 → 4,000), Atlantean Sun (Baby Sunfish → 5 min) and the Snail's line (stat `CompanionStat` Snail: coins its Snail
+  picks up, `CoinService.onCollected`'s `byCompanion`): Story3 "Little Helper" (20) → perk CoinLinger1 (coins stay 1 s
+  longer on the sand), Story4 "Busy Snail" (100) → CoinLinger2 (+2 s more), Story5 "Snail Champion" (200) → CoinBounce
+  (a coin reaching the sand hops 2.2 studs and lands in 1.5 s, then its ground timer starts: 5 s + the linger bonuses).
+  The Pelican's line opens once the player owns the Pelican (`requiresCompanion`; QuestService's 5 s board loop
+  runs `refreshStoryLines`, so it shows up within 5 s of the Ocean reward); stat `CompanionStat` Pelican: fish that ate a pellet
+  the Pelican threw (`FishService.onFishFed`'s `byCompanion`): Story6 "Lunch Time" (50) → FishSatiety (a fed fish
+  stays full 15 s longer, FishService.feed), Story7 "Double Serving" (150) → PelicanDouble, Story8 "Pelican Chef" (500)
+  → PelicanCharges (see CompanionService). Rough pace: ~8 min, ~13 min, ~40 min of tending (~17 with the 500-point
+  Ocean upgrade).
+  Perk rewards go to `PlayerData.perks`; CoinService / FishService / CompanionService read them when needed.
+- **Ocean.** `ReleaseFish {fishType, variant}`: the server checks the feature, that one of that kind *and* variant
+  is alive and that `MIN_FISH_KEPT` fish remain. It releases the one of them that earns the least: lowest growth
+  stage, then smallest, then youngest (`FishService.releaseFish`, rise animation; the panel says so under its
+  subtitle), credits `getOceanPoints(fishType, variant)` (species' points × 1 / 2 / 3 / 5 for Normal / Anomaly /
+  Ghost / Shiny) and fires `MoneyPopup{ocean}`. A rebirth counts the same way (`getRebirthOceanPoints(data)`). The tutorial is the coach bubble, then
+  the PanelCoach; "Got it!" or a first release sends `FinishTutorial`.
+- **Ocean milestones.** `ClaimOceanReward`: the server checks the feature, `oceanPoints >= points` and that it
+  wasn't claimed, pushes the id to `oceanRewardsClaimed` and grants: a companion (`CompanionService.grant`, equipped if
+  a slot is free), a companion slot (`companionSlots + 1`), a companion upgrade (nothing stored beyond the claimed
+  id: CompanionService reads `getCompanionMultiplier` live) or a bigger tank (`capacity = max(capacity, 15)`, kept
+  through rebirths), more incubators (`incubators = max(incubators, count)`), a variant luck (nothing stored beyond the
+  claimed id: EggService reads `getVariantLuck`, which multiplies the rare variants' chances in `rollVariant`) or
+  cosmetics (`DataService.addCosmetic`), then a Reward popup. Points are never spent. The Ocean
+  side button gets a badge while one is claimable.
+- **Event sources.** *Recurring*: each server's clock starts with the server and again when any event ends. From
+  minute 5 each new minute draws once, chance (m − 4) / 11 (minute 5: 9 %, 10: 55 %, 15: 100 %), only while at least
+  one player isn't immune (otherwise that minute waits for one); it then picks a random event with `recurring: true`
+  (the Abyss). Only that server has it. *Admin*: "/event <name>" (`isAdmin`, checked on the server) starts any event
+  (recurring ones too) with admin behaviour: locally, then MessagingService to every server, and a MemoryStore entry
+  (expiring with the event) that servers started later join (if > 5 s left). An admin event replaces whatever runs; a
+  recurring event never starts over one (the clock doesn't run during any event). "/event stop" ends the running event
+  (everywhere if it is an admin one). In Studio the command and the test buttons only touch the playtest server.
+  *Immunity*: EventService sets `EventImmune` every second (not loaded or onboarding not Done); immune owners get no guest,
+  no lantern raid and no coin bonus (`getEventCoinMultiplier(owner)`), and MusicEventController hides the event from an
+  immune client (music, banner, darkness); when the tutorial ends mid-event, the event joins them.
+- **Music event.** `EventService.startEvent` sets the attributes. The server beat loop calls
+  `FishService.dropBeatCoins(chance)`. The client side is MusicEventController (music, beats, `onBeat` →
+  FishAnimationController puffs, banner).
+- **Abyssal raid.** `EventService.startEvent("Abyss")` sets the same attributes and runs `AbyssService.run` until the
+  end. In each owned tank, a raid loop waits for a coin (`findCoinToSteal`: most valuable, not frozen / bubble, ≥ 2.5 s
+  left on the sand), then makes a pass, again and again until the event ends (no cap, 0.8–2.2 s of rest between two;
+  ~13 passes a minute with a few fish, more with more coins): the server clones
+  `LanternFish` at the back of the tank (local Z +7), off to one side, `Lurking` = true then false. It glides 1.2 s at
+  3 studs/s (its lure and red eyes fade in first on the clients), then darts at up to 9 studs/s, following the coin. While still
+  emerging it switches to another coin if its target vanishes; later, a coin collected first (player or Snail) or
+  expired is a miss. Within reach it calls `stealCoin` (no credit, "-X$" popup, CoinStolen SFX) and carries the coin
+  welded to its mouth. Then `Lurking` = true: it swims back into the dark and is destroyed with its loot. Moved by the
+  server (Heartbeat, replicated CFrame). Client: AbyssEventController darkens the world and dresses the tanks for the
+  event's length (2.5 s fades); the banner glows slowly (cyan ↔ red). Its track (`musicId`) crossfades over the
+  background music. While it runs, every coin is worth x1.5 (`coinMultiplier`, read by `FishService.dropCoin`
+  through the shared `getEventCoinMultiplier`; the income line shows it).
+- **Rebirth.** The story quest "Saving Up" (Rebirth line, open after Story1) tracks the money held toward the price
+  (5,000 $); claiming it unlocks the "Rebirth" feature: a notice, a side button with a "NEW" coach bubble (its tutorial ends when the menu opens) and a "!" badge
+  whenever a rebirth is affordable. The menu explains the trade (fish → Ocean Points, run restart, multiplier, new
+  theme); "Rebirth" needs a second click. Server: refused during a hatch reveal; Ocean Points from `PlayerData.fish`
+  (`getRebirthOceanPoints`, variants included), `FishService.releaseAll` (release exits), `CoinService.clearOwner`, then money =
+  start money (300), fish / incubating / eggsBought reset (free starter egg again), `rebirths + 1`, reward popup.
+  Kept: Fish Index, quests, companions, Ocean Points, features, likes. `FishService.dropCoin` multiplies every coin
+  by `getRebirthMultiplier` (x2.5 after rebirth 1, x8 after rebirth 2, times the like boost). AquariumService dresses
+  each tank in its owner's `getAquariumTheme` (polled every second; free tanks Basic): Lagoon, Neon Coral Lagoon, Sunken
+  Pirate Wreck, Atlantis Ruins.
+  4 rebirth levels for now (x2.5, x8, x25, x80): after the fourth, the menu says more are coming. While the next rebirth is affordable the
+  side button pulses in a gold halo, and App shows a "REBIRTH READY!" bubble on it (multiplier and theme of the next
+  rebirth) when it becomes affordable, then every 4 min while it stays so (8 s; opening the menu pushes it back; not
+  while the Rebirth's own "NEW" bubble or a panel is up).
+- **Likes.** Another player's board shows a local ProximityPrompt (E, 10 studs; its text shows the cooldown). It
+  sends `GiveLike`; the server checks the giver is within `LIKE_RANGE` of the board, that the tank has an owner
+  who isn't the giver, and the giver's cooldown (`lastLikeGivenAt` + 1 h, any tank). Then `likesReceived += 1` and
+  the owner's boost restarts at 5 min (`now + LIKE_BOOST_DURATION`, it never adds up), both players are notified.
+  The boost is session-only (LikeService memory, dropped when the owner leaves) and reaches the clients through the
+  aquarium's `LikeBoostEndsAt` attribute (board + owner's pill). `FishService.dropCoin` multiplies coin values by
+  `LikeService.getCoinMultiplier` (x2; fart bubbles stay 1 $).
+- **Onboarding.** EnterView → BuyEgg (free) → Hatching → OpenEgg → CollectCoin (frozen coin) → CoinCollected →
+  Feed (free food) → Done (+300 $). Menus (side buttons) appear only once the onboarding is Done.
+  `STORY_QUEST_HINT_DELAY` (5 s) later, a coach bubble on the Quests button asks the player to look at the Snail
+  quest and wishes them good luck. It is client-only (App state, not in `tutorialsDone`): it shows only if the
+  onboarding was played in this session and Story1 (line Start) is still to claim, and ends when the book is opened.
+
+---
+
+## 4. Known limits / next steps
+
+- **Saves in Studio** need *Game Settings → Security → Enable Studio Access to API Services*; without it ProfileStore
+  runs on a mock store (warning in the output) and nothing persists between playtests. Studio and live servers
+  share the same store. Reset everyone by bumping `STORE_NAME`; reset your own save in a Studio playtest with
+  `/datareset` then `/datareset confirm` (DevCommandService). `DataService.resetSave` skips the onSave hooks and
+  `getSave` for that player, so nothing of the old run is written back into the fresh profile.
+- **Crash**: a hard server crash (no BindToClose) loses up to `AUTO_SAVE_PERIOD` (60 s) of progress; the profile
+  stays locked until ProfileStore considers the dead session expired.
+- **Fish swimming traffic**: one message per wander step (~every 2–5 s per fish) and per chase step (every 0.25 s,
+  only while food is in the water), sent only to the clients watching that tank. A chase segment covers 1 s of
+  swimming (`CHASE_LOOKAHEAD`) at constant speed and is replaced after 0.25 s, so its end is never reached while the
+  next one travels; the client blends a late segment from the pose the old one gives *now* (FishRenderController.getPose). Coins, food, companions and event
+  guests are still server-tweened (candidates for the same treatment if they become numerous).
+- **Load test (2026-10-29, Studio solo, 6 tanks × 30 fish, uncollected coins; harness removed afterwards).** Server:
+  heartbeat 0.6–0.9 ms (K-pop beats included), never the bottleneck. Client (60 fps cap): 2.5D view of a full tank
+  ≈ 4.7 ms scripts + 9.3 ms render CPU; lobby view of the 6 full tanks (180 fish, 120 animated, 1.07M triangles)
+  ≈ 7.1 + 11.9 ms, still 60 fps; lobby + K-pop 56 fps (beat puffs on every fish). Hotspots: (1) the EditableMesh
+  swim animation costs per *species* on screen, not per fish (2 → 6 species in a tank: +3 ms scripts, +3 ms
+  render; one SetPosition pass over all species' variants ≈ 15 ms of Luau); (2) server-tweened coins: ≈ 0.4 KB/s
+  each while they sink, ~90 KB/s per client with ~200 coins in view (fish replication is only ~37 msg/s). Weak
+  devices will feel (1) first. Studio caps at 15 fps when its window loses focus: steady 66.7 ms frames are that
+  cap, not load.
+- **Studio captures** don't show BillboardGuis parented to PlayerGui (hunger badges, popups): check them by script.
+- **EditableMesh budget** (≈16 meshes / 46k vertices in Studio): handled by the animation LOD. Keep new fish
+  meshes ≤ ~4–5k vertices. With 9 species in one tank (M2 test, Atlantis run) Studio hit the budget: some species
+  glide unanimated ("Fish animation paused ... retried every 10s"), nothing breaks. To watch with 18 species (M7 load test).
+- **Scaling to many species (goal: dozens, maybe 100+). Decided 2026-10-29; item 1 built in V0.37.** Server, network and saves
+  don't care about the species count (per-fish costs only), and the swim animation is already capped
+  (`MAX_ANIMATED_SPECIES` = 6 at once; extra species glide unanimated). The real risk is **asset loading**: every
+  template sits in `ReplicatedStorage.Assets.Fish`, so every client downloads (and the loading screen preloads) every
+  species → long loads and mobile memory crashes at ~100. To do, **before ~15–20 species**:
+  1. **On-demand templates** (done, V0.37: server/fishAssets): templates in `ServerStorage`, a species is copied into
+     ReplicatedStorage while one is present on the server (any tank), removed 60 s after the last one left; the
+     loading screen preloads only those. Same for `Assets.FishVariants`, per variant present. The client waits for a
+     missing template (FishRenderController `pending`). Load test with 18 species still to do (ROADMAP M7).
+  2. **Per-species budget** from the next species on: mesh ≤ ~3k vertices, texture 512×512.
+  3. Later, for looks: a cheap whole-body sway for species beyond the animated cap; cheaper rigs (deform only the
+     rear half, lower rate for small / far fish).
+  4. Production is the real limit (mesh + icon + config + balance per species): tool it (colour variants of a
+     mesh cost almost nothing).
+- **Roblox moderation**: a "Firefighter" fish was dropped, its icon got the account a moderation warning (a nozzle in its
+  mouth, read as a cigarette). Rules in CLAUDE.md §7.
+- **Not built yet**: the V1 content planned in BALANCE.md §5 and scheduled in ROADMAP.md (rebirths 5–8, eggs 9–12,
+  species 13–18, Ocean milestones above 40,000 with capacity up to 25, the Water Hen / Swordfish /
+  Jellyfish companions and their paid quest lines, a third companion slot, gamepasses (no MarketplaceService code
+  yet: `PlayerData.passes` stays empty), the Voyage quests after Atlantis; themes Mariana Trench, Volcanic Temple, Crystal
+  Caverns and Cosmic Sanctuary to build), daily / weekly quest content. Cosmetics (titles, decor, Pearl rims) are stored but not displayed: their looks
+  come with the content that grants them. The shelf arrows show since V0.38 (8 eggs). The Pelican's and the Snail's Ocean upgrades have their V1 values since V0.36 (x1.33 /
+  x1.15, ROADMAP M1). Kpop is the only admin event and Abyss the only recurring one (`recurring` in GAME_EVENTS).
+- **Admin events across servers** rely on MessagingService (best effort, a few seconds of delay; a server that misses
+  the message still joins through the MemoryStore only when it starts). A server started during an admin event joins
+  it for the time left. Add admins by UserId in `server/admins.ts` (the game's owner always is one).
+- **Playtesting**: see `docs/agent-notes/studio-mcp-ui-testing.md` and `fish-asset-pipeline.md`. In short: stand at
+  the tank CFrame × (0, 5, −14) to be in the focus zone, drive flows through remotes, feed fish in long tests, and
+  mark temporary test values with `// TEMP TEST`, then restore them.

@@ -1,0 +1,506 @@
+# Release Notes — Projet Quarium
+
+Every change to the game, patch by patch. The newest version is at the top.
+
+**Rules**
+- Each patch is a sub-patch: +0.01 (V0.01 → V0.02 → V0.03…), unless a bigger version step is asked for.
+- Every task that changes the game opens a new patch, and all its changes go into it.
+- Old versions are never deleted or rewritten: they are the history of the game.
+- Each patch lists its changes under **New**, **Changes**, **Balance** and **Fixes**. Leave out the sections that are empty.
+
+---
+
+## V0.38 — 2026-10-30
+
+**New**
+- **Two new aquariums**: rebirth 3 (45M, coins x25) takes you to the **Sunken Pirate Wreck**, rebirth 4 (120M, coins
+  x80) to the **Atlantis Ruins**. The Rebirth menu then says more aquariums are coming.
+- **Three new Epic fish**, each with its Anomaly, Ghost and Shiny looks in the Fish Index:
+  - **Catfish**: a spotted bottom dweller with little whiskers, digging up tiny treasure chests;
+  - **Blue Tang**: a lively royal blue fish with a yellow tail, dropping sapphires often;
+  - **Baby Sunfish**: a round pale drifter, dropping big golden sun medallions now and then.
+- **Two new eggs**: the **Wreck Egg** (55M: Imperial Discus or Catfish) after the Neon Coral Egg, and the **Atlantis
+  Egg** (144M: Catfish, Blue Tang or Baby Sunfish) after it.
+- **New Ocean rewards**: a second incubator at 5,000 points (two eggs of the same kind at once), a bigger aquarium at
+  8,000 (17 fish) and 25,000 (19 fish), and **Lucky ocean** at 40,000 (Anomaly, Ghost and Shiny fish hatch 1.5x as
+  often).
+- **The Voyage**: the Rebirth story line continues after "Saving Up" and follows you from aquarium to aquarium: find
+  each aquarium's signature fish (5 minutes of your tank's income), then reach the next aquarium (Ocean Points). Goals
+  you have already reached complete as soon as their quest opens.
+
+**Changes**
+- The egg shop now has 8 eggs: arrows on the sides of the shelf move it along (it shows your best eggs by itself).
+
+**Balance**
+- The new content follows the V1 plan: rebirth 3 at about 3 hours of play, rebirth 4 at about 4h45, all twelve
+  species at about 5h45. The Voyage rewards bring rebirth 2 a few minutes earlier (about 1h40).
+
+---
+
+## V0.37 — 2026-10-30
+
+Foundations for the next updates (ROADMAP M0). Nothing new to play yet: most of these show up with the next eggs and
+Ocean rewards.
+
+**New**
+- **Several eggs of the same kind at once**: the game can now give extra incubators (a future Ocean reward). A shop
+  slot then shows how many of its eggs are incubating ("1/2") and a small gold "+" to buy one more; the slot opens
+  the egg that is ready first.
+- **A shop for more eggs**: once there are more than six eggs, arrows on the sides of the egg shelf move it along. It
+  shows your best eggs by itself, and an arrow gets a red "!" when an egg out of view is ready to open.
+- **New kinds of Ocean rewards**, ready for the next milestones: more incubators, better luck for rare fish
+  (Anomaly, Ghost, Shiny), and cosmetics (titles, decorations).
+- **New kinds of quests and rewards**, ready for the next story quests: hatch a given species, rebirth, open eggs,
+  hatch a rare variant, fill the Fish Index, release fish; rewards worth a few minutes of your tank's income, Ocean
+  Points, titles and decorations. Some quest lines will need a gamepass: they show what they give, locked.
+
+**Changes**
+- The Ocean rewards list scrolls, and opens on the first reward you haven't claimed yet.
+- Big numbers read better everywhere: trillions show as "T" and above as "Qa" (prices, money, coin popups, rewards,
+  messages).
+- Fish models now load only for the species swimming on your server: faster loading, less memory, ready for many
+  more species.
+
+**Fixes**
+- Very large amounts of money (from about 100 trillion) no longer show as scientific notation ("1e+15"). Money is
+  capped at 1 quadrillion, far above anything the game gives.
+
+---
+
+## V0.36 — 2026-10-30
+
+**Balance**
+- **Faster Snail** (Ocean milestone, 100 points): the Snail now crawls at 115 % speed instead of 150 %. With all its
+  quests it picks up about 60 % of the coins of a full tank on its own (it was about 72 %).
+- **Hungry Pelican** (Ocean milestone, 500 points): the Pelican now throws food every 7.5 s instead of every 4 s
+  (x1.33 instead of x2.5). With all its quests it keeps 15 fish fed on its own, no longer 25.
+- The two milestones' descriptions in the Ocean menu say so. Players who already claimed them get the new values.
+  Playing actively doesn't change: feeding and collecting by hand still work as before.
+
+---
+
+## V0.35 — 2026-10-30
+
+**New**
+- **Two new aquarium looks, ready for the next rebirths** (they will be given by rebirths 3 and 4, which come with the
+  next eggs; nobody wears them yet):
+  - **Sunken Pirate Wreck**: dark wet sand, dark wood base, rusty brass rims; a sunken rowboat, a fallen mast with its
+    torn sail, an anchor, a ship wheel, crates and a glowing treasure chest with gold coins and pearls spilled around
+    it; a painted backdrop with a shipwreck lying on the seabed in the light rays.
+  - **Atlantis Ruins**: pale sand, marble base, glowing turquoise plinth, gold rims; a marble arch on steps, standing
+    and fallen columns, a glowing crystal in a ring of light tiles, coral growing on the ruins, gold pebbles; a painted
+    backdrop of the sunken city with its domes, towers and a great golden dome.
+
+---
+
+## V0.34 — 2026-10-30
+
+**Changes**
+- Side menu: each button's name now sits inside the button, under its icon (it used to straddle the bottom edge,
+  where the outline cut through the letters). The buttons are a little bigger and the icons a little smaller to
+  make room.
+
+---
+
+## V0.33 — 2026-10-30
+
+**New**
+- **New look for the whole interface ("arcade aquatic")**, built from the design in `design/ui/redesign-v2.figcraft`:
+  - cartoon fonts everywhere: Luckiest Guy for titles, buttons and big numbers, Fredoka One for the rest, always
+    with a dark outline so they read over any aquarium;
+  - every button is in relief (a darker edge under it) and sinks when pressed; colours by role: green for the main
+    action, gold to buy, red to confirm or close, blue / lagoon for the rest;
+  - menus open in a navy window with a coloured ribbon title over its top edge, a round red close button on its
+    corner and a few bubbles: gold for Quests, lagoon for the Fish Index, blue for the Ocean, green for Companions,
+    purple for Rebirth;
+  - the egg shop becomes a navy shelf of square egg slots coloured by state (green to buy, grey too expensive, amber
+    hatching, gold ready), with the price on a tag hanging below (2,500 / 25K / 150K…); cracks spread over an
+    incubating egg and its tag fills up;
+  - money shows in a pill with a big gold coin; the "Liked! Coins x2" pill is pink with a heart;
+  - the side menu gets drawn icons (a scroll, the Snail, a book, a wave, a rebirth arrow) instead of emoji;
+  - quests show as cards with a picture of what they count, their story line on a tag, a progress bar, a square
+    reward slot and a big CLAIM! button;
+  - the Fish Index shows every variant as a square slot (blue Normal, purple Anomaly, pale Ghost, gold Shiny with
+    sparkles), the dark silhouette with a "?" until found;
+  - Ocean, Companions, Rebirth, the reward popup, the hatch reveal, the tutorial card, the event banner, the
+    notifications and the "My aquarium" / "Back to lobby" button follow the same style.
+
+**Changes**
+- The rewards "The Ocean" and "Rebirth" show a drawn icon (quest book, reward popup) instead of an emoji.
+
+---
+
+## V0.32 — 2026-10-30
+
+**New**
+- Studio: the place's owner can type `/nextfrench` during a playtest so the next egg they open hatches a French Fish
+  (to test the easter egg). The command doesn't exist on live servers.
+
+---
+
+## V0.31 — 2026-10-30
+
+**New**
+- **Rebirth reminder**: while a rebirth is affordable, the Rebirth button pulses in a gold halo. A "REBIRTH READY!"
+  bubble says what it brings (the coin multiplier and the new aquarium) when it becomes affordable, then again every
+  4 minutes while it stays affordable. Opening the Rebirth menu pushes the next one back.
+- **Secret: the French Fish** (an easter egg, its odds are shown nowhere):
+  - it wears a beret, a Breton striped shirt and a red scarf, with a baguette on its back;
+  - any egg can hatch it, 0.1% of the time (taken from the egg's most common fish), never as an Anomaly, Ghost or
+    Shiny;
+  - every minute it drops a **croissant** worth half of what the rest of your tank earns in a minute (rebirth,
+    like and event bonuses included); one croissant in 15 sparkles and is worth double;
+  - release it in the Ocean for 100 Ocean Points (it also leaves at a rebirth);
+  - after one hour in your tank it goes off to join a protest, still giving its Ocean Points. Its hour only runs
+    while you tend your aquarium, never offline or while the tank is paused;
+  - the Fish Index gets an **Easter eggs** category, invisible until you hatch one. Fish of that category stay out
+    of the collection count.
+
+**Changes**
+- The Pirate Fish and the Imperial Discus are now **Rare**, like the Silver Angelfish. No fish is Epic or Legendary
+  yet.
+
+**Balance**
+- The French Fish doesn't move the average progression: about 1 player in 6 meets one in their first 3 hours.
+
+---
+
+## V0.30 — 2026-10-29
+
+**New**
+- **Rebirth 2**: coins x8 forever, and your tank becomes the **Neon Coral Lagoon**.
+- Two new eggs in the shop: the **Amazon Egg** (Flame Gourami or Silver Angelfish) and the **Neon Coral Egg**
+  (Silver Angelfish, Pirate Fish or Imperial Discus). Buy an Amazon Egg to unlock the Neon Coral Egg.
+- Three new fish, each with its Anomaly, Ghost and Shiny looks in the Fish Index:
+  - the **Silver Angelfish** (Rare), which drops pearls;
+  - the **Pirate Fish** (Epic), which drops rubies;
+  - the **Imperial Discus** (Legendary), which drops crowns.
+- A new Ocean milestone at 1,500 Ocean Points: **Bigger aquarium**, your tank holds 15 fish instead of 10. You keep
+  it through rebirths.
+
+**Balance**
+- New progression target for an average player: rebirth 2 after about 1h45 of play, all nine fish after about 2h30.
+  The start of the game doesn't change (rebirth 1 after about 30 minutes, the first six fish after about 1 hour).
+
+---
+
+## V0.29 — 2026-10-29
+
+**New** (in preparation: the models are in the game files but nothing uses them yet)
+- Two new fish, with their Anomaly, Ghost and Shiny looks and their collection icons: the **Silver Angelfish** (Anomaly: midnight blue, Shiny: gold) and the **Imperial Discus** (Anomaly: red, Shiny: golden).
+- Three new kinds of coins: the **Pearl** (a pearl in its shell), the **Ruby** and the **Crown**.
+- A new aquarium look, the **Neon Coral Lagoon**: glowing neon rims, indigo sand, a night reef painted on the back wall, pink, cyan and violet corals, an anemone, a giant clam and glowing pebbles.
+- Two new eggs: the **Amazon Egg** (jungle leaves around a river) and the **Neon Coral Egg** (glowing corals on a night-blue shell).
+
+---
+
+## V0.28 — 2026-10-29
+
+**New**
+- Aquarium full: when you try to open an egg without room, a short reminder next to the Ocean button tells you that you can release a fish there. Before the Ocean is unlocked, it points to the "Full House" quest instead. It shows up at most once every 3 minutes, and not again once you have released a fish.
+
+---
+
+## V0.27 — 2026-10-29
+
+**New**
+- A new story line, Rebirth, opens after "Coin Collector". **Saving Up**: have 5,000$ at once. Its bar follows your savings, and claiming it unlocks the Rebirth.
+- A "My aquarium" button in the lobby, where "Back to lobby" sits in the aquarium view. It takes you straight to your aquarium's view.
+
+**Changes**
+- The Rebirth menu now unlocks through the "Saving Up" quest instead of appearing out of nowhere. Players who already have it keep it.
+
+**Fixes**
+- Abyssal raid: the lantern fish stopped stealing after 10 tries, before the end of the event. It now keeps coming for your coins, at the same pace, for the whole minute.
+
+---
+
+## V0.26 — 2026-10-29
+
+**New**
+- Smart Pelican: a small gauge above your Pelican shows its food charges. A full slot holds a pellet, and the next charge grows in its slot while it refills.
+- Food now looks as filling as it is. With the "Hearty meals" bonus, every meal (yours and the Pelican's) is a plump shrimp instead of a pellet. Food also turns slowly as it sinks.
+
+---
+
+## V0.25 — 2026-10-29
+
+**New**
+- A new story line, the Pelican's, opens as soon as you get the Pelican:
+  - **Lunch Time**: let your Pelican feed 50 fish. Reward: your fish stay full 15 seconds longer after eating.
+  - **Double Serving**: let your Pelican feed 150 fish. Reward: your Pelican throws 2 pellets instead of 1.
+  - **Pelican Chef**: let your Pelican feed 500 fish. Reward: your Pelican becomes smart. It stores up to 2 food charges (one more every feeding interval) and, as soon as a fish is hungry, uses one to feed it right away. It no longer throws food when no fish needs it.
+
+**Fixes**
+- Quest book: the text of bonus rewards ("+1s", "Boing"...) was dark on the dark card and hard to read. It is now gold.
+
+---
+
+## V0.24 — 2026-10-29
+
+**Changes**
+- Story quests now come in lines that run at the same time. After "Coin Collector", the Ocean line ("Full House") and the Snail line ("Little Helper", "Busy Snail", "Snail Champion") both open: work on whichever you like. Each quest in the quest book shows its line.
+- Your story progress is kept: each line picks up where you were.
+
+---
+
+## V0.23 — 2026-10-29
+
+**New**
+- Three new story quests, after "Full House", where your Snail does the work:
+  - **Little Helper**: let your Snail pick up 20 coins. Reward: coins stay 1 second longer on the sand.
+  - **Busy Snail**: let your Snail pick up 100 coins. Reward: coins stay 2 more seconds on the sand.
+  - **Snail Champion**: let your Snail pick up 200 coins. Reward: coins bounce once when they reach the sand (the bounce lasts 1.5 seconds), then stay on the sand as long as usual, plus the 3 bonus seconds.
+- These bonuses are permanent and are kept through rebirths.
+
+---
+
+## V0.22 — 2026-10-29
+
+**New**
+- Two new Ocean rewards:
+  - 100 points: **Faster Snail**, your Snail crawls at 150% speed;
+  - 500 points: **Hungry Pelican**, your Pelican throws food 2.5x as often (every 4 seconds).
+- Fish Index: hover a variant's column (or one of its fish) to see what that variant brings: its colours, its coin bonus and its Ocean Points.
+
+---
+
+## V0.21 — 2026-10-29
+
+**New**
+- **Ocean rewards**: Ocean Points now unlock rewards at milestones, claimed from the Ocean menu (the points are never spent):
+  - 50 points: the **Pelican**, a new companion;
+  - 200 points: a **second companion slot**.
+- **Pelican**: it stands on the back of your aquarium and watches your fish. Every 10 seconds it throws a free food pellet into the water, aimed at a hungry fish when there is one. It only feeds while you look after your aquarium.
+- The Ocean menu is now in two parts: releasing fish on the left, the rewards on the right with your progress toward each one. The Ocean button shows a badge when a reward is ready.
+- New sticker icons for the companions, in the companion menu, the quest rewards and the reward popups.
+
+**Changes**
+- The aquarium view leaves room above the tank while your Pelican is out, so you can see it.
+
+**Fixes**
+- The fish icon could take a moment to appear when an egg hatched (seen on an Anomaly Blue Neon): every fish icon is now loaded as soon as you join.
+
+---
+
+## V0.20 — 2026-10-29
+
+**New**
+- **Recurring events**: every server now starts events by itself. After 5 minutes without an event, each minute has a growing chance to start one, and by 15 minutes it always does. It is drawn among the recurring events (for now the Abyssal Raid) and only happens on that server. The clock starts again when the event ends.
+- **Admin events**: an admin can start any event on every server at once with the chat command `/event <name>` (for example `/event kpop`), and stop it with `/event stop`. An admin event replaces the recurring event running, and no recurring event can start during it. Servers that start during an admin event join it. The K-pop event is an admin event.
+
+**Changes**
+- Events no longer disturb players during the tutorial: no event music, banner, darkness, guest, lantern fish or coin bonus for them. The event joins them as soon as they finish it.
+- Each event now has its own duration (1 minute for both for now).
+
+---
+
+## V0.19 — 2026-10-29
+
+**Changes**
+- No more emoji in the game's texts: coin popups (a ghost coin now shows just its amount), menu titles, tabs, buttons, notifications, the aquarium nameplate and fish counter, the hatch reveal and the Ocean menu. Ocean Points now read "+3 Ocean" in the popup and "+3 pts" in the Ocean menu.
+
+---
+
+## V0.18 — 2026-10-29
+
+**Changes**
+- New fish icons in a sticker style: the real fish in their real colours, with a thick outline and a soft shadow. Ghosts get a pale blue outline and stay see-through, shinies a gold outline with sparkles. They replace the 3D portraits in the Fish Index, the Ocean menu and the hatch reveal.
+- In the Fish Index, a variant you haven't found shows the fish's dark silhouette under a "?".
+
+---
+
+## V0.17 — 2026-10-29
+
+**New**
+- Studio: the place's owner can erase their own save during a playtest with `/datareset`, then `/datareset confirm` within 15 seconds. The command doesn't exist on live servers.
+
+**Changes**
+- The Fish Index no longer shows how many of each fish you hatched: a found variant shows its portrait, a missing one a "?".
+
+---
+
+## V0.16 — 2026-10-29
+
+**New**
+- **You choose which fish goes back to the ocean**: the Ocean menu now has one row per kind *and* variant in your tank (for example "Shiny Golden Guppy ×1"). Releasing a rare variant asks for a second click ("Sure?").
+- Fish pictures are now **3D portraits of the real fish**, in their real colours: the Fish Index, the Ocean menu and the hatch reveal (where the fish turns gently). Ghosts are see-through and shinies twinkle there too.
+
+**Balance**
+- Rare variants give more Ocean Points when released, and at a rebirth: Anomaly ×2, Ghost ×3, Shiny ×5.
+
+---
+
+## V0.15 — 2026-10-29
+
+**New**
+- **Fish variants**: every fish you hatch can come out as a rare variant of its species:
+  - **Anomaly** (10 %): alternate colours, drops its coins 1.2× as often;
+  - **Ghost** (5 %): translucent, you can see through it. Instead of sparkling coins it drops **ghost coins** (translucent, trailing wisps), worth 3 sparkling coins;
+  - **Shiny** (1 %): alternate colours and twinkles like a sparkling coin. Drops coins as often as an anomaly, and 3× more sparkling coins.
+- The hatch reveal announces the variant ("You hatched a Shiny Clownfish!", with its chance) in the variant's colours.
+- **New Fish Index**: one row per fish and one column per variant (Normal, Anomaly, Ghost, Shiny), with the chance of each variant, how many you hatched, and a scroll bar. Every variant is its own entry: 24 to collect.
+
+**Changes**
+- Releasing a fish to the ocean lets go of a normal one before any rare variant.
+- The Golden Guppy's texture is lighter in memory (same look).
+
+**Balance**
+- Variants make the game about 4 % faster on average: first rebirth ≈ 28 min instead of 29, the six first fish ≈ 58 min instead of 61. Prices are unchanged.
+
+---
+
+## V0.14 — 2026-10-29
+
+**Changes**
+- New eyes for the lantern fish: glossy black eyeballs with a glowing red iris and a thin slit pupil, like a predator's, instead of red balls stuck on its eyes. A soft red glow lights its eye sockets from within, and the slit shows up with the glow when it comes out of the dark.
+
+---
+
+## V0.13 — 2026-10-29
+
+**New**
+- The Abyssal Raid now has its own music, which takes over from the beach music while it lasts.
+
+**Changes**
+- The lantern fish looks much more menacing: a near-black body, bared fangs, glowing red eyes and a cold, pale lure. In the dark, its eyes and its lure show up first, before its body comes out of the shadows. It is also a bit bigger.
+- The Abyssal Raid banner now glows from the lure's cold cyan to the red of its eyes.
+
+**Balance**
+- During the Abyssal Raid, every coin is worth **x1.5** (on top of rebirths and likes). The income line shows the bonus.
+
+---
+
+## V0.12 — 2026-10-29
+
+**New**
+- **Abyssal Raid**, a new server-wide event:
+  - the whole world goes dark: the day turns into a deep blue night;
+  - every aquarium turns into the abyss: a dark backdrop with a ridge of rocks and glowing specks, deep navy water and marine snow drifting down;
+  - a **lantern fish** sneaks out of the dark at the back of your aquarium, its glowing lure first. It darts at your most valuable coin to steal it: click the coin before it gets there! Whether it grabs the coin or not, it swims back into the dark and vanishes;
+  - it can try to steal up to 10 coins per minute. A stolen coin shows a red "-X$" where it was taken;
+  - the event banner glows lantern yellow and shows the time left.
+- Studio: one test button per event (K-pop and Abyssal Raid).
+
+**Changes**
+- The event banner's subtitle and colours now depend on the event.
+
+---
+
+## V0.11 — 2026-10-29
+
+**Changes**
+- Clearer aquarium in the close-up view: the beach haze fades out and the front glass and water become more see-through while you look after your tank, so fish, coins and decor keep their real colours. The lobby keeps its sunny haze.
+
+---
+
+## V0.10 — 2026-10-29
+
+**Balance**
+- The Snail crawls 20 % faster when it fetches coins (3 → 3.6 studs/s) and reaches a bit farther to pick them up.
+
+**Changes**
+- The Snail no longer pauses after each coin: it picks coins up on its way and heads straight to the next one. It now goes for the coin it can grab the soonest (one already on the sand rather than one still falling).
+- Releasing a fish to the ocean always lets go of your smallest fish of that kind, the one that earns the least (youngest growth stage, then the smallest). A short line in the Ocean menu now says so.
+
+---
+
+## V0.09 — 2026-10-29
+
+**Changes**
+- The owner's name is now on a brass nameplate at the front of the aquarium's base ("🐠 Name's Aquarium"), next to the fish counter, instead of floating above the tank.
+- Free aquariums no longer show a "Free aquarium" sign.
+
+**Fixes**
+- The floating sign of the aquarium behind no longer shows through the glass in the aquarium view.
+
+---
+
+## V0.08 — 2026-10-29
+
+**New**
+- **Rebirth**: once you can afford 5,000 $, a new Rebirth menu appears, with a "NEW" bubble and a notification. A rebirth restarts your run in exchange for permanent rewards:
+  - every fish in your tank goes back to the ocean and earns you its Ocean Points;
+  - your money restarts at 300 $, and your eggs and egg unlocks are reset (the free starter egg is back);
+  - your Fish Index, quests, companions, Ocean Points and likes are kept;
+  - your coins are worth **x2.5 forever**;
+  - your aquarium becomes the **Lagoon Aquarium**.
+- The Rebirth menu shows exactly what you lose and what you get (including the Ocean Points your current fish will bring), your progress toward the price, and asks for a second click to confirm. A "!" badge shows when a rebirth is affordable.
+- **Lagoon Aquarium** (rebirth 1): light sand, teal and gold frame, a painted lagoon backdrop with light rays, and decor kept low along the back and the sides so fish and coins stay in view: a sandcastle, corals, rocks, starfish, shells, sea grass, pebbles and a bubbler.
+- The coin income line now shows your multiplier, for example "(x2.5)".
+
+**Balance**
+- Freshwater Egg: 10,000 $ → 25,000 $. It is now the wall that the first rebirth gets you past.
+- Expected pace for an average player: first rebirth at about 30 min of play, all 6 first fish discovered at about 1 h (about 1h20 without rebirthing).
+
+---
+
+## V0.07 — 2026-10-29
+
+**Fixes**
+- Text no longer wobbles when a window opens. The menus (quests, companions, Fish Index, Ocean), the tutorial card, the event banner, the reward popup and the hatch caption now fade in at their final size instead of growing. The rays, the eggs and the fish keep their pop.
+
+---
+
+## V0.06 — 2026-10-29
+
+**Fixes**
+- Hungry fish now swim smoothly toward the food. They used to stop for a split second several times per second while chasing it.
+- The Ocean menu no longer jumps between sizes while it opens. The same fix applies to the quest book, whose quest descriptions could do the same.
+
+---
+
+## V0.05 — 2026-10-29
+
+**Changes**
+- **Loading screen**: new artwork, a sunny beach with the aquarium bowl. The loading bar is now shaped like a fish, with a swishing tail, under a "LOADING... %" counter.
+- **Loading screen**: it now waits for its artwork on a slow connection (8 seconds at most), so players see the illustration instead of a plain blue screen.
+
+---
+
+## V0.04 — 2026-10-29
+
+**New**
+- **Loading screen**: the game now opens on a "Project: Quarium" illustrated screen with a bubbly loading bar. The bar follows the real loading (the game, the fish, then your save) and the screen fades out once your aquarium is ready.
+
+---
+
+## V0.03 — 2026-10-29
+
+**Changes**
+- **Like boost**: a new like now restarts the x2 coins boost at 5 minutes instead of adding 5 more minutes. Likes still count up on the board, even when several come in at once.
+- **Like boost**: the boost is no longer saved. It is lost when you leave the game.
+
+---
+
+## V0.02 — 2026-10-29
+
+**New**
+- **Aquarium likes**: a small driftwood board now stands beside each aquarium and shows how many likes its owner has received.
+- **Giving a like**: walk up to another player's board and press E to give a 👍. Each player can give 1 like per hour, to any aquarium. Your own aquarium can't be liked by you. The prompt shows how long until your next like.
+- **Like boost**: each like received doubles the coins of the owner's fish for 5 minutes. Several likes add up their time. The board shows the boost and its countdown, and the owner sees a "Liked! Coins x2" timer under the top bar. Both players get a notification.
+- Likes received, the like cooldown and the boost are saved. The boost timer keeps running while you're offline.
+
+---
+
+## V0.01 — 2026-10-29
+
+First version: the state of the game at the start of these release notes.
+
+**New**
+- **Aquariums**: up to 6 players per server. Each player owns one of the 6 aquariums placed around a beach lobby, with their name on its sign. Walking up to the glass switches to a 2.5D focus view of your own tank. A back button returns you to the lobby.
+- **Eggs shop** (top bar, 6 slots): Common Egg (100 $), Improved Egg (500 $), Superior Egg (2,500 $) and Freshwater Egg (10,000 $). Each egg has its own hatch time and odds. Buying an egg of one rarity unlocks the next. Ready eggs show "OPEN!" and must be opened by clicking them. One egg of each type can incubate at a time. The last 2 slots are "Soon".
+- **Hatching**: a reveal animation shows the fish, its rarity and its odds, with "NEW!" for a first discovery. A full tank (10 fish) can still buy eggs, but can't open them.
+- **Fish**: Golden Guppy, Blue Neon and Red Tetra (Common); Clownfish, Zebra Danio and Flame Gourami (Uncommon). Each fish has a random adult size, starts as a baby and grows over time. Coin value grows with it.
+- **Coins**: fish drop coins that sink to the sand and must be clicked to be collected, with a floating "+X $" popup. Some coins are special.
+- **Hunger**: fish go from Satiated (30 s) to Hungry (15 s) to Weak. Clicking the water drops a food pellet (paid). Fish chase and eat it. Weak fish never die: they swim very slowly and only let out 1 $ fart bubbles instead of coins, until they are fed.
+- **AFK freeze**: while you are away from your tank, your fish are frozen in time: no hunger, no growth, no coins. Eggs keep hatching.
+- **Tutorial**: 5 steps. Walk up to the glass, buy the free egg, open it, collect your first coin, then feed your hungry fish. Completing it gives 300 $. The menus appear once it is done.
+- **Quest book**: Story, Daily and Weekly tabs. Story quests: "Coin Collector" (collect 300 $ of coins), which gives the Snail, then "Full House" (10 fish in your tank), which unlocks the Ocean. A badge shows when a reward is ready to claim. The daily and weekly boards reset on schedule, but have no quests yet.
+- **Story quest hint**: 5 s after the tutorial, a bubble on the Quests button invites you to look at the Snail quest and wishes you good luck.
+- **Companions**: the Snail crawls along the bottom of your tank and picks up coins for you. It can be equipped or unequipped from the Companions menu (1 slot).
+- **Fish Index**: a collection of every species, filled in as you hatch them.
+- **The Ocean** (unlocked by "Full House"): release fish you don't need to free a spot in your tank and earn Ocean Points, a score that only grows. Rarer fish give more points. Your last fish can't be released. A short tutorial shows the first time you open it.
+- **Music events**: server-wide "K-POP LIVE" event, with its own music and a banner. Fish react to the beat and drop extra coins, and a guest fish visits each tank.
+- **Audio**: background music and sound effects (coins, hatching, feeding, releases, weak fish…).
+- **Saving**: your progress is saved: money, fish (with their size, age and hunger), Fish Index, eggs (they keep hatching while you are offline), tutorial step, quests, companions, Ocean Points and unlocked features. Saves happen every 60 s, when you leave and when the server shuts down. Your data can only be open on one server at a time, so it can't be duplicated. A tutorial left halfway resumes where you stopped.

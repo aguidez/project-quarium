@@ -1,0 +1,41 @@
+{
+  "name": "projetquarium",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "main": "index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "rbxtsc",
+    "watch": "rbxtsc -w",
+    "serve": "rojo serve",
+    "sim": "node tools/economy-sim.js",
+    "doctor": "node tools/check-setup.js"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "devDependencies": {
+    "@rbxts/compiler-types": "^3.0.0-types.0",
+    "@rbxts/types": "^1.0.960",
+    "@typescript-eslint/eslint-plugin": "^8.72.1",
+    "@typescript-eslint/parser": "^8.72.1",
+    "eslint": "^10.13.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.7",
+    "eslint-plugin-roblox-ts": "^1.4.1",
+    "jimp": "0.22.12",
+    "prettier": "^3.9.10",
+    "roblox-ts": "^3.0.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@rbxts/janitor": "^1.18.3-ts.0",
+    "@rbxts/profile-store": "^1.0.3",
+    "@rbxts/react": "^17.3.13-ts.1",
+    "@rbxts/react-roblox": "^17.3.13-ts.1",
+    "@rbxts/services": "^1.6.0",
+    "@rbxts/t": "^3.2.1"
+  }
+}
