@@ -3,7 +3,7 @@
 > The development plan from the live game (V0.35) to V1: what to build, in which order, and how. The **numbers** live
 > in `BALANCE.md` §5 and `tools/balance-v1-plan.js`; this file is the **work**. Tick the boxes as tasks ship, and move
 > what a milestone ships into `PROJECT_CONTEXT.md` / `RELEASE_NOTES.md` as usual.
-> Last updated: 2026-10-30 (M2 done in V0.38, M0 in V0.37, M1 in V0.36; first version: 7 milestones, from the rebalance to rebirth 8).
+> Last updated: 2026-10-30 (M3 done in V0.39, M2 done in V0.38, M0 in V0.37, M1 in V0.36; first version: 7 milestones, from the rebalance to rebirth 8).
 
 **V1 in one line**: 8 rebirths / aquariums, 18 species, 12 eggs, a tank of 25 fish, 5 companions (3 slots, the third one
 a gamepass), a "Voyage" main quest line to the end, ~12h15 for a free player to see everything (BALANCE.md §5.3).
@@ -67,14 +67,19 @@ Themes already built (`PirateWreck`, `Atlantis` in ServerStorage.Assets.Aquarium
 - [x] Check: playtest a rebirth 3 → 4 with temporary money (`// TEMP TEST`), sim, docs. Played on a separate test
       store (`PlayerData_M2Test`), so the owner's save never moved.
 
-### M3 — Gamepasses (the shop)
+### M3 — Gamepasses (the shop; shipped in V0.39)
 
-- [ ] `GamePassService` (server): `UserOwnsGamePassAsync` cached per player at join, `PromptGamePassFinished` to
-      grant at once, a `passes` list synced to the client (never trusted from it); `shared/types/gamepasses.ts` (ids,
-      names, effects). Studio: create the passes on the Creator Dashboard (ids from the owner).
-- [ ] UI: a Shop panel (V2 kit) listing the passes; "locked" quest lines show their pass with a Buy button.
-- [ ] Passes of this milestone: **Third companion slot**, **x2 Ocean Points**, **Lucky** (variants x2), **+50 %
+- [x] `GamePassService` (server): `UserOwnsGamePassAsync` checked per player at join, `PromptGamePassPurchaseFinished`
+      to grant at once, a `passes` list synced to the client (never trusted from it); `shared/types/gamepasses.ts` (ids,
+      names, effects). Passes created on the Creator Dashboard by the owner (ids in GAME_PASSES); Studio test command
+      `/pass <GamePass>`. Prices are set on the Dashboard only (read by the Shop with GetProductInfo).
+- [x] UI: a Shop panel (V2 kit, built without a FigCraft mock-up at the owner's request) and a Shop side button;
+      "locked" quest lines show their pass with a Buy button.
+- [x] Passes of this milestone: **Third companion slot**, **x2 Ocean Points**, **Lucky** (variants x2), **+50 %
       Coins** (x1.5 on every coin, sold as "+50 %"; decided, BALANCE.md §5.10).
+- [x] Icons: `tools/pass-icons.js` → design/ui/passes, approved by the owner, uploaded once (ids in
+      GAME_PASSES.image and V2_IMAGES.iconShop). The same 512 px PNGs can be the passes' icons on the Dashboard.
+- [ ] Owner: put the 4 passes on sale (price) on the Creator Dashboard: until then the Shop cards say "Soon".
 
 ### M4 — Rebirth 5: Mariana Trench, the Water Hen and the Swordfish (~6h15 → ~8h05)
 

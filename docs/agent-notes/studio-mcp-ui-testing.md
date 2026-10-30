@@ -30,3 +30,6 @@ Playtesting UI through the Roblox Studio MCP:
 - **Dev chat commands** (Studio, owner only): send them from a Client execute_luau with `TextChatService.TextChannels.RBXGeneral:SendAsync("/incubators 2")` inside `task.spawn` (a direct call can time the request out).
 
 Related: [[lobby-decor-constraints]]
+
+- **Gamepasses in Studio** (2026-10-30): Roblox counts the game's creator as owning every pass of the game, so the owner's playtests show all passes OWNED and active. Use `/pass <GamePass>` (session only) to see the buyer's side. `GetProductInfo(id, Enum.InfoType.GamePass)` returns `IsForSale = false` / no price until the owner sets a price on the Creator Dashboard.
+- **Rojo half-syncing** (2026-10-30, macOS): with the plugin "connected", Studio got some edited files but not others nor any new file. Restarting `npm run serve` and reconnecting the plugin fixed it. Check a new file *and* an edited one before a playtest.

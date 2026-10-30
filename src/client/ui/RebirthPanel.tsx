@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "@rbxts/react";
 import { FishType } from "shared/types/fish";
+import { GamePass } from "shared/types/gamepasses";
 import { PlayerData } from "shared/types/playerData";
 import {
 	AQUARIUM_THEMES,
@@ -37,6 +38,8 @@ export interface RebirthPanelProps {
 	rebirths: number;
 	money: number;
 	fish: Record<FishType, number>;
+	/** Gamepasses owned (x2 Ocean Points doubles the rebirth's points). */
+	passes: readonly GamePass[];
 	/** Living rare variants (PlayerData.fishVariants): worth more Ocean Points. */
 	fishVariants: PlayerData["fishVariants"];
 	onRebirth: () => void;
@@ -190,7 +193,11 @@ export function RebirthPanel(props: RebirthPanelProps) {
 
 	let fishCount = 0;
 	for (const [, count] of pairs(props.fish)) fishCount += count;
-	const points = getRebirthOceanPoints({ fish: props.fish, fishVariants: props.fishVariants });
+	const points = getRebirthOceanPoints({
+		fish: props.fish,
+		fishVariants: props.fishVariants,
+		passes: props.passes as GamePass[],
+	});
 	const affordable = props.money >= upcoming.price;
 	const ratio = math.clamp(props.money / upcoming.price, 0, 1);
 	const buttonSize = UDim2.fromOffset(BUTTON_WIDTH, FOOTER_HEIGHT - 6);

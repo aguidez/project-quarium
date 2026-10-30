@@ -250,7 +250,7 @@ function simulate() {
 		if (next && money >= next.price) {
 			rebirthAt.push(t);
 			for (const f of fish) release(f);
-			ocean += (QUEST_REWARDS.rebirth[rebirthAt.length] || 0) * P.oceanBoost; // the story quest of that rebirth
+			ocean += QUEST_REWARDS.rebirth[rebirthAt.length] || 0; // the story quest of that rebirth (the x2 pass leaves fixed rewards alone)
 			oceanAtRebirth.push(ocean);
 			fish = [];
 			incubating = {};

@@ -508,6 +508,9 @@ permanently**, so quests can be added or reworded without touching the pace.
 
 ### 5.10 Gamepasses (outside the balance)
 
+Live since V0.39 (ROADMAP M3): Third companion slot, x2 Ocean Points, Lucky, +50 % Coins; the companion passes come
+with M4–M5.
+
 Rule: **the free timeline (§5.3) is the only target.** Prices and milestones are tuned for a player with no pass and are
 never raised because passes exist. A pass shortens the game or adds comfort for its owner; it never locks progression
 content (species, eggs, aquariums, capacity, companions themselves) away from free players.
@@ -518,7 +521,7 @@ content (species, eggs, aquariums, capacity, companions themselves) away from fr
 | Swordfish pass | Its 3 upgrade quests (~96 % of the coins AFK) | none on the timeline (an active player); AFK income ~x1.6 |
 | Jellyfish pass | Its 3 upgrade quests (25 fish fed AFK) | none on the timeline; AFK income +6–35 % on 17–25 fish |
 | Third companion slot | Collector + feeder + Water Hen at once | none on the timeline; AFK and hatch speed together |
-| x2 Ocean Points | Milestones earlier (tank 25 at ~8h00 instead of ~9h50) | 12h16 → ~12h06 |
+| x2 Ocean Points | Fish released and rebirths give x2 (fixed quest points don't): milestones earlier (tank 25 at ~8h09 instead of ~9h48) | 12h15 → ~12h08 |
 | Lucky | Variant chances x2 | none (variants are outside the 12 h) |
 | **+50 % Coins** (decided) | Coins x1.5, sold as "+50 % coins" | **12h16 → ~8h58 (-27 %)** |
 | *x2 Coins (rejected)* | *Coins x2* | *12h16 → ~7h10 (-41 %)* |
@@ -561,3 +564,4 @@ V0.36 (ROADMAP M1).
 | V0.35 (plan, rev. 2) | The owner's species and aquariums (Mariana Trench, Volcanic Temple, Crystal Caverns, Cosmic Sanctuary); companions Water Hen (Ocean 85,000, hatch -15 %, pass to -35 %), Swordfish (120,000, a maxed Snail, pass to ~96 %), Jellyfish (200,000, a maxed Pelican, pass to 25 fish); a third slot by gamepass; Snail's Ocean upgrade x1.5 → x1.15 (~60 %), Pelican's x2.5 → x1.33 (15 fish) | All 18 species and 8 aquariums **~12h16** (11h37–12h53), -11 min from the free Water Hen; pass estimates: Water Hen -22 min, x2 Coins -41 %, x1.5 Coins -27 % (the coins pass is +50 %, decided) |
 | V0.36 | ROADMAP M1, live: Snail's Ocean upgrade (100 points) x1.5 → x1.15, Pelican's (500 points) x2.5 → x1.33 (every 4 s → 7.5 s) | Active timeline unchanged (companions are not in the economy model): rebirth 1 ~28 min (22–36), rebirth 2 ~1h43, all nine ~2h28 (2h11–2h50). AFK: a maxed Snail picks up ~61 % of the coins at 1 coin/s (was ~72 %), a maxed Pelican keeps 15 fish fed (was 25), 6 % weak at 17 fish, 35 % at 25 |
 | V0.38 | ROADMAP M2, live: Catfish (Epic, 16k / 10 s, 800 points), Blue Tang (19.2k / 6 s, 1,300), Baby Sunfish (130k / 20 s, 2,000); Wreck Egg (55M, 135 s) and Atlantis Egg (144M, 150 s); rebirths 3 (45M, x25, Pirate Wreck) and 4 (120M, x80, Atlantis); Ocean milestones 5,000 (second incubator), 8,000 (17 fish), 25,000 (19 fish), 40,000 (Lucky ocean); Voyage quests 1–7 (5 min of income per signature species, 500 / 1,500 / 4,000 Ocean Points per rebirth). Plan's numbers, unchanged | Matches the plan: rebirth 3 ~3h01 (2h44–3h19), rebirth 4 ~4h47 (4h21–5h11), all twelve species ~5h42 (5h13–6h10). Rebirth 2 ~1h43 → ~1h40 and the 15-fish milestone with it (Voyage quests: 5 min of income at the Flame Gourami, +500 points at rebirth 2) |
+| V0.39 | ROADMAP M3, live: gamepasses (outside the balance): +50 % Coins (x1.5 on every coin), x2 Ocean Points on fish going to the ocean only (the simulator's `oceanBoost` no longer doubles the rebirth quests' fixed points), Lucky (variant luck x2), Third companion slot | Free timeline unchanged (end of V1 ~12h15); with x2 Ocean Points: tank 25 at ~8h09, end ~12h08 |

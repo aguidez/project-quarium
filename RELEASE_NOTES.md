@@ -10,6 +10,24 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.39 — 2026-10-30
+
+**New**
+- **Shop**: a new Shop button on the left opens the gamepass shop, with four permanent boosts:
+  - **Third Companion Slot**: one more companion in your aquarium at once;
+  - **x2 Ocean Points**: fish you release to the ocean, and your whole tank at a rebirth, give twice the points;
+  - **Lucky**: Anomaly, Ghost and Shiny fish hatch twice as often (on top of Lucky ocean);
+  - **+50% Coins**: every coin your fish drop is worth 50% more.
+  Each card shows its price; a pass not on sale yet shows "Soon". A pass bought is active at once, and your passes are
+  checked again each time you join.
+- Quests of a paid line now have a **Buy** button for their pass (the first paid lines come with the next companions).
+
+**Changes**
+- The coin line under the egg shop, the companion slot counter and the Ocean Points shown in the Ocean and Rebirth
+  menus include your passes.
+
+---
+
 ## V0.38 — 2026-10-30
 
 **New**

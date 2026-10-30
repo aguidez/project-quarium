@@ -29,6 +29,7 @@ import { isOnboardingDone } from "shared/types/onboarding";
 import { getEventCoinMultiplier } from "shared/types/events";
 import { getSatietyBonus } from "shared/types/perks";
 import { getRebirthMultiplier } from "shared/types/rebirths";
+import { getPassCoinMultiplier } from "shared/types/gamepasses";
 import { SavedFish, SaveData } from "../saveData";
 import { FishAssets } from "../fishAssets";
 import { loadTemplates } from "../templates";
@@ -305,17 +306,18 @@ class FishServiceSingleton implements Lifecycle {
 	}
 
 	/**
-	 * Coin value follows the fish's growth, times the owner's rebirth multiplier (permanent), the
-	 * like boost (doubled for a while) and the running event's bonus (abyssal raid x1.5). One coin out
+	 * Coin value follows the fish's growth, times the owner's rebirth multiplier (permanent), the +50% Coins
+	 * pass, the like boost (doubled for a while) and the running event's bonus (abyssal raid x1.5). One coin out
 	 * of SPECIAL_COIN_ODDS is special (never a frozen one), one out of 5 for a shiny fish; a ghost
 	 * fish's special coins are ghost coins instead, worth GHOST_COIN_MULTIPLIER special ones.
 	 */
 	private dropCoin(owner: Player, fish: FishEntity, frozen = false) {
 		const special = !frozen && this.rng.NextNumber() * getSpecialCoinOdds(fish.variant) < 1;
 		const ghost = special && FISH_VARIANTS[fish.variant].ghostCoins;
-		const rebirths = DataService.getData(owner)?.rebirths ?? 0;
+		const data = DataService.getData(owner);
 		const multiplier =
-			getRebirthMultiplier(rebirths) *
+			getRebirthMultiplier(data?.rebirths ?? 0) *
+			getPassCoinMultiplier(data?.passes ?? []) *
 			LikeService.getCoinMultiplier(owner) *
 			getEventCoinMultiplier(owner) *
 			(ghost ? GHOST_COIN_MULTIPLIER : 1);

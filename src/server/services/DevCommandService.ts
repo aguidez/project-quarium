@@ -5,6 +5,8 @@ import { CoinService } from "./CoinService";
 import { DataService } from "./DataService";
 import { EggService } from "./EggService";
 import { FishService } from "./FishService";
+import { GamePassService } from "./GamePassService";
+import { GAME_PASSES, isGamePass } from "shared/types/gamepasses";
 
 const RESET_COMMAND = "/datareset";
 const CONFIRM_WORD = "confirm";
@@ -12,6 +14,7 @@ const CONFIRM_WORD = "confirm";
 const CONFIRM_WINDOW = 15;
 const NEXT_FRENCH_COMMAND = "/nextfrench";
 const INCUBATORS_COMMAND = "/incubators";
+const PASS_COMMAND = "/pass";
 /** The most incubators the test command gives (the V1 plan stops at 2). */
 const MAX_TEST_INCUBATORS = 4;
 
@@ -25,6 +28,8 @@ const MAX_TEST_INCUBATORS = 4;
  *                       playtest to begin again from the onboarding)
  *  /nextfrench          the next egg opened hatches a French Fish (the easter egg), to test it
  *  /incubators <n>      sets the player's incubators per egg type (saved: "/incubators 1" puts it back)
+ *  /pass <Pass>         gives or takes a gamepass (e.g. "/pass Coins"), for this session only: the next join
+ *                       asks Roblox again
  */
 class DevCommandServiceSingleton implements Lifecycle {
 	private resetAskedAt = new Map<Player, number>();
@@ -58,13 +63,22 @@ class DevCommandServiceSingleton implements Lifecycle {
 			if (player) this.onIncubators(player, text);
 		});
 		incubators.Parent = TextChatService;
+
+		const pass = new Instance("TextChatCommand");
+		pass.Name = "DevPass";
+		pass.PrimaryAlias = PASS_COMMAND;
+		pass.Triggered.Connect((source, text) => {
+			const player = Players.GetPlayerByUserId(source.UserId);
+			if (player) this.onPass(player, text);
+		});
+		pass.Parent = TextChatService;
 		Players.PlayerRemoving.Connect((player) => this.resetAskedAt.delete(player));
 	}
 
 	public onStart() {
 		if (RunService.IsStudio())
 			print(
-				`[Server] DevCommandService: ${RESET_COMMAND}, ${NEXT_FRENCH_COMMAND}, ${INCUBATORS_COMMAND} available (Studio, place owner only).`,
+				`[Server] DevCommandService: ${RESET_COMMAND}, ${NEXT_FRENCH_COMMAND}, ${INCUBATORS_COMMAND}, ${PASS_COMMAND} available (Studio, place owner only).`,
 			);
 	}
 
@@ -93,6 +107,23 @@ class DevCommandServiceSingleton implements Lifecycle {
 		data.incubators = math.clamp(math.floor(count), 1, MAX_TEST_INCUBATORS);
 		DataService.sync(player);
 		DataService.notify(player, `Incubators per egg type: ${data.incubators}.`, "info");
+	}
+
+	private onPass(player: Player, text: string) {
+		if (!this.isAllowed(player)) {
+			warn(`[Server] ${player.Name} tried ${PASS_COMMAND}: refused (not the place's owner).`);
+			return;
+		}
+		const pass = text.split(" ")[1];
+		if (!isGamePass(pass)) {
+			const names = new Array<string>();
+			for (const [name] of pairs(GAME_PASSES)) names.push(name);
+			DataService.notify(player, `Usage: ${PASS_COMMAND} <${names.join(" | ")}>`, "info");
+			return;
+		}
+		const owned = !GamePassService.owns(player, pass);
+		GamePassService.setTestPass(player, pass, owned);
+		DataService.notify(player, `${GAME_PASSES[pass].displayName}: ${owned ? "on" : "off"} (this session).`, "info");
 	}
 
 	private onReset(player: Player, text: string) {

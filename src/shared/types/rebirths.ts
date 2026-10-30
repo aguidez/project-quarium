@@ -1,4 +1,5 @@
 import { FISH_TYPES, FishType } from "./fish";
+import { getPassOceanMultiplier } from "./gamepasses";
 import { getLivingVariant, PlayerData } from "./playerData";
 import { getOceanPoints, VARIANT_ORDER } from "./variants";
 
@@ -65,14 +66,17 @@ export function getAquariumTheme(rebirths: number): AquariumTheme {
 	return rebirths > 0 ? (REBIRTHS[math.min(rebirths, REBIRTHS.size()) - 1]?.theme ?? "Basic") : "Basic";
 }
 
-/** Ocean Points the living fish earn when they all go back to the ocean at a rebirth (rare variants count more). */
-export function getRebirthOceanPoints(data: Pick<PlayerData, "fish" | "fishVariants">): number {
+/**
+ * Ocean Points the living fish earn when they all go back to the ocean at a rebirth (rare variants count more,
+ * the x2 Ocean Points pass doubles them).
+ */
+export function getRebirthOceanPoints(data: Pick<PlayerData, "fish" | "fishVariants" | "passes">): number {
 	let points = 0;
 	for (const [fishType] of pairs(data.fish)) {
 		for (const variant of VARIANT_ORDER)
 			points += getLivingVariant(data, fishType, variant) * getOceanPoints(fishType, variant);
 	}
-	return points;
+	return points * getPassOceanMultiplier(data.passes);
 }
 
 /** "x2.5" */

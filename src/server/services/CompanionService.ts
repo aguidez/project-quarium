@@ -6,6 +6,7 @@ import { COMPANION_TYPES, CompanionType, PELICAN_FEED_INTERVAL } from "shared/ty
 import { getCompanionMultiplier } from "shared/types/oceanRewards";
 import { getPelicanCharges, getPelicanPellets } from "shared/types/perks";
 import { isOnboardingDone } from "shared/types/onboarding";
+import { getCompanionSlots } from "shared/types/playerData";
 import { loadTemplates, scaleModel } from "../templates";
 import { Aquarium, AquariumService } from "./AquariumService";
 import { CoinService } from "./CoinService";
@@ -111,7 +112,7 @@ class CompanionServiceSingleton implements Lifecycle {
 		const equipped =
 			equip &&
 			!data.equippedCompanions.includes(companionType) &&
-			data.equippedCompanions.size() < data.companionSlots;
+			data.equippedCompanions.size() < getCompanionSlots(data);
 		if (equipped) data.equippedCompanions.push(companionType);
 		DataService.sync(player);
 		this.refresh(player);
@@ -122,8 +123,8 @@ class CompanionServiceSingleton implements Lifecycle {
 		const data = DataService.getData(player);
 		if (!data || !data.companions.includes(companionType) || data.equippedCompanions.includes(companionType))
 			return;
-		if (data.equippedCompanions.size() >= data.companionSlots) {
-			const slots = data.companionSlots;
+		if (data.equippedCompanions.size() >= getCompanionSlots(data)) {
+			const slots = getCompanionSlots(data);
 			DataService.notify(player, `Only ${slots} companion${slots > 1 ? "s" : ""} at a time: unequip one first.`);
 			return;
 		}

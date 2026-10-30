@@ -8,7 +8,8 @@ import { ActiveEvent, GameEventType, TEST_EVENT_ORDER } from "shared/types/event
 import { Feature } from "shared/types/features";
 import { FishType, FOOD_PRICE, getIncomePerSecond } from "shared/types/fish";
 import { isOnboardingDone, STORY_QUEST_HINT_DELAY } from "shared/types/onboarding";
-import { getTotalFish, PlayerData } from "shared/types/playerData";
+import { getCompanionSlots, getTotalFish, PlayerData } from "shared/types/playerData";
+import { GamePass, getPassCoinMultiplier } from "shared/types/gamepasses";
 import { hasClaimableQuest } from "shared/types/quests";
 import { FishVariant } from "shared/types/variants";
 import { hasClaimableOceanReward, OceanRewardId } from "shared/types/oceanRewards";
@@ -24,6 +25,7 @@ import { OnboardingPanel } from "./OnboardingPanel";
 import { QuestPanel } from "./QuestPanel";
 import { formatNumber } from "./Panel";
 import { RewardPopup } from "./RewardPopup";
+import { ShopPanel } from "./ShopPanel";
 import { BAR_HEIGHT, BAR_WIDTH, ShopBar } from "./ShopBar";
 import { SideButtons } from "./SideButtons";
 import { TextStroke } from "./kit";
@@ -68,9 +70,10 @@ export interface AppProps {
 	onFinishTutorial: (feature: Feature) => void;
 	onClaimOceanReward: (id: OceanRewardId) => void;
 	onRebirth: () => void;
+	onBuyPass: (pass: GamePass) => void;
 }
 
-type MenuPanel = "Quests" | "Companions" | "FishIndex" | "Ocean" | "Rebirth";
+type MenuPanel = "Quests" | "Companions" | "FishIndex" | "Ocean" | "Rebirth" | "Shop";
 
 interface BarPlacement {
 	centerX: number;
@@ -129,8 +132,12 @@ export function App(props: AppProps) {
 	const rebirthTutorial = rebirthUnlocked && !data.tutorialsDone.includes("Rebirth");
 	const upcomingRebirth = data !== undefined ? getNextRebirth(data.rebirths) : undefined;
 	const rebirthReady = upcomingRebirth !== undefined && data !== undefined && data.money >= upcomingRebirth.price;
-	// Shown in the income line: rebirths and the running event's bonus (not the like boost: it has its pill)
-	const coinMultiplier = getRebirthMultiplier(data?.rebirths ?? 0) * (props.event?.config.coinMultiplier ?? 1);
+	// Shown in the income line: rebirths, the coins pass and the running event's bonus (not the like boost: it has
+	// its pill)
+	const coinMultiplier =
+		getRebirthMultiplier(data?.rebirths ?? 0) *
+		getPassCoinMultiplier(data?.passes ?? []) *
+		(props.event?.config.coinMultiplier ?? 1);
 
 	// Story quest hint: only right after an onboarding played in this session (not for a player who
 	// joins with it already done), once the "Tutorial complete!" popup is gone. Ends when the book is opened.
@@ -321,6 +328,7 @@ export function App(props: AppProps) {
 							: undefined
 					}
 					fullReminder={openPanel === undefined ? fullReminder : undefined}
+					onShop={() => setOpenPanel("Shop")}
 				/>
 			)}
 			{menusVisible && openPanel === "Quests" && (
@@ -329,6 +337,7 @@ export function App(props: AppProps) {
 					quests={data.quests}
 					passes={data.passes}
 					onClaim={props.onClaimQuest}
+					onBuyPass={props.onBuyPass}
 					onClose={() => setOpenPanel(undefined)}
 				/>
 			)}
@@ -337,7 +346,7 @@ export function App(props: AppProps) {
 					key="CompanionPanel"
 					owned={data.companions}
 					equipped={data.equippedCompanions}
-					slots={data.companionSlots}
+					slots={getCompanionSlots(data)}
 					onEquip={props.onEquipCompanion}
 					onUnequip={props.onUnequipCompanion}
 					onClose={() => setOpenPanel(undefined)}
@@ -369,10 +378,19 @@ export function App(props: AppProps) {
 					money={data.money}
 					fish={data.fish}
 					fishVariants={data.fishVariants}
+					passes={data.passes}
 					onRebirth={() => {
 						setOpenPanel(undefined);
 						props.onRebirth();
 					}}
+					onClose={() => setOpenPanel(undefined)}
+				/>
+			)}
+			{menusVisible && openPanel === "Shop" && (
+				<ShopPanel
+					key="ShopPanel"
+					passes={data.passes}
+					onBuy={props.onBuyPass}
 					onClose={() => setOpenPanel(undefined)}
 				/>
 			)}

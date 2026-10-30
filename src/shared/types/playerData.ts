@@ -8,7 +8,7 @@ import { createQuestsData, QuestsData } from "./quests";
 import { OceanRewardId } from "./oceanRewards";
 import { Perk } from "./perks";
 import { FishVariant } from "./variants";
-import { GamePass } from "./gamepasses";
+import { GamePass, getPassCompanionSlots } from "./gamepasses";
 
 /**
  * Money never goes above this (DataService credits clamp to it): 1 quadrillion, the last unit the UI shortens
@@ -140,6 +140,11 @@ export function getLivingVariant(
 	let normal = data.fish[fishType] ?? 0;
 	for (const [, count] of pairs(variants)) normal -= count;
 	return math.max(normal, 0);
+}
+
+/** Companions that can be equipped at once: the Ocean slots, plus the Third Companion Slot pass. */
+export function getCompanionSlots(data: Pick<PlayerData, "companionSlots" | "passes">): number {
+	return data.companionSlots + getPassCompanionSlots(data.passes);
 }
 
 export function getTotalFish(data: PlayerData): number {

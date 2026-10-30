@@ -58,6 +58,8 @@ export interface QuestPanelProps {
 	/** Gamepasses owned: the quests of a line needing another one are shown locked. */
 	passes: readonly GamePass[];
 	onClaim: (questId: string) => void;
+	/** A locked quest's Buy button: asks the server for the pass's purchase prompt. */
+	onBuyPass: (pass: GamePass) => void;
 	onClose: () => void;
 }
 
@@ -189,7 +191,13 @@ function RewardSlot(props: { reward: RewardDisplay; order: number }) {
  * One quest (FigCraft redesign-v2: QuestCard): icon disc, title, description, progress bar, reward slot
  * and its claim button; a story quest wears its line's tag on the card's top edge.
  */
-function QuestCard(props: { quest: QuestProgress; passes: readonly GamePass[]; order: number; onClaim: () => void }) {
+function QuestCard(props: {
+	quest: QuestProgress;
+	passes: readonly GamePass[];
+	order: number;
+	onClaim: () => void;
+	onBuyPass: (pass: GamePass) => void;
+}) {
 	const line = getStoryLine(props.quest.id);
 	const { quest } = props;
 	const config = getQuestConfig(quest.id);
@@ -206,7 +214,7 @@ function QuestCard(props: { quest: QuestProgress; passes: readonly GamePass[]; o
 		CARD_PADDING * 2 -
 		(ICON_SIZE + CARD_GAP) -
 		(reward ? REWARD_SIZE + CARD_GAP : 0) -
-		(claimable ? CLAIM_SIZE.X + CARD_GAP : 0);
+		(claimable || pass !== undefined ? CLAIM_SIZE.X + CARD_GAP : 0);
 
 	return (
 		<Card
@@ -344,6 +352,18 @@ function QuestCard(props: { quest: QuestProgress; passes: readonly GamePass[]; o
 					onClick={props.onClaim}
 				/>
 			)}
+			{pass !== undefined && (
+				<Button3D
+					key="BuyPass"
+					layoutOrder={4}
+					palette={PALETTES.purple}
+					size={UDim2.fromOffset(CLAIM_SIZE.X, CLAIM_SIZE.Y)}
+					text="BUY"
+					textSize={22}
+					disabled={GAME_PASSES[pass].id <= 0}
+					onClick={() => props.onBuyPass(pass)}
+				/>
+			)}
 		</Card>
 	);
 }
@@ -421,6 +441,7 @@ export function QuestPanel(props: QuestPanelProps) {
 				passes={props.passes}
 				order={index}
 				onClaim={() => props.onClaim(quest.id)}
+				onBuyPass={props.onBuyPass}
 			/>
 		));
 	} else if (tab === "Story") {

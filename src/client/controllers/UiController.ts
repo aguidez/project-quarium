@@ -1,3 +1,4 @@
+import { GamePass } from "shared/types/gamepasses";
 import React from "@rbxts/react";
 import { createRoot, Root } from "@rbxts/react-roblox";
 import { ContentProvider, Players, RunService } from "@rbxts/services";
@@ -146,6 +147,8 @@ class UiControllerSingleton implements Lifecycle {
 				onClaimOceanReward: (id: string) => this.actionRemote.FireServer("ClaimOceanReward", id),
 				// Intent only: the server checks the price, resets the run and applies the multiplier
 				onRebirth: () => this.actionRemote.FireServer("Rebirth"),
+				// Intent only: the server shows Roblox's prompt; the pass comes from Roblox, never from the client
+				onBuyPass: (pass: GamePass) => this.actionRemote.FireServer("BuyGamePass", pass),
 				// Studio test button: the server also refuses it outside Studio
 				onTestEvent: RunService.IsStudio()
 					? (eventType: GameEventType) => this.actionRemote.FireServer("StartTestEvent", eventType)

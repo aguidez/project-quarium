@@ -2,7 +2,9 @@
 
 > Living map of the project. **Read it before exploring the code, and update it in the same change
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
-> Last updated: 2026-10-30 (portable workspace: SETUP.md, workspace.local.json, cross-platform MCP launchers in tools/mcp, npm run doctor, docs/agent-notes; V0.38, ROADMAP M2: species Catfish / Blue Tang / Baby Sunfish (Epic) with coins Chest / Sapphire /
+> Last updated: 2026-10-30 (V0.39, ROADMAP M3: gamepasses: GamePassService (ownership from Roblox at join, purchase prompt,
+> "/pass" Studio command), ShopPanel + Shop side button, passes Third Companion Slot / x2 Ocean Points / Lucky / +50% Coins
+> with their effects, a BUY button on locked quests, tools/pass-icons.js (resvg); portable workspace: SETUP.md, workspace.local.json, cross-platform MCP launchers in tools/mcp, npm run doctor, docs/agent-notes; V0.38, ROADMAP M2: species Catfish / Blue Tang / Baby Sunfish (Epic) with coins Chest / Sapphire /
 > SunMedallion, Wreck and Atlantis eggs, rebirths 3–4 wired to the PirateWreck / Atlantis themes, Ocean milestones
 > 5,000–40,000, Voyage quest line to Atlantis; V0.37, ROADMAP M0 foundations: shared/format.ts (T / Qa, MAX_MONEY), incubators per egg type,
 > 12-egg shelf with arrows, on-demand fish templates (server/fishAssets, templates moved to ServerStorage), Ocean milestone
@@ -27,6 +29,8 @@ coins. Around that core loop:
 - events: recurring ones drawn by each server every 5–15 min (the abyssal raid: the world goes dark, a lantern
   fish steals coins) and admin ones started on every server (the K-pop music event); never during the tutorial;
 - likes between players: a board beside each tank, a like doubles the owner's coins for 5 min;
+- gamepasses, sold in the Shop panel (BALANCE.md §5.10, never part of the balance): Third Companion Slot, x2 Ocean
+  Points (fish released / rebirths), Lucky (rare variants x2) and +50% Coins;
 - rebirths: restart the run for a permanent coin multiplier and a new aquarium theme (4 levels so far: Lagoon, Neon Coral, Pirate Wreck, Atlantis); while one is
   affordable the Rebirth button pulses and a bubble reminds the player now and then;
 - easter eggs: secret fish hidden in every egg (the French Fish, see §3.4), their own Fish Index category.
@@ -49,7 +53,7 @@ theme / companion / egg, the moderation watch list of the new designs).
 | Sync | **Rojo 7.7.1** (aftman). `default.project.json` maps `out/server` → ServerScriptService.TS, `out/shared` → ReplicatedStorage.TS, `out/client` → StarterPlayerScripts.TS, `out/first` → ReplicatedFirst.TS (loading screen). Never edit those scripts in Studio. A change to `default.project.json` needs `rojo serve` restarted (and the plugin reconnected) |
 | Packages | `@rbxts/react` + `react-roblox` (UI), `@rbxts/t` (runtime validation), `@rbxts/janitor` (cleanup), `@rbxts/services`, `@rbxts/profile-store` (player saves, see §3.1) |
 | Build / check | `npx rbxtsc` after every change; it must report zero errors |
-| Workspace | Windows or macOS, set up from `SETUP.md`; `npm run doctor` checks a machine. Machine-specific values (install paths, GPU flags) only in the git-ignored `workspace.local.json` (via `tools/local-config.js`), never in committed files; scripts are cross-platform Node. npm scripts: `build`, `watch`, `serve` (rojo serve), `sim` (economy simulator), `doctor`. `jimp` 0.22 is a devDependency for the image tools |
+| Workspace | Windows or macOS, set up from `SETUP.md`; `npm run doctor` checks a machine. Machine-specific values (install paths, GPU flags) only in the git-ignored `workspace.local.json` (via `tools/local-config.js`), never in committed files; scripts are cross-platform Node. npm scripts: `build`, `watch`, `serve` (rojo serve), `sim` (economy simulator), `doctor`. `jimp` 0.22 and `@resvg/resvg-js` 2.6 (SVG → PNG without FigCraft: tools/pass-icons.js) are devDependencies for the image tools |
 | Framework | `shared/framework.ts`: singletons implementing `Lifecycle { onInit (sync), onStart (task.spawn) }`, registered in order in `server/main.server.ts` / `client/main.client.ts` |
 | Server authority | The client only sends **intents**. The server validates each one with `t`, reads prices and odds from shared config, and owns money, inventory, timers and every gameplay state. Even fish positions are server-computed (swim segments): clients only render them, never report them |
 | World ↔ code | Studio models are found by **CollectionService tags** (`shared/tags.ts`) and attributes, never by deep paths. Templates live in `ServerStorage.Assets` / `ReplicatedStorage.Assets` (fish, cloned by clients) in the place file, which Rojo does not manage: **remind the user to save the place** after MCP edits |
@@ -89,6 +93,8 @@ ProjetQuarium/
 │  │                         redesign-v2.build.js (node → JSON → `figcraft-cli run`; with a preview folder it exports
 │  │                         the boards and the sprites, in the same session: the fonts Luckiest Guy / Fredoka One
 │  │                         are loaded from the Roblox install and a separate render wouldn't have them)
+│  ├─ passes/                Gamepass icons Pass_<GamePass>.png + Pass_Shop.png (512 px, no text) and _sheet.png (review),
+│  │                         rendered by tools/pass-icons.js; ids in GAME_PASSES.image / V2_IMAGES.iconShop
 │  ├─ v2/                    V2 sprites (2x PNG, ids in theme.ts V2_IMAGES): Icon_Quests / FishIndex / Ocean / Rebirth,
 │  │                         RibbonTailLeft / Right (white + grey fold, tinted in game), Sparkle, SoftGlow
 │  ├─ shopbar.build.js       Fish icons Guppy/Neon/RedTetra + shop bar (FigCraft command script)
@@ -124,6 +130,8 @@ ProjetQuarium/
 ├─ tools/fish-variant-recolor.js  Hue rotation of a species' texture + icon into its Anomaly / Shiny looks (pipeline in its header);
 │                                optional tint [hue, saturation] for grey fish (Silver Angelfish); species without a flat
 │                                icon get the texture only (their icons are the stickers)
+├─ tools/pass-icons.js       Gamepass + Shop icons drawn as SVG in the V2 style, rendered to PNG with @resvg/resvg-js
+│                            (no FigCraft needed) → design/ui/passes, plus a review sheet
 ├─ tools/fish-sticker-icons.js    Sticker icons from black / white Studio captures of a fish sheet (difference matting,
 │                                outline, rim, shadow, shiny sparkles; pipeline in its header)
 └─ src/
@@ -154,10 +162,14 @@ ProjetQuarium/
    │     │                   getVariantIncomeMultiplier, balance notes
    │     ├─ playerData.ts    PlayerData shape + defaults + helpers (getTotalFish, getFishAndEggs, isEggUnlocked,
    │     │                   getHatchedVariant, getLivingVariant, getIncubating, hasFreeIncubator…), MAX_MONEY (1e15),
-   │     │                   DEFAULT_INCUBATORS (1)
+   │     │                   DEFAULT_INCUBATORS (1), getCompanionSlots (Ocean slots + the slot pass: use it, never
+   │     │                   companionSlots alone)
    │     ├─ cosmetics.ts     CosmeticId / COSMETICS (kind Title / Decor / Finish): the V1 titles, decor and Pearl rims;
    │     │                   PlayerData.cosmetics. Not displayed yet (nothing grants them before M5 / M6)
-   │     ├─ gamepasses.ts    GamePass / GAME_PASSES: names only (ids and effects come with M3's GamePassService)
+   │     ├─ gamepasses.ts    GamePass / GAME_PASSES (name, shop text, Roblox id, icon, badge "x2"…, shopOrder: the four
+   │     │                   Shop passes; the companion passes of M4–M5 have no id yet), getShopPasses, getPassById,
+   │     │                   effects getPassCoinMultiplier (x1.5) / getPassOceanMultiplier (x2) / getPassVariantLuck
+   │     │                   (x2) / getPassCompanionSlots (+1)
    │     ├─ quests.ts        QUESTS (Story1 Snail, Story2 Ocean, Story3–5 the Snail's line, Story6–8 the Pelican's line,
    │     │                   Story9 then Voyage1–7 the main "Voyage" line), STORY_LINES (Start / Ocean / Rebirth (shown
    │     │                   "Voyage") / Snail / Pelican: quests in
@@ -254,13 +266,19 @@ ProjetQuarium/
    │     │                   fish that leaves on its own (points, popup, its leaveMessage)
    │     ├─ RebirthService   "Rebirth" intent (needs the "Rebirth" feature, quest "Saving Up"): fish to the ocean,
    │     │                   run reset, rebirths + 1, reward popup
+   │     ├─ GamePassService  The only writer of PlayerData.passes: at join (onLoaded) asks Roblox for each pass on sale
+   │     │                   (UserOwnsGamePassAsync, 3 tries; no answer keeps the saved state; passes without an id are
+   │     │                   dropped), grants a purchase from PromptGamePassPurchaseFinished (thank-you Reward),
+   │     │                   "BuyGamePass" intent → PromptGamePassPurchase; a lost slot pass unequips the extra companion.
+   │     │                   setTestPass for "/pass". The game's creator owns every pass of the game (Studio shows OWNED)
    │     ├─ LikeService      Places a like board beside each tank, GiveLike (range / own tank / cooldown),
    │     │                   keeps each owner's boost in memory (getCoinMultiplier), publishes likes + boost as aquarium attributes
    │     └─ DevCommandService  Studio-only chat commands (a TextChatCommand created only when RunService.IsStudio(),
    │                         and only the place's owner may use it): "/datareset" asks, "/datareset confirm" within 15 s
    │                         empties the tank, wipes the save to the template and kicks (stop / start the playtest);
    │                         "/nextfrench": the next egg opened hatches a French Fish (EggService.forceNextHatch);
-   │                         "/incubators <n>": incubators per egg type (1–4, saved: "/incubators 1" puts it back)
+   │                         "/incubators <n>": incubators per egg type (1–4, saved: "/incubators 1" puts it back);
+   │                         "/pass <GamePass>": gives / takes a pass for the session (the next join asks Roblox again)
    └─ client/
       ├─ main.client.ts      Registers controllers
       ├─ fishLook.ts         getFishTemplate / cloneFishTemplate (undefined until the server replicated the species),
@@ -318,7 +336,7 @@ ProjetQuarium/
          ├─ RewardPopup      Reward celebration (money / companion / feature)
          ├─ EventBanner      Running event banner (style per event kind: beat flashes / slow glow; FigCraft EventBanner,
          │                   EventBannerAbyss) + one Studio test button per event (TEST_EVENT_ORDER)
-         ├─ SideButtons      Left menu (3D squares, icon + label inside the face): Quests, Companions (once one is owned), Fish Index, Ocean (once unlocked), Rebirth
+         ├─ SideButtons      Left menu (3D squares, icon + label inside the face): Quests, Companions (once one is owned), Fish Index, Ocean (once unlocked), Rebirth, Shop
          │                   (gold halo pulsing + "!" while affordable, "REBIRTH READY!" bubble driven by App: when it
          │                   becomes affordable, then every 4 min while it stays so, 8 s each) + coach bubbles
          │                   (Quests: story quest hint after the onboarding; Ocean: just unlocked) and the "AQUARIUM FULL"
@@ -337,7 +355,11 @@ ProjetQuarium/
          │                   Release asks "Sure?" (3 s); right, Ocean milestones (progress bar / CLAIM! / Claimed) in a
          │                   470 px scrolling list that opens on the first milestone not claimed (V1: ~17 of them);
          │                   FigCraft OceanPanel / Row_Variant / Milestone_Claimable / Milestone_Locked). Quest book: a quest
-         │                   of a paid line without its pass shows "LOCKED: NEEDS THE <PASS>" instead of its progress bar
+         │                   of a paid line without its pass shows "LOCKED: NEEDS THE <PASS>" instead of its progress bar,
+         │                   and a purple BUY button (BuyGamePass) in place of CLAIM!
+         ├─ ShopPanel        Gamepass shop: a 2x2 grid of cards (icon slot in the pass's colour + badge "x2" / "+50%"
+         │                   drawn in game, name, text, button). Prices read on the client with GetProductInfo (cached for
+         │                   the session): "R$ <price>", "SOON" when Roblox says off sale (or no id), "OWNED" (gold)
          ├─ LikeBoard        Face of a like board (likes, "a like = x2" hint or boost countdown), mounted by LikeBoardController
          ├─ RebirthPanel     Rebirth menu: multiplier hero, what is lost / earned (Ocean Points preview), progress, 2-click confirm
          ├─ LikeBoostPill    The owner's own boost ("Liked! Coins x2 4:32"), under the top HUD
@@ -462,7 +484,7 @@ ProjetQuarium/
   | `rebirths` | Rebirths done: coin multiplier and aquarium theme |
   | `perks` | Permanent quest bonuses (shared/types/perks), kept through rebirths |
   | `cosmetics` | Titles, decor and finishes earned (shared/types/cosmetics), kept forever |
-  | `passes` | Gamepasses owned: written only by the server from Roblox (GamePassService, M3), empty until then |
+  | `passes` | Gamepasses owned: written only by GamePassService from Roblox (checked again at each join; "/pass" in Studio). Read by FishService (coins x1.5), OceanService / getRebirthOceanPoints (x2), EggService (luck x2), getCompanionSlots (+1) |
 
 ### 3.2 Client → server (intents only)
 
@@ -478,6 +500,7 @@ ProjetQuarium/
 | | `WatchAquariums` (PlotIndex[], ≤ 6, debounced 0.25 s): only changes what this client receives | FishService |
 | | `GiveLike` (PlotIndex, from the board's prompt) | LikeService |
 | | `Rebirth` (no payload) | RebirthService |
+| | `BuyGamePass` (GamePass): shows Roblox's prompt; the pass itself comes from Roblox | GamePassService |
 | `Interact` (rate-limited) | `DropFood` (Vector3) | FoodService |
 | | `CollectCoin` (coin hitbox) | CoinService (must stand at own tank) |
 
@@ -643,6 +666,14 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   `STORY_QUEST_HINT_DELAY` (5 s) later, a coach bubble on the Quests button asks the player to look at the Snail
   quest and wishes them good luck. It is client-only (App state, not in `tutorialsDone`): it shows only if the
   onboarding was played in this session and Story1 (line Start) is still to claim, and ends when the book is opened.
+- **Gamepasses.** Shop card → `BuyGamePass` → GamePassService checks the pass has an id and isn't owned, then
+  `MarketplaceService.PromptGamePassPurchase`; Roblox fires `PromptGamePassPurchaseFinished` on the server, which adds
+  the pass to `PlayerData.passes`, syncs and sends a thank-you Reward. At each join the passes are asked again from
+  Roblox (a refund takes it away; an outage keeps the save). Effects are read live where they act, so they apply at
+  once: coin value x1.5 (FishService.dropCoin, every coin incl. the croissant; not the 1 $ bubbles nor IncomeMinutes
+  rewards), Ocean Points x2 on fish going to the ocean (OceanService.credit, getRebirthOceanPoints; fixed quest
+  rewards are not doubled), variant luck x2 (stacks with Lucky ocean: Shiny 3 %, Ghost 15 %, Anomaly 30 %), +1
+  companion slot (getCompanionSlots). The client shows the same numbers (income line, Ocean rows, Rebirth preview).
 
 ---
 
@@ -691,8 +722,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   mouth, read as a cigarette). Rules in CLAUDE.md §7.
 - **Not built yet**: the V1 content planned in BALANCE.md §5 and scheduled in ROADMAP.md (rebirths 5–8, eggs 9–12,
   species 13–18, Ocean milestones above 40,000 with capacity up to 25, the Water Hen / Swordfish /
-  Jellyfish companions and their paid quest lines, a third companion slot, gamepasses (no MarketplaceService code
-  yet: `PlayerData.passes` stays empty), the Voyage quests after Atlantis; themes Mariana Trench, Volcanic Temple, Crystal
+  Jellyfish companions and their paid quest lines (their passes have no Roblox id yet), the Voyage quests after Atlantis; themes Mariana Trench, Volcanic Temple, Crystal
   Caverns and Cosmic Sanctuary to build), daily / weekly quest content. Cosmetics (titles, decor, Pearl rims) are stored but not displayed: their looks
   come with the content that grants them. The shelf arrows show since V0.38 (8 eggs). The Pelican's and the Snail's Ocean upgrades have their V1 values since V0.36 (x1.33 /
   x1.15, ROADMAP M1). Kpop is the only admin event and Abyss the only recurring one (`recurring` in GAME_EVENTS).

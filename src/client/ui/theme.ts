@@ -72,6 +72,7 @@ export const V2_IMAGES = {
 	iconFishIndex: "rbxassetid://117500058635391",
 	iconOcean: "rbxassetid://86767682222210",
 	iconRebirth: "rbxassetid://123446163856086",
+	iconShop: "rbxassetid://128028502564290", // design/ui/passes/Pass_Shop.png (tools/pass-icons.js)
 	ribbonTailLeft: "rbxassetid://132217540092284", // white tail + grey fold, 64x56 design px
 	ribbonTailRight: "rbxassetid://119721448521037",
 	sparkle: "rbxassetid://84841007993115", // white 4-point star

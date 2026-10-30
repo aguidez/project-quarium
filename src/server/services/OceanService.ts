@@ -3,7 +3,8 @@ import { Lifecycle } from "shared/framework";
 import { getRemoteEvent, MoneyPopup, Reward } from "shared/network";
 import { Feature, FEATURES, MIN_FISH_KEPT } from "shared/types/features";
 import { FISH_TYPES, FishType } from "shared/types/fish";
-import { getLivingVariant, getTotalFish } from "shared/types/playerData";
+import { getPassOceanMultiplier } from "shared/types/gamepasses";
+import { getCompanionSlots, getLivingVariant, getTotalFish } from "shared/types/playerData";
 import { FISH_VARIANTS, FishVariant, getOceanPoints } from "shared/types/variants";
 import { COMPANION_TYPES } from "shared/types/companions";
 import { getOceanMilestone } from "shared/types/oceanRewards";
@@ -61,8 +62,9 @@ class OceanServiceSingleton implements Lifecycle {
 		this.finishTutorial(player, "Ocean"); // releasing a fish is the whole lesson
 	}
 
-	/** Ocean Points of a fish gone to the ocean, with their popup where it was. */
-	private credit(player: Player, points: number, position: Vector3) {
+	/** Ocean Points of a fish gone to the ocean (x2 with the pass), with their popup where it was. */
+	private credit(player: Player, basePoints: number, position: Vector3) {
+		const points = basePoints * getPassOceanMultiplier(DataService.getData(player)?.passes ?? []);
 		DataService.addOceanPoints(player, points);
 		QuestService.addProgress(player, "OceanPoints", points);
 		const popup: MoneyPopup = { position, amount: points, special: false, ocean: true };
@@ -136,7 +138,7 @@ class OceanServiceSingleton implements Lifecycle {
 			DataService.sync(player);
 			celebration = {
 				title: "Ocean reward!",
-				subtitle: `You can now have ${data.companionSlots} companions in your aquarium at once.`,
+				subtitle: `You can now have ${getCompanionSlots(data)} companions in your aquarium at once.`,
 				amount: 0,
 				item: { icon: "+1", name: "Companion slot" },
 			};

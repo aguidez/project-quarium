@@ -25,3 +25,5 @@ Adding a fish species / coin / egg (done 2026-10-29 for Clownfish, Zebra Danio, 
 - Economy: `node tools/economy-sim.js` (in the repo since the rebirth, 2026-10-29; average player = collect 0.5, calibrated on the old "6 fish at ~1h" notes). Balance notes in eggs.ts / rebirths.ts.
 
 Related: [[studio-mcp-ui-testing]]
+
+- **UI icons without FigCraft** (2026-10-30): `tools/pass-icons.js` draws icons as SVG in the V2 style (14 px outline at 512, gradient light → base, white gloss stroke, sparkles) and renders them with `@resvg/resvg-js` (devDependency, prebuilt on Windows / macOS), plus a `_sheet.png` showing each at its in-game size for review. No text in uploaded icons: the values ("x2", "+50%") are kit Chips drawn by the game.

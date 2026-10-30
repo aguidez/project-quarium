@@ -31,6 +31,7 @@ export interface ClientToServerEvents {
 	 * | "ReleaseFish" (payload: FishType) | "FinishTutorial" (payload: Feature)
 	 * | "WatchAquariums" (payload: PlotIndex[]: the tanks this client renders, see FishService)
 	 * | "GiveLike" (payload: PlotIndex of the liked aquarium, from its like board, see LikeService)
+	 * | "BuyGamePass" (payload: GamePass: the server shows Roblox's purchase prompt, see GamePassService)
 	 */
 	RequestAction: (actionName: string, payload?: unknown) => void;
 	/**

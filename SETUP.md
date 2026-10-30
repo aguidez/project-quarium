@@ -25,7 +25,7 @@ Accounts: the **Roblox account that owns the game** (or Team Create access to it
 git clone https://github.com/aguidez/project-quarium.git ProjetQuarium
 # or, with an SSH key on your GitHub account: git clone git@github.com:aguidez/project-quarium.git ProjetQuarium
 cd ProjetQuarium
-npm install            # packages (roblox-ts, @rbxts/*, eslint, jimp for the image tools)
+npm install            # packages (roblox-ts, @rbxts/*, eslint, jimp and @resvg/resvg-js for the image tools)
 aftman install         # or: rokit install  -> rojo 7.7.1 on the PATH
 npx rbxtsc             # build: must end with no error, creates out/ and include/
 ```

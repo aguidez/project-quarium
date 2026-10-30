@@ -3,6 +3,7 @@ import { MIN_FISH_KEPT } from "shared/types/features";
 import { FISH_TYPES, FishType, getFishIndexOrder } from "shared/types/fish";
 import { getLivingVariant, PlayerData } from "shared/types/playerData";
 import { FISH_VARIANTS, FishVariant, getOceanPoints, VARIANT_ORDER } from "shared/types/variants";
+import { getPassOceanMultiplier } from "shared/types/gamepasses";
 import { COMPANION_TYPES } from "shared/types/companions";
 import { OCEAN_MILESTONES, OceanMilestone, OceanRewardId } from "shared/types/oceanRewards";
 import { Button3D, Card, Chip, ItemSlot, Outline, Plate, ProgressBar, TextStroke } from "./kit";
@@ -58,7 +59,7 @@ const COACH_BUTTON_ROOM = 108; // "Got it!" button and the gap before it
 
 export interface OceanPanelProps {
 	/** Living fish per type and rare variant (PlayerData.fish, fishVariants). */
-	tank: Pick<PlayerData, "fish" | "fishVariants">;
+	tank: Pick<PlayerData, "fish" | "fishVariants" | "passes">;
 	oceanPoints: number;
 	/** First visit after unlocking it: a short explanation on top (FigCraft: PanelCoach). */
 	showTutorial: boolean;
@@ -98,6 +99,8 @@ function FishRow(props: {
 	variant: FishVariant;
 	count: number;
 	canRelease: boolean;
+	/** The x2 Ocean Points pass. */
+	pointsMultiplier: number;
 	onRelease: () => void;
 }) {
 	const fish = FISH_TYPES[props.fishType];
@@ -105,7 +108,7 @@ function FishRow(props: {
 	const variant = FISH_VARIANTS[props.variant];
 	const variantStyle = VARIANT_STYLES[props.variant];
 	const rare = props.variant !== "Normal";
-	const points = getOceanPoints(props.fishType, props.variant);
+	const points = getOceanPoints(props.fishType, props.variant) * props.pointsMultiplier;
 	const [armed, setArmed] = useState(false);
 	useEffect(() => {
 		if (!armed) return;
@@ -453,6 +456,7 @@ export function OceanPanel(props: OceanPanelProps) {
 					variant={variant}
 					count={count}
 					canRelease={canRelease}
+					pointsMultiplier={getPassOceanMultiplier(props.tank.passes)}
 					onRelease={() => props.onRelease(fishType, variant)}
 				/>,
 			);

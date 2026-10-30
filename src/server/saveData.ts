@@ -7,7 +7,13 @@ import { getOceanMilestone } from "shared/types/oceanRewards";
 import { PERKS } from "shared/types/perks";
 import { ONBOARDING_STEPS } from "shared/types/onboarding";
 import { isGamePass } from "shared/types/gamepasses";
-import { DEFAULT_INCUBATORS, DEFAULT_PLAYER_DATA, MAX_MONEY, PlayerData } from "shared/types/playerData";
+import {
+	DEFAULT_INCUBATORS,
+	DEFAULT_PLAYER_DATA,
+	getCompanionSlots,
+	MAX_MONEY,
+	PlayerData,
+} from "shared/types/playerData";
 import {
 	getQuestConfig,
 	getStoryLine,
@@ -181,15 +187,16 @@ export function sanitizeSave(save: SaveData) {
 	data.companions = data.companions.filter(
 		(c, i) => COMPANION_TYPES[c] !== undefined && data.companions.indexOf(c) === i,
 	);
+	// The passes are the saved ones here (GamePassService checks them again with Roblox, then trims the equipped)
+	data.passes = data.passes.filter((p, i) => isGamePass(p) && data.passes.indexOf(p) === i);
 	const equipped = new Array<CompanionType>();
 	for (const companionType of data.equippedCompanions) {
-		if (equipped.size() >= data.companionSlots) break;
+		if (equipped.size() >= getCompanionSlots(data)) break;
 		if (data.companions.includes(companionType) && !equipped.includes(companionType)) equipped.push(companionType);
 	}
 	data.equippedCompanions = equipped;
 	data.features = data.features.filter((f) => FEATURES[f] !== undefined);
 	data.cosmetics = data.cosmetics.filter((c, i) => isCosmeticId(c) && data.cosmetics.indexOf(c) === i);
-	data.passes = data.passes.filter((p, i) => isGamePass(p) && data.passes.indexOf(p) === i);
 	data.tutorialsDone = data.tutorialsDone.filter((f) => FEATURES[f] !== undefined);
 
 	save.tank = save.tank.filter(

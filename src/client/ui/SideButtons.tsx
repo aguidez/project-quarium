@@ -1,7 +1,7 @@
 import React, { useBinding, useEffect } from "@rbxts/react";
 import { RunService, Workspace } from "@rbxts/services";
 import { COMPANION_TYPES } from "shared/types/companions";
-import { Button3D, NotifBadge, Outline, Plate, SoftGlow, TextStroke } from "./kit";
+import { Button3D, CoinIcon, NotifBadge, Outline, Plate, SoftGlow, TextStroke } from "./kit";
 import { getWrappedHeight } from "./Panel";
 import { FONT_BOLD, FONT_TITLE, NAVY, Palette, PALETTES, V2_IMAGES } from "./theme";
 
@@ -43,6 +43,8 @@ export interface SideButtonsProps {
 	 * the Ocean is still the reward of "Full House".
 	 */
 	fullReminder?: "Ocean" | "Quests";
+	/** The gamepass shop (once the tutorial is over, like every menu). */
+	onShop: () => void;
 }
 
 const FULL_TITLE = "AQUARIUM FULL";
@@ -185,16 +187,26 @@ function SideButton(props: {
 				zIndex={1}
 				onClick={props.onClick}
 			>
-				<imagelabel
-					key="Icon"
-					AnchorPoint={new Vector2(0.5, 0)}
-					Position={new UDim2(0.5, 0, 0, 5)}
-					Size={UDim2.fromOffset(ICON_SIZE, ICON_SIZE)}
-					BackgroundTransparency={1}
-					Image={props.image}
-					ScaleType={Enum.ScaleType.Fit}
-					ZIndex={3}
-				/>
+				{props.image !== "" ? (
+					<imagelabel
+						key="Icon"
+						AnchorPoint={new Vector2(0.5, 0)}
+						Position={new UDim2(0.5, 0, 0, 5)}
+						Size={UDim2.fromOffset(ICON_SIZE, ICON_SIZE)}
+						BackgroundTransparency={1}
+						Image={props.image}
+						ScaleType={Enum.ScaleType.Fit}
+						ZIndex={3}
+					/>
+				) : (
+					<CoinIcon
+						key="Icon"
+						size={ICON_SIZE - 10}
+						position={new UDim2(0.5, 0, 0, 10)}
+						anchorPoint={new Vector2(0.5, 0)}
+						zIndex={3}
+					/>
+				)}
 				<textlabel
 					key="Label"
 					AnchorPoint={new Vector2(0.5, 1)}
@@ -218,7 +230,7 @@ function SideButton(props: {
 	);
 }
 
-/** Left-edge menu buttons (FigCraft redesign-v2: SideButtons): quests, companions, fish index, Ocean, rebirth. */
+/** Left-edge menu buttons (FigCraft redesign-v2: SideButtons): quests, companions, fish index, Ocean, rebirth, shop. */
 export function SideButtons(props: SideButtonsProps) {
 	const viewport = Workspace.CurrentCamera?.ViewportSize;
 	const scale = viewport ? math.clamp(viewport.Y / REFERENCE_HEIGHT, 0.7, 1.3) : 1;
@@ -324,6 +336,13 @@ export function SideButtons(props: SideButtonsProps) {
 					onClick={props.onRebirth}
 				/>
 			)}
+			<SideButton
+				order={6}
+				palette={PALETTES.pink}
+				image={V2_IMAGES.iconShop}
+				label="Shop"
+				onClick={props.onShop}
+			/>
 		</frame>
 	);
 }
