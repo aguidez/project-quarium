@@ -359,7 +359,7 @@ class FishServiceSingleton implements Lifecycle {
 		const clock = os.clock();
 		if (clock - (this.fartSfxAt.get(owner) ?? -math.huge) < FART_SFX_COOLDOWN) return;
 		this.fartSfxAt.set(owner, clock);
-		this.playSizedSfx(fish, "Fart");
+		this.playSizedSfx(fish, "WeakBubble");
 	}
 
 	/**

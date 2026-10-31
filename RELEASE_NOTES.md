@@ -10,6 +10,28 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.43 — 2026-10-31
+
+**New**
+- **Coin sounds**: every coin you collect rings a soft little chime, climbing higher as you chain coins quickly;
+  sparkling and ghost coins ring higher still. Coins picked up by your companions chime very softly.
+
+**Changes**
+- A weak fish's bubble now sounds like a bubble, not a fart.
+- The Fish Index and the hatch reveal show the variant chances you really hatch with, Lucky ocean and the Lucky pass
+  included (e.g. Anomaly 15% with Lucky ocean).
+- Each companion card shows what the companion does right now with its own bonuses: speed, feeding interval,
+  pellets, charges, reach, hatch speed...
+- The Snail's and the Pelican's quest bonuses (lasting and bouncy coins, Hearty meals) now say they are permanent,
+  even without the companion: they always were.
+
+**Fixes**
+- The Claim buttons of the Ocean rewards no longer stick out of their cards.
+- The Swordfish (and the Snail) froze in front of a coin lying too close to the glass, unable to reach it: they now
+  grab it from as close as they can get.
+
+---
+
 ## V0.42 — 2026-10-31
 
 **New**

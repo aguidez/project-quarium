@@ -16,8 +16,12 @@ export const SFX = {
 	FishReleased: { id: "rbxassetid://86074928120719", volume: 0.7 },
 	/** A fish turned weak with hunger ("Power Down" by Daily Sounds, a cartoon "lost a life"). */
 	FishWeak: { id: "rbxassetid://96795857757261", volume: 0.5 },
-	/** A weak fish lets out a fart bubble ("Cartoon Fart" by Marik_is13). */
-	Fart: { id: "rbxassetid://91851573572106", volume: 0.55 },
+	/** A weak fish lets out a bubble ("Underwater Bubbles Deeper Med Short Bursts 6" by Pro Sound Effects). */
+	WeakBubble: { id: "rbxassetid://9120310416", volume: 0.5 },
+	/** The player collects a coin ("Coin Pickup" by Daily Sounds): pitched up while coins are chained (CoinService). */
+	CoinCollect: { id: "rbxassetid://130378474223829", volume: 0.2 },
+	/** A companion picks a coin up: the same chime, softer, so an AFK tank doesn't ring all the time. */
+	CompanionCoin: { id: "rbxassetid://130378474223829", volume: 0.07 },
 	/** A fart bubble is clicked ("cartoon bubble pop" by ad0xsus). */
 	BubblePop: { id: "rbxassetid://109359226723492", volume: 0.6 },
 	/** One crack of a hatching egg, played at each crack stage ("egg crack 2"). */

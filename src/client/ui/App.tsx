@@ -8,7 +8,7 @@ import { ActiveEvent, GameEventType, TEST_EVENT_ORDER } from "shared/types/event
 import { Feature } from "shared/types/features";
 import { FishType, FOOD_PRICE, getIncomePerSecond } from "shared/types/fish";
 import { isOnboardingDone, STORY_QUEST_HINT_DELAY } from "shared/types/onboarding";
-import { getCompanionSlots, getTotalFish, PlayerData } from "shared/types/playerData";
+import { getCompanionSlots, getPlayerVariantLuck, getTotalFish, PlayerData } from "shared/types/playerData";
 import { GamePass, getPassCoinMultiplier } from "shared/types/gamepasses";
 import { hasClaimableQuest } from "shared/types/quests";
 import { FishVariant } from "shared/types/variants";
@@ -354,13 +354,20 @@ export function App(props: AppProps) {
 					owned={data.companions}
 					equipped={data.equippedCompanions}
 					slots={getCompanionSlots(data)}
+					perks={data.perks}
+					oceanRewardsClaimed={data.oceanRewardsClaimed}
 					onEquip={props.onEquipCompanion}
 					onUnequip={props.onUnequipCompanion}
 					onClose={() => setOpenPanel(undefined)}
 				/>
 			)}
 			{menusVisible && openPanel === "FishIndex" && (
-				<FishIndexPanel key="FishIndexPanel" collection={data} onClose={() => setOpenPanel(undefined)} />
+				<FishIndexPanel
+					key="FishIndexPanel"
+					collection={data}
+					luck={getPlayerVariantLuck(data)}
+					onClose={() => setOpenPanel(undefined)}
+				/>
 			)}
 			{menusVisible && oceanUnlocked && openPanel === "Ocean" && (
 				<OceanPanel
@@ -419,6 +426,7 @@ export function App(props: AppProps) {
 					fishType={props.reveal.fishType}
 					variant={props.reveal.variant}
 					firstTime={props.reveal.firstTime}
+					luck={data ? getPlayerVariantLuck(data) : 1}
 					playSfx={props.playSfx}
 					onEnd={props.onRevealEnd}
 				/>

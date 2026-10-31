@@ -2,7 +2,9 @@
 
 > Living map of the project. **Read it before exploring the code, and update it in the same change
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
-> Last updated: 2026-10-31 (V0.42, ROADMAP M5: rebirth 6 → VolcanicTemple theme, Lionfish / Dragonfish (Legendary) +
+> Last updated: 2026-10-31 (V0.43: weak fish bubble sound instead of the fart one, coin chime with a combo pitch
+> (CoinService.playCoinSfx), Ocean milestone cards fit their width, variant chances shown with the player's luck
+> (getPlayerVariantLuck), companion cards show their live numbers (companionStats.ts); V0.42, ROADMAP M5: rebirth 6 → VolcanicTemple theme, Lionfish / Dragonfish (Legendary) +
 > CoralFan / DragonScale coins, Volcano egg, Ocean milestones 180,000–300,000, the Jellyfish companion (on-demand feeder,
 > FoodService.releaseFood) and its pass line (perks Jellyfish1–3), Pearl rims shown by AquariumService, Voyage 10–11, fed
 > callbacks report which companion fed; V0.41: the shop moves into the lobby: Workspace.Lobby.FishingHutEast / FishingHutWest (hut +
@@ -158,7 +160,8 @@ ProjetQuarium/
    │  ├─ network.ts          Remote contracts + getRemoteEvent(name) (Remotes folder in ReplicatedStorage), FishView / FishMessage
    │  ├─ swim.ts             SwimSegment + getSwimPose: fish movement computed identically by server and clients
    │  ├─ tags.ts             CollectionService tags and the attributes they carry
-   │  ├─ sounds.ts           Music id + SFX ids (played in 2D by AudioController; CoinStolen = the lantern's gulp)
+   │  ├─ sounds.ts           Music id + SFX ids (played in 2D by AudioController; CoinStolen = the lantern's gulp; WeakBubble = a weak
+   │  │                      fish's bubble; CoinCollect / CompanionCoin = the coin chime)
    │  └─ types/
    │     ├─ fish.ts          FishType, FishRarity (… Mythic, Secret = easter eggs), CoinType (… Croissant), HungerState
    │     │                   (Satiated/Hungry/Weak, no death), FISH_TYPES (income, interval, coin, rarity, oceanPoints,
@@ -169,15 +172,19 @@ ProjetQuarium/
    │     │                   getDrawOdds (+ easter eggs, taken from the most common fish), rollEgg, starter egg, balance notes
    │     ├─ variants.ts      FishVariant (Normal / Anomaly / Ghost / Shiny), FISH_VARIANTS (chance, coinRate,
    │     │                   specialOddsMultiplier, ghostCoins, sparkles, rank, oceanPointsMultiplier), VARIANT_ORDER,
-   │     │                   GHOST_COIN_MULTIPLIER, RECOLOURED_VARIANTS, rollVariant, getOceanPoints, getSpecialCoinOdds,
+   │     │                   GHOST_COIN_MULTIPLIER, RECOLOURED_VARIANTS, rollVariant, formatVariantChance(variant, luck), getOceanPoints, getSpecialCoinOdds,
    │     │                   getVariantIncomeMultiplier, balance notes
    │     ├─ playerData.ts    PlayerData shape + defaults + helpers (getTotalFish, getFishAndEggs, isEggUnlocked,
    │     │                   getHatchedVariant, getLivingVariant, getIncubating, hasFreeIncubator…), MAX_MONEY (1e15),
    │     │                   DEFAULT_INCUBATORS (1), getCompanionSlots (Ocean slots + the slot pass: use it, never
-   │     │                   companionSlots alone), getHatchMultiplier (Water Hen equipped: 0.85, or its perk's),
+   │     │                   companionSlots alone), getHatchMultiplier (Water Hen equipped: 0.85, or its perk's), getPlayerVariantLuck (Lucky ocean x the Lucky pass:
+   │     │                   EggService's draw and the chances shown by the Fish Index / egg reveal),
    │     │                   syncIncubationSpeed (rescales the incubating timers to a new hatch speed, progress kept;
    │     │                   run by DataService.sync, buyEgg and sanitizeSave; timers are server times, so the eggs
    │     │                   keep the speed they had at the disconnection while offline)
+   │     ├─ companionStats.ts getCompanionStats(companion, data): what a companion does now with its own bonuses
+   │     │                   (Ocean upgrades, its perks), the line under its ability on the companion card; player-wide
+   │     │                   perks of its quest line (lasting / bouncy coins, Hearty meals) work without it: not shown
    │     ├─ cosmetics.ts     CosmeticId / COSMETICS (kind Title / Decor / Finish): the V1 titles, decor and Pearl rims;
    │     │                   PlayerData.cosmetics. Pearl rims shown since V0.42 (AquariumService); titles and decor not displayed yet (M6)
    │     ├─ gamepasses.ts    GamePass / GAME_PASSES (name, shop text, Roblox id, icon, badge "x2"…, shopOrder: the four
@@ -250,7 +257,9 @@ ProjetQuarium/
    │     │                   look from the owner's satiety bonus (getFoodLook): Pellet = brown ball, others = clone of
    │     │                   a FoodTemplate MeshPart; random turn, then a slow 120° spin while sinking (CFrame tweens)
    │     ├─ CoinService      Spawns coin models (sinking, ground lifetime) and fart bubbles (spawnBubble: rise, pop at the
-   │     │                   surface, 1 $), collection + credit, onCollected callbacks (with the companion that collected, if any),
+   │     │                   surface, 1 $), collection + credit, onCollected callbacks (with the companion that collected, if any), the coin
+   │     │                   chime (playCoinSfx: CoinCollect climbs +6 % per click chained within 1.2 s, up to 8 steps, x1.2
+   │     │                   for sparkling / ghost coins; a companion's pickups play CompanionCoin, softer, every 0.35 s at most),
    │     │                   findCoinToFetch / collectForOwner(owner, coin, companion) (Snail, Swordfish), clearOwner,
    │     │                   findCoinToSteal / isCoinAlive / stealCoin (lantern fish: no credit, red "-X$" popup)
    │     ├─ FishService      Fish as data only (no server model): swim AI as SwimSegments, hunger (weak, never dies),
@@ -286,7 +295,8 @@ ProjetQuarium/
    │     │                   rests; its ability is EggService's); Swordfish AI (swims anywhere in the water toward the
    │     │                   coin findCoinToFetch picks with the surface as pickup height: 0.95 × the Snail's speed across
    │     │                   the tank, dives / climbs at 6 studs/s to follow a sinking coin, grabs within reach 2 (perks
-   │     │                   Swordfish1–3: getSwordfishStats), cruises at 2 studs/s otherwise); Jellyfish AI (drifts in the top 35 % of
+   │     │                   Swordfish1–3: getSwordfishStats; the reach also covers the gap between a coin and the closest
+   │     │                   point its body may go, against the glass / under the surface, like the Snail's), cruises at 2 studs/s otherwise); Jellyfish AI (drifts in the top 35 % of
    │     │                   the water at 1.1 studs/s; on demand like the Smart Pelican: charges refill every interval while
    │     │                   not full, one spent at once when a fish is hungry and no food is in the water: it swoops over
    │     │                   the hungriest fish and releases its pellets 1.4 studs apart; getJellyfishStats from its perks;
@@ -641,7 +651,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   `credit()` then adds the money, fires `MoneyPopup` and runs the `onCollected` callbacks (quests, onboarding).
 - **Hunger.** A fish goes Satiated (30 s) → Hungry (15 s) → Weak (until fed; it never dies). A weak fish swims at
   35 % speed, is tinted dull on the client and, at its coin interval, farts a bubble instead of a coin
-  (`CoinService.spawnBubble`: 1 $, rises and pops; "Fart" SFX at most every 2.5 s per player, "FishWeak" SFX and a
+  (`CoinService.spawnBubble`: 1 $, rises and pops; "WeakBubble" SFX (an underwater blub, the fart sound until V0.42) at most every 2.5 s per player, "FishWeak" SFX and a
   notice at most every 30 s). The player clicks the water (`DropFood`) to drop a pellet that costs money; a fish
   chases it and eats it, which resets it to Satiated. Species flagged `cannibal` eat smaller fish when weak (none yet). Hunger, growth and coins all stop while
   the owner is AFK (not tending) or still in the onboarding.

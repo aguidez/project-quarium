@@ -44,6 +44,8 @@ type HoverHandler = (variant: FishVariant | undefined) => void;
 export interface FishIndexPanelProps {
 	/** Fish hatched so far, per type and per rare variant (PlayerData). */
 	collection: Pick<PlayerData, "hatched" | "hatchedVariants">;
+	/** The player's variant luck (getPlayerVariantLuck): the chances shown are the ones they hatch with. */
+	luck: number;
 	onClose: () => void;
 }
 
@@ -88,7 +90,7 @@ function Text(props: {
 }
 
 /** What a variant brings, under its column header (right-aligned: the last column sits by the panel's edge). */
-function VariantTooltip(props: { variant: FishVariant }) {
+function VariantTooltip(props: { variant: FishVariant; luck: number }) {
 	const config = FISH_VARIANTS[props.variant];
 	const palette = VARIANT_PALETTES[props.variant];
 	const textWidth = TOOLTIP_WIDTH - TOOLTIP_PADDING * 2;
@@ -118,7 +120,7 @@ function VariantTooltip(props: { variant: FishVariant }) {
 				Size={new UDim2(1, 0, 0, 22)}
 				BackgroundTransparency={1}
 				Font={FONT_TITLE}
-				Text={`${config.displayName.upper()}  ${formatVariantChance(props.variant)}`}
+				Text={`${config.displayName.upper()}  ${formatVariantChance(props.variant, props.luck)}`}
 				TextSize={18}
 				TextColor3={props.variant === "Normal" ? WHITE : palette.base}
 				TextXAlignment={Enum.TextXAlignment.Left}
@@ -144,7 +146,13 @@ function VariantTooltip(props: { variant: FishVariant }) {
 }
 
 /** Header of a variant column (FigCraft redesign-v2: ColumnHeader_<Variant>): its chip, and its chance at hatch. */
-function ColumnHeader(props: { order: number; variant: FishVariant; hovered: boolean; onHover: HoverHandler }) {
+function ColumnHeader(props: {
+	order: number;
+	variant: FishVariant;
+	luck: number;
+	hovered: boolean;
+	onHover: HoverHandler;
+}) {
 	const config = FISH_VARIANTS[props.variant];
 	const palette = VARIANT_PALETTES[props.variant];
 	return (
@@ -175,11 +183,11 @@ function ColumnHeader(props: { order: number; variant: FishVariant; hovered: boo
 				Size={new UDim2(1, 0, 0, 16)}
 				BackgroundTransparency={1}
 				Font={FONT_BOLD}
-				Text={formatVariantChance(props.variant)}
+				Text={formatVariantChance(props.variant, props.luck)}
 				TextSize={14}
 				TextColor3={props.hovered ? WHITE : NAVY.muted}
 			/>
-			{props.hovered && <VariantTooltip variant={props.variant} />}
+			{props.hovered && <VariantTooltip variant={props.variant} luck={props.luck} />}
 		</frame>
 	);
 }
@@ -349,6 +357,7 @@ export function FishIndexPanel(props: FishIndexPanelProps) {
 			key={variant}
 			order={index + 2}
 			variant={variant}
+			luck={props.luck}
 			hovered={hovered === variant}
 			onHover={setHovered}
 		/>

@@ -1,10 +1,12 @@
 import React from "@rbxts/react";
 import { COMPANION_TYPES, CompanionType } from "shared/types/companions";
+import { getCompanionStats } from "shared/types/companionStats";
+import { Perk } from "shared/types/perks";
 import { Button3D, Chip, ItemSlot, Plate, TextStroke } from "./kit";
 import { Panel } from "./Panel";
 import { FONT_BOLD, NAVY, PALETTES } from "./theme";
 
-const CARD_SIZE = new Vector2(172, 262);
+const CARD_SIZE = new Vector2(172, 290);
 const CARD_GAP = 12;
 const CARD_DEPTH = 5;
 const SLOT_SIZE = 88;
@@ -16,6 +18,9 @@ export interface CompanionPanelProps {
 	owned: CompanionType[];
 	equipped: CompanionType[];
 	slots: number;
+	/** The player's bonuses: each card shows what its companion does with them (getCompanionStats). */
+	perks: readonly Perk[];
+	oceanRewardsClaimed: readonly string[];
 	onEquip: (companionType: CompanionType) => void;
 	onUnequip: (companionType: CompanionType) => void;
 	onClose: () => void;
@@ -27,6 +32,8 @@ interface CardProps {
 	image?: string;
 	name: string;
 	text: string;
+	/** Its numbers right now, with the bonuses unlocked. */
+	stats?: string;
 	locked: boolean;
 	button?: { label: string; equipped: boolean; onClick: () => void };
 }
@@ -89,10 +96,24 @@ function CompanionCard(props: CardProps) {
 				TextWrapped={true}
 				TextYAlignment={Enum.TextYAlignment.Top}
 			/>
+			{props.stats !== undefined && (
+				<textlabel
+					key="Stats"
+					LayoutOrder={4}
+					Size={new UDim2(1, 0, 0, 30)}
+					BackgroundTransparency={1}
+					Font={FONT_BOLD}
+					Text={props.stats}
+					TextSize={12}
+					TextColor3={PALETTES.lagoon.light}
+					TextWrapped={true}
+					TextYAlignment={Enum.TextYAlignment.Top}
+				/>
+			)}
 			{button && (
 				<Button3D
 					key="Button"
-					layoutOrder={4}
+					layoutOrder={5}
 					palette={button.equipped ? PALETTES.gold : PALETTES.green}
 					size={new UDim2(1, 0, 0, 38)}
 					text={button.label.upper()}
@@ -117,6 +138,7 @@ export function CompanionPanel(props: CompanionPanelProps) {
 				image={config.image}
 				name={config.displayName}
 				text={config.ability}
+				stats={getCompanionStats(companionType, props)}
 				locked={false}
 				button={{
 					label: equipped ? "Equipped" : "Equip",

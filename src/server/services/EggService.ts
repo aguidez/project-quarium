@@ -5,12 +5,11 @@ import { Lifecycle } from "shared/framework";
 import { EggHatch, getRemoteEvent } from "shared/network";
 import { EGG_TYPES, EggType, getEggPrice, HATCH_REVEAL_TIME, rollEgg } from "shared/types/eggs";
 import { canBuyEggs, isOnboardingEggStep, ONBOARDING_FISH } from "shared/types/onboarding";
-import { getVariantLuck } from "shared/types/oceanRewards";
-import { getPassVariantLuck } from "shared/types/gamepasses";
 import {
 	getFishAndEggs,
 	getHatchedVariant,
 	getIncubating,
+	getPlayerVariantLuck,
 	getTotalFish,
 	hasFreeIncubator,
 	isEggUnlocked,
@@ -117,7 +116,7 @@ class EggServiceSingleton implements Lifecycle {
 		const fishType = onboardingEgg ? ONBOARDING_FISH : (forced ?? rollEgg(eggType, this.rng));
 		// Then its variant (the tutorial's fish is always a normal one, so it looks like the tutorial says;
 		// an easter egg fish has none)
-		const luck = getVariantLuck(data.oceanRewardsClaimed) * getPassVariantLuck(data.passes);
+		const luck = getPlayerVariantLuck(data);
 		const variant: FishVariant = onboardingEgg || isEasterEgg(fishType) ? "Normal" : rollVariant(this.rng, luck);
 		const firstTime = getHatchedVariant(data, fishType, variant) === 0;
 		if (!DataService.hatchEgg(player, eggType, fishType, variant)) return;

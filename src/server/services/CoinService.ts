@@ -12,6 +12,12 @@ import { DataService } from "./DataService";
 import { InteractionService } from "./InteractionService";
 
 const SINK_SPEED = 4; // studs/s
+// The coin chime (playCoinSfx): each click within the window climbs a step, up to the max
+const COIN_COMBO_WINDOW = 1.2; // seconds
+const COIN_COMBO_PITCH = 0.06; // pitch added per step
+const COIN_COMBO_MAX = 8;
+const SPECIAL_CHIME_PITCH = 1.2; // a sparkling / ghost coin rings higher
+const COMPANION_CHIME_GAP = 0.35; // seconds between two chimes of companion pickups
 const EDGE_MARGIN = 1;
 const GROUND_LIFETIME = 5; // seconds a coin stays on the sand before vanishing
 const BLINK_DURATION = 1.5; // last part of the ground lifetime, blinking as a warning
@@ -155,6 +161,9 @@ class CoinServiceSingleton implements Lifecycle {
 	private coinsByOwner = new Map<Player, Set<Coin>>();
 	private templates = new Map<CoinType, Model>();
 	private collectedCallbacks = new Array<CoinCollectedCallback>();
+	/** The coin chime's combo per player (see playCoinSfx), and when a companion's pickup last chimed. */
+	private coinCombos = new Map<Player, { step: number; at: number }>();
+	private companionChimeAt = new Map<Player, number>();
 
 	public onInit() {
 		this.templates = loadTemplates(TAGS.CoinTemplate, "CoinType", COIN_TYPES);
@@ -170,6 +179,8 @@ class CoinServiceSingleton implements Lifecycle {
 				for (const coin of coins) this.removeCoin(coin);
 			}
 			this.coinsByOwner.delete(player);
+			this.coinCombos.delete(player);
+			this.companionChimeAt.delete(player);
 		});
 	}
 
@@ -451,9 +462,29 @@ class CoinServiceSingleton implements Lifecycle {
 		DataService.addMoney(owner, coin.value);
 		this.popupRemote.FireClient(owner, { position, amount: coin.value, special: coin.special, ghost: coin.ghost });
 		if (coin.bubble) this.sfxRemote.FireClient(owner, "BubblePop", 0.9 + math.random() * 0.3);
+		else this.playCoinSfx(owner, coin.special || coin.ghost, companion !== undefined);
 		for (const callback of this.collectedCallbacks) {
 			task.spawn(callback, owner, coin.frozen, coin.value, companion);
 		}
+	}
+
+	/**
+	 * The coin chime: chained clicks climb in pitch (a combo, back to the base after a pause), sparkling and ghost coins
+	 * ring higher; a companion's pickups are softer and spaced out.
+	 */
+	private playCoinSfx(owner: Player, special: boolean, byCompanion: boolean) {
+		const now = os.clock();
+		if (byCompanion) {
+			if (now - (this.companionChimeAt.get(owner) ?? 0) < COMPANION_CHIME_GAP) return;
+			this.companionChimeAt.set(owner, now);
+			this.sfxRemote.FireClient(owner, "CompanionCoin", 1.05 + math.random() * 0.1);
+			return;
+		}
+		const combo = this.coinCombos.get(owner);
+		const step = combo && now - combo.at < COIN_COMBO_WINDOW ? math.min(combo.step + 1, COIN_COMBO_MAX) : 0;
+		this.coinCombos.set(owner, { step, at: now });
+		const pitch = (1 + step * COIN_COMBO_PITCH) * (special ? SPECIAL_CHIME_PITCH : 1);
+		this.sfxRemote.FireClient(owner, "CoinCollect", pitch);
 	}
 
 	// ---------------------------------------------------------------------

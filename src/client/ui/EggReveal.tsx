@@ -40,6 +40,8 @@ export interface EggRevealProps {
 	variant: FishVariant;
 	/** First fish of this type and variant: it just joined the fish index. */
 	firstTime: boolean;
+	/** The player's variant luck: the chance shown is the one they hatched with. */
+	luck: number;
 	playSfx: (name: SfxName, playbackSpeed?: number) => void;
 	onEnd: () => void;
 }
@@ -360,7 +362,7 @@ export function EggReveal(props: EggRevealProps) {
 							Size={new UDim2(1, 0, 0, 26)}
 							BackgroundTransparency={1}
 							Font={FONT_TITLE}
-							Text={`${variant.displayName.upper()}  •  ${formatVariantChance(props.variant)}`}
+							Text={`${variant.displayName.upper()}  •  ${formatVariantChance(props.variant, props.luck)}`}
 							TextSize={24}
 							TextColor3={variantStyle.color}
 							{...captionText()}

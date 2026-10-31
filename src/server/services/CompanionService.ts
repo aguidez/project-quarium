@@ -9,6 +9,8 @@ import {
 	JELLYFISH_FEED_INTERVAL,
 	JELLYFISH_PELLETS,
 	PELICAN_FEED_INTERVAL,
+	SWORDFISH_REACH,
+	SWORDFISH_SPEED,
 } from "shared/types/companions";
 import { getCompanionMultiplier } from "shared/types/oceanRewards";
 import { getJellyfishStats, getPelicanCharges, getPelicanPellets, getSwordfishStats } from "shared/types/perks";
@@ -64,8 +66,6 @@ const HEN_REST_MAX = 4;
 
 // Swordfish: swims through the water and grabs its owner's coins while they sink (BALANCE.md §5.8: free, as a maxed
 // Snail; its pass quests make it faster with a wider reach, perks.ts)
-const SWORDFISH_SPEED = 0.95; // × SNAIL_SPEED while chasing a coin
-const SWORDFISH_REACH = 2; // horizontal studs from the coin to grab it
 const SWORDFISH_DIVE_SPEED = 6; // studs/s up or down: keeps up with a sinking coin (4 studs/s)
 const SWORDFISH_CRUISE_SPEED = 2; // studs/s when there is nothing to grab
 const SWORDFISH_STEP_TIME = 0.15;
@@ -545,7 +545,11 @@ class CompanionServiceSingleton implements Lifecycle {
 
 	/** The coin is within reach of the snail and low enough above the sand. */
 	private canPickUp(entity: CompanionEntity, coin: BasePart, pickupY: number): boolean {
-		return flat(coin.Position.sub(entity.body.Position)).Magnitude <= SNAIL_REACH && coin.Position.Y <= pickupY;
+		// A coin closer to the glass than the snail can crawl: its reach covers the gap it can't cross
+		const gap = flat(coin.Position.sub(this.clampToFloor(entity, coin.Position))).Magnitude;
+		return (
+			flat(coin.Position.sub(entity.body.Position)).Magnitude <= SNAIL_REACH + gap && coin.Position.Y <= pickupY
+		);
 	}
 
 	/** One short glide on the sand toward `target`, turning progressively to face it (yields). */
@@ -708,8 +712,14 @@ class CompanionServiceSingleton implements Lifecycle {
 
 	/** The coin is within its reach (horizontally, and not far above or below). */
 	private canGrab(entity: CompanionEntity, coin: BasePart, reach: number): boolean {
+		// It keeps its whole body away from the glass and the surface: its reach covers the gap to a coin beyond
+		const closest = this.clampToWater(entity, coin.Position);
+		const gap = coin.Position.sub(closest);
 		const offset = coin.Position.sub(entity.body.Position);
-		return flat(offset).Magnitude <= reach && math.abs(offset.Y) <= reach + entity.body.Size.Y / 2;
+		return (
+			flat(offset).Magnitude <= reach + flat(gap).Magnitude &&
+			math.abs(offset.Y) <= reach + entity.body.Size.Y / 2 + math.abs(gap.Y)
+		);
 	}
 
 	/** One short swim toward `target`: `speed` across the tank, diving fast enough to follow a sinking coin. */

@@ -49,12 +49,15 @@ const OCEAN_PANEL_WIDTH = PANEL_INNER_WIDTH + COLUMN_GAP + MILESTONE_COLUMN_WIDT
 const MILESTONE_PADDING = 14;
 const MILESTONE_INNER_WIDTH = MILESTONE_COLUMN_WIDTH - MILESTONE_PADDING * 2;
 const MILESTONE_ICON = 64;
-const MILESTONE_INFO_WIDTH = MILESTONE_INNER_WIDTH - 20 - MILESTONE_ICON - 10; // card padding, icon, gap
+const MILESTONE_LIST_INSET = 4; // room for the card strokes, which the scrolling frame would clip
+const MILESTONE_LIST_RIGHT = 12; // room for the scroll bar
+// Text width of a card (to wrap its description): list insets, card padding, icon, gap
+const MILESTONE_INFO_WIDTH =
+	MILESTONE_INNER_WIDTH - MILESTONE_LIST_INSET - MILESTONE_LIST_RIGHT - 20 - MILESTONE_ICON - 10;
 const MILESTONES_TEXT = "Ocean Points are never spent: reach each milestone to claim its reward.";
 /** Height of the milestone list: about four cards, then it scrolls (V1 has ~17 milestones). */
 const MILESTONE_LIST_HEIGHT = 470;
 const MILESTONE_GAP = 10;
-const MILESTONE_LIST_INSET = 4; // room for the card strokes, which the scrolling frame would clip
 const COACH_BUTTON_ROOM = 108; // "Got it!" button and the gap before it
 
 export interface OceanPanelProps {
@@ -295,7 +298,8 @@ function MilestoneCard(props: {
 			<frame
 				key="Info"
 				LayoutOrder={2}
-				Size={UDim2.fromOffset(MILESTONE_INFO_WIDTH, 0)}
+				// What is left of the card next to the icon: never wider than the card, whatever the scroll bar takes
+				Size={new UDim2(1, -(MILESTONE_ICON + 10), 0, 0)}
 				AutomaticSize={Enum.AutomaticSize.Y}
 				BackgroundTransparency={1}
 			>
@@ -659,7 +663,7 @@ export function OceanPanel(props: OceanPanelProps) {
 							PaddingTop={new UDim(0, MILESTONE_LIST_INSET)}
 							PaddingBottom={new UDim(0, MILESTONE_LIST_INSET)}
 							PaddingLeft={new UDim(0, MILESTONE_LIST_INSET)}
-							PaddingRight={new UDim(0, 12)}
+							PaddingRight={new UDim(0, MILESTONE_LIST_RIGHT)}
 						/>
 						<uilistlayout Padding={new UDim(0, MILESTONE_GAP)} SortOrder={Enum.SortOrder.LayoutOrder} />
 						{milestones}

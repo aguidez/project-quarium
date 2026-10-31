@@ -10,7 +10,7 @@ export interface CompanionConfig {
 	icon: string; // old emoji icon, unused by the UI now (see image)
 	/** Sticker icon (design/ui/companions), shown in the companion panel, the rewards and the Ocean menu. */
 	image: string;
-	/** What it does for the player, shown in the companion panel. */
+	/** What it does for the player, shown in the companion panel (its numbers: companionStats.ts, with the bonuses). */
 	ability: string;
 }
 
@@ -25,14 +25,14 @@ export const COMPANION_TYPES: Record<CompanionType, CompanionConfig> = {
 		displayName: "Pelican",
 		icon: "",
 		image: "rbxassetid://125583206090759",
-		ability: "Watches your aquarium from above and throws food to your fish every 10 s.",
+		ability: "Watches your aquarium from above and throws food to your fish.",
 	},
 	// V1 companions (ROADMAP M4, BALANCE.md §5.8): free from the Ocean, upgraded by a gamepass quest line
 	WaterHen: {
 		displayName: "Water Hen",
 		icon: "",
 		image: "rbxassetid://106605624608137", // design/ui/companions/Companion_WaterHen.png
-		ability: "Paddles on the surface of your aquarium. While equipped, the eggs you buy hatch 15% faster.",
+		ability: "Paddles on the surface of your aquarium. While it is equipped, your eggs hatch faster.",
 	},
 	Swordfish: {
 		displayName: "Swordfish",
@@ -62,6 +62,9 @@ export const WATER_HEN_HATCH_MULTIPLIER = 0.85;
  * up to JELLYFISH_CHARGES, JELLYFISH_PELLETS pellets a feed; its Jellyfish pass quests improve it (perks.ts).
  */
 export const JELLYFISH_FEED_INTERVAL = 7.5;
+/** The free Swordfish (BALANCE.md §5.8: a maxed Snail): x the Snail's speed, and its reach in studs (perks.ts raise them). */
+export const SWORDFISH_SPEED = 0.95;
+export const SWORDFISH_REACH = 2;
 export const JELLYFISH_CHARGES = 2;
 export const JELLYFISH_PELLETS = 2;
 

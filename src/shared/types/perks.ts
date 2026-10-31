@@ -55,28 +55,29 @@ export const PERKS: Record<Perk, PerkConfig> = {
 	CoinLinger1: {
 		displayName: "Lasting coins",
 		label: "+1s",
-		description: "Coins stay 1 second longer on the sand.",
+		description: "Coins stay 1 second longer on the sand. Permanent, even without your Snail.",
 		groundTimeBonus: 1,
 		bounce: false,
 	},
 	CoinLinger2: {
 		displayName: "Lasting coins II",
 		label: "+2s",
-		description: "Coins stay 2 more seconds on the sand.",
+		description: "Coins stay 2 more seconds on the sand. Permanent, even without your Snail.",
 		groundTimeBonus: 2,
 		bounce: false,
 	},
 	CoinBounce: {
 		displayName: "Bouncy coins",
 		label: "Boing",
-		description: "Coins bounce once when they reach the sand, before their timer starts.",
+		description:
+			"Coins bounce once when they reach the sand, before their timer starts. Permanent, even without your Snail.",
 		groundTimeBonus: 0,
 		bounce: true,
 	},
 	FishSatiety: {
 		displayName: "Hearty meals",
 		label: "+15s",
-		description: "Your fish stay full 15 seconds longer after eating.",
+		description: "Your fish stay full 15 seconds longer after eating. Permanent, even without your Pelican.",
 		groundTimeBonus: 0,
 		bounce: false,
 		satietyBonus: 15,

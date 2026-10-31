@@ -5,10 +5,10 @@ import { Feature } from "./features";
 import { DEFAULT_FISH_CAPACITY, FishType } from "./fish";
 import { OnboardingStep } from "./onboarding";
 import { createQuestsData, QuestsData } from "./quests";
-import { OceanRewardId } from "./oceanRewards";
+import { getVariantLuck, OceanRewardId } from "./oceanRewards";
 import { getPerkHatchMultiplier, Perk } from "./perks";
 import { FishVariant } from "./variants";
-import { GamePass, getPassCompanionSlots } from "./gamepasses";
+import { GamePass, getPassCompanionSlots, getPassVariantLuck } from "./gamepasses";
 
 /**
  * Money never goes above this (DataService credits clamp to it): 1 quadrillion, the last unit the UI shortens
@@ -154,6 +154,11 @@ export function getLivingVariant(
 /** Companions that can be equipped at once: the Ocean slots, plus the Third Companion Slot pass. */
 export function getCompanionSlots(data: Pick<PlayerData, "companionSlots" | "passes">): number {
 	return data.companionSlots + getPassCompanionSlots(data.passes);
+}
+
+/** The rare variants' chances multiplier of a player: Lucky ocean (Ocean milestone) x the Lucky pass. */
+export function getPlayerVariantLuck(data: Pick<PlayerData, "oceanRewardsClaimed" | "passes">): number {
+	return getVariantLuck(data.oceanRewardsClaimed) * getPassVariantLuck(data.passes);
 }
 
 /** Hatch time of an egg bought now (x its EGG_TYPES time): shorter while the Water Hen is equipped. */

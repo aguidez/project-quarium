@@ -134,11 +134,12 @@ export function getVariantIncomeMultiplier(variant: FishVariant): number {
 }
 
 /** Percent shown next to a variant ("10%"), from its chance. */
-export function formatVariantChance(variant: FishVariant): string {
-	let chance = FISH_VARIANTS[variant].chance;
+/** "10%": the chance at hatch, with the player's variant luck (Lucky ocean, the Lucky pass) like rollVariant. */
+export function formatVariantChance(variant: FishVariant, luck = 1): string {
+	let chance = FISH_VARIANTS[variant].chance * luck;
 	if (variant === "Normal") {
 		chance = 1;
-		for (const other of VARIANT_ORDER) chance -= FISH_VARIANTS[other].chance;
+		for (const other of VARIANT_ORDER) chance -= FISH_VARIANTS[other].chance * luck;
 	}
 	return `${math.floor(chance * 1000 + 0.5) / 10}%`;
 }
