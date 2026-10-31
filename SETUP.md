@@ -15,7 +15,7 @@ simulators, but not test in Studio). Run `npm run doctor` at the end: it checks 
 | **Rojo Studio plugin** | matching Rojo 7.7 | connects Studio to `rojo serve` | `rojo plugin install`, or the Creator Store |
 | **VS Code** | latest | editor; accept the recommended extensions (roblox-ts, ESLint, Rojo, Claude Code) | https://code.visualstudio.com |
 | **Claude Code** | latest | the AI agent (CLI or VS Code extension) | https://claude.com/claude-code |
-| **FigCraft** | 0.11.x | *optional*: UI design (`design/ui/*.figcraft`, FigCraft MCP) | portable build, unzip it anywhere outside the repo |
+| **FigCraft** | 0.11–0.12 | *optional*: UI design (`design/ui/*.figcraft`, FigCraft MCP); needs **both** the app and `figcraft-cli` (the MCP attaches to the running app) | Windows: portable build (both side by side), unzip it anywhere outside the repo. macOS: the `.dmg` holds the app only, the CLI is a separate download (e.g. `/Applications/FigCraft CLI/figcraft-cli`) |
 
 Accounts: the **Roblox account that owns the game** (or Team Create access to it) to open the place and publish.
 
@@ -42,7 +42,7 @@ cp workspace.local.example.json workspace.local.json      # Windows PowerShell: 
 | Key | Needed when | Value |
 |---|---|---|
 | `figcraftDir` | you use FigCraft | folder holding `figcraft(.exe)` and `figcraft-cli(.exe)` |
-| `figcraftApp`, `figcraftCli` | the FigCraft executables have other names / places (e.g. a macOS `.app`) | exact paths |
+| `figcraftApp`, `figcraftCli` | the FigCraft executables have other names / places (macOS: always) | exact paths, e.g. `/Applications/FigCraft.app/Contents/MacOS/FigCraft` and `/Applications/FigCraft CLI/figcraft-cli` |
 | `figcraftPort` | port 7979 is taken | the FigCraft control port |
 | `wgpuBackend` | FigCraft crashes at startup ("Shader translation error") | `"vulkan"` (the old Windows PC needed it), `"dx12"`, `"metal"`... or remove the key |
 | `robloxStudioMcp` | the Studio MCP server isn't found automatically | path of `StudioMCP` (macOS) or `mcp.bat` / `StudioMCP.exe` (Windows) |
