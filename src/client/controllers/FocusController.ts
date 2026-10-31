@@ -42,8 +42,9 @@ const OCCLUSION_STEP = "AquariumFocusOcclusion";
 const FOCUS_HAZE_KEEP = 0.2; // share of the atmosphere's density / haze left in the view
 const FOCUS_GLASS_CLEAR = 0.6; // LocalTransparencyModifier of the front glass (0.7 -> 0.88 transparent)
 const FOCUS_WATER_CLEAR = 0.5; // ... and of the water (0.8 -> 0.9)
-// A companion perched on the rim (the Pelican) stands above the tank: the view makes room for it
-const PERCHED_COMPANIONS = ["Pelican"];
+// A companion perched on the rim (the Pelican) or floating on the surface (the Water Hen) stands above the
+// tank's front: the view makes room for it
+const PERCHED_COMPANIONS = ["Pelican", "WaterHen"];
 const PERCH_HEADROOM = 6; // studs added above the tank's front
 const REFRAME_TIME = 0.6;
 

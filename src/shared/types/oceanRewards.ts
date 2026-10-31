@@ -15,7 +15,10 @@ export type OceanRewardId =
 	| "SecondIncubator"
 	| "Aquarium17"
 	| "Aquarium19"
-	| "LuckyOcean";
+	| "LuckyOcean"
+	| "Aquarium21"
+	| "WaterHen"
+	| "Swordfish";
 
 /**
  * A companion upgrade multiplies what the companion does: the Snail's crawling speed, the Pelican's
@@ -114,6 +117,30 @@ export const OCEAN_MILESTONES: readonly OceanMilestone[] = [
 		title: "Lucky ocean",
 		description: "Rare fish hatch 1.5x as often: Anomaly 15%, Ghost 7.5%, Shiny 1.5%.",
 		reward: { kind: "VariantLuck", multiplier: 1.5 },
+	},
+	// Rebirth 5 (ROADMAP M4): the tank 21 comes with the rebirth's release, the Water Hen right after it
+	{
+		id: "Aquarium21",
+		points: 70000,
+		title: "Bigger aquarium",
+		description: "Your aquarium holds 21 fish.",
+		reward: { kind: "Capacity", capacity: 21 },
+	},
+	{
+		// Balance (BALANCE.md §5.8): hatch -15 % while equipped, a comfort (the waits are for money): ~-11 min to the end
+		id: "WaterHen",
+		points: 85000,
+		title: "Water Hen",
+		description: "A new companion: while it is equipped, the eggs you buy hatch 15% faster.",
+		reward: { kind: "Companion", companion: "WaterHen" },
+	},
+	{
+		// Free, it collects like a maxed Snail (~60 % at 1 coin/s); its pass quests take it to ~96 %
+		id: "Swordfish",
+		points: 120000,
+		title: "Swordfish",
+		description: "A new companion that swims through the water and grabs your coins while they sink.",
+		reward: { kind: "Companion", companion: "Swordfish" },
 	},
 ];
 

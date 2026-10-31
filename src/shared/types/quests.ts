@@ -41,7 +41,7 @@ export type QuestStat =
 	| "FishReleased"
 	/**
 	 * What the quest's `companion` does for the player: coins its Snail picks up, fish its Pelican feeds (the V1
-	 * companions add theirs: eggs opened with the Water Hen equipped...).
+	 * companions add theirs: eggs opened with the Water Hen equipped, coins its Swordfish grabs).
 	 */
 	| "CompanionStat";
 
@@ -228,10 +228,84 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 1,
 		rewards: [{ kind: "IncomeMinutes", minutes: 5 }],
 	},
+	Voyage8: {
+		category: "Story",
+		title: "Into the Deep",
+		description: "Rebirth into the Mariana Trench (rebirth 5).",
+		stat: "Rebirths",
+		target: 5,
+		rewards: [{ kind: "OceanPoints", amount: 10000 }],
+	},
+	Voyage9: {
+		category: "Story",
+		title: "Light of the Deep",
+		description: "Hatch a Lanternfish.",
+		stat: "SpeciesHatched",
+		fishType: "Lanternfish",
+		target: 1,
+		rewards: [{ kind: "IncomeMinutes", minutes: 5 }],
+	},
+	// The Water Hen's line (Water Hen pass, BALANCE.md §5.9): eggs opened with it equipped. Slow on purpose: its
+	// effect is the smallest
+	WaterHen1: {
+		category: "Story",
+		title: "Nest Keeper",
+		description: "Open 50 eggs with your Water Hen equipped.",
+		stat: "CompanionStat",
+		companion: "WaterHen",
+		target: 50,
+		rewards: [{ kind: "Perk", perk: "WaterHen1" }],
+	},
+	WaterHen2: {
+		category: "Story",
+		title: "Mother Hen",
+		description: "Open 150 eggs with your Water Hen equipped.",
+		stat: "CompanionStat",
+		companion: "WaterHen",
+		target: 150,
+		rewards: [{ kind: "Perk", perk: "WaterHen2" }],
+	},
+	WaterHen3: {
+		category: "Story",
+		title: "Hatchery Queen",
+		description: "Open 400 eggs with your Water Hen equipped.",
+		stat: "CompanionStat",
+		companion: "WaterHen",
+		target: 400,
+		rewards: [{ kind: "Perk", perk: "WaterHen3" }],
+	},
+	// The Swordfish's line (Swordfish pass): coins it picks up (~1 coin/s)
+	Swordfish1: {
+		category: "Story",
+		title: "Quick Catch",
+		description: "Let your Swordfish grab 300 coins.",
+		stat: "CompanionStat",
+		companion: "Swordfish",
+		target: 300,
+		rewards: [{ kind: "Perk", perk: "Swordfish1" }],
+	},
+	Swordfish2: {
+		category: "Story",
+		title: "Coin Hunter",
+		description: "Let your Swordfish grab 1,000 coins.",
+		stat: "CompanionStat",
+		companion: "Swordfish",
+		target: 1000,
+		rewards: [{ kind: "Perk", perk: "Swordfish2" }],
+	},
+	Swordfish3: {
+		category: "Story",
+		title: "Swordfish Ace",
+		description: "Let your Swordfish grab 3,000 coins.",
+		stat: "CompanionStat",
+		companion: "Swordfish",
+		target: 3000,
+		rewards: [{ kind: "Perk", perk: "Swordfish3" }],
+	},
 };
 
 /** Story lines: each one has its quests in order, and opens once a quest of another line is claimed. */
-export type StoryLine = "Start" | "Ocean" | "Rebirth" | "Snail" | "Pelican";
+export type StoryLine = "Start" | "Ocean" | "Rebirth" | "Snail" | "Pelican" | "WaterHen" | "Swordfish";
 
 export interface StoryLineConfig {
 	/** Small tag over its quests in the quest book. */
@@ -256,12 +330,38 @@ export const STORY_LINES: Record<StoryLine, StoryLineConfig> = {
 	// The main line: the rebirth, then the "Voyage" through the aquariums (its key stays "Rebirth" for the saves)
 	Rebirth: {
 		displayName: "Voyage",
-		quests: ["Story9", "Voyage1", "Voyage2", "Voyage3", "Voyage4", "Voyage5", "Voyage6", "Voyage7"],
+		quests: [
+			"Story9",
+			"Voyage1",
+			"Voyage2",
+			"Voyage3",
+			"Voyage4",
+			"Voyage5",
+			"Voyage6",
+			"Voyage7",
+			"Voyage8",
+			"Voyage9",
+		],
 		requires: "Story1",
 		order: 3,
 	},
 	Snail: { displayName: "Snail", quests: ["Story3", "Story4", "Story5"], requires: "Story1", order: 4 },
 	Pelican: { displayName: "Pelican", quests: ["Story6", "Story7", "Story8"], requiresCompanion: "Pelican", order: 5 },
+	// The paid companion lines (ROADMAP M4): shown from the moment the companion is owned, locked without the pass
+	WaterHen: {
+		displayName: "Water Hen",
+		quests: ["WaterHen1", "WaterHen2", "WaterHen3"],
+		requiresCompanion: "WaterHen",
+		requiresPass: "WaterHenPass",
+		order: 6,
+	},
+	Swordfish: {
+		displayName: "Swordfish",
+		quests: ["Swordfish1", "Swordfish2", "Swordfish3"],
+		requiresCompanion: "Swordfish",
+		requiresPass: "SwordfishPass",
+		order: 7,
+	},
 };
 
 /** A quest of a line whose gamepass the player doesn't own: shown, never counted or claimed (see requiresPass). */

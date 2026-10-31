@@ -14,6 +14,7 @@ import {
 	getTotalFish,
 	hasFreeIncubator,
 	isEggUnlocked,
+	syncIncubationSpeed,
 } from "shared/types/playerData";
 import { FishType, isEasterEgg } from "shared/types/fish";
 import { FishVariant, rollVariant } from "shared/types/variants";
@@ -86,8 +87,12 @@ class EggServiceSingleton implements Lifecycle {
 			return;
 		}
 
-		const hatchTime = EGG_TYPES[eggType].hatchTime;
-		DataService.startIncubation(player, eggType, Workspace.GetServerTimeNow() + hatchTime);
+		// At the current hatch speed (the Water Hen's): the timers already running were rescaled to it, so the
+		// new egg is too, and later changes rescale them all (syncIncubationSpeed)
+		const now = Workspace.GetServerTimeNow();
+		syncIncubationSpeed(data, now);
+		const hatchTime = EGG_TYPES[eggType].hatchTime * data.incubationMultiplier;
+		DataService.startIncubation(player, eggType, now + hatchTime);
 		if (data.onboarding === "BuyEgg") DataService.setOnboardingStep(player, "Hatching");
 	}
 
@@ -119,6 +124,9 @@ class EggServiceSingleton implements Lifecycle {
 		this.forcedHatch.delete(player);
 		QuestService.addProgress(player, "EggsOpened", 1, { fishType, variant });
 		QuestService.addProgress(player, "VariantHatched", 1, { fishType, variant });
+		// The Water Hen's line counts the eggs opened with it equipped
+		if (data.equippedCompanions.includes("WaterHen"))
+			QuestService.addProgress(player, "CompanionStat", 1, { companion: "WaterHen" });
 
 		// The fish joins the tank once its reveal has played, after any reveal still queued
 		const now = os.clock();

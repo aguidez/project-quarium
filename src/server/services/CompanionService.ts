@@ -4,7 +4,7 @@ import { Lifecycle } from "shared/framework";
 import { TAGS } from "shared/tags";
 import { COMPANION_TYPES, CompanionType, PELICAN_FEED_INTERVAL } from "shared/types/companions";
 import { getCompanionMultiplier } from "shared/types/oceanRewards";
-import { getPelicanCharges, getPelicanPellets } from "shared/types/perks";
+import { getPelicanCharges, getPelicanPellets, getSwordfishStats } from "shared/types/perks";
 import { isOnboardingDone } from "shared/types/onboarding";
 import { getCompanionSlots } from "shared/types/playerData";
 import { loadTemplates, scaleModel } from "../templates";
@@ -45,6 +45,27 @@ const PELICAN_PELLET_SPREAD = 1.6; // studs between the pellets of one throw (Do
 const PELICAN_PELLET_DELAY = 0.15;
 const PELICAN_WATCH_STEP = 0.25; // an on-demand Pelican checks the fish this often
 
+// Water Hen: floats on the surface and paddles from one side to the other (its ability is passive: EggService)
+const HEN_SPEED = 1.6; // studs/s
+const HEN_STEP_TIME = 0.25;
+const HEN_FLOAT = 0.25; // × its height above the surface (the rest is under water)
+const HEN_BOB = 0.12; // studs up and down while it floats
+const HEN_BOB_PERIOD = 1.6; // seconds
+const HEN_FRONT_DEPTH = 0.45; // stays in this front share of the tank (never hidden at the back)
+const HEN_REST_MIN = 1.5;
+const HEN_REST_MAX = 4;
+
+// Swordfish: swims through the water and grabs its owner's coins while they sink (BALANCE.md §5.8: free, as a maxed
+// Snail; its pass quests make it faster with a wider reach, perks.ts)
+const SWORDFISH_SPEED = 0.95; // × SNAIL_SPEED while chasing a coin
+const SWORDFISH_REACH = 2; // horizontal studs from the coin to grab it
+const SWORDFISH_DIVE_SPEED = 6; // studs/s up or down: keeps up with a sinking coin (4 studs/s)
+const SWORDFISH_CRUISE_SPEED = 2; // studs/s when there is nothing to grab
+const SWORDFISH_STEP_TIME = 0.15;
+const SWORDFISH_TURN = 0.45;
+const SWORDFISH_REST_MIN = 0.5;
+const SWORDFISH_REST_MAX = 2;
+
 interface CompanionEntity {
 	owner: Player;
 	companionType: CompanionType;
@@ -70,6 +91,8 @@ class CompanionServiceSingleton implements Lifecycle {
 	private behaviors: Record<CompanionType, (entity: CompanionEntity) => void> = {
 		Snail: (entity) => this.snailLoop(entity),
 		Pelican: (entity) => this.pelicanLoop(entity),
+		WaterHen: (entity) => this.waterHenLoop(entity),
+		Swordfish: (entity) => this.swordfishLoop(entity),
 	};
 
 	public onInit() {
@@ -195,6 +218,11 @@ class CompanionServiceSingleton implements Lifecycle {
 		if (companionType === "Pelican") {
 			// Pops in on its perch on the back rim, facing the glass (the tank's LookVector)
 			model.PivotTo(this.getPerch(entity));
+		} else if (companionType === "WaterHen" || companionType === "Swordfish") {
+			// On the surface / in the water, somewhere along the front of the tank, facing sideways
+			const start = companionType === "WaterHen" ? this.randomSurfacePoint(entity) : this.randomWaterPoint(entity);
+			const side = aquarium.cframe.RightVector.mul(this.rng.NextNumber() < 0.5 ? 1 : -1);
+			model.PivotTo(CFrame.lookAt(start, start.add(side)));
 		} else {
 			// Pops in on the sand, somewhere along the front of the tank, facing sideways
 			const start = this.randomFloorPoint(entity);
@@ -210,6 +238,11 @@ class CompanionServiceSingleton implements Lifecycle {
 			// Back on the sand (or its perch) at its full size: it popped in around its centre
 			if (companionType === "Pelican") {
 				model.PivotTo(this.getPerch(entity));
+			} else if (companionType === "WaterHen") {
+				const position = body.Position;
+				model.PivotTo(body.CFrame.add(new Vector3(0, this.surfaceY(entity) - position.Y, 0)));
+			} else if (companionType === "Swordfish") {
+				// Already in the water
 			} else {
 				const position = body.Position;
 				model.PivotTo(body.CFrame.add(new Vector3(0, this.floorY(entity) - position.Y, 0)));
@@ -454,13 +487,14 @@ class CompanionServiceSingleton implements Lifecycle {
 				strollTarget = undefined;
 				if (this.canPickUp(entity, coin, pickupY)) {
 					// Straight to the next coin (a refused pickup must not spin the loop without yielding)
-					if (!CoinService.collectForOwner(owner, coin)) task.wait(0.1);
+					if (!CoinService.collectForOwner(owner, coin, "Snail")) task.wait(0.1);
 					continue;
 				}
 				const target = this.clampToFloor(entity, coin.Position);
 				if (flat(target.sub(entity.body.Position)).Magnitude > SNAIL_REACH * 0.5) {
 					this.crawlStep(entity, target, SNAIL_SPEED * boost);
-					if (coin.Parent && this.canPickUp(entity, coin, pickupY)) CoinService.collectForOwner(owner, coin);
+					if (coin.Parent && this.canPickUp(entity, coin, pickupY))
+						CoinService.collectForOwner(owner, coin, "Snail");
 				} else {
 					task.wait(0.1); // right under the coin, waiting for it to sink
 				}
@@ -512,6 +546,165 @@ class CompanionServiceSingleton implements Lifecycle {
 		});
 		tween.Play();
 		task.wait(SNAIL_STEP_TIME); // not Completed.Wait(): never fires if the model is destroyed meanwhile
+	}
+
+	// ---------------------------------------------------------------------
+	// Water Hen
+	// ---------------------------------------------------------------------
+
+	/** Height of its body's centre while it floats (most of it above the surface). */
+	private surfaceY(entity: CompanionEntity): number {
+		return entity.aquarium.waterBounds.max.Y + entity.body.Size.Y * HEN_FLOAT;
+	}
+
+	/** A point on the surface, in the front part of the tank. */
+	private randomSurfacePoint(entity: CompanionEntity): Vector3 {
+		const bounds = entity.aquarium.waterBounds;
+		const margin = EDGE_MARGIN + entity.body.Size.Z / 2;
+		const frame = entity.aquarium.cframe;
+		// The front of a tank is its -Z side (its LookVector): pick a local point, then go to world space
+		const halfX = (bounds.max.X - bounds.min.X) / 2 - margin;
+		const halfZ = (bounds.max.Z - bounds.min.Z) / 2 - margin;
+		const localX = this.rng.NextNumber(-halfX, halfX);
+		const localZ = -halfZ + this.rng.NextNumber(0, 2 * halfZ * HEN_FRONT_DEPTH);
+		const point = frame.PointToWorldSpace(new Vector3(localX, 0, localZ));
+		return new Vector3(
+			math.clamp(point.X, bounds.min.X + margin, bounds.max.X - margin),
+			this.surfaceY(entity),
+			math.clamp(point.Z, bounds.min.Z + margin, bounds.max.Z - margin),
+		);
+	}
+
+	/** Paddles to a spot of the surface, rests there bobbing, and goes on. */
+	private waterHenLoop(entity: CompanionEntity) {
+		while (entity.alive) {
+			const target = this.randomSurfacePoint(entity);
+			while (entity.alive && flat(target.sub(entity.body.Position)).Magnitude > 0.3) {
+				this.floatStep(entity, target, HEN_SPEED);
+			}
+			const restUntil = os.clock() + this.rng.NextNumber(HEN_REST_MIN, HEN_REST_MAX);
+			while (entity.alive && os.clock() < restUntil) this.floatStep(entity, entity.body.Position, 0);
+		}
+	}
+
+	/** One short paddle toward `target` on the surface (or bobbing on the spot at speed 0), turning to face it. */
+	private floatStep(entity: CompanionEntity, target: Vector3, speed: number) {
+		const body = entity.body;
+		const from = body.Position;
+		const offset = flat(target.sub(from));
+		const distance = offset.Magnitude;
+		let look = flat(body.CFrame.LookVector);
+		let position = from;
+		if (speed > 0 && distance > 0.05) {
+			const direction = offset.Unit;
+			const turned = look.Magnitude > 0.01 ? look.Unit.Lerp(direction, SNAIL_TURN) : direction;
+			look = turned.Magnitude > 0.01 ? turned : direction;
+			position = from.add(direction.mul(math.min(distance, speed * HEN_STEP_TIME)));
+		}
+		if (look.Magnitude < 0.01) look = entity.aquarium.cframe.RightVector;
+		const bob = math.sin((os.clock() / HEN_BOB_PERIOD) * 2 * math.pi) * HEN_BOB;
+		const floating = new Vector3(position.X, this.surfaceY(entity) + bob, position.Z);
+		const goal = CFrame.lookAt(floating, floating.add(look.Unit));
+		TweenService.Create(body, new TweenInfo(HEN_STEP_TIME, Enum.EasingStyle.Linear), { CFrame: goal }).Play();
+		task.wait(HEN_STEP_TIME);
+	}
+
+	// ---------------------------------------------------------------------
+	// Swordfish
+	// ---------------------------------------------------------------------
+
+	/** Keeps a point inside the water, its whole body included. */
+	private clampToWater(entity: CompanionEntity, point: Vector3): Vector3 {
+		const bounds = entity.aquarium.waterBounds;
+		const margin = EDGE_MARGIN + entity.body.Size.Z / 2;
+		const halfY = entity.body.Size.Y / 2;
+		return new Vector3(
+			math.clamp(point.X, bounds.min.X + margin, bounds.max.X - margin),
+			math.clamp(point.Y, bounds.min.Y + halfY, bounds.max.Y - halfY - 0.5),
+			math.clamp(point.Z, bounds.min.Z + margin, bounds.max.Z - margin),
+		);
+	}
+
+	private randomWaterPoint(entity: CompanionEntity): Vector3 {
+		const bounds = entity.aquarium.waterBounds;
+		return this.clampToWater(
+			entity,
+			new Vector3(
+				this.rng.NextNumber(bounds.min.X, bounds.max.X),
+				this.rng.NextNumber(bounds.min.Y, bounds.max.Y),
+				this.rng.NextNumber(bounds.min.Z, bounds.max.Z),
+			),
+		);
+	}
+
+	/**
+	 * Heads for the coin it can reach the soonest, wherever it is in the water (no waiting for it to sink), and grabs
+	 * it once within reach; cruises around the tank otherwise. Its speed and reach come from its perks.
+	 */
+	private swordfishLoop(entity: CompanionEntity) {
+		const owner = entity.owner;
+		// The coins are reachable at any height: the "pickup height" is the surface
+		const anyHeight = entity.aquarium.waterBounds.max.Y;
+		let cruiseTarget: Vector3 | undefined;
+		let restUntil = 0;
+
+		while (entity.alive) {
+			const stats = getSwordfishStats(this.getPerks(owner), SWORDFISH_SPEED, SWORDFISH_REACH);
+			const speed = SNAIL_SPEED * stats.speed;
+			const coin = CoinService.findCoinToFetch(owner, entity.body.Position, speed, anyHeight);
+			if (coin) {
+				cruiseTarget = undefined;
+				if (this.canGrab(entity, coin, stats.reach)) {
+					if (!CoinService.collectForOwner(owner, coin, "Swordfish")) task.wait(0.1);
+					continue;
+				}
+				this.swimStep(entity, coin.Position, speed);
+				if (coin.Parent && this.canGrab(entity, coin, stats.reach))
+					CoinService.collectForOwner(owner, coin, "Swordfish");
+				continue;
+			}
+
+			if (os.clock() < restUntil) {
+				task.wait(0.2);
+				continue;
+			}
+			cruiseTarget ??= this.randomWaterPoint(entity);
+			if (cruiseTarget.sub(entity.body.Position).Magnitude < 0.5) {
+				cruiseTarget = undefined;
+				restUntil = os.clock() + this.rng.NextNumber(SWORDFISH_REST_MIN, SWORDFISH_REST_MAX);
+				continue;
+			}
+			this.swimStep(entity, cruiseTarget, SWORDFISH_CRUISE_SPEED);
+		}
+	}
+
+	/** The coin is within its reach (horizontally, and not far above or below). */
+	private canGrab(entity: CompanionEntity, coin: BasePart, reach: number): boolean {
+		const offset = coin.Position.sub(entity.body.Position);
+		return flat(offset).Magnitude <= reach && math.abs(offset.Y) <= reach + entity.body.Size.Y / 2;
+	}
+
+	/** One short swim toward `target`: `speed` across the tank, diving fast enough to follow a sinking coin. */
+	private swimStep(entity: CompanionEntity, target: Vector3, speed: number) {
+		const body = entity.body;
+		const from = body.Position;
+		const goalPoint = this.clampToWater(entity, target);
+		const offset = flat(goalPoint.sub(from));
+		const distance = offset.Magnitude;
+		const dy = goalPoint.Y - from.Y;
+		const climb = math.clamp(dy, -SWORDFISH_DIVE_SPEED * SWORDFISH_STEP_TIME, SWORDFISH_DIVE_SPEED * SWORDFISH_STEP_TIME);
+		let look = flat(body.CFrame.LookVector);
+		let position = from.add(new Vector3(0, climb, 0));
+		if (distance > 0.05) {
+			const direction = offset.Unit;
+			const turned = look.Magnitude > 0.01 ? look.Unit.Lerp(direction, SWORDFISH_TURN) : direction;
+			look = turned.Magnitude > 0.01 ? turned : direction;
+			position = position.add(direction.mul(math.min(distance, speed * SWORDFISH_STEP_TIME)));
+		}
+		if (look.Magnitude < 0.01) look = entity.aquarium.cframe.RightVector;
+		const goal = CFrame.lookAt(position, position.add(look.Unit));
+		TweenService.Create(body, new TweenInfo(SWORDFISH_STEP_TIME, Enum.EasingStyle.Linear), { CFrame: goal }).Play();
+		task.wait(SWORDFISH_STEP_TIME);
 	}
 }
 

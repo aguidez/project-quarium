@@ -3,6 +3,7 @@ import { t } from "@rbxts/t";
 import { Lifecycle } from "shared/framework";
 import { getRemoteEvent } from "shared/network";
 import { TAGS } from "shared/tags";
+import { CompanionType } from "shared/types/companions";
 import { COIN_HITBOX_SCALE, COIN_TYPES, CoinType, FART_BUBBLE_VALUE } from "shared/types/fish";
 import { COIN_BOUNCE_TIME, getGroundTimeBonus, hasCoinBounce } from "shared/types/perks";
 import { loadTemplates } from "../templates";
@@ -49,8 +50,8 @@ interface Coin {
 }
 
 /** `value`: money credited. `frozen`: the onboarding coin. */
-/** `byCompanion`: picked up by a companion (the Snail) rather than clicked. */
-type CoinCollectedCallback = (player: Player, frozen: boolean, value: number, byCompanion: boolean) => void;
+/** `companion`: the companion that picked it up (the Snail, the Swordfish), undefined when clicked. */
+type CoinCollectedCallback = (player: Player, frozen: boolean, value: number, companion?: CompanionType) => void;
 
 /** Twinkle: grows from nothing to `peak` then fades back to nothing. */
 function twinkle(peak: number): NumberSequence {
@@ -443,7 +444,7 @@ class CoinServiceSingleton implements Lifecycle {
 	}
 
 	/** Removes the coin and credits its value to its owner. */
-	private credit(coin: Coin, byCompanion = false) {
+	private credit(coin: Coin, companion?: CompanionType) {
 		const owner = coin.owner;
 		const position = coin.hitbox.Position;
 		this.removeCoin(coin);
@@ -451,7 +452,7 @@ class CoinServiceSingleton implements Lifecycle {
 		this.popupRemote.FireClient(owner, { position, amount: coin.value, special: coin.special, ghost: coin.ghost });
 		if (coin.bubble) this.sfxRemote.FireClient(owner, "BubblePop", 0.9 + math.random() * 0.3);
 		for (const callback of this.collectedCallbacks) {
-			task.spawn(callback, owner, coin.frozen, coin.value, byCompanion);
+			task.spawn(callback, owner, coin.frozen, coin.value, companion);
 		}
 	}
 
@@ -486,10 +487,10 @@ class CoinServiceSingleton implements Lifecycle {
 	}
 
 	/** A companion picks up one of its owner's coins: credited as if the owner had clicked it. */
-	public collectForOwner(owner: Player, hitbox: BasePart): boolean {
+	public collectForOwner(owner: Player, hitbox: BasePart, companion: CompanionType): boolean {
 		const coin = this.coinsByHitbox.get(hitbox);
 		if (!coin || !coin.alive || coin.frozen || coin.bubble || coin.owner !== owner) return false;
-		this.credit(coin, true);
+		this.credit(coin, companion);
 		return true;
 	}
 

@@ -44,6 +44,9 @@ const GUEST_PUFF = 1.4; // the event's star dances harder
 
 const TAU = math.pi * 2;
 
+/** Companion types whose mesh is a fish (head −Z, tail +Z): animated like the fish. */
+const SWIMMING_COMPANIONS = ["Swordfish"];
+
 function smoothstep(edge0: number, edge1: number, x: number): number {
 	const t = math.clamp((x - edge0) / (edge1 - edge0), 0, 1);
 	return t * t * (3 - 2 * t);
@@ -157,6 +160,13 @@ class FishAnimationControllerSingleton implements Lifecycle {
 		CollectionService.GetInstanceAddedSignal(TAGS.EventFish).Connect((fish) => this.track(fish));
 		CollectionService.GetInstanceRemovedSignal(TAGS.EventFish).Connect((fish) => this.untrack(fish));
 		for (const fish of CollectionService.GetTagged(TAGS.EventFish)) this.track(fish);
+		// Companions shaped like a fish (the Swordfish) swim like one too
+		const trackCompanion = (companion: Instance) => {
+			if (SWIMMING_COMPANIONS.includes(companion.GetAttribute("CompanionType") as string)) this.track(companion);
+		};
+		CollectionService.GetInstanceAddedSignal(TAGS.Companion).Connect(trackCompanion);
+		CollectionService.GetInstanceRemovedSignal(TAGS.Companion).Connect((companion) => this.untrack(companion));
+		for (const companion of CollectionService.GetTagged(TAGS.Companion)) trackCompanion(companion);
 	}
 
 	public onStart() {

@@ -45,6 +45,8 @@ let FISH = {
 	Catfish: { income: 16000, interval: 10, ocean: 800 },
 	BlueTang: { income: 19200, interval: 6, ocean: 1300 },
 	BabySunfish: { income: 130000, interval: 20, ocean: 2000 },
+	// Rebirth 5 (V0.40, ROADMAP M4)
+	Lanternfish: { income: 156000, interval: 12, ocean: 3200 },
 };
 if (plan.FISH) FISH = plan.FISH;
 // Easter egg fish (fish.ts FishConfig.easterEgg): hidden chance (percent) per egg opened, taken from the egg's
@@ -86,6 +88,7 @@ let EGGS = [
 	},
 	{ name: "Wreck", price: 55e6, hatch: 135, odds: { ImperialDiscus: 55, Catfish: 45 } },
 	{ name: "Atlantis", price: 144e6, hatch: 150, odds: { Catfish: 25, BlueTang: 55, BabySunfish: 20 } },
+	{ name: "Trench", price: 6.1e9, hatch: 165, odds: { BabySunfish: 55, Lanternfish: 45 } },
 ];
 if (plan.EGGS) EGGS = plan.EGGS;
 // Rebirth n is REBIRTHS[n - 1] (rebirths.ts): price, total coin multiplier, start money
@@ -94,6 +97,7 @@ let REBIRTHS = [
 	{ price: 1300000, mult: 8, start: 300 },
 	{ price: 45e6, mult: 25, start: 300 },
 	{ price: 120e6, mult: 80, start: 300 },
+	{ price: 5.1e9, mult: 250, start: 300 },
 ];
 if (plan.REBIRTHS) REBIRTHS = plan.REBIRTHS;
 // Capacity milestones (oceanRewards.ts, kind "Capacity"): the tank holds `capacity` fish from `points` Ocean Points
@@ -101,20 +105,22 @@ let CAPACITY = [
 	{ points: 1500, capacity: 15 },
 	{ points: 8000, capacity: 17 },
 	{ points: 25000, capacity: 19 },
+	{ points: 70000, capacity: 21 },
 ];
 if (plan.CAPACITY) CAPACITY = plan.CAPACITY;
-let OCEAN_MILESTONES = [50, 100, 200, 500, 1500, 5000, 8000, 25000, 40000]; // oceanRewards.ts (only reported, except the capacity / incubator ones)
+let OCEAN_MILESTONES = [50, 100, 200, 500, 1500, 5000, 8000, 25000, 40000, 70000, 85000, 120000]; // oceanRewards.ts (only reported, except the capacity / incubator ones)
 if (plan.OCEAN_MILESTONES) OCEAN_MILESTONES = plan.OCEAN_MILESTONES;
 // Incubator milestones (oceanRewards.ts, kind "Incubator"): from `points` Ocean Points, `count` eggs of the same type
 // can incubate at once
 let INCUBATORS = plan.INCUBATORS || [{ points: 5000, count: 2 }];
-// Hatch-time milestones (planned, the Water Hen companion): from `points` Ocean Points, eggs hatch in `mult` x their time
-let HATCH = plan.HATCH || [];
+// Hatch-time milestones (the Water Hen companion, live since V0.40, assumed equipped): from `points` Ocean Points, eggs
+// hatch in `mult` x their time
+let HATCH = plan.HATCH || [{ points: 85000, mult: 0.85 }];
 // Story quest rewards that move the economy (quests.ts, the Voyage line): minutes of income when a species is
 // discovered, Ocean Points when rebirth n is done. Other rewards (perks, cosmetics) are not modelled.
 const LIVE_QUEST_REWARDS = {
-	discover: { FlameGourami: 5, ImperialDiscus: 5, Catfish: 5, BabySunfish: 5 },
-	rebirth: { 2: 500, 3: 1500, 4: 4000 },
+	discover: { FlameGourami: 5, ImperialDiscus: 5, Catfish: 5, BabySunfish: 5, Lanternfish: 5 },
+	rebirth: { 2: 500, 3: 1500, 4: 4000, 5: 10000 },
 };
 const QUEST_REWARDS = Object.assign({ discover: {}, rebirth: {} }, plan.QUEST_REWARDS || LIVE_QUEST_REWARDS);
 const P = Object.assign(

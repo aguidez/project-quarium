@@ -10,6 +10,39 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.40 — 2026-10-31
+
+**New**
+- **A new aquarium**: rebirth 5 (5.1B, coins x250) takes you down to the **Mariana Trench**: dark basalt spires, glass
+  sponges and glowing anemones in deep blue water. The Rebirth menu then says more aquariums are coming.
+- **A new Legendary fish, the Lanternfish**: a little midnight-blue fish lit by rows of glowing dots, dropping shining
+  nautilus shells. With its Anomaly (crimson), Ghost and Shiny (golden) looks in the Fish Index.
+- **A new egg**: the **Trench Egg** (6.1B: Baby Sunfish or Lanternfish), after the Atlantis Egg.
+- **Two new companions**, from the Ocean:
+  - **Water Hen** (85,000 Ocean Points): paddles on the surface of your aquarium; while it is equipped, your eggs
+    hatch 15% faster, live: equip it on eggs already incubating and they speed up, unequip it and they slow back down
+    without losing the time gained. Left equipped when you leave, it keeps working while you are offline;
+  - **Swordfish** (120,000 Ocean Points): swims through the water and grabs your coins while they sink, without
+    waiting for them to reach the sand.
+- **Their quest lines**, shown as soon as you own the companion and unlocked by their pass:
+  - **Water Hen Pass**: open 50 / 150 / 400 eggs with it equipped, for eggs hatching 22% / 28% / 35% faster;
+  - **Swordfish Pass**: let it grab 300 / 1,000 / 3,000 coins, for a Swordfish up to 2.2x as fast with a wider reach.
+- **Ocean milestones**: 70,000 points, your aquarium holds **21 fish**; then the Water Hen and the Swordfish.
+- **Voyage quests**: "Into the Deep" (rebirth 5: 10,000 Ocean Points) and "Light of the Deep" (hatch a Lanternfish:
+  5 minutes of income).
+
+**Changes**
+- The progress bar of an egg in the shop follows the Water Hen's hatch speed.
+- The aquarium view leaves room above the tank for the Water Hen, like for the Pelican.
+- The Swordfish swims with a moving tail and fins like the fish; the Water Hen rocks and nods as it paddles.
+- Each aquarium theme now also sets the colour of its water (deeper blue in the Mariana Trench).
+
+**Balance**
+- New numbers from the V1 plan, unchanged: the average player reaches rebirth 5 at ~6h12, the Swordfish at ~6h51 and
+  all thirteen species at ~7h01 (BALANCE.md).
+
+---
+
 ## V0.39 — 2026-10-30
 
 **New**

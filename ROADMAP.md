@@ -3,7 +3,7 @@
 > The development plan from the live game (V0.35) to V1: what to build, in which order, and how. The **numbers** live
 > in `BALANCE.md` §5 and `tools/balance-v1-plan.js`; this file is the **work**. Tick the boxes as tasks ship, and move
 > what a milestone ships into `PROJECT_CONTEXT.md` / `RELEASE_NOTES.md` as usual.
-> Last updated: 2026-10-30 (M3 done in V0.39, M2 done in V0.38, M0 in V0.37, M1 in V0.36; first version: 7 milestones, from the rebalance to rebirth 8).
+> Last updated: 2026-10-31 (M4 done in V0.40, M3 done in V0.39, M2 done in V0.38, M0 in V0.37, M1 in V0.36; first version: 7 milestones, from the rebalance to rebirth 8).
 
 **V1 in one line**: 8 rebirths / aquariums, 18 species, 12 eggs, a tank of 25 fish, 5 companions (3 slots, the third one
 a gamepass), a "Voyage" main quest line to the end, ~12h15 for a free player to see everything (BALANCE.md §5.3).
@@ -81,17 +81,22 @@ Themes already built (`PirateWreck`, `Atlantis` in ServerStorage.Assets.Aquarium
       GAME_PASSES.image and V2_IMAGES.iconShop). The same 512 px PNGs can be the passes' icons on the Dashboard.
 - [ ] Owner: put the 4 passes on sale (price) on the Creator Dashboard: until then the Shop cards say "Soon".
 
-### M4 — Rebirth 5: Mariana Trench, the Water Hen and the Swordfish (~6h15 → ~8h05)
+### M4 — Rebirth 5: Mariana Trench, the Water Hen and the Swordfish (~6h15 → ~8h05; shipped in V0.40)
 
-- [ ] Models: theme **Mariana Trench** (theme recipe, §3.2), **Lanternfish**, Trench egg, **Water Hen** and
-      **Swordfish** (companion recipe, §3.3).
-- [ ] Config: species 13, egg Trench (6.1B), REBIRTH 5 (5.1B x250), milestones 70,000 (tank 21), 85,000 (Water Hen),
-      120,000 (Swordfish).
-- [ ] **Water Hen**: while equipped, eggs hatch 15 % faster (EggService reads the equipped companions at purchase).
-      Paid line ("Water Hen pass"): 3 quests → -22 %, -28 %, -35 %.
-- [ ] **Swordfish**: swims through the water and grabs coins while they sink (CompanionService: a swimming fetch
+- [x] Models: theme **Mariana Trench** (basalt spires, glass sponges, glowing anemones, a painted deep backdrop and a
+      darker `Water` style part: every theme now carries one), **Lanternfish** (photophores, no lure) and its
+      **Nautilus shell** coin, Trench egg (eggs.build.js, rendered with resvg), **Water Hen** and **Swordfish**; their
+      stickers and the Lanternfish variant textures, approved by the owner and uploaded once.
+- [x] Config: species 13, egg Trench (6.1B), REBIRTH 5 (5.1B x250), milestones 70,000 (tank 21), 85,000 (Water Hen),
+      120,000 (Swordfish); Voyage 8–9.
+- [x] **Water Hen**: while equipped, eggs hatch 15 % faster (EggService reads the equipped companions at purchase).
+      Paid line ("Water Hen pass", id 2057906427): 3 quests → -22 %, -28 %, -35 %. It floats and paddles on the surface.
+- [x] **Swordfish**: swims through the water and grabs coins while they sink (CompanionService: a swimming fetch
       loop next to the Snail's crawl); free = a maxed Snail (~60 %). Paid line ("Swordfish pass"): 3 quests → speed
       x1.4 / x1.8 / x2.2 and a wider reach: ~77 %, ~90 %, ~96 % of the coins.
+- [x] Check: playtest on a test store (`PlayerData_M4Test`): rebirth 5, theme, milestones, hatch -15 %, Swordfish
+      pickups, a Lanternfish hatched; sims match the plan.
+- [ ] Owner: put the Water Hen Pass (2057906427) and the Swordfish Pass (2058734507) on sale on the Creator Dashboard.
 
 ### M5 — Rebirth 6: Volcanic Temple and the Jellyfish (~8h05 → ~9h50)
 

@@ -12,6 +12,7 @@
   "Catfish": { "Anomaly": [180, 1.1, 0], "Shiny": [240, 1.2, 0.03] },
   "BlueTang": { "Anomaly": [120, 1, 0], "Shiny": [180, 1.15, 0.03] },
   "BabySunfish": { "Anomaly": [0, 1, -0.15, [200, 0.45]], "Shiny": [0, 1.15, 0.03, [45, 0.8]] },
+  "Lanternfish": { "Anomaly": [120, 1.05, 0.02], "Shiny": [0, 1.1, 0.14, [45, 0.85]] },
   "_colorMaps": {
     "Basic": { "Normal": "rbxassetid://78123515869414", "Anomaly": "rbxassetid://109716399108991", "Shiny": "rbxassetid://122310939672949" },
     "Big": { "Anomaly": "rbxassetid://77757889934537", "Shiny": "rbxassetid://125921896161201" },
@@ -24,6 +25,7 @@
     "PirateFish": { "Normal": "rbxassetid://76837327495535", "Anomaly": "rbxassetid://106089869843984", "Shiny": "rbxassetid://75123395235665" },
     "Catfish": { "Normal": "rbxassetid://129757555402705", "Anomaly": "rbxassetid://74578300329592", "Shiny": "rbxassetid://105055135846126" },
     "BlueTang": { "Normal": "rbxassetid://104040134895319", "Anomaly": "rbxassetid://111087086288488", "Shiny": "rbxassetid://73876633319361" },
-    "BabySunfish": { "Normal": "rbxassetid://118313287107044", "Anomaly": "rbxassetid://98165720003132", "Shiny": "rbxassetid://72128905120503" }
+    "BabySunfish": { "Normal": "rbxassetid://118313287107044", "Anomaly": "rbxassetid://98165720003132", "Shiny": "rbxassetid://72128905120503" },
+    "Lanternfish": { "Normal": "rbxassetid://137202914351402 (generated 1024, kept)", "Anomaly": "rbxassetid://72710673027243", "Shiny": "rbxassetid://91640410305441" }
   }
 }

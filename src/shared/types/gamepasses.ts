@@ -22,7 +22,7 @@ export interface GamePassConfig {
 	image: string;
 	/** Short value drawn over the icon by the game ("x2", "+50%"): uploaded icons carry no text. */
 	badge?: string;
-	/** Order on the Shop panel; undefined: sold from its quest line only (the companion passes, M4–M5). */
+	/** Order on the Shop panel; undefined: sold from its quest line only (the companion passes). */
 	shopOrder?: number;
 }
 
@@ -59,8 +59,20 @@ export const GAME_PASSES: Record<GamePass, GamePassConfig> = {
 		badge: "+50%",
 		shopOrder: 4,
 	},
-	WaterHenPass: { displayName: "Water Hen Pass", description: "", id: 0, image: "" },
-	SwordfishPass: { displayName: "Swordfish Pass", description: "", id: 0, image: "" },
+	// The companion passes (M4): sold from their quest line, they unlock its 3 upgrade quests; their picture is the
+	// companion's sticker (COMPANION_TYPES image)
+	WaterHenPass: {
+		displayName: "Water Hen Pass",
+		description: "Unlocks the Water Hen's quests: eggs hatch up to 35% faster with it.",
+		id: 2057906427,
+		image: "rbxassetid://106605624608137", // design/ui/companions/Companion_WaterHen.png
+	},
+	SwordfishPass: {
+		displayName: "Swordfish Pass",
+		description: "Unlocks the Swordfish's quests: it swims up to 2.2x as fast and grabs almost every coin.",
+		id: 2058734507,
+		image: "rbxassetid://94908996690740", // design/ui/companions/Companion_Swordfish.png
+	},
 	JellyfishPass: { displayName: "Jellyfish Pass", description: "", id: 0, image: "" },
 };
 

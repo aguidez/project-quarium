@@ -180,7 +180,8 @@ export function ShopBar(props: ShopBarProps) {
 				affordable={money >= price}
 				odds={config.odds}
 				hatchAt={eggs[0]}
-				hatchTime={config.hatchTime}
+				// At the speed the timers run at now (the Water Hen's): its progress bar keeps the progress made
+				hatchTime={config.hatchTime * (data?.incubationMultiplier ?? 1)}
 				eggCount={eggs.size()}
 				incubators={data?.incubators}
 				canBuyAnother={

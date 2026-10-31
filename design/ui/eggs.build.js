@@ -192,6 +192,27 @@ const EGGS = {
 				.join("") +
 			sparkle(30, 26, 6, "#FFFFFF") + sparkle(72, 24, 4, "#FFF3B0") + sparkle(50, 100, 4, "#FFFFFF"),
 	},
+	// Mariana Trench: midnight-blue shell fading to black, a band of dark basalt ridges, rows of glowing cyan
+	// photophores (the Lanternfish's) and violet specks of the deep
+	Trench: {
+		outline: "#050B1C",
+		defs: `<radialGradient id="shell" cx="0.38" cy="0.3" r="0.8">
+			<stop offset="0" stop-color="#9FC4FF"/><stop offset="0.45" stop-color="#2B4F9E"/><stop offset="1" stop-color="#0A1330"/>
+		</radialGradient>
+		<radialGradient id="dot" cx="0.5" cy="0.5" r="0.5">
+			<stop offset="0" stop-color="#FFFFFF"/><stop offset="0.4" stop-color="#7FF0FF"/><stop offset="1" stop-color="#7FF0FF" stop-opacity="0"/>
+		</radialGradient>`,
+		decor:
+			`<path d="M0 84 L10 74 L18 80 L28 68 L38 78 L48 70 L58 80 L68 66 L78 76 L88 70 L100 80 V120 H0 Z" fill="#141C33" stroke="#050B1C" stroke-width="1.5"/>` +
+			`<path d="M0 96 L14 88 L26 94 L40 86 L54 94 L66 88 L80 96 L92 90 L100 94 V120 H0 Z" fill="#0B1124"/>` +
+			[[20, 46], [30, 50], [40, 53], [50, 54], [60, 53], [70, 50], [80, 46], [28, 62], [40, 65], [52, 66], [64, 65], [76, 62]]
+				.map(([cx, cy]) => `<circle cx="${cx}" cy="${cy}" r="4.2" fill="url(#dot)"/><circle cx="${cx}" cy="${cy}" r="1.6" fill="#E8FDFF"/>`)
+				.join("") +
+			[[26, 100, 1.6], [58, 104, 1.3], [80, 98, 1.5], [44, 90, 1.2]]
+				.map(([cx, cy, r]) => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#C69CFF"/>`)
+				.join("") +
+			sparkle(30, 26, 6, "#FFFFFF") + sparkle(70, 30, 4, "#9CF7FF"),
+	},
 };
 
 function svg(body, defs = "") {

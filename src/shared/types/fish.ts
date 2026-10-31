@@ -11,6 +11,7 @@ export type FishType =
 	| "Catfish"
 	| "BlueTang"
 	| "BabySunfish"
+	| "Lanternfish"
 	| "FrenchFish";
 
 /** Rarity of a fish type, shown in the fish index, the egg odds and the hatch reveal. */
@@ -40,6 +41,7 @@ export type CoinType =
 	| "Chest"
 	| "Sapphire"
 	| "SunMedallion"
+	| "Nautilus"
 	| "Croissant";
 export const COIN_TYPES: readonly CoinType[] = [
 	"Bronze",
@@ -54,6 +56,7 @@ export const COIN_TYPES: readonly CoinType[] = [
 	"Chest",
 	"Sapphire",
 	"SunMedallion",
+	"Nautilus",
 	"Croissant",
 ];
 
@@ -300,6 +303,21 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 		scaleMax: 1.1,
 		speedMin: 1.2,
 		speedMax: 2.2,
+		hunger: DEFAULT_HUNGER,
+	},
+	// --- Rebirth 5 (ROADMAP M4): the Mariana Trench's species. Not the Abyss event's lantern fish (EventFish
+	// "LanternFish"): another look, photophores and no lure ---
+	Lanternfish: {
+		displayName: "Lanternfish",
+		rarity: "Legendary",
+		income: 156000, // 13,000/s
+		oceanPoints: 3200,
+		coin: "Nautilus",
+		incomeInterval: 12, // a little glowing darter: a shining nautilus shell now and then
+		scaleMin: 0.9,
+		scaleMax: 1.1,
+		speedMin: 2.6,
+		speedMax: 4.2,
 		hunger: DEFAULT_HUNGER,
 	},
 	// Easter egg (see EasterEggConfig): its coin is a croissant worth half the tank's income per minute

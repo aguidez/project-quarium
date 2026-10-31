@@ -63,11 +63,11 @@ class QuestServiceSingleton implements Lifecycle {
 	public onInit() {
 		DataService.registerAction("ClaimQuest", t.string, (player, questId) => this.claim(player, questId));
 		// The frozen coin is the onboarding's: quests only count what the player earns afterwards
-		CoinService.onCollected((player, frozen, value, byCompanion) => {
+		CoinService.onCollected((player, frozen, value, companion) => {
 			if (frozen) return;
 			this.addProgress(player, "CoinMoney", value);
-			// Only the Snail collects coins so far (the Swordfish will say which companion it was)
-			if (byCompanion) this.addProgress(player, "CompanionStat", 1, { companion: "Snail" });
+			// The Snail's or the Swordfish's pickups
+			if (companion) this.addProgress(player, "CompanionStat", 1, { companion });
 			this.reportGauges(player);
 		});
 		FishService.onFishSpawned((owner) => this.reportGauges(owner));

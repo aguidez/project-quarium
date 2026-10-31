@@ -1,0 +1,98 @@
+import { Janitor } from "@rbxts/janitor";
+import { CollectionService, RunService } from "@rbxts/services";
+import { Lifecycle } from "shared/framework";
+import { TAGS } from "shared/tags";
+
+// Water Hen: rocks from side to side and nods while it floats, faster and wider while it paddles
+const HEN_ROCK_FREQUENCY = 0.9; // rocks per second at rest
+const HEN_PADDLE_FREQUENCY = 2.2; // waddles per second while paddling
+const HEN_ROCK_ANGLE = math.rad(5); // roll at rest
+const HEN_PADDLE_ANGLE = math.rad(9); // roll while paddling
+const HEN_NOD_ANGLE = math.rad(4); // pitch: leans forward a little with each paddle
+const HEN_BOB = 0.06; // studs: a small extra bob on top of the server's
+const MOVING_SPEED = 0.4; // studs/s: faster than this, it is paddling
+const BLEND_RATE = 4; // how fast it eases between resting and paddling (per second)
+
+interface AnimatedCompanion {
+	body: BasePart;
+	mesh: BasePart;
+	lastPosition: Vector3;
+	paddle: number; // 0 resting, 1 paddling (eased)
+	phase: number; // radians
+	janitor: Janitor;
+}
+
+/**
+ * Small procedural animations of the companions that have no mesh deformation (the Swordfish swims through
+ * FishAnimationController). Purely visual and local: the server moves the model's anchored "Body"; here, the
+ * client unwelds its own copy of the "Mesh" and places it on the body every frame with a wobble.
+ */
+class CompanionAnimationControllerSingleton implements Lifecycle {
+	private companions = new Map<Instance, AnimatedCompanion>();
+
+	public onInit() {
+		CollectionService.GetInstanceAddedSignal(TAGS.Companion).Connect((model) => this.track(model));
+		CollectionService.GetInstanceRemovedSignal(TAGS.Companion).Connect((model) => this.untrack(model));
+		for (const model of CollectionService.GetTagged(TAGS.Companion)) this.track(model);
+	}
+
+	public onStart() {
+		print("[Client] CompanionAnimationController started.");
+		RunService.RenderStepped.Connect((dt) => {
+			for (const [, companion] of this.companions) this.animateHen(companion, dt);
+		});
+	}
+
+	private track(model: Instance) {
+		if (!model.IsA("Model") || model.GetAttribute("CompanionType") !== "WaterHen" || this.companions.has(model))
+			return;
+		task.spawn(() => {
+			const body = model.WaitForChild("Body", 10);
+			const mesh = model.WaitForChild("Mesh", 10);
+			if (!body?.IsA("BasePart") || !mesh?.IsA("BasePart") || !model.IsDescendantOf(game)) return;
+			if (!CollectionService.HasTag(model, TAGS.Companion)) return;
+			// Local only: the mesh follows the body from here, not through its weld
+			mesh.Anchored = true;
+			for (const child of mesh.GetChildren()) if (child.IsA("WeldConstraint")) child.Destroy();
+			const janitor = new Janitor();
+			this.companions.set(model, {
+				body,
+				mesh,
+				lastPosition: body.Position,
+				paddle: 0,
+				phase: math.random() * math.pi * 2,
+				janitor,
+			});
+			janitor.Add(model.AncestryChanged.Connect(() => !model.IsDescendantOf(game) && this.untrack(model)));
+		});
+	}
+
+	private untrack(model: Instance) {
+		const companion = this.companions.get(model);
+		if (!companion) return;
+		this.companions.delete(model);
+		companion.janitor.Destroy();
+	}
+
+	private animateHen(companion: AnimatedCompanion, dt: number) {
+		const { body, mesh } = companion;
+		if (dt <= 0) return;
+		const position = body.Position;
+		const offset = position.sub(companion.lastPosition);
+		const speed = new Vector3(offset.X, 0, offset.Z).Magnitude / dt;
+		companion.lastPosition = position;
+		const target = speed > MOVING_SPEED ? 1 : 0;
+		companion.paddle += (target - companion.paddle) * math.min(1, dt * BLEND_RATE);
+
+		const paddle = companion.paddle;
+		const frequency = HEN_ROCK_FREQUENCY + (HEN_PADDLE_FREQUENCY - HEN_ROCK_FREQUENCY) * paddle;
+		companion.phase = (companion.phase + dt * frequency * math.pi * 2) % (math.pi * 2);
+		const roll = math.sin(companion.phase) * (HEN_ROCK_ANGLE + (HEN_PADDLE_ANGLE - HEN_ROCK_ANGLE) * paddle);
+		// Head toward −Z: a negative pitch around X leans it forward, twice per waddle (once per foot)
+		const nod = -math.abs(math.sin(companion.phase)) * HEN_NOD_ANGLE * paddle;
+		const bob = math.sin(companion.phase * 2) * HEN_BOB;
+		mesh.CFrame = body.CFrame.mul(new CFrame(0, bob, 0)).mul(CFrame.Angles(nod, 0, roll));
+	}
+}
+
+export const CompanionAnimationController = new CompanionAnimationControllerSingleton();

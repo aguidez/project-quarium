@@ -2,7 +2,10 @@
 
 > Living map of the project. **Read it before exploring the code, and update it in the same change
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
-> Last updated: 2026-10-30 (V0.39, ROADMAP M3: gamepasses: GamePassService (ownership from Roblox at join, purchase prompt,
+> Last updated: 2026-10-31 (V0.40, ROADMAP M4: rebirth 5 → MarianaTrench theme, Lanternfish (Legendary) + Nautilus coin,
+> Trench egg, Ocean milestones 70,000–120,000, companions Water Hen (hatch x0.85 while equipped, floats on the surface) and
+> Swordfish (swims after the coins), their pass lines WaterHen / Swordfish (perks WaterHen1–3, Swordfish1–3), Voyage 8–9,
+> CoinService reports which companion collected, a `Water` style part in every theme; V0.39, ROADMAP M3: gamepasses: GamePassService (ownership from Roblox at join, purchase prompt,
 > "/pass" Studio command), ShopPanel + Shop side button, passes Third Companion Slot / x2 Ocean Points / Lucky / +50% Coins
 > with their effects, a BUY button on locked quests, tools/pass-icons.js (resvg); portable workspace: SETUP.md, workspace.local.json, cross-platform MCP launchers in tools/mcp, npm run doctor, docs/agent-notes; V0.38, ROADMAP M2: species Catfish / Blue Tang / Baby Sunfish (Epic) with coins Chest / Sapphire /
 > SunMedallion, Wreck and Atlantis eggs, rebirths 3–4 wired to the PirateWreck / Atlantis themes, Ocean milestones
@@ -20,18 +23,19 @@ money). An unfed fish never dies: it turns weak (very slow) and only lets out 1 
 coins. Around that core loop:
 
 - a story / daily / weekly quest book;
-- companions (the Snail picks up coins);
+- companions (the Snail picks up coins on the sand, the Swordfish in the water, the Pelican feeds, the Water Hen speeds
+  up hatching);
 - fish variants: every hatch can be an Anomaly (10 %), a Ghost (5 %) or a Shiny (1 %), rarer and richer;
 - a Fish Index (collection): one row per species, one column per variant;
 - the Ocean: release fish (the player picks the kind and the variant) for Ocean Points, a progression score that
   unlocks milestones (50: the Pelican companion, 100: Snail speed x1.15, 200: a second companion slot, 500: the
-  Pelican feeds x1.33 as often, every 7.5 s, 1,500: the tank holds 15 fish, 5,000: a second incubator, 8,000 / 25,000: 17 / 19 fish, 40,000: rare variants x1.5);
+  Pelican feeds x1.33 as often, every 7.5 s, 1,500: the tank holds 15 fish, 5,000: a second incubator, 8,000 / 25,000: 17 / 19 fish, 40,000: rare variants x1.5, 70,000: 21 fish, 85,000: the Water Hen, 120,000: the Swordfish);
 - events: recurring ones drawn by each server every 5–15 min (the abyssal raid: the world goes dark, a lantern
   fish steals coins) and admin ones started on every server (the K-pop music event); never during the tutorial;
 - likes between players: a board beside each tank, a like doubles the owner's coins for 5 min;
 - gamepasses, sold in the Shop panel (BALANCE.md §5.10, never part of the balance): Third Companion Slot, x2 Ocean
   Points (fish released / rebirths), Lucky (rare variants x2) and +50% Coins;
-- rebirths: restart the run for a permanent coin multiplier and a new aquarium theme (4 levels so far: Lagoon, Neon Coral, Pirate Wreck, Atlantis); while one is
+- rebirths: restart the run for a permanent coin multiplier and a new aquarium theme (5 levels so far: Lagoon, Neon Coral, Pirate Wreck, Atlantis, Mariana Trench); while one is
   affordable the Rebirth button pulses and a bubble reminds the player now and then;
 - easter eggs: secret fish hidden in every egg (the French Fish, see §3.4), their own Fish Index category.
 
@@ -101,9 +105,10 @@ ProjetQuarium/
 │  ├─ fish.build.js          → design/ui/fish/*.svg: Clownfish / ZebraDanio / FlameGourami icons
 │  ├─ fish/variants/         variant-spec.json (hue angles, uploaded texture ids) + the old flat variant icons
 │  ├─ fish/stickers/         Icon_<Type>_<Variant>.png: the UI's fish icons (sticker style), ids in theme.ts FISH_ICONS
-│  ├─ eggs.build.js          → design/ui/eggs/*.svg: egg sprites (whole, top/bottom halves, 3 cracks), Common → Atlantis
+│  ├─ eggs.build.js          → design/ui/eggs/*.svg: egg sprites (whole, top/bottom halves, 3 cracks), Common → Trench
 │  │                         (FigCraft shopbar.figcraft frames at y 460: Amazon / NeonCoral x 1200-1800, Wreck / Atlantis
-│  │                         x 2000-2700; imported, exported 2x, never saved there)
+│  │                         x 2000-2700; imported, exported 2x, never saved there). Trench (V0.40): PNG ×2 rendered with @resvg/resvg-js
+│  │                         (200×240) instead of FigCraft
 │  ├─ gate.build.js          Locked-gate icon of gated eggs
 │  │  (SVG → FigCraft file.import → export PNG ×2 → upload_image (local http server) → ids in theme.ts)
 │  └─ loading/               LoadingBanner.png (the user's beach banner) → LoadingBannerClean.png (baked bar erased)
@@ -125,7 +130,7 @@ ProjetQuarium/
 │                            Snail x1.15, Jellyfish and Swordfish stages. Not in the game: becomes the config when V1 is built
 ├─ tools/companion-sim.js    AFK simulator (node): share of fish-time weak with a feeder (Pelican, planned Jellyfish) per
 │                            tank size (mirrors CompanionService, FishService hunger, FoodService), share of coins a
-│                            collector picks up per coin rate (Snail on the sand, planned Swordfish in the water;
+│                            collector picks up per coin rate (Snail on the sand, Swordfish in the water: its live stages;
 │                            CoinService); `--plan` adds the plan's companion stages and upgrades
 ├─ tools/fish-variant-recolor.js  Hue rotation of a species' texture + icon into its Anomaly / Shiny looks (pipeline in its header);
 │                                optional tint [hue, saturation] for grey fish (Silver Angelfish); species without a flat
@@ -163,29 +168,37 @@ ProjetQuarium/
    │     ├─ playerData.ts    PlayerData shape + defaults + helpers (getTotalFish, getFishAndEggs, isEggUnlocked,
    │     │                   getHatchedVariant, getLivingVariant, getIncubating, hasFreeIncubator…), MAX_MONEY (1e15),
    │     │                   DEFAULT_INCUBATORS (1), getCompanionSlots (Ocean slots + the slot pass: use it, never
-   │     │                   companionSlots alone)
+   │     │                   companionSlots alone), getHatchMultiplier (Water Hen equipped: 0.85, or its perk's),
+   │     │                   syncIncubationSpeed (rescales the incubating timers to a new hatch speed, progress kept;
+   │     │                   run by DataService.sync, buyEgg and sanitizeSave; timers are server times, so the eggs
+   │     │                   keep the speed they had at the disconnection while offline)
    │     ├─ cosmetics.ts     CosmeticId / COSMETICS (kind Title / Decor / Finish): the V1 titles, decor and Pearl rims;
    │     │                   PlayerData.cosmetics. Not displayed yet (nothing grants them before M5 / M6)
    │     ├─ gamepasses.ts    GamePass / GAME_PASSES (name, shop text, Roblox id, icon, badge "x2"…, shopOrder: the four
-   │     │                   Shop passes; the companion passes of M4–M5 have no id yet), getShopPasses, getPassById,
+   │     │                   Shop passes; WaterHenPass id 2057906427 and SwordfishPass id 2058734507, sold from their quest
+   │     │                   line, picture = the companion's sticker; JellyfishPass (M5) has no id), getShopPasses, getPassById,
    │     │                   effects getPassCoinMultiplier (x1.5) / getPassOceanMultiplier (x2) / getPassVariantLuck
    │     │                   (x2) / getPassCompanionSlots (+1)
    │     ├─ quests.ts        QUESTS (Story1 Snail, Story2 Ocean, Story3–5 the Snail's line, Story6–8 the Pelican's line,
-   │     │                   Story9 then Voyage1–7 the main "Voyage" line), STORY_LINES (Start / Ocean / Rebirth (shown
-   │     │                   "Voyage") / Snail / Pelican: quests in
+   │     │                   Story9 then Voyage1–9 the main "Voyage" line, WaterHen1–3 / Swordfish1–3 the paid companion lines),
+   │     │                   STORY_LINES (Start / Ocean / Rebirth (shown "Voyage") / Snail / Pelican / WaterHen / Swordfish (both
+   │     │                   requiresCompanion + requiresPass): quests in
    │     │                   order, requires (a quest),
    │     │                   requiresCompanion, order), refreshStoryLines(lines, companions), getActiveStoryQuests,
    │     │                   isStoryQuestDone, getStoryLine, isQuestLocked (line `requiresPass`: shown, never counted
    │     │                   nor claimed without the pass); stats: counters CoinMoney, OceanPoints, EggsOpened,
-   │     │                   VariantHatched {variant}, FishReleased, CompanionStat {companion} (Snail coins, Pelican feeds),
+   │     │                   VariantHatched {variant}, FishReleased, CompanionStat {companion} (Snail / Swordfish coins, Pelican feeds,
+   │     │                   eggs opened with the Water Hen equipped),
    │     │                   gauges (GAUGE_STATS) FishInTank, MoneyHeld, SpeciesHatched {fishType}, Rebirths, IndexCells;
    │     │                   rewards Money / Companion / Feature / Perk / IncomeMinutes / OceanPoints / Title / Decor;
    │     │                   daily/weekly periods (UTC)
    │     ├─ perks.ts         Perk (CoinLinger1 +1 s, CoinLinger2 +2 s, CoinBounce, FishSatiety +15 s full, PelicanDouble
-   │     │                   2 pellets, PelicanCharges 2 charges), PERKS, COIN_BOUNCE_TIME (1.5 s), getGroundTimeBonus,
-   │     │                   hasCoinBounce, getSatietyBonus, getPelicanPellets, getPelicanCharges
-   │     ├─ companions.ts    CompanionType (Snail, Pelican), COMPANION_TYPES (+ sticker `image`), DEFAULT_COMPANION_SLOTS,
-   │     │                   PELICAN_FEED_INTERVAL
+   │     │                   2 pellets, PelicanCharges 2 charges, WaterHen1–3 hatch x0.78 / 0.72 / 0.65, Swordfish1–3 speed x1.4 / 1.8 /
+   │     │                   2.2 + reach 2.5 / 3 / 3.2), PERKS, COIN_BOUNCE_TIME (1.5 s), getGroundTimeBonus,
+   │     │                   hasCoinBounce, getSatietyBonus, getPelicanPellets, getPelicanCharges, getPerkHatchMultiplier,
+   │     │                   getSwordfishStats
+   │     ├─ companions.ts    CompanionType (Snail, Pelican, WaterHen, Swordfish), COMPANION_TYPES (+ sticker `image`),
+   │     │                   DEFAULT_COMPANION_SLOTS, PELICAN_FEED_INTERVAL, WATER_HEN_HATCH_MULTIPLIER (0.85)
    │     ├─ foodLooks.ts     FoodLook (Pellet, Shrimp), FOOD_LOOKS (min satiety bonus per look: 0, 15), getFoodLook:
    │     │                   the more a meal feeds (perks' satiety bonus), the more filling the food looks
    │     ├─ oceanRewards.ts  OCEAN_MILESTONES (id, points, title, description, reward: Companion / CompanionSlot /
@@ -200,7 +213,7 @@ ProjetQuarium/
    │     │                   recurring flag, EventSource, getRecurringEvents, getRecurringChance (minutes 5–15),
    │     │                   EVENT_IMMUNE_ATTRIBUTE + isEventImmune (tutorial)
    │     ├─ rebirths.ts      REBIRTHS (price, multiplier, start money, theme), AQUARIUM_THEMES (Basic, Lagoon,
-   │     │                   NeonCoral, PirateWreck, Atlantis: rebirths 1–4), getNextRebirth,
+   │     │                   NeonCoral, PirateWreck, Atlantis, MarianaTrench: rebirths 1–5), getNextRebirth,
    │     │                   getRebirthMultiplier, getAquariumTheme, getRebirthOceanPoints, rebirth balance notes
    │     ├─ likes.ts         Like rules (1 per hour given, x2 coins for 5 min, restarted by each like), board offset, helpers
    │     ├─ onboarding.ts    Onboarding steps + rules (what is allowed / free at each step), ONBOARDING_REWARD,
@@ -217,7 +230,7 @@ ProjetQuarium/
    │  ├─ saveData.ts         SaveData (profile: PlayerData + saved tank), SavedFish, SAVE_TEMPLATE, sanitizeSave
    │  └─ services/
    │     ├─ DataService      ProfileStore sessions (load, auto-save, final save, onLoaded / onSave hooks), sync(),
-   │     │                   notify(), registerAction(), money/fish helpers, resetSave (wipe + kick, see DevCommandService)
+   │     │                   notify(), registerAction() (sync() also runs syncIncubationSpeed), money/fish helpers, resetSave (wipe + kick, see DevCommandService)
    │     ├─ InteractionService  "Interact" remote: token bucket (10/s) shared by DropFood / CollectCoin
    │     ├─ AquariumService  Registers Studio tanks, assigns one per player, owner nameplate (base), runtime folders
    │     │                   (Fish/Food/Coins/Companions), focus reports ("SetFocus") + isTending / isAtOwnAquarium
@@ -227,7 +240,8 @@ ProjetQuarium/
    │     │                   look from the owner's satiety bonus (getFoodLook): Pellet = brown ball, others = clone of
    │     │                   a FoodTemplate MeshPart; random turn, then a slow 120° spin while sinking (CFrame tweens)
    │     ├─ CoinService      Spawns coin models (sinking, ground lifetime) and fart bubbles (spawnBubble: rise, pop at the
-   │     │                   surface, 1 $), collection + credit, onCollected callbacks, findCoinToFetch / collectForOwner (Snail), clearOwner,
+   │     │                   surface, 1 $), collection + credit, onCollected callbacks (with the companion that collected, if any),
+   │     │                   findCoinToFetch / collectForOwner(owner, coin, companion) (Snail, Swordfish), clearOwner,
    │     │                   findCoinToSteal / isCoinAlive / stealCoin (lantern fish: no credit, red "-X$" popup)
    │     ├─ FishService      Fish as data only (no server model): swim AI as SwimSegments, hunger (weak, never dies),
    │     │                   growth, coins / farts, cannibal eating, releases, beat coins, AFK freeze; easter egg fish:
@@ -235,7 +249,8 @@ ProjetQuarium/
    │     │                   clients that watch each tank ("WatchAquariums" → FishSync messages)
    │     ├─ EggService       BuyEgg / OpenEgg: price, gating, incubation (up to PlayerData.incubators eggs per type, the
    │     │                   soonest opens first), draw (or forceNextHatch, Studio tests), variant with getVariantLuck,
-   │     │                   quest stats EggsOpened / VariantHatched, reveal timing, then FishService.spawnFish;
+   │     │                   quest stats EggsOpened / VariantHatched (+ CompanionStat WaterHen when it is equipped), hatch time ×
+   │     │                   PlayerData.incubationMultiplier (the Water Hen's speed, applied live: see syncIncubationSpeed), reveal timing, then FishService.spawnFish;
    │     │                   isRevealing (a hatched fish not in the tank yet)
    │     ├─ OnboardingService  Drives onboarding steps from server facts; scripted first coin / first hunger; reward
    │     ├─ EventService     Events: recurring clock (per server), admin events ("/event <name>" / "/event stop",
@@ -256,7 +271,12 @@ ProjetQuarium/
    │     │                   charges (start full, +1 per interval while not full), spends one at once when a fish is
    │     │                   hungry (FishService.hasHungryFish) and no food is in the water, never throws otherwise;
    │     │                   publishes them on the Pelican model: attributes Charges, MaxCharges, NextChargeAt (server
-   │     │                   time, absent when full), ChargeInterval)
+   │     │                   time, absent when full), ChargeInterval); Water Hen AI (floats on the surface, a quarter of
+   │     │                   its height above it, bobs, paddles at 1.6 studs/s to spots in the front 45 % of the tank and
+   │     │                   rests; its ability is EggService's); Swordfish AI (swims anywhere in the water toward the
+   │     │                   coin findCoinToFetch picks with the surface as pickup height: 0.95 × the Snail's speed across
+   │     │                   the tank, dives / climbs at 6 studs/s to follow a sinking coin, grabs within reach 2 (perks
+   │     │                   Swordfish1–3: getSwordfishStats), cruises at 2 studs/s otherwise)
    │     ├─ QuestService     Progress from server stats (addProgress(stat, amount, subject {fishType, variant, companion});
    │     │                   reportGauges reads every gauge from PlayerData), claims, rewards (money / companion / feature /
    │     │                   perk / IncomeMinutes: minutes × FishService.getTankIncomePerMinute (at least one fish of the best
@@ -294,17 +314,21 @@ ProjetQuarium/
       │  │                   in the lobby, a "My aquarium" button at the same spot (FocusUi.GoToAquarium) puts the character
       │  │                   on the ground in the middle of its tank's focus zone, facing the glass, and enters the view;
       │  │                   "clarity" tween in the view: less atmosphere haze, clearer own GlassFront / Water (local only);
-      │  │                   6 studs of headroom above the tank while one of the player's companions is perched (Pelican)
+      │  │                   6 studs of headroom above the tank while one of the player's companions is perched (Pelican) or floats on
+      │  │                   the surface (Water Hen)
       │  ├─ AquariumInteractionController  Clicks in focus view → CollectCoin (coin under cursor) or DropFood
       │  ├─ FishRenderController  Builds / moves the local fish models of the watched tanks (own tank in 2.5D, else
       │  │                   tanks within 160 studs of the camera) from FishSync segments; growth, weak tint, exits;
       │  │                   a fish whose model (or rare variant texture) hasn't arrived waits in `pending` (kept up to
       │  │                   date by Swim / State), built when the asset arrives, in its normal look after 5 s
       │  ├─ FishIndicatorController  Hunger / AFK badges above fish (from attributes)
+      │  ├─ CompanionAnimationController  Local wobble of the Water Hen (unwelds its own copy of the Mesh and places it on
+      │  │                   the server-moved Body every frame: rocks side to side, faster and with a nod while it
+      │  │                   paddles); the Swordfish is animated by FishAnimationController (SWIMMING_COMPANIONS)
       │  ├─ PelicanChargesController  Charge gauge above the local player's on-demand Pelican (BillboardGui, local
       │  │                   child of its Body): one round slot per charge, a pellet when full, a pellet growing from
       │  │                   the centre while it refills, a pop when one is earned; hidden while MaxCharges is 0
-      │  ├─ FishAnimationController  EditableMesh swim deformation, shared per species, with camera LOD
+      │  ├─ FishAnimationController  EditableMesh swim deformation, shared per species, with camera LOD (also the Swordfish companion)
       │  │                   (own tank in 2.5D; else tanks on screen within 110 studs; max 6 species) + beat puffs
       │  ├─ IncomePopupController  Floating "+X$" / "-X$" / "+X Ocean" billboards (MoneyPopup remote)
       │  ├─ AudioController  Background music, event music crossfade, SFX (PlaySfx remote or UI)
@@ -388,14 +412,17 @@ ProjetQuarium/
     (glossy black ball, R 0.44, hiding the mesh's cartoon eye), a red Neon `Eye` iris and a black slit `Pupil`
     (SpecialMesh ellipsoids sunk into the shell, facing 20° forward of the side). Eye / Pupil glow with the lure);
   - `Companions/` (tag `CompanionTemplate`, attr `CompanionType`; root `Body` + welded `Mesh`, head −Z): `Snail`,
-    `Pelican` (generated mesh, 3.6×6.4×6 studs); `Lobby/` (decor);
+    `Pelican` (generated mesh, 3.6×6.4×6 studs), `Swordfish` (round blue-silver body, sail fin, short rounded bill,
+    4.9×4.1×6.5) and `WaterHen` (round moorhen, red and yellow beak, 3.2×3.9×4.6), both generated (V0.40, texture as
+    SurfaceAppearance); `Lobby/` (decor);
   - `Food/` (tag `FoodTemplate`, attr `FoodLook`; a single anchored MeshPart, its size is the food's): `Shrimp`
     (generated mesh, 0.46×0.95×0.82 studs, curled pink and white shrimp: food of the Hearty meals perk);
   - `LikeBoards/LikeBoard` (tag `LikeBoardTemplate`): driftwood lectern, PrimaryPart `Root` at ground level, front
     −Z, invisible `Board` part whose Front face carries the counter. LikeService clones it into each aquarium at
     `aquarium frame × LIKE_BOARD_OFFSET` (beside the front corner, outside the focus camera's frame);
   - `AquariumThemes/<Theme>` (tag `AquariumThemeTemplate`, attr `Theme`): PrimaryPart `Origin` = the tank frame,
-    `Style/` parts named like the tank's (Sand, Backdrop, Base, Plinth, Rim*: look + children such as the Lagoon's
+    `Style/` parts named like the tank's (Sand, Backdrop, Base, Plinth, Rim*, and since V0.40 `Water`: every theme has
+    one, the old ones with the tank's default 288cdc / 0.8 so a tank changing owner gets its water back; look + children such as the Lagoon's
     painted backdrop SurfaceGui copied onto the tank), `Decor/` cloned into the tank (all CanQuery off). `Basic` =
     the original look (the tanks' Studio `Decorations` are removed at runtime); `Lagoon` = rebirth 1: light sand,
     teal plinth, gold rims, painted backdrop, sandcastle / coral / rocks / starfish / shells (lobby props scaled down),
@@ -423,6 +450,14 @@ ProjetQuarium/
   `Crystal` (turquoise PointLight) in a ring of Neon `GlowTiles`, marble slabs with round Neon inlays, Lagoon corals and
   sea grass, gold / marble `Pebbles`, Bubbler. Deliberately absent (CLAUDE.md §7): cannons, skulls / Jolly Roger,
   swords, bottles / barrels, trident, faces, torches; inlays are discs, not crosses.
+- **Rebirth 5 content** (2026-10-31, V0.40): fish `Lanternfish` (slim midnight-blue body, rows of glowing cyan
+  photophores, no lure; 2.6 × 2.5 × 6 studs, generated 1024² texture kept as Normal), `FishVariants`
+  `Lanternfish_Anomaly` (crimson) / `_Shiny` (gold) at 512²; coin `NautilusShell` (CoinType Nautilus, white and teal
+  spiral shell, a clone of the SunMedallion template with its mesh swapped). Theme `MarianaTrench` ("Mariana
+  Trench", rebirth 5): blue-grey sand, Basalt base, Neon cyan plinth, steel Metal rims, darker `Water` (164c86 / 0.72),
+  `TrenchPainting` backdrop (deep-blue gradient, light shafts, two layers of dark ridges, glowing cyan / violet dots);
+  decor: generated columnar `Basalt` rock clusters (back corners, sides, back middle), three `GlassSponge`s, three
+  glowing `Anemone`s, Bubbler. Deliberately absent (CLAUDE.md §7): hydrothermal vents (smoke), bones.
 - **Easter egg content** (2026-10-30): fish `FrenchFish` (4.2 × 4.6 × 4.4 studs, round, beret / Breton shirt / red
   scarf / baguette on its back, generated 1024² texture, no FishVariants), coin `CroissantCoin` (CoinType Croissant,
   mesh tilted −50° on X so the crescent faces the glass, SurfaceAppearance Color 1/0.86/0.55 so it reads golden, not
@@ -450,7 +485,8 @@ ProjetQuarium/
   is the authority) using the saved fish for age / size / hunger (extra ones are newborn). Companions come back
   through CompanionService's refresh loop, the onboarding resumes at its saved step (its timers restart), eggs keep
   their absolute hatch time. Not saved: coins and food in the water, the frozen onboarding coin (dropped again).
-- **Offline rules.** Eggs keep incubating offline (absolute hatch time). A like boost is lost when its owner leaves.
+- **Offline rules.** Eggs keep incubating offline (absolute hatch time), at the speed they had at the disconnection
+  (a Water Hen left equipped keeps working). A like boost is lost when its owner leaves.
   Nothing else moves: no offline income or
   coins, and hunger and growth are frozen (saved as time left / age, like the AFK freeze). Events live on
   each server (ReplicatedStorage attributes) and are never saved: a player who rejoins gets whatever event that server
@@ -472,6 +508,7 @@ ProjetQuarium/
   | `hatchedVariants` | Of those, per type, the rare variants (no `Normal` key: normal = hatched − these; `getHatchedVariant`) |
   | `incubating` | Per egg type, the hatch times of its eggs (soonest first, at most `incubators`). Saves with one number per type are migrated by `sanitizeSave` (sanitizeIncubating) |
   | `incubators` | Eggs of the same type that can incubate at once (1; Ocean milestone kind `Incubator`), kept through rebirths |
+  | `incubationMultiplier` | Hatch speed the `incubating` timers run at (1, or the Water Hen's 0.85 / perk's): `syncIncubationSpeed` rescales them when `getHatchMultiplier` changes, the progress made is kept |
   | `eggsBought` | Eggs bought per type (unlocks the next egg) |
   | `onboarding` | Current onboarding step |
   | `capacity` | Max living fish in the tank |
@@ -562,7 +599,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   removes it ("Released" exit) and `onFishLeft` lets OceanService credit its Ocean Points (100) with the popup and a
   notice ("went off to join a protest"). Released by hand or at a rebirth like any fish.
 - **Coins.** `FishService.tick` (every 0.25 s) calls `dropCoin`, which uses `CoinService.spawnCoin`; the coin sinks
-  and expires 5 s after reaching the sand. A coin is collected by a click (`CollectCoin`) or by the Snail, and
+  and expires 5 s after reaching the sand. A coin is collected by a click (`CollectCoin`) or by the Snail / the Swordfish, and
   `credit()` then adds the money, fires `MoneyPopup` and runs the `onCollected` callbacks (quests, onboarding).
 - **Hunger.** A fish goes Satiated (30 s) → Hungry (15 s) → Weak (until fed; it never dies). A weak fish swims at
   35 % speed, is tinted dull on the client and, at its coin interval, farts a bubble instead of a coin
@@ -588,8 +625,9 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   feature get Saving Up done on load, and only it), then the Voyage quests (gauges: a goal already met completes as the
   quest opens): Freshwater Finds (a Flame Gourami → 5 min of income), Deeper Waters (rebirth 2 → 500 Ocean Points),
   Crown of the Reef (Imperial Discus → 5 min), Sunken Secrets (rebirth 3 → 1,500), Treasure of the Wreck (Catfish → 5
-  min), The Lost City (rebirth 4 → 4,000), Atlantean Sun (Baby Sunfish → 5 min) and the Snail's line (stat `CompanionStat` Snail: coins its Snail
-  picks up, `CoinService.onCollected`'s `byCompanion`): Story3 "Little Helper" (20) → perk CoinLinger1 (coins stay 1 s
+  min), The Lost City (rebirth 4 → 4,000), Atlantean Sun (Baby Sunfish → 5 min), Into the Deep (rebirth 5 → 10,000),
+  Light of the Deep (Lanternfish → 5 min) and the Snail's line (stat `CompanionStat` Snail: coins its Snail
+  picks up, `CoinService.onCollected`'s `companion`): Story3 "Little Helper" (20) → perk CoinLinger1 (coins stay 1 s
   longer on the sand), Story4 "Busy Snail" (100) → CoinLinger2 (+2 s more), Story5 "Snail Champion" (200) → CoinBounce
   (a coin reaching the sand hops 2.2 studs and lands in 1.5 s, then its ground timer starts: 5 s + the linger bonuses).
   The Pelican's line opens once the player owns the Pelican (`requiresCompanion`; QuestService's 5 s board loop
@@ -598,6 +636,12 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   stays full 15 s longer, FishService.feed), Story7 "Double Serving" (150) → PelicanDouble, Story8 "Pelican Chef" (500)
   → PelicanCharges (see CompanionService). Rough pace: ~8 min, ~13 min, ~40 min of tending (~17 with the 500-point
   Ocean upgrade).
+  The paid companion lines (V0.40) open once the companion is owned and stay locked without their pass
+  (`requiresPass`, the quest book shows a Buy button): Water Hen (`CompanionStat` WaterHen: eggs opened while it is
+  equipped, EggService) WaterHen1–3 "Nest Keeper" 50 / "Mother Hen" 150 / "Hatchery Queen" 400 → perks WaterHen1–3
+  (hatch x0.78 / 0.72 / 0.65 instead of 0.85); Swordfish (`CompanionStat` Swordfish: coins it grabs) Swordfish1–3
+  "Quick Catch" 300 / "Coin Hunter" 1,000 / "Swordfish Ace" 3,000 → perks Swordfish1–3 (speed x1.4 / 1.8 / 2.2, reach
+  2.5 / 3 / 3.2).
   Perk rewards go to `PlayerData.perks`; CoinService / FishService / CompanionService read them when needed.
 - **Ocean.** `ReleaseFish {fishType, variant}`: the server checks the feature, that one of that kind *and* variant
   is alive and that `MIN_FISH_KEPT` fish remain. It releases the one of them that earns the least: lowest growth
@@ -720,10 +764,10 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
      mesh cost almost nothing).
 - **Roblox moderation**: a "Firefighter" fish was dropped, its icon got the account a moderation warning (a nozzle in its
   mouth, read as a cigarette). Rules in CLAUDE.md §7.
-- **Not built yet**: the V1 content planned in BALANCE.md §5 and scheduled in ROADMAP.md (rebirths 5–8, eggs 9–12,
-  species 13–18, Ocean milestones above 40,000 with capacity up to 25, the Water Hen / Swordfish /
-  Jellyfish companions and their paid quest lines (their passes have no Roblox id yet), the Voyage quests after Atlantis; themes Mariana Trench, Volcanic Temple, Crystal
-  Caverns and Cosmic Sanctuary to build), daily / weekly quest content. Cosmetics (titles, decor, Pearl rims) are stored but not displayed: their looks
+- **Not built yet**: the V1 content planned in BALANCE.md §5 and scheduled in ROADMAP.md (rebirths 6–8, eggs 10–12,
+  species 14–18, Ocean milestones above 120,000 with capacity up to 25, the Jellyfish companion and its paid quest
+  line, the Voyage quests after the Mariana Trench; themes Volcanic Temple, Crystal Caverns and Cosmic Sanctuary to
+  build), daily / weekly quest content. Cosmetics (titles, decor, Pearl rims) are stored but not displayed: their looks
   come with the content that grants them. The shelf arrows show since V0.38 (8 eggs). The Pelican's and the Snail's Ocean upgrades have their V1 values since V0.36 (x1.33 /
   x1.15, ROADMAP M1). Kpop is the only admin event and Abyss the only recurring one (`recurring` in GAME_EVENTS).
 - **Admin events across servers** rely on MessagingService (best effort, a few seconds of delay; a server that misses

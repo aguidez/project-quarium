@@ -1,3 +1,4 @@
+import { Workspace } from "@rbxts/services";
 import { COMPANION_TYPES, CompanionType } from "shared/types/companions";
 import { isCosmeticId } from "shared/types/cosmetics";
 import { EGG_TYPES, EggType } from "shared/types/eggs";
@@ -13,6 +14,7 @@ import {
 	getCompanionSlots,
 	MAX_MONEY,
 	PlayerData,
+	syncIncubationSpeed,
 } from "shared/types/playerData";
 import {
 	getQuestConfig,
@@ -195,6 +197,9 @@ export function sanitizeSave(save: SaveData) {
 		if (data.companions.includes(companionType) && !equipped.includes(companionType)) equipped.push(companionType);
 	}
 	data.equippedCompanions = equipped;
+	// The eggs ran offline at the speed they had at the disconnection; from now on, at the speed of what is equipped
+	if (!typeIs(data.incubationMultiplier, "number") || !(data.incubationMultiplier > 0)) data.incubationMultiplier = 1;
+	syncIncubationSpeed(data, Workspace.GetServerTimeNow());
 	data.features = data.features.filter((f) => FEATURES[f] !== undefined);
 	data.cosmetics = data.cosmetics.filter((c, i) => isCosmeticId(c) && data.cosmetics.indexOf(c) === i);
 	data.tutorialsDone = data.tutorialsDone.filter((f) => FEATURES[f] !== undefined);

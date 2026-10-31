@@ -13,6 +13,7 @@ import { LikeBoardController } from "./controllers/LikeBoardController";
 import { MusicEventController } from "./controllers/MusicEventController";
 import { OnboardingController } from "./controllers/OnboardingController";
 import { PelicanChargesController } from "./controllers/PelicanChargesController";
+import { CompanionAnimationController } from "./controllers/CompanionAnimationController";
 import { UiController } from "./controllers/UiController";
 
 // Register all client controllers here
@@ -32,4 +33,5 @@ bootstrap([
 	AbyssEventController,
 	LikeBoardController,
 	PelicanChargesController,
+	CompanionAnimationController,
 ]);

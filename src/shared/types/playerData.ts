@@ -1,4 +1,4 @@
-import { CompanionType, DEFAULT_COMPANION_SLOTS } from "./companions";
+import { CompanionType, DEFAULT_COMPANION_SLOTS, WATER_HEN_HATCH_MULTIPLIER } from "./companions";
 import { CosmeticId } from "./cosmetics";
 import { EGG_TYPES, EggType } from "./eggs";
 import { Feature } from "./features";
@@ -6,7 +6,7 @@ import { DEFAULT_FISH_CAPACITY, FishType } from "./fish";
 import { OnboardingStep } from "./onboarding";
 import { createQuestsData, QuestsData } from "./quests";
 import { OceanRewardId } from "./oceanRewards";
-import { Perk } from "./perks";
+import { getPerkHatchMultiplier, Perk } from "./perks";
 import { FishVariant } from "./variants";
 import { GamePass, getPassCompanionSlots } from "./gamepasses";
 
@@ -31,6 +31,11 @@ export interface PlayerData {
 	 * `incubators` per type; older saves held one number per type (migrated by sanitizeSave).
 	 */
 	incubating: Partial<Record<EggType, number[]>>;
+	/**
+	 * Hatch speed the `incubating` timers run at now (getHatchMultiplier when they were last rescaled, see
+	 * syncIncubationSpeed): the Water Hen speeds up the eggs live, and they keep running at that speed offline.
+	 */
+	incubationMultiplier: number;
 	/** Eggs of the same type that can incubate at once (Ocean milestone "Incubator"), kept through rebirths. */
 	incubators: number;
 	/** Eggs bought so far, per type: buying one unlocks the next egg of the shop (see isEggUnlocked). */
@@ -90,10 +95,12 @@ export const DEFAULT_PLAYER_DATA: PlayerData = {
 		Catfish: 0,
 		BlueTang: 0,
 		BabySunfish: 0,
+		Lanternfish: 0,
 		FrenchFish: 0,
 	},
 	fishVariants: {},
 	incubating: {},
+	incubationMultiplier: 1,
 	incubators: DEFAULT_INCUBATORS,
 	eggsBought: {},
 	onboarding: "EnterView",
@@ -145,6 +152,35 @@ export function getLivingVariant(
 /** Companions that can be equipped at once: the Ocean slots, plus the Third Companion Slot pass. */
 export function getCompanionSlots(data: Pick<PlayerData, "companionSlots" | "passes">): number {
 	return data.companionSlots + getPassCompanionSlots(data.passes);
+}
+
+/** Hatch time of an egg bought now (x its EGG_TYPES time): shorter while the Water Hen is equipped. */
+export function getHatchMultiplier(data: Pick<PlayerData, "equippedCompanions" | "perks">): number {
+	if (!data.equippedCompanions.includes("WaterHen")) return 1;
+	return getPerkHatchMultiplier(data.perks) ?? WATER_HEN_HATCH_MULTIPLIER;
+}
+
+/**
+ * Rescales the incubating eggs' timers when the hatch speed changed (the Water Hen equipped or unequipped, one of its
+ * perks earned): what is left of each egg's hatching runs at the new speed, the progress made so far is kept, an egg
+ * already ready stays ready. Timers are server times, so they keep the speed they had at the disconnection while
+ * the player is offline. Returns whether anything changed.
+ */
+export function syncIncubationSpeed(
+	data: Pick<PlayerData, "incubating" | "incubationMultiplier" | "equippedCompanions" | "perks">,
+	now: number,
+): boolean {
+	const multiplier = getHatchMultiplier(data);
+	const previous = data.incubationMultiplier;
+	if (multiplier === previous) return false;
+	data.incubationMultiplier = multiplier;
+	if (!(previous > 0)) return true; // a broken save: its timers are kept as they are
+	for (const [, eggs] of pairs(data.incubating)) {
+		for (let i = 0; i < eggs.size(); i++) {
+			if (eggs[i] > now) eggs[i] = now + ((eggs[i] - now) * multiplier) / previous;
+		}
+	}
+	return true;
 }
 
 export function getTotalFish(data: PlayerData): number {

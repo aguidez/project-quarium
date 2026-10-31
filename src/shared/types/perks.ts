@@ -2,7 +2,19 @@
  * Perks: permanent bonuses earned through quests (kept through rebirths, like the quests themselves).
  * Their effects add up: CoinLinger1 + CoinLinger2 keep coins on the sand 3 s longer.
  */
-export type Perk = "CoinLinger1" | "CoinLinger2" | "CoinBounce" | "FishSatiety" | "PelicanDouble" | "PelicanCharges";
+export type Perk =
+	| "CoinLinger1"
+	| "CoinLinger2"
+	| "CoinBounce"
+	| "FishSatiety"
+	| "PelicanDouble"
+	| "PelicanCharges"
+	| "WaterHen1"
+	| "WaterHen2"
+	| "WaterHen3"
+	| "Swordfish1"
+	| "Swordfish2"
+	| "Swordfish3";
 
 export interface PerkConfig {
 	displayName: string;
@@ -22,6 +34,12 @@ export interface PerkConfig {
 	 * and spends one, right away, when a fish is hungry; it never throws food when no fish needs it.
 	 */
 	pelicanCharges?: number;
+	/** Hatch time (x the egg's) of the eggs bought with the Water Hen equipped, instead of its 0.85. */
+	hatchMultiplier?: number;
+	/** The Swordfish swims this many times the Snail's speed (instead of SWORDFISH_SPEED)... */
+	swordfishSpeed?: number;
+	/** ...and grabs coins from this far (studs, instead of SWORDFISH_REACH). */
+	swordfishReach?: number;
 }
 
 export const PERKS: Record<Perk, PerkConfig> = {
@@ -70,6 +88,59 @@ export const PERKS: Record<Perk, PerkConfig> = {
 		bounce: false,
 		pelicanCharges: 2,
 	},
+	// The Water Hen's line (Water Hen pass, BALANCE.md §5.9): eggs opened with it equipped
+	WaterHen1: {
+		displayName: "Swift hatching",
+		label: "-22%",
+		description: "With your Water Hen equipped, eggs hatch 22% faster.",
+		groundTimeBonus: 0,
+		bounce: false,
+		hatchMultiplier: 0.78,
+	},
+	WaterHen2: {
+		displayName: "Swift hatching II",
+		label: "-28%",
+		description: "With your Water Hen equipped, eggs hatch 28% faster.",
+		groundTimeBonus: 0,
+		bounce: false,
+		hatchMultiplier: 0.72,
+	},
+	WaterHen3: {
+		displayName: "Swift hatching III",
+		label: "-35%",
+		description: "With your Water Hen equipped, eggs hatch 35% faster.",
+		groundTimeBonus: 0,
+		bounce: false,
+		hatchMultiplier: 0.65,
+	},
+	// The Swordfish's line (Swordfish pass): coins it picks up
+	Swordfish1: {
+		displayName: "Quick fins",
+		label: "x1.4",
+		description: "Your Swordfish swims 1.4x as fast and reaches coins from further away.",
+		groundTimeBonus: 0,
+		bounce: false,
+		swordfishSpeed: 1.4,
+		swordfishReach: 2.5,
+	},
+	Swordfish2: {
+		displayName: "Quick fins II",
+		label: "x1.8",
+		description: "Your Swordfish swims 1.8x as fast and reaches coins from further away.",
+		groundTimeBonus: 0,
+		bounce: false,
+		swordfishSpeed: 1.8,
+		swordfishReach: 3,
+	},
+	Swordfish3: {
+		displayName: "Quick fins III",
+		label: "x2.2",
+		description: "Your Swordfish swims 2.2x as fast and reaches coins from further away.",
+		groundTimeBonus: 0,
+		bounce: false,
+		swordfishSpeed: 2.2,
+		swordfishReach: 3.2,
+	},
 };
 
 /** How long a coin's bounce lasts (up and down) when the player has CoinBounce. */
@@ -105,4 +176,28 @@ export function getPelicanCharges(perks: readonly Perk[]): number {
 
 export function hasCoinBounce(perks: readonly Perk[]): boolean {
 	return perks.some((perk) => PERKS[perk].bounce);
+}
+
+/** Hatch time multiplier of the Water Hen's perks (the lowest one wins), or undefined without any. */
+export function getPerkHatchMultiplier(perks: readonly Perk[]): number | undefined {
+	let best: number | undefined;
+	for (const perk of perks) {
+		const multiplier = PERKS[perk].hatchMultiplier;
+		if (multiplier !== undefined && (best === undefined || multiplier < best)) best = multiplier;
+	}
+	return best;
+}
+
+/** The Swordfish's speed (x the Snail's) and reach from its perks, defaults when it has none. */
+export function getSwordfishStats(
+	perks: readonly Perk[],
+	speed: number,
+	reach: number,
+): { speed: number; reach: number } {
+	for (const perk of perks) {
+		const config = PERKS[perk];
+		if (config.swordfishSpeed !== undefined) speed = math.max(speed, config.swordfishSpeed);
+		if (config.swordfishReach !== undefined) reach = math.max(reach, config.swordfishReach);
+	}
+	return { speed, reach };
 }

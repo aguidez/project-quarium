@@ -181,6 +181,15 @@ function snailRun(coinsPerSecond, { speed, ground: groundTime, pickup = PICKUP_H
 	return picked / Math.max(dropped, 1);
 }
 
+// Swordfish (live since V0.40, CompanionService SWORDFISH_SPEED / SWORDFISH_REACH, perks.ts Swordfish1–3): swims and grabs
+// the coins at any height; speeds are x the Snail's 3.6 studs/s, reach in studs
+const SWORDFISH_STAGES = [
+	{ name: "Swordfish (Ocean 120k, free)", speed: 0.95, ground: 9.5, pickup: WATER_Y, reach: 2 },
+	{ name: "+ pass quest 1: x1.4, reach 2.5", speed: 1.4, ground: 9.5, pickup: WATER_Y, reach: 2.5 },
+	{ name: "+ pass quest 2: x1.8, reach 3", speed: 1.8, ground: 9.5, pickup: WATER_Y, reach: 3 },
+	{ name: "+ pass quest 3: x2.2, reach 3.2", speed: 2.2, ground: 9.5, pickup: WATER_Y, reach: 3.2 },
+];
+
 function snail() {
 	const upgrade = plan.SNAIL_UPGRADE ?? 1.15; // Ocean milestone "Faster Snail" (oceanRewards.ts)
 	const STAGES = [
@@ -189,7 +198,7 @@ function snail() {
 		{ name: "+ Lasting coins II +2 s (quest 100)", speed: 1, ground: 8 },
 		{ name: "+ Bouncy coins (quest 200)", speed: 1, ground: 9.5 },
 		{ name: `+ Faster Snail x${upgrade} (Ocean 100)`, speed: upgrade, ground: 9.5 },
-		...(plan.SNAIL_STAGES || []),
+		...(plan.SNAIL_STAGES || SWORDFISH_STAGES),
 	];
 	// coins per second of a tank: e.g. 10 Guppies 2.5/s, 15 Discus 0.6/s, 15 Pirates 3/s
 	const RATES = [0.25, 0.5, 1, 1.5, 2, 3, 4];

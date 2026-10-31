@@ -1,5 +1,5 @@
 import ProfileStore from "@rbxts/profile-store";
-import { Players } from "@rbxts/services";
+import { Players, Workspace } from "@rbxts/services";
 import { t } from "@rbxts/t";
 import { Lifecycle } from "shared/framework";
 import { getRemoteEvent, NotifyKind } from "shared/network";
@@ -8,7 +8,7 @@ import { EggType } from "shared/types/eggs";
 import { Feature } from "shared/types/features";
 import { FishType } from "shared/types/fish";
 import { OnboardingStep } from "shared/types/onboarding";
-import { getTotalFish, MAX_MONEY, PlayerData } from "shared/types/playerData";
+import { getTotalFish, MAX_MONEY, PlayerData, syncIncubationSpeed } from "shared/types/playerData";
 import { FishVariant } from "shared/types/variants";
 import { SAVE_TEMPLATE, SaveData, sanitizeSave } from "../saveData";
 
@@ -152,9 +152,15 @@ class DataServiceController implements Lifecycle {
 		return this.profiles.get(player)?.Data;
 	}
 
+	/**
+	 * Sends the player's data to their client. Every change goes through here, so it also rescales the eggs'
+	 * timers when the hatch speed changed (syncIncubationSpeed: the Water Hen acts live).
+	 */
 	public sync(player: Player) {
 		const data = this.getData(player);
-		if (data) this.syncRemote.FireClient(player, data);
+		if (!data) return;
+		syncIncubationSpeed(data, Workspace.GetServerTimeNow());
+		this.syncRemote.FireClient(player, data);
 	}
 
 	public notify(player: Player, message: string, kind: NotifyKind = "warning") {
