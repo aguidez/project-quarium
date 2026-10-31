@@ -4,8 +4,11 @@ import { formatCountdown, LIKE_BOOST_DURATION, LIKE_BOOST_MULTIPLIER } from "sha
 import { formatNumber } from "./Panel";
 import { COLORS, FONT_BLACK, FONT_BOLD, LIKE_COLORS, verticalGradient } from "./theme";
 
-/** The board's 3.6 × 2.2 stud face is drawn at this density: the FigCraft design's 360 × 220 px. */
-export const BOARD_PIXELS_PER_STUD = 100;
+/**
+ * Width in pixels of the board's face (the FigCraft design's 360 × 220 px): the SurfaceGui's density follows the
+ * "Board" part's real size, so the board can be scaled in Studio without touching the layout.
+ */
+export const BOARD_CANVAS_WIDTH = 360;
 
 export interface LikeBoardProps {
 	/** Likes of the aquarium's owner; undefined while the aquarium is free. */

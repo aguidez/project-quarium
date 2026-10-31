@@ -49,6 +49,11 @@ export const TAGS = {
 	/** Studio-made companion model in ServerStorage.Assets, laid out like a FishTemplate. Attribute "CompanionType". */
 	CompanionTemplate: "CompanionTemplate",
 	/**
+	 * The fisherman selling the gamepasses in his hut on the beach (Workspace.Lobby.FishingHut, built in Studio): a
+	 * Model with a PrimaryPart. Walking up to him opens the Shop panel (ShopKeeperController, client only).
+	 */
+	ShopKeeper: "ShopKeeper",
+	/**
 	 * Studio-made food look in ServerStorage.Assets.Food: a single anchored MeshPart (its size is the
 	 * food's size). Attribute "FoodLook". The default pellet (FoodLook "Pellet") has none: it is a ball.
 	 */

@@ -7,7 +7,7 @@ import { getRemoteEvent } from "shared/network";
 import { TAGS } from "shared/tags";
 import { formatCountdown, getNextLikeAt, LIKE_PROMPT_RANGE } from "shared/types/likes";
 import { PlayerData } from "shared/types/playerData";
-import { BOARD_PIXELS_PER_STUD, LikeBoard } from "client/ui/LikeBoard";
+import { BOARD_CANVAS_WIDTH, LikeBoard } from "client/ui/LikeBoard";
 
 const PROMPT_UPDATE_INTERVAL = 1; // seconds between two refreshes of the prompts' texts (cooldown)
 const BOARD_MAX_DISTANCE = 90; // studs: farther boards aren't drawn
@@ -76,7 +76,7 @@ class LikeBoardControllerSingleton implements Lifecycle {
 		gui.Adornee = board;
 		gui.Face = Enum.NormalId.Front;
 		gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud;
-		gui.PixelsPerStud = BOARD_PIXELS_PER_STUD;
+		gui.PixelsPerStud = BOARD_CANVAS_WIDTH / board.Size.X;
 		gui.LightInfluence = 0.3;
 		gui.MaxDistance = BOARD_MAX_DISTANCE;
 		gui.ResetOnSpawn = false;

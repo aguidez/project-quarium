@@ -14,7 +14,7 @@ export const LIKE_BOOST_MULTIPLIER = 2; // coin value multiplier while boosted
 export const LIKE_RANGE = 14;
 export const LIKE_PROMPT_RANGE = 10;
 /** The board stands beside the tank's front corner, on the right of a player facing the glass (aquarium frame). */
-export const LIKE_BOARD_OFFSET = new CFrame(-28.5, -1, -8);
+export const LIKE_BOARD_OFFSET = new CFrame(-30.6, -1, -8);
 
 /** When the player may give their next like (Workspace.GetServerTimeNow() time). */
 export function getNextLikeAt(data: PlayerData): number {

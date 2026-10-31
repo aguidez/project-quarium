@@ -2,7 +2,9 @@
 
 > Living map of the project. **Read it before exploring the code, and update it in the same change
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
-> Last updated: 2026-10-31 (V0.40, ROADMAP M4: rebirth 5 → MarianaTrench theme, Lanternfish (Legendary) + Nautilus coin,
+> Last updated: 2026-10-31 (V0.41: the shop moves into the lobby: Workspace.Lobby.FishingHutEast / FishingHutWest (hut +
+> fisherman tagged ShopKeeper + SHOP sign) at both ends of the central aisle, ShopKeeperController opens the Shop panel at
+> the counter, no Shop side button; like boards x1.8 (LIKE_BOARD_OFFSET x −30.6); spawn moved to x 100, Welcome sign to the north end, south Boundary fixed; V0.40, ROADMAP M4: rebirth 5 → MarianaTrench theme, Lanternfish (Legendary) + Nautilus coin,
 > Trench egg, Ocean milestones 70,000–120,000, companions Water Hen (hatch x0.85 while equipped, floats on the surface) and
 > Swordfish (swims after the coins), their pass lines WaterHen / Swordfish (perks WaterHen1–3, Swordfish1–3), Voyage 8–9,
 > CoinService reports which companion collected, a `Water` style part in every theme; V0.39, ROADMAP M3: gamepasses: GamePassService (ownership from Roblox at join, purchase prompt,
@@ -322,6 +324,10 @@ ProjetQuarium/
       │  │                   a fish whose model (or rare variant texture) hasn't arrived waits in `pending` (kept up to
       │  │                   date by Swim / State), built when the asset arrives, in its normal look after 5 s
       │  ├─ FishIndicatorController  Hunger / AFK badges above fish (from attributes)
+      │  ├─ ShopKeeperController  The fisherman's shop (tag ShopKeeper): isNearby / onNearbyChanged (opens within 9 studs:
+      │  │                   at the counter, not at the spawn ~13 studs away; closes beyond 12; the nearest of the huts), read by UiController → App `shopNearby` (opens / closes the Shop panel;
+      │  │                   closed by hand it stays closed until the player comes back); turns him toward a player
+      │  │                   nearby (yaw ≤ 55°) and makes him breathe (local PivotTo)
       │  ├─ CompanionAnimationController  Local wobble of the Water Hen (unwelds its own copy of the Mesh and places it on
       │  │                   the server-moved Body every frame: rocks side to side, faster and with a nod while it
       │  │                   paddles); the Swordfish is animated by FishAnimationController (SWIMMING_COMPANIONS)
@@ -360,7 +366,7 @@ ProjetQuarium/
          ├─ RewardPopup      Reward celebration (money / companion / feature)
          ├─ EventBanner      Running event banner (style per event kind: beat flashes / slow glow; FigCraft EventBanner,
          │                   EventBannerAbyss) + one Studio test button per event (TEST_EVENT_ORDER)
-         ├─ SideButtons      Left menu (3D squares, icon + label inside the face): Quests, Companions (once one is owned), Fish Index, Ocean (once unlocked), Rebirth, Shop
+         ├─ SideButtons      Left menu (3D squares, icon + label inside the face): Quests, Companions (once one is owned), Fish Index, Ocean (once unlocked), Rebirth (no Shop since V0.41: the shop is the fisherman's hut)
          │                   (gold halo pulsing + "!" while affordable, "REBIRTH READY!" bubble driven by App: when it
          │                   becomes affordable, then every 4 min while it stays so, 8 s each) + coach bubbles
          │                   (Quests: story quest hint after the onboarding; Ocean: just unlocked) and the "AQUARIUM FULL"
@@ -384,6 +390,7 @@ ProjetQuarium/
          ├─ ShopPanel        Gamepass shop: a 2x2 grid of cards (icon slot in the pass's colour + badge "x2" / "+50%"
          │                   drawn in game, name, text, button). Prices read on the client with GetProductInfo (cached for
          │                   the session): "R$ <price>", "SOON" when Roblox says off sale (or no id), "OWNED" (gold)
+         │                   Opened by walking up to the fisherman's hut (App `shopNearby`, ShopKeeperController)
          ├─ LikeBoard        Face of a like board (likes, "a like = x2" hint or boost countdown), mounted by LikeBoardController
          ├─ RebirthPanel     Rebirth menu: multiplier hero, what is lost / earned (Ocean Points preview), progress, 2-click confirm
          ├─ LikeBoostPill    The owner's own boost ("Liked! Coins x2 4:32"), under the top HUD
@@ -394,7 +401,13 @@ ProjetQuarium/
 - **`Workspace.Lobby`**: 6 `Aquarium` models (Aquarium1–6 at x = −64 / 0 / 64, z = ±16). Each has a PrimaryPart
   `Base`, an `AquariumWater` part and the Studio `Decorations` (basic theme). The owner's nameplate is a SurfaceGui
   `OwnerPlate` that AquariumService adds on the Base's front face (brass, like the capacity plaque; disabled while
-  the tank is free). Plus the beach decor.
+  the tank is free). Plus the beach decor, and since V0.41 two identical fishing huts, the shop, at both ends of the
+  central aisle between the two rows of tanks: `FishingHutEast` (113, 0, 0), right behind the spawn, facing −X, and
+  `FishingHutWest` (−113, 0, 0), facing +X. Each: `Hut` (generated driftwood shack, teal planks, counter window,
+  13.9 × 16 × 13.8, anchored), `Fisherman` (generated shopkeeper in a yellow raincoat, 6.2 studs, raised behind the
+  counter, no collision; tag `ShopKeeper`, PrimaryPart = its MeshPart), `SignAnchor` (a BillboardGui "SHOP" plate in the
+  V2 pink). For them the `LobbySpawn` and its painted sun moved 8 studs west (x 100) and the `WelcomeSign` with its two
+  tiki torches went to the north end of the promenade (108, 0, 64), facing the spawn.
 - **`ServerStorage.Assets.Fish`** (moved from ReplicatedStorage on 2026-10-30, V0.37; tag `FishTemplate`, attr
   `FishType`; invisible root `Body` + welded `Mesh` with a SurfaceAppearance, head toward −Z): the server reads their
   size and copies a species into `ReplicatedStorage.Assets.Fish` while one swims on the server (server/fishAssets),
@@ -417,7 +430,8 @@ ProjetQuarium/
     SurfaceAppearance); `Lobby/` (decor);
   - `Food/` (tag `FoodTemplate`, attr `FoodLook`; a single anchored MeshPart, its size is the food's): `Shrimp`
     (generated mesh, 0.46×0.95×0.82 studs, curled pink and white shrimp: food of the Hearty meals perk);
-  - `LikeBoards/LikeBoard` (tag `LikeBoardTemplate`): driftwood lectern, PrimaryPart `Root` at ground level, front
+  - `LikeBoards/LikeBoard` (tag `LikeBoardTemplate`): driftwood lectern (scaled x1.8 in V0.41: 7.2 × 7.1 studs, board face
+    6.5 × 4; the SurfaceGui density is BOARD_CANVAS_WIDTH / the Board's width, so it can be rescaled freely), PrimaryPart `Root` at ground level, front
     −Z, invisible `Board` part whose Front face carries the counter. LikeService clones it into each aquarium at
     `aquarium frame × LIKE_BOARD_OFFSET` (beside the front corner, outside the focus camera's frame);
   - `AquariumThemes/<Theme>` (tag `AquariumThemeTemplate`, attr `Theme`): PrimaryPart `Origin` = the tank frame,

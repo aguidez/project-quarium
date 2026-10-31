@@ -43,8 +43,6 @@ export interface SideButtonsProps {
 	 * the Ocean is still the reward of "Full House".
 	 */
 	fullReminder?: "Ocean" | "Quests";
-	/** The gamepass shop (once the tutorial is over, like every menu). */
-	onShop: () => void;
 }
 
 const FULL_TITLE = "AQUARIUM FULL";
@@ -230,7 +228,7 @@ function SideButton(props: {
 	);
 }
 
-/** Left-edge menu buttons (FigCraft redesign-v2: SideButtons): quests, companions, fish index, Ocean, rebirth, shop. */
+/** Left-edge menu buttons (FigCraft redesign-v2: SideButtons): quests, companions, fish index, Ocean, rebirth (the shop is the fisherman's hut on the beach). */
 export function SideButtons(props: SideButtonsProps) {
 	const viewport = Workspace.CurrentCamera?.ViewportSize;
 	const scale = viewport ? math.clamp(viewport.Y / REFERENCE_HEIGHT, 0.7, 1.3) : 1;
@@ -336,13 +334,6 @@ export function SideButtons(props: SideButtonsProps) {
 					onClick={props.onRebirth}
 				/>
 			)}
-			<SideButton
-				order={6}
-				palette={PALETTES.pink}
-				image={V2_IMAGES.iconShop}
-				label="Shop"
-				onClick={props.onShop}
-			/>
 		</frame>
 	);
 }

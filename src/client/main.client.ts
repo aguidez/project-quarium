@@ -14,6 +14,7 @@ import { MusicEventController } from "./controllers/MusicEventController";
 import { OnboardingController } from "./controllers/OnboardingController";
 import { PelicanChargesController } from "./controllers/PelicanChargesController";
 import { CompanionAnimationController } from "./controllers/CompanionAnimationController";
+import { ShopKeeperController } from "./controllers/ShopKeeperController";
 import { UiController } from "./controllers/UiController";
 
 // Register all client controllers here
@@ -34,4 +35,5 @@ bootstrap([
 	LikeBoardController,
 	PelicanChargesController,
 	CompanionAnimationController,
+	ShopKeeperController,
 ]);

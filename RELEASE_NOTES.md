@@ -10,6 +10,23 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.41 — 2026-10-31
+
+**New**
+- **The fisherman's huts**: the Shop moves onto the beach, into two fishing huts at both ends of the central aisle
+  (look for the pink SHOP signs), one right behind the spawn. Walk up to the old fisherman's counter and his shop
+  opens; walk away and it closes. He turns to greet you as you come close.
+
+**Changes**
+- The Shop button is gone from the left menu: one button less on the screen.
+- The spawn moved a few steps toward the aquariums, and the Welcome sign to the north end of the boardwalk.
+- The like boards beside the aquariums are almost twice as big, so they are easier to spot.
+
+**Fixes**
+- An invisible wall cut the lobby in two in front of the middle aquariums (a map boundary turned the wrong way).
+
+---
+
 ## V0.40 — 2026-10-31
 
 **New**

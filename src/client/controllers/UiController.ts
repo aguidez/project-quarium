@@ -17,6 +17,7 @@ import { FISH_ICONS } from "client/ui/theme";
 import { AudioController } from "./AudioController";
 import { LikeBoardController } from "./LikeBoardController";
 import { MusicEventController } from "./MusicEventController";
+import { ShopKeeperController } from "./ShopKeeperController";
 
 const isEggHatch = t.interface({
 	eggType: t.keyOf(EGG_TYPES),
@@ -79,6 +80,7 @@ class UiControllerSingleton implements Lifecycle {
 		});
 		MusicEventController.onEventChanged(() => this.render());
 		LikeBoardController.onOwnBoostChanged(() => this.render());
+		ShopKeeperController.onNearbyChanged(() => this.render());
 		this.render();
 	}
 
@@ -132,6 +134,7 @@ class UiControllerSingleton implements Lifecycle {
 				playSfx: (name, playbackSpeed) => AudioController.play(name, playbackSpeed),
 				event: MusicEventController.getEvent(),
 				likeBoostEndsAt: LikeBoardController.getOwnBoostEndsAt(),
+				shopNearby: ShopKeeperController.isNearby(),
 				subscribeBeat: (listener) => MusicEventController.onBeat(listener),
 				// Intents only: the server checks the quest is complete / the companion is owned and a slot is free
 				onClaimQuest: (questId: string) => this.actionRemote.FireServer("ClaimQuest", questId),

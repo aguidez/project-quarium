@@ -71,6 +71,8 @@ export interface AppProps {
 	onClaimOceanReward: (id: OceanRewardId) => void;
 	onRebirth: () => void;
 	onBuyPass: (pass: GamePass) => void;
+	/** The player stands at the fisherman's counter on the beach: the Shop panel opens (ShopKeeperController). */
+	shopNearby: boolean;
 }
 
 type MenuPanel = "Quests" | "Companions" | "FishIndex" | "Ocean" | "Rebirth" | "Shop";
@@ -123,6 +125,12 @@ export function App(props: AppProps) {
 	const { centerX, scale } = useBarPlacement();
 	const [openPanel, setOpenPanel] = useState<MenuPanel>();
 	const data = props.data;
+	// The shop lives in the fisherman's hut: it opens as the player walks up to him and closes as they leave (closed
+	// by hand, it stays closed until they come back)
+	useEffect(() => {
+		if (props.shopNearby) setOpenPanel("Shop");
+		else setOpenPanel((panel) => (panel === "Shop" ? undefined : panel));
+	}, [props.shopNearby]);
 	// The menus show up once the tutorial is over, so they never distract from it
 	const menusVisible = data !== undefined && isOnboardingDone(data.onboarding);
 	const oceanUnlocked = data !== undefined && data.features.includes("Ocean");
@@ -328,7 +336,6 @@ export function App(props: AppProps) {
 							: undefined
 					}
 					fullReminder={openPanel === undefined ? fullReminder : undefined}
-					onShop={() => setOpenPanel("Shop")}
 				/>
 			)}
 			{menusVisible && openPanel === "Quests" && (
