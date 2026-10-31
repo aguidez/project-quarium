@@ -2,9 +2,16 @@ import { CollectionService, Players, TweenService, Workspace } from "@rbxts/serv
 import { t } from "@rbxts/t";
 import { Lifecycle } from "shared/framework";
 import { TAGS } from "shared/tags";
-import { COMPANION_TYPES, CompanionType, PELICAN_FEED_INTERVAL } from "shared/types/companions";
+import {
+	COMPANION_TYPES,
+	CompanionType,
+	JELLYFISH_CHARGES,
+	JELLYFISH_FEED_INTERVAL,
+	JELLYFISH_PELLETS,
+	PELICAN_FEED_INTERVAL,
+} from "shared/types/companions";
 import { getCompanionMultiplier } from "shared/types/oceanRewards";
-import { getPelicanCharges, getPelicanPellets, getSwordfishStats } from "shared/types/perks";
+import { getJellyfishStats, getPelicanCharges, getPelicanPellets, getSwordfishStats } from "shared/types/perks";
 import { isOnboardingDone } from "shared/types/onboarding";
 import { getCompanionSlots } from "shared/types/playerData";
 import { loadTemplates, scaleModel } from "../templates";
@@ -66,6 +73,16 @@ const SWORDFISH_TURN = 0.45;
 const SWORDFISH_REST_MIN = 0.5;
 const SWORDFISH_REST_MAX = 2;
 
+// Jellyfish: drifts in the top of the water and feeds on demand like a maxed Pelican (BALANCE.md §5.8): with a charge
+// ready and a hungry fish, it swoops over the fish and lets its pellets go (they sink straight down from it)
+const JELLYFISH_TOP_SHARE = 0.35; // stays in this top share of the water
+const JELLYFISH_DRIFT_SPEED = 1.1; // studs/s
+const JELLYFISH_SWOOP_SPEED = 9; // studs/s toward a hungry fish
+const JELLYFISH_SWOOP_MIN_TIME = 0.35;
+const JELLYFISH_PELLET_SPREAD = 1.4; // studs between the pellets of one feed
+const JELLYFISH_PELLET_DELAY = 0.12;
+const JELLYFISH_AFTER_FEED = 0.4; // hangs there a moment before drifting on
+
 interface CompanionEntity {
 	owner: Player;
 	companionType: CompanionType;
@@ -93,6 +110,7 @@ class CompanionServiceSingleton implements Lifecycle {
 		Pelican: (entity) => this.pelicanLoop(entity),
 		WaterHen: (entity) => this.waterHenLoop(entity),
 		Swordfish: (entity) => this.swordfishLoop(entity),
+		Jellyfish: (entity) => this.jellyfishLoop(entity),
 	};
 
 	public onInit() {
@@ -218,9 +236,14 @@ class CompanionServiceSingleton implements Lifecycle {
 		if (companionType === "Pelican") {
 			// Pops in on its perch on the back rim, facing the glass (the tank's LookVector)
 			model.PivotTo(this.getPerch(entity));
-		} else if (companionType === "WaterHen" || companionType === "Swordfish") {
+		} else if (companionType === "WaterHen" || companionType === "Swordfish" || companionType === "Jellyfish") {
 			// On the surface / in the water, somewhere along the front of the tank, facing sideways
-			const start = companionType === "WaterHen" ? this.randomSurfacePoint(entity) : this.randomWaterPoint(entity);
+			const start =
+				companionType === "WaterHen"
+					? this.randomSurfacePoint(entity)
+					: companionType === "Jellyfish"
+						? this.randomJellyfishPoint(entity)
+						: this.randomWaterPoint(entity);
 			const side = aquarium.cframe.RightVector.mul(this.rng.NextNumber() < 0.5 ? 1 : -1);
 			model.PivotTo(CFrame.lookAt(start, start.add(side)));
 		} else {
@@ -241,7 +264,7 @@ class CompanionServiceSingleton implements Lifecycle {
 			} else if (companionType === "WaterHen") {
 				const position = body.Position;
 				model.PivotTo(body.CFrame.add(new Vector3(0, this.surfaceY(entity) - position.Y, 0)));
-			} else if (companionType === "Swordfish") {
+			} else if (companionType === "Swordfish" || companionType === "Jellyfish") {
 				// Already in the water
 			} else {
 				const position = body.Position;
@@ -413,9 +436,14 @@ class CompanionServiceSingleton implements Lifecycle {
 	 * (PelicanChargesController): "Charges", "MaxCharges" (0: feeds on a timer, no gauge), and while
 	 * it isn't full "NextChargeAt" (server time) and "ChargeInterval". Only written when they change.
 	 */
-	private showCharges(entity: CompanionEntity, charges: number, maxCharges: number, chargeAt: number) {
+	private showCharges(
+		entity: CompanionEntity,
+		charges: number,
+		maxCharges: number,
+		chargeAt: number,
+		interval = this.getFeedInterval(entity.owner),
+	) {
 		const model = entity.model;
-		const interval = this.getFeedInterval(entity.owner);
 		if (model.GetAttribute("Charges") !== charges) model.SetAttribute("Charges", charges);
 		if (model.GetAttribute("MaxCharges") !== maxCharges) model.SetAttribute("MaxCharges", maxCharges);
 		if (model.GetAttribute("ChargeInterval") !== interval) model.SetAttribute("ChargeInterval", interval);
@@ -457,7 +485,7 @@ class CompanionServiceSingleton implements Lifecycle {
 		for (let i = 0; i < pellets; i++) {
 			// Spread sideways around the target (seen from the front)
 			const side = (i - (pellets - 1) / 2) * PELICAN_PELLET_SPREAD;
-			FoodService.throwFood(entity.owner, beak, target.add(entity.aquarium.cframe.RightVector.mul(side)));
+			FoodService.throwFood(entity.owner, beak, target.add(entity.aquarium.cframe.RightVector.mul(side)), "Pelican");
 			if (i < pellets - 1) task.wait(PELICAN_PELLET_DELAY);
 		}
 		this.turnTo(entity, facing, PELICAN_LEAN_TIME * 1.5, Enum.EasingStyle.Back);
@@ -705,6 +733,90 @@ class CompanionServiceSingleton implements Lifecycle {
 		const goal = CFrame.lookAt(position, position.add(look.Unit));
 		TweenService.Create(body, new TweenInfo(SWORDFISH_STEP_TIME, Enum.EasingStyle.Linear), { CFrame: goal }).Play();
 		task.wait(SWORDFISH_STEP_TIME);
+	}
+
+	// ---------------------------------------------------------------------
+	// Jellyfish
+	// ---------------------------------------------------------------------
+
+	/** A point in the top of the water (JELLYFISH_TOP_SHARE), its whole body under the surface. */
+	private randomJellyfishPoint(entity: CompanionEntity): Vector3 {
+		const bounds = entity.aquarium.waterBounds;
+		const top = bounds.max.Y;
+		const low = top - (top - bounds.min.Y) * JELLYFISH_TOP_SHARE;
+		return this.clampToWater(
+			entity,
+			new Vector3(
+				this.rng.NextNumber(bounds.min.X, bounds.max.X),
+				this.rng.NextNumber(low, top),
+				this.rng.NextNumber(bounds.min.Z, bounds.max.Z),
+			),
+		);
+	}
+
+	/**
+	 * Drifts around the top of the water and feeds on demand: a food charge every interval while it isn't full (it
+	 * starts full), one spent at once when a fish is hungry and no food is in the water (like the Smart Pelican). The
+	 * charges show above it (PelicanChargesController). Its perks (Jellyfish pass) give more charges, a shorter
+	 * interval and more pellets.
+	 */
+	private jellyfishLoop(entity: CompanionEntity) {
+		const owner = entity.owner;
+		let charges = 0;
+		let maxCharges = 0;
+		let chargeAt = os.clock();
+		let driftTarget: Vector3 | undefined;
+		while (entity.alive) {
+			const stats = getJellyfishStats(this.getPerks(owner), {
+				charges: JELLYFISH_CHARGES,
+				interval: JELLYFISH_FEED_INTERVAL,
+				pellets: JELLYFISH_PELLETS,
+			});
+			if (stats.charges > maxCharges) charges = stats.charges; // full on spawn, or right when a perk adds charges
+			maxCharges = stats.charges;
+			if (charges >= maxCharges) chargeAt = os.clock() + stats.interval;
+			else if (os.clock() >= chargeAt) {
+				charges += 1;
+				chargeAt = os.clock() + stats.interval;
+			}
+			this.showCharges(entity, charges, maxCharges, chargeAt, stats.interval);
+
+			if (charges > 0 && this.needsFood(owner)) {
+				charges -= 1;
+				this.showCharges(entity, charges, maxCharges, chargeAt, stats.interval);
+				this.jellyfishFeed(entity, stats.pellets);
+				driftTarget = undefined;
+				continue;
+			}
+			driftTarget ??= this.randomJellyfishPoint(entity);
+			if (driftTarget.sub(entity.body.Position).Magnitude < 0.5) {
+				driftTarget = undefined;
+				continue;
+			}
+			this.swimStep(entity, driftTarget, JELLYFISH_DRIFT_SPEED);
+		}
+	}
+
+	/** Swoops over the hungriest fish (anywhere when none is found) and lets its pellets go, side by side. */
+	private jellyfishFeed(entity: CompanionEntity, pellets: number) {
+		const body = entity.body;
+		const fish = FishService.findHungryFishPosition(entity.owner);
+		const above = fish
+			? this.clampToWater(entity, new Vector3(fish.X, body.Position.Y, fish.Z))
+			: this.randomJellyfishPoint(entity);
+		const distance = above.sub(body.Position).Magnitude;
+		const time = math.max(distance / JELLYFISH_SWOOP_SPEED, JELLYFISH_SWOOP_MIN_TIME);
+		const facing = flat(body.CFrame.LookVector).Magnitude > 0.01 ? flat(body.CFrame.LookVector).Unit : Vector3.zAxis;
+		this.turnTo(entity, CFrame.lookAt(above, above.add(facing)), time, Enum.EasingStyle.Quad);
+		if (!entity.alive) return;
+		const side = entity.aquarium.cframe.RightVector;
+		const under = body.Position.sub(new Vector3(0, body.Size.Y / 2, 0));
+		for (let i = 0; i < pellets; i++) {
+			const offset = (i - (pellets - 1) / 2) * JELLYFISH_PELLET_SPREAD;
+			FoodService.releaseFood(entity.owner, under.add(side.mul(offset)), "Jellyfish");
+			if (i < pellets - 1) task.wait(JELLYFISH_PELLET_DELAY);
+		}
+		task.wait(JELLYFISH_AFTER_FEED);
 	}
 }
 

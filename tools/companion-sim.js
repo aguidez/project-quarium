@@ -98,6 +98,16 @@ function pelicanRun(n, cfg) {
 	return { weak: weakTime / (n * DURATION), perFishMinute: (thrown / n / DURATION) * 60 };
 }
 
+// Jellyfish (live since V0.42, companions.ts JELLYFISH_* and perks.ts Jellyfish1–3): feeds on demand like a maxed
+// Pelican. It swoops over the hungry fish and lets the pellets go from the top of the water, about as fast as the
+// Pelican's throw, so the same model plays it
+const JELLYFISH_STAGES = [
+	{ name: "Jellyfish (Ocean 200k, free)", interval: 7.5, pellets: 2, charges: 2, satiety: 15 },
+	{ name: "+ pass quest 1: 3 charges, every 6 s", interval: 6, pellets: 2, charges: 3, satiety: 15 },
+	{ name: "+ pass quest 2: every 5 s", interval: 5, pellets: 2, charges: 3, satiety: 15 },
+	{ name: "+ pass quest 3: 3 pellets", interval: 5, pellets: 3, charges: 3, satiety: 15 },
+];
+
 function pelican() {
 	const upgrade = plan.PELICAN_UPGRADE ?? 1.33; // Ocean milestone "Hungry Pelican" (oceanRewards.ts)
 	const STAGES = [
@@ -106,7 +116,7 @@ function pelican() {
 		{ name: "+ Double serving (quest 150)", interval: 10, pellets: 2, charges: 0, satiety: 15 },
 		{ name: "+ Smart Pelican (quest 500)", interval: 10, pellets: 2, charges: 2, satiety: 15 },
 		{ name: `+ Hungry Pelican x${upgrade} (Ocean)`, interval: 10 / upgrade, pellets: 2, charges: 2, satiety: 15 },
-		...(plan.PELICAN_STAGES || []),
+		...(plan.PELICAN_STAGES || JELLYFISH_STAGES),
 	];
 	const SIZES = [5, 8, 10, 12, 15, 17, 19, 21, 23, 25];
 	console.log("Pelican alone, AFK: share of fish-time weak (income lost), per tank size");

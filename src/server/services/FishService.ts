@@ -5,6 +5,7 @@ import { FishMessage, FishView, getRemoteEvent } from "shared/network";
 import { SfxName } from "shared/sounds";
 import { getSwimEnd, getSwimPose, holdSegment, SwimSegment } from "shared/swim";
 import { TAGS } from "shared/tags";
+import { CompanionType } from "shared/types/companions";
 import {
 	FISH_TYPES,
 	FishConfig,
@@ -88,8 +89,8 @@ interface FishEntity {
 	alive: boolean;
 }
 
-/** `byCompanion` (fed callbacks): the food was thrown by a companion (the Pelican). */
-type FishCallback = (owner: Player, fishType: FishType, byCompanion?: boolean) => void;
+/** `byCompanion` (fed callbacks): the companion that gave the food (the Pelican, the Jellyfish), if any. */
+type FishCallback = (owner: Player, fishType: FishType, byCompanion?: CompanionType) => void;
 /** An easter egg fish left the tank on its own, from `position`. */
 type FishLeftCallback = (owner: Player, fishType: FishType, position: Vector3) => void;
 
@@ -399,7 +400,7 @@ class FishServiceSingleton implements Lifecycle {
 		this.sendState(fish);
 	}
 
-	private feed(fish: FishEntity, sfx: SfxName, byCompanion = false) {
+	private feed(fish: FishEntity, sfx: SfxName, byCompanion?: CompanionType) {
 		// The Hearty meals perk keeps it full longer
 		const bonus = getSatietyBonus(DataService.getData(fish.owner)?.perks ?? []);
 		this.setState(fish, HungerState.Satiated, os.clock() + fish.config.hunger.satiatedDuration + bonus);

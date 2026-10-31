@@ -3,7 +3,7 @@
 > The development plan from the live game (V0.35) to V1: what to build, in which order, and how. The **numbers** live
 > in `BALANCE.md` §5 and `tools/balance-v1-plan.js`; this file is the **work**. Tick the boxes as tasks ship, and move
 > what a milestone ships into `PROJECT_CONTEXT.md` / `RELEASE_NOTES.md` as usual.
-> Last updated: 2026-10-31 (M4 done in V0.40, M3 done in V0.39, M2 done in V0.38, M0 in V0.37, M1 in V0.36; first version: 7 milestones, from the rebalance to rebirth 8).
+> Last updated: 2026-10-31 (M5 done in V0.42, M4 done in V0.40, M3 done in V0.39, M2 done in V0.38, M0 in V0.37, M1 in V0.36; first version: 7 milestones, from the rebalance to rebirth 8).
 
 **V1 in one line**: 8 rebirths / aquariums, 18 species, 12 eggs, a tank of 25 fish, 5 companions (3 slots, the third one
 a gamepass), a "Voyage" main quest line to the end, ~12h15 for a free player to see everything (BALANCE.md §5.3).
@@ -98,13 +98,21 @@ Themes already built (`PirateWreck`, `Atlantis` in ServerStorage.Assets.Aquarium
       pickups, a Lanternfish hatched; sims match the plan.
 - [ ] Owner: put the Water Hen Pass (2057906427) and the Swordfish Pass (2058734507) on sale on the Creator Dashboard.
 
-### M5 — Rebirth 6: Volcanic Temple and the Jellyfish (~8h05 → ~9h50)
+### M5 — Rebirth 6: Volcanic Temple and the Jellyfish (~8h05 → ~9h50; shipped in V0.42)
 
-- [ ] Models: theme **Underwater Volcanic Temple**, **Lionfish**, **Dragonfish**, Volcano egg, **Jellyfish**.
-- [ ] Config: species 14–15, egg Volcano (15.6B), REBIRTH 6 (13B x800), milestones 180,000 (tank 23), 200,000
-      (Jellyfish), 300,000 (Pearl rims, cosmetic).
-- [ ] **Jellyfish**: feeds like an on-demand Pelican (charges, pellets), free = a maxed Pelican (15 fish). Paid line
-      ("Jellyfish pass"): 3 quests → 3 charges every 6 s (19 fish), every 5 s (23), 3 pellets (25).
+- [x] Models: theme **Volcanic Temple** (generated stone arch with glowing carvings, darkened basalt, Neon magma veins
+      on the sand, a painted red backdrop, a warm `Water`), **Lionfish** (soft frilly fins, no spines) and its coral fan
+      coin, **Dragonfish** (horizontal, gold-tinted, red crest: "dragon" prompts give upright creatures) and its dragon
+      scale coin, Volcano egg (eggs.build.js, resvg), **Jellyfish**; stickers and variant textures approved and
+      uploaded once.
+- [x] Config: species 14–15, egg Volcano (15.6B), REBIRTH 6 (13B x800), milestones 180,000 (tank 23), 200,000
+      (Jellyfish), 300,000 (Pearl rims, shown on the rims of every theme: AquariumService); Voyage 10–11.
+- [x] **Jellyfish**: feeds like an on-demand Pelican (charges, pellets), free = a maxed Pelican (15 fish): it drifts
+      in the top of the water, swoops over the hungry fish and releases its pellets (FoodService.releaseFood). Paid
+      line ("Jellyfish pass", id 2061499264): 3 quests → 3 charges every 6 s (19 fish), every 5 s (23), 3 pellets (25).
+- [x] Check: playtest on the test store (rebirth 6, milestones, Lionfish and Dragonfish hatched, Jellyfish feeding with
+      its gauge); sims match the plan.
+- [ ] Owner: put the Jellyfish Pass on sale on the Creator Dashboard.
 
 ### M6 — Rebirths 7–8: Crystal Caverns and Cosmic Alien Sanctuary, end of V1 (~9h50 → ~12h15)
 

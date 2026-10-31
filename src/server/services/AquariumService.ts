@@ -19,6 +19,10 @@ const PLATE_STROKE = Color3.fromHex("#6E4A12");
 const PLATE_TEXT = Color3.fromHex("#3A2408");
 const THEME_CHECK_INTERVAL = 1; // seconds between two checks of the themes the tanks should wear
 const THEME_CHILD_ATTRIBUTE = "ThemeChild"; // decals / textures a theme added to a tank part
+// The Pearl rims cosmetic (FinishPearlRims): a pearly white sheen on the tank's rims, whatever its theme
+const RIM_PARTS = ["RimFront", "RimBack", "RimLeft", "RimRight"];
+const PEARL_COLOR = Color3.fromHex("#F3ECF7");
+const PEARL_REFLECTANCE = 0.3;
 
 /** Axis-aligned box describing the inside of a water volume (world space). */
 export interface Bounds {
@@ -39,6 +43,7 @@ export interface Aquarium {
 	ownerLabel: TextLabel;
 	owner?: Player;
 	theme?: AquariumTheme; // worn now (see applyTheme)
+	pearlRims?: boolean; // the Pearl rims finish worn now
 	themeDecor?: Model;
 }
 
@@ -117,7 +122,8 @@ class AquariumServiceSingleton implements Lifecycle {
 		while (true) {
 			for (const aquarium of this.aquariums) {
 				const data = aquarium.owner ? DataService.getData(aquarium.owner) : undefined;
-				this.applyTheme(aquarium, getAquariumTheme(data?.rebirths ?? 0));
+				const pearlRims = data?.cosmetics.includes("FinishPearlRims") ?? false;
+				this.applyTheme(aquarium, getAquariumTheme(data?.rebirths ?? 0), pearlRims);
 			}
 			task.wait(THEME_CHECK_INTERVAL);
 		}
@@ -133,11 +139,12 @@ class AquariumServiceSingleton implements Lifecycle {
 	 * holds parts named like the tank's (Sand, Backdrop, Base, Rim...): their look (and decals,
 	 * textures...) is copied onto the tank. Everything else is decor, cloned into the tank.
 	 */
-	private applyTheme(aquarium: Aquarium, theme: AquariumTheme) {
-		if (aquarium.theme === theme) return;
+	private applyTheme(aquarium: Aquarium, theme: AquariumTheme, pearlRims: boolean) {
+		if (aquarium.theme === theme && aquarium.pearlRims === pearlRims) return;
 		const template = this.themes.get(theme);
 		if (!template) return;
 		aquarium.theme = theme;
+		aquarium.pearlRims = pearlRims;
 
 		aquarium.themeDecor?.Destroy();
 		// The decor built in Studio is the basic theme's: replaced for good by the template
@@ -153,6 +160,17 @@ class AquariumServiceSingleton implements Lifecycle {
 				if (part.IsA("BasePart") && target?.IsA("BasePart")) this.copyStyle(part, target);
 			}
 			style.Destroy();
+		}
+		// The Pearl rims finish (Ocean 300,000) goes over every theme's rims
+		if (pearlRims) {
+			for (const name of RIM_PARTS) {
+				const rim = aquarium.model.FindFirstChild(name);
+				if (!rim?.IsA("BasePart")) continue;
+				rim.Color = PEARL_COLOR;
+				rim.Material = Enum.Material.SmoothPlastic;
+				rim.MaterialVariant = "";
+				rim.Reflectance = PEARL_REFLECTANCE;
+			}
 		}
 		for (const part of decor.GetDescendants()) {
 			// Decor never blocks a click on the water or a coin, nor a character

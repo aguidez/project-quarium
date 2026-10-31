@@ -4,8 +4,8 @@
  * - Title: a name shown with the player (quest "Master Aquarist", Ocean 1,000,000...);
  * - Decor: an ornament placed in the player's tank, whatever its theme;
  * - Finish: a look applied to the tank of every theme (Pearl rims).
- * The ids below are the ones the V1 plan grants. Not displayed yet: their looks come with the content
- * that grants them (ROADMAP M5 / M6), nothing grants them before.
+ * The ids below are the ones the V1 plan grants. Pearl rims are shown since V0.42 (Ocean 300,000, AquariumService);
+ * the titles and decor come with the content that grants them (ROADMAP M6), nothing grants them before.
  */
 export type CosmeticKind = "Title" | "Decor" | "Finish";
 

@@ -12,6 +12,8 @@ export type FishType =
 	| "BlueTang"
 	| "BabySunfish"
 	| "Lanternfish"
+	| "Lionfish"
+	| "Dragonfish"
 	| "FrenchFish";
 
 /** Rarity of a fish type, shown in the fish index, the egg odds and the hatch reveal. */
@@ -42,6 +44,8 @@ export type CoinType =
 	| "Sapphire"
 	| "SunMedallion"
 	| "Nautilus"
+	| "CoralFan"
+	| "DragonScale"
 	| "Croissant";
 export const COIN_TYPES: readonly CoinType[] = [
 	"Bronze",
@@ -57,6 +61,8 @@ export const COIN_TYPES: readonly CoinType[] = [
 	"Sapphire",
 	"SunMedallion",
 	"Nautilus",
+	"CoralFan",
+	"DragonScale",
 	"Croissant",
 ];
 
@@ -318,6 +324,34 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 		scaleMax: 1.1,
 		speedMin: 2.6,
 		speedMax: 4.2,
+		hunger: DEFAULT_HUNGER,
+	},
+	// --- Rebirth 6 (ROADMAP M5): the Volcanic Temple's species. Lionfish with soft fan fins (no spines), Dragonfish
+	// with glowing scales (no fire, no fangs): CLAUDE.md §7 ---
+	Lionfish: {
+		displayName: "Lionfish",
+		rarity: "Legendary",
+		income: 208000, // 26,000/s
+		oceanPoints: 5000,
+		coin: "CoralFan",
+		incomeInterval: 8, // a frilly little dancer: red coral fans often
+		scaleMin: 0.9,
+		scaleMax: 1.1,
+		speedMin: 2.2,
+		speedMax: 3.6,
+		hunger: DEFAULT_HUNGER,
+	},
+	Dragonfish: {
+		displayName: "Dragonfish",
+		rarity: "Legendary",
+		income: 1300000, // 52,000/s
+		oceanPoints: 8000,
+		coin: "DragonScale",
+		incomeInterval: 25, // a long glowing glider: a heavy golden scale now and then
+		scaleMin: 0.95,
+		scaleMax: 1.1,
+		speedMin: 1.8,
+		speedMax: 3,
 		hunger: DEFAULT_HUNGER,
 	},
 	// Easter egg (see EasterEggConfig): its coin is a croissant worth half the tank's income per minute

@@ -10,6 +10,31 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.42 — 2026-10-31
+
+**New**
+- **A new aquarium**: rebirth 6 (13B, coins x800) takes you to the **Volcanic Temple**: dark basalt, an ancient stone
+  arch with glowing carvings and magma veins shining in the sand, under a deep red sky. The Rebirth menu then says
+  more aquariums are coming.
+- **Two new Legendary fish**, each with its Anomaly, Ghost and Shiny looks in the Fish Index:
+  - **Lionfish**: a red and white striped fish with a frilly fin, dropping red coral fan coins often;
+  - **Dragonfish**: a long golden fish with a flowing red crest, dropping heavy golden dragon scales now and then.
+- **A new egg**: the **Volcano Egg** (15.6B: Lanternfish, Lionfish or Dragonfish), after the Trench Egg.
+- **A new companion, the Jellyfish** (200,000 Ocean Points): it drifts in the top of the water and, as soon as one
+  of your fish is hungry, swoops over it and drops food. Its food charges show above it, like the Smart Pelican's.
+  Its quest line comes with the **Jellyfish Pass**: let it feed 300 / 1,000 / 3,000 fish for more charges, faster
+  charges and 3 pellets at a time.
+- **Ocean milestones**: 180,000 points, your aquarium holds **23 fish**; then the Jellyfish; and at 300,000 the
+  **Pearl rims**, a pearly finish on the rims of your aquarium, whatever its theme.
+- **Voyage quests**: "Heat Below" (rebirth 6: 25,000 Ocean Points) and "Temple Guardian" (hatch a Dragonfish:
+  5 minutes of income).
+
+**Balance**
+- New numbers from the V1 plan, unchanged: the average player reaches rebirth 6 at ~8h06 and all fifteen species at
+  ~9h05 (BALANCE.md).
+
+---
+
 ## V0.41 — 2026-10-31
 
 **New**

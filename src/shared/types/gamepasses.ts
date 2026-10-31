@@ -73,7 +73,12 @@ export const GAME_PASSES: Record<GamePass, GamePassConfig> = {
 		id: 2058734507,
 		image: "rbxassetid://94908996690740", // design/ui/companions/Companion_Swordfish.png
 	},
-	JellyfishPass: { displayName: "Jellyfish Pass", description: "", id: 0, image: "" },
+	JellyfishPass: {
+		displayName: "Jellyfish Pass",
+		description: "Unlocks the Jellyfish's quests: it feeds faster, with more charges and pellets, up to 25 fish.",
+		id: 2061499264,
+		image: "rbxassetid://96894492239649", // design/ui/companions/Companion_Jellyfish.png
+	},
 };
 
 // The passes' effects (BALANCE.md §5.10): they never stack beyond these

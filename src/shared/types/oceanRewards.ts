@@ -18,7 +18,10 @@ export type OceanRewardId =
 	| "LuckyOcean"
 	| "Aquarium21"
 	| "WaterHen"
-	| "Swordfish";
+	| "Swordfish"
+	| "Aquarium23"
+	| "Jellyfish"
+	| "PearlRims";
 
 /**
  * A companion upgrade multiplies what the companion does: the Snail's crawling speed, the Pelican's
@@ -141,6 +144,29 @@ export const OCEAN_MILESTONES: readonly OceanMilestone[] = [
 		title: "Swordfish",
 		description: "A new companion that swims through the water and grabs your coins while they sink.",
 		reward: { kind: "Companion", companion: "Swordfish" },
+	},
+	// Rebirth 6 (ROADMAP M5): the tank 23 and the Jellyfish come with the rebirth's release
+	{
+		id: "Aquarium23",
+		points: 180000,
+		title: "Bigger aquarium",
+		description: "Your aquarium holds 23 fish.",
+		reward: { kind: "Capacity", capacity: 23 },
+	},
+	{
+		// Free, it feeds like a maxed Pelican (15 fish fed AFK); its pass quests take it to 25 fish
+		id: "Jellyfish",
+		points: 200000,
+		title: "Jellyfish",
+		description: "A new companion that drifts in the water and drops food right above your hungry fish.",
+		reward: { kind: "Companion", companion: "Jellyfish" },
+	},
+	{
+		id: "PearlRims",
+		points: 300000,
+		title: "Pearl rims",
+		description: "A pearly finish on the rims of your aquarium, whatever its theme.",
+		reward: { kind: "Cosmetic", cosmetics: ["FinishPearlRims"] },
 	},
 ];
 

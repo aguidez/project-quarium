@@ -71,9 +71,9 @@ class QuestServiceSingleton implements Lifecycle {
 			this.reportGauges(player);
 		});
 		FishService.onFishSpawned((owner) => this.reportGauges(owner));
-		FishService.onFishFed((owner, _fishType, byCompanion) => {
-			// Only the Pelican feeds so far (the Jellyfish will say which companion it was)
-			if (byCompanion) this.addProgress(owner, "CompanionStat", 1, { companion: "Pelican" });
+		FishService.onFishFed((owner, _fishType, companion) => {
+			// The Pelican's or the Jellyfish's feeds
+			if (companion) this.addProgress(owner, "CompanionStat", 1, { companion });
 		});
 	}
 

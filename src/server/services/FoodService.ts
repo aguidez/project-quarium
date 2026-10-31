@@ -2,6 +2,7 @@ import { CollectionService, Players, TweenService } from "@rbxts/services";
 import { t } from "@rbxts/t";
 import { Lifecycle } from "shared/framework";
 import { TAGS } from "shared/tags";
+import { CompanionType } from "shared/types/companions";
 import { FOOD_PRICE } from "shared/types/fish";
 import { FoodLook, getFoodLook } from "shared/types/foodLooks";
 import { getSatietyBonus } from "shared/types/perks";
@@ -21,8 +22,8 @@ export interface Food {
 	part: BasePart;
 	owner: Player;
 	alive: boolean;
-	/** Thrown by a companion (the Pelican). */
-	byCompanion: boolean;
+	/** The companion that gave it (the Pelican, the Jellyfish), undefined for the player's own pellets. */
+	byCompanion?: CompanionType;
 }
 
 function isFiniteNumber(value: number) {
@@ -99,19 +100,38 @@ class FoodServiceSingleton implements Lifecycle {
 	 * A companion (the Pelican) throws a free pellet from `from` (above the tank) into the water above
 	 * `target`. Same cap as the player's pellets; returns false when the tank already has too many.
 	 */
-	public throwFood(owner: Player, from: Vector3, target: Vector3): boolean {
+	public throwFood(owner: Player, from: Vector3, target: Vector3, companion: CompanionType): boolean {
 		const aquarium = AquariumService.getAquarium(owner);
 		if (!aquarium || this.getFoods(owner).size() >= MAX_FOOD_PER_PLAYER) return false;
-		this.spawnFood(owner, aquarium, target, from);
+		this.spawnFood(owner, aquarium, target, from, companion);
 		return true;
 	}
 
-	private spawnFood(owner: Player, aquarium: Aquarium, requested: Vector3, thrownFrom?: Vector3) {
+	/**
+	 * A companion already in the water (the Jellyfish) lets a free pellet go at `at`: it sinks straight down from
+	 * there. Same cap as the other pellets; returns false when the tank already has too many.
+	 */
+	public releaseFood(owner: Player, at: Vector3, companion: CompanionType): boolean {
+		const aquarium = AquariumService.getAquarium(owner);
+		if (!aquarium || this.getFoods(owner).size() >= MAX_FOOD_PER_PLAYER) return false;
+		this.spawnFood(owner, aquarium, at, undefined, companion, at.Y);
+		return true;
+	}
+
+	private spawnFood(
+		owner: Player,
+		aquarium: Aquarium,
+		requested: Vector3,
+		thrownFrom?: Vector3,
+		companion?: CompanionType,
+		startY?: number,
+	) {
 		// Never trust the client position: clamp it inside the owner's water
 		const bounds = aquarium.waterBounds;
 		const x = math.clamp(requested.X, bounds.min.X + EDGE_MARGIN, bounds.max.X - EDGE_MARGIN);
 		const z = math.clamp(requested.Z, bounds.min.Z + EDGE_MARGIN, bounds.max.Z - EDGE_MARGIN);
-		const start = new Vector3(x, bounds.max.Y - FOOD_SIZE, z);
+		const top = bounds.max.Y - FOOD_SIZE;
+		const start = new Vector3(x, math.clamp(startY ?? top, bounds.min.Y + FOOD_SIZE, top), z);
 		const bottom = new Vector3(x, bounds.min.Y + FOOD_SIZE / 2, z);
 
 		const part = this.createPart(owner);
@@ -121,7 +141,7 @@ class FoodServiceSingleton implements Lifecycle {
 		part.CFrame = new CFrame(thrownFrom ?? start).mul(CFrame.Angles(tilt, yaw, 0));
 		part.Parent = aquarium.foodFolder;
 
-		const food: Food = { part, owner, alive: true, byCompanion: thrownFrom !== undefined };
+		const food: Food = { part, owner, alive: true, byCompanion: companion };
 		this.getFoods(owner).add(food);
 
 		// Sink slowly; the food disappears when it touches the sand

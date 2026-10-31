@@ -92,7 +92,9 @@ class PelicanChargesControllerSingleton implements Lifecycle {
 
 	private track(model: Instance) {
 		if (!model.IsA("Model") || this.janitors.has(model)) return;
-		if (model.GetAttribute("CompanionType") !== "Pelican") return;
+		// The Jellyfish feeds on demand too, with the same attributes
+		const companionType = model.GetAttribute("CompanionType");
+		if (companionType !== "Pelican" && companionType !== "Jellyfish") return;
 		if (model.GetAttribute("Owner") !== Players.LocalPlayer.UserId) return;
 		const janitor = new Janitor();
 		this.janitors.set(model, janitor);

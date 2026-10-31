@@ -184,6 +184,18 @@ export const FISH_ICONS: Record<FishType, Record<FishVariant, string>> = {
 		Ghost: "rbxassetid://96170546434722",
 		Shiny: "rbxassetid://130156391015583",
 	},
+	Lionfish: {
+		Normal: "rbxassetid://136049057236963",
+		Anomaly: "rbxassetid://128348629033015",
+		Ghost: "rbxassetid://82334868775418",
+		Shiny: "rbxassetid://111025640215018",
+	},
+	Dragonfish: {
+		Normal: "rbxassetid://126100559241211",
+		Anomaly: "rbxassetid://95244607905271",
+		Ghost: "rbxassetid://104543312979275",
+		Shiny: "rbxassetid://89883389934153",
+	},
 	// Easter egg: no variant, every column is its one icon
 	FrenchFish: {
 		Normal: FRENCH_FISH_ICON,
@@ -263,6 +275,11 @@ export const EGG_SPRITES: Record<EggType, EggSprites> = {
 		icon: "rbxassetid://108031365345095", // TrenchEgg.png
 		top: "rbxassetid://87982584203157", // TrenchEggTop.png
 		bottom: "rbxassetid://109223152211260", // TrenchEggBottom.png
+	},
+	Volcano: {
+		icon: "rbxassetid://74526808969308", // VolcanoEgg.png
+		top: "rbxassetid://119121638443950", // VolcanoEggTop.png
+		bottom: "rbxassetid://121990538528263", // VolcanoEggBottom.png
 	},
 };
 

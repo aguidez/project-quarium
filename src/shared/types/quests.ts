@@ -41,7 +41,7 @@ export type QuestStat =
 	| "FishReleased"
 	/**
 	 * What the quest's `companion` does for the player: coins its Snail picks up, fish its Pelican feeds (the V1
-	 * companions add theirs: eggs opened with the Water Hen equipped, coins its Swordfish grabs).
+	 * companions add theirs: eggs opened with the Water Hen equipped, coins its Swordfish grabs, fish its Jellyfish feeds).
 	 */
 	| "CompanionStat";
 
@@ -245,6 +245,23 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 1,
 		rewards: [{ kind: "IncomeMinutes", minutes: 5 }],
 	},
+	Voyage10: {
+		category: "Story",
+		title: "Heat Below",
+		description: "Rebirth into the Volcanic Temple (rebirth 6).",
+		stat: "Rebirths",
+		target: 6,
+		rewards: [{ kind: "OceanPoints", amount: 25000 }],
+	},
+	Voyage11: {
+		category: "Story",
+		title: "Temple Guardian",
+		description: "Hatch a Dragonfish.",
+		stat: "SpeciesHatched",
+		fishType: "Dragonfish",
+		target: 1,
+		rewards: [{ kind: "IncomeMinutes", minutes: 5 }],
+	},
 	// The Water Hen's line (Water Hen pass, BALANCE.md §5.9): eggs opened with it equipped. Slow on purpose: its
 	// effect is the smallest
 	WaterHen1: {
@@ -302,10 +319,46 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 3000,
 		rewards: [{ kind: "Perk", perk: "Swordfish3" }],
 	},
+	// The Jellyfish's line (Jellyfish pass): fish it feeds (~20 a minute at 20 fish)
+	Jellyfish1: {
+		category: "Story",
+		title: "Snack Time",
+		description: "Let your Jellyfish feed 300 fish.",
+		stat: "CompanionStat",
+		companion: "Jellyfish",
+		target: 300,
+		rewards: [{ kind: "Perk", perk: "Jellyfish1" }],
+	},
+	Jellyfish2: {
+		category: "Story",
+		title: "Tentacle Chef",
+		description: "Let your Jellyfish feed 1,000 fish.",
+		stat: "CompanionStat",
+		companion: "Jellyfish",
+		target: 1000,
+		rewards: [{ kind: "Perk", perk: "Jellyfish2" }],
+	},
+	Jellyfish3: {
+		category: "Story",
+		title: "Grand Feast",
+		description: "Let your Jellyfish feed 3,000 fish.",
+		stat: "CompanionStat",
+		companion: "Jellyfish",
+		target: 3000,
+		rewards: [{ kind: "Perk", perk: "Jellyfish3" }],
+	},
 };
 
 /** Story lines: each one has its quests in order, and opens once a quest of another line is claimed. */
-export type StoryLine = "Start" | "Ocean" | "Rebirth" | "Snail" | "Pelican" | "WaterHen" | "Swordfish";
+export type StoryLine =
+	| "Start"
+	| "Ocean"
+	| "Rebirth"
+	| "Snail"
+	| "Pelican"
+	| "WaterHen"
+	| "Swordfish"
+	| "Jellyfish";
 
 export interface StoryLineConfig {
 	/** Small tag over its quests in the quest book. */
@@ -341,6 +394,8 @@ export const STORY_LINES: Record<StoryLine, StoryLineConfig> = {
 			"Voyage7",
 			"Voyage8",
 			"Voyage9",
+			"Voyage10",
+			"Voyage11",
 		],
 		requires: "Story1",
 		order: 3,
@@ -361,6 +416,13 @@ export const STORY_LINES: Record<StoryLine, StoryLineConfig> = {
 		requiresCompanion: "Swordfish",
 		requiresPass: "SwordfishPass",
 		order: 7,
+	},
+	Jellyfish: {
+		displayName: "Jellyfish",
+		quests: ["Jellyfish1", "Jellyfish2", "Jellyfish3"],
+		requiresCompanion: "Jellyfish",
+		requiresPass: "JellyfishPass",
+		order: 8,
 	},
 };
 

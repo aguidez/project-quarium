@@ -213,6 +213,31 @@ const EGGS = {
 				.join("") +
 			sparkle(30, 26, 6, "#FFFFFF") + sparkle(70, 30, 4, "#9CF7FF"),
 	},
+	// Volcanic Temple: dark basalt shell warmed from inside, glowing orange magma veins (zigzags, never round),
+	// a band of dark rock at the bottom (no flames, no smoke: CLAUDE.md §7)
+	Volcano: {
+		outline: "#1A0806",
+		defs: `<radialGradient id="shell" cx="0.38" cy="0.3" r="0.8">
+			<stop offset="0" stop-color="#FFB27A"/><stop offset="0.45" stop-color="#8A3220"/><stop offset="1" stop-color="#2A0E0A"/>
+		</radialGradient>`,
+		decor:
+			[
+				"M18 30 L26 40 L22 50 L32 60",
+				"M70 22 L62 34 L70 44 L64 56",
+				"M44 44 L52 52 L48 62 L58 70",
+			]
+				.map(
+					(d) =>
+						`<path d="${d}" fill="none" stroke="#FF7A2A" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"/>` +
+						`<path d="${d}" fill="none" stroke="#FFB04A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>` +
+						`<path d="${d}" fill="none" stroke="#FFF1C2" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>`,
+				)
+				.join("") +
+			`<path d="M0 86 L12 78 L22 84 L34 74 L46 82 L58 72 L70 82 L82 76 L100 84 V120 H0 Z" fill="#2C1714" stroke="#1A0806" stroke-width="1.5"/>` +
+			`<path d="M10 100 L20 94 L28 100" fill="none" stroke="#FF8A3A" stroke-width="1.6" stroke-linecap="round"/>` +
+			`<path d="M66 104 L74 97 L84 102" fill="none" stroke="#FF8A3A" stroke-width="1.6" stroke-linecap="round"/>` +
+			sparkle(30, 22, 6, "#FFFFFF") + sparkle(78, 60, 3.5, "#FFD27A"),
+	},
 };
 
 function svg(body, defs = "") {

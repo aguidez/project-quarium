@@ -3,7 +3,7 @@
  * Immortal, they never eat and don't drop coins like a fish: each one has its own ability
  * that changes how the player plays. Only `companionSlots` of them can be equipped at once.
  */
-export type CompanionType = "Snail" | "Pelican" | "WaterHen" | "Swordfish";
+export type CompanionType = "Snail" | "Pelican" | "WaterHen" | "Swordfish" | "Jellyfish";
 
 export interface CompanionConfig {
 	displayName: string;
@@ -40,6 +40,12 @@ export const COMPANION_TYPES: Record<CompanionType, CompanionConfig> = {
 		image: "rbxassetid://94908996690740", // design/ui/companions/Companion_Swordfish.png
 		ability: "Swims through the water and grabs the coins for you while they sink.",
 	},
+	Jellyfish: {
+		displayName: "Jellyfish",
+		icon: "",
+		image: "rbxassetid://96894492239649", // design/ui/companions/Companion_Jellyfish.png
+		ability: "Drifts in the water and drops food right above your hungry fish, as soon as they need it.",
+	},
 };
 
 /** Seconds between two pellets the Pelican throws into its owner's aquarium. */
@@ -50,6 +56,14 @@ export const PELICAN_FEED_INTERVAL = 10;
  * further (perks.ts hatchMultiplier).
  */
 export const WATER_HEN_HATCH_MULTIPLIER = 0.85;
+
+/**
+ * The Jellyfish feeds on demand like a maxed Pelican (BALANCE.md §5.8): a food charge every JELLYFISH_FEED_INTERVAL,
+ * up to JELLYFISH_CHARGES, JELLYFISH_PELLETS pellets a feed; its Jellyfish pass quests improve it (perks.ts).
+ */
+export const JELLYFISH_FEED_INTERVAL = 7.5;
+export const JELLYFISH_CHARGES = 2;
+export const JELLYFISH_PELLETS = 2;
 
 /** Companions a player can have in their aquarium at first; PlayerData.companionSlots grows with progression. */
 export const DEFAULT_COMPANION_SLOTS = 1;

@@ -14,7 +14,10 @@ export type Perk =
 	| "WaterHen3"
 	| "Swordfish1"
 	| "Swordfish2"
-	| "Swordfish3";
+	| "Swordfish3"
+	| "Jellyfish1"
+	| "Jellyfish2"
+	| "Jellyfish3";
 
 export interface PerkConfig {
 	displayName: string;
@@ -40,6 +43,12 @@ export interface PerkConfig {
 	swordfishSpeed?: number;
 	/** ...and grabs coins from this far (studs, instead of SWORDFISH_REACH). */
 	swordfishReach?: number;
+	/** The Jellyfish stores up to this many food charges (instead of JELLYFISH_CHARGES)... */
+	jellyfishCharges?: number;
+	/** ...gets one every this many seconds (instead of JELLYFISH_FEED_INTERVAL)... */
+	jellyfishInterval?: number;
+	/** ...and drops this many pellets a feed (instead of JELLYFISH_PELLETS). */
+	jellyfishPellets?: number;
 }
 
 export const PERKS: Record<Perk, PerkConfig> = {
@@ -141,6 +150,32 @@ export const PERKS: Record<Perk, PerkConfig> = {
 		swordfishSpeed: 2.2,
 		swordfishReach: 3.2,
 	},
+	// The Jellyfish's line (Jellyfish pass, BALANCE.md §5.8): fish it feeds. 19 / 23 / 25 fish kept fed AFK
+	Jellyfish1: {
+		displayName: "Big appetite",
+		label: "3",
+		description: "Your Jellyfish stores 3 food charges and gets one every 6 s.",
+		groundTimeBonus: 0,
+		bounce: false,
+		jellyfishCharges: 3,
+		jellyfishInterval: 6,
+	},
+	Jellyfish2: {
+		displayName: "Quick tentacles",
+		label: "5s",
+		description: "Your Jellyfish gets a food charge every 5 s.",
+		groundTimeBonus: 0,
+		bounce: false,
+		jellyfishInterval: 5,
+	},
+	Jellyfish3: {
+		displayName: "Feast",
+		label: "x3",
+		description: "Your Jellyfish drops 3 pellets at a time.",
+		groundTimeBonus: 0,
+		bounce: false,
+		jellyfishPellets: 3,
+	},
 };
 
 /** How long a coin's bounce lasts (up and down) when the player has CoinBounce. */
@@ -200,4 +235,19 @@ export function getSwordfishStats(
 		if (config.swordfishReach !== undefined) reach = math.max(reach, config.swordfishReach);
 	}
 	return { speed, reach };
+}
+
+/** The Jellyfish's feeding from its perks: the best of each, the defaults when it has none. */
+export function getJellyfishStats(
+	perks: readonly Perk[],
+	defaults: { charges: number; interval: number; pellets: number },
+): { charges: number; interval: number; pellets: number } {
+	let { charges, interval, pellets } = defaults;
+	for (const perk of perks) {
+		const config = PERKS[perk];
+		if (config.jellyfishCharges !== undefined) charges = math.max(charges, config.jellyfishCharges);
+		if (config.jellyfishInterval !== undefined) interval = math.min(interval, config.jellyfishInterval);
+		if (config.jellyfishPellets !== undefined) pellets = math.max(pellets, config.jellyfishPellets);
+	}
+	return { charges, interval, pellets };
 }

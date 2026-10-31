@@ -14,7 +14,7 @@ import { getOceanPoints, VARIANT_ORDER } from "./variants";
  * Egg (2.5M, more than its price), the last species at ~2h31. Its x8 is steep on purpose: the run
  * restarts from the first egg, and the climb back to the Neon Coral Egg must stay under ~35 min.
  */
-export type AquariumTheme = "Basic" | "Lagoon" | "NeonCoral" | "PirateWreck" | "Atlantis" | "MarianaTrench";
+export type AquariumTheme = "Basic" | "Lagoon" | "NeonCoral" | "PirateWreck" | "Atlantis" | "MarianaTrench" | "VolcanicTemple";
 
 export interface AquariumThemeConfig {
 	displayName: string;
@@ -30,6 +30,7 @@ export const AQUARIUM_THEMES: Record<AquariumTheme, AquariumThemeConfig> = {
 	PirateWreck: { displayName: "Sunken Pirate Wreck" },
 	Atlantis: { displayName: "Atlantis Ruins" },
 	MarianaTrench: { displayName: "Mariana Trench" },
+	VolcanicTemple: { displayName: "Volcanic Temple" },
 };
 
 export interface RebirthConfig {
@@ -52,6 +53,7 @@ export const REBIRTHS: readonly RebirthConfig[] = [
 	{ price: 45e6, multiplier: 25, startMoney: 300, theme: "PirateWreck" },
 	{ price: 120e6, multiplier: 80, startMoney: 300, theme: "Atlantis" },
 	{ price: 5.1e9, multiplier: 250, startMoney: 300, theme: "MarianaTrench" },
+	{ price: 13e9, multiplier: 800, startMoney: 300, theme: "VolcanicTemple" },
 ];
 
 /** The rebirth a player who has done `rebirths` of them can do next (undefined once all are done). */

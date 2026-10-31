@@ -96,6 +96,8 @@ export const DEFAULT_PLAYER_DATA: PlayerData = {
 		BlueTang: 0,
 		BabySunfish: 0,
 		Lanternfish: 0,
+		Lionfish: 0,
+		Dragonfish: 0,
 		FrenchFish: 0,
 	},
 	fishVariants: {},

@@ -2,7 +2,16 @@ import { FISH_TYPES, FishType } from "./fish";
 
 /** Fish are no longer bought directly: the player buys an egg, which hatches into a random fish. */
 export type EggType =
-	"Common" | "Improved" | "Superior" | "Freshwater" | "Amazon" | "NeonCoral" | "Wreck" | "Atlantis" | "Trench";
+	| "Common"
+	| "Improved"
+	| "Superior"
+	| "Freshwater"
+	| "Amazon"
+	| "NeonCoral"
+	| "Wreck"
+	| "Atlantis"
+	| "Trench"
+	| "Volcano";
 
 export interface EggOdds {
 	fishType: FishType;
@@ -101,7 +110,7 @@ export const EGG_TYPES: Record<EggType, EggConfig> = {
 		requires: "Amazon",
 	},
 	// V1 eggs (BALANCE.md §5): one per aquarium, priced 1.2x the rebirth that opens it, so it is reached after
-	// that rebirth (rebirth 3: 45M, rebirth 4: 120M, rebirth 5: 5.1B)
+	// that rebirth (rebirth 3: 45M, rebirth 4: 120M, rebirth 5: 5.1B, rebirth 6: 13B)
 	Wreck: {
 		displayName: "Wreck Egg",
 		price: 55e6,
@@ -135,6 +144,18 @@ export const EGG_TYPES: Record<EggType, EggConfig> = {
 		],
 		order: 9,
 		requires: "Atlantis",
+	},
+	Volcano: {
+		displayName: "Volcano Egg",
+		price: 15.6e9,
+		hatchTime: 180,
+		odds: [
+			{ fishType: "Lanternfish", chance: 25 },
+			{ fishType: "Lionfish", chance: 55 },
+			{ fishType: "Dragonfish", chance: 20 },
+		],
+		order: 10,
+		requires: "Trench",
 	},
 };
 
