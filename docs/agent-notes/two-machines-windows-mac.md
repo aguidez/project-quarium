@@ -16,4 +16,9 @@ The owner develops on **both** a Windows PC (where the project and SETUP.md were
 - FigCraft differs per OS: Windows uses the portable build (`figcraftDir`, app + CLI side by side); the Mac needs
   `/Applications/FigCraft.app` **and** the separate `/Applications/FigCraft CLI/figcraft-cli`
   (`figcraftApp` + `figcraftCli`). The CLI alone is not enough: the MCP attaches to the running app.
+- **Stale build after switching machines**: `out/` is git-ignored, so after a pull Studio runs the last build made
+  on *this* machine until `npx rbxtsc` runs (2026-11-01: V0.41–V0.44 made on the Mac, the PC still played a V0.40
+  build, reported as "the shop no longer opens"). Symptoms in the output: `Template "...<recent species/theme>"
+  ignored: needs a PrimaryPart and a valid ...`, and recent services / controllers missing from the "started"
+  lines. Before chasing a "regression" after a machine switch, check `out/` dates and rebuild.
 - On the Mac, Node comes from Homebrew (`/opt/homebrew/bin`, may need adding to the PATH in shell commands).

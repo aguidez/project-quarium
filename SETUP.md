@@ -97,3 +97,10 @@ npm run sim           # economy simulator (BALANCE.md)
 3. Note the old `workspace.local.json` values if useful (the FigCraft folder is the only one that was needed).
 4. Claude's auto-memory of the old machine (`%USERPROFILE%\.claude\projects\<project>\memory\`) is already copied into
    `docs/agent-notes/`; anything added there later must be copied over by hand.
+
+## Switching machines (every time)
+
+After `git pull` on the other machine, **rebuild before opening a playtest**: `npx rbxtsc` (or keep `npm run watch`
+running). `out/` is git-ignored, so without a build Rojo keeps syncing that machine's last build into Studio: the
+game then runs old code (e.g. V0.44 content pulled, a V0.40 build played: no shop at the huts, the new species'
+templates "ignored").

@@ -15,4 +15,4 @@ step, a tool quirk), add or update a note here and its line below, in the same t
 - [Roblox moderation risk](roblox-moderation-risk.md) — a firefighter-fish icon got the account a ToS warning; no bomb/weapon-like shapes, ask before risky themes
 - [UI V2 arcade style](ui-v2-arcade-style.md) — owner-approved Pet Sim-like UI; build every screen from client/ui/kit.tsx, never flat
 - [Shell heredoc quirk](shell-heredoc-quirk.md) — (Windows Git Bash) heredocs with apostrophes break; write scripts with the Write tool
-- [Two machines: Windows and Mac](two-machines-windows-mac.md) — the owner switches between a Windows PC and a Mac; add the Mac variant next to Windows, never replace it; FigCraft app + CLI per OS
+- [Two machines: Windows and Mac](two-machines-windows-mac.md) — the owner switches between a Windows PC and a Mac; add the Mac variant next to Windows, never replace it; FigCraft app + CLI per OS; rebuild (`npx rbxtsc`) after every pull or Studio plays a stale build

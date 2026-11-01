@@ -2,7 +2,8 @@
 
 > Living map of the project. **Read it before exploring the code, and update it in the same change
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
-> Last updated: 2026-11-01 (V0.44, ROADMAP M6: rebirths 7–8 → CrystalCaverns / CosmicSanctuary themes, WolfDogfish
+> Last updated: 2026-11-01 (ROADMAP_V1.1.md: the post-V1 animation revamp plan, EditableMesh budget measured in §4;
+> V0.44, ROADMAP M6: rebirths 7–8 → CrystalCaverns / CosmicSanctuary themes, WolfDogfish
 > ("Husky Dogfish") / BunnyShark / MiniLeviathan (Mythic) with Moon / Star / Planet coins, Crystal and Cosmic eggs, Ocean
 > milestones 450,000 (tank 25) and 1,000,000 (OceanGuardian: title + whale statue), Voyage 12–16 (gauge SpeciesFound,
 > Master Aquarist), TitleService (best title above the head), decor in the tank (DECOR_SLOTS, tag DecorTemplate); V0.43: weak fish bubble sound instead of the fart one, coin chime with a combo pitch
@@ -57,7 +58,9 @@ expected progression (rebirth 1 ~28 min, six species ~1 h, rebirth 2 ~1h40, rebi
 and the **V1 plan** (§5: 18 species, 12 eggs, 8 rebirths, a tank of 25 fish, the Water Hen / Swordfish / Jellyfish
 companions with paid upgrade quests, a "Voyage" main quest line, ~12h15 to see everything; played by
 `tools/balance-v1-plan.js`). **`ROADMAP.md`** is the development plan of V1 (milestones M0–M7, recipes for a species /
-theme / companion / egg, the moderation watch list of the new designs).
+theme / companion / egg, the moderation watch list of the new designs). **`ROADMAP_V1.1.md`** is the plan after V1:
+the animation revamp (Blender in the toolchain as a third MCP server driven by the agent, auto-rigged skeletons instead of EditableMesh, behaviour and companion
+animations), steps A0–A8.
 
 ---
 
@@ -92,6 +95,7 @@ ProjetQuarium/
 │                            Ocean milestones tables, design rules, the V1 plan (§5), history. Updated with every economy change
 ├─ ROADMAP.md                V1 development plan: milestones M0 (foundations) → M7 (launch calibration) with checkboxes,
 │                            recipes (species, aquarium theme, companion, egg), moderation watch list of the new designs
+├─ ROADMAP_V1.1.md           After V1: the animation revamp (Blender skeletons instead of EditableMesh), steps A0–A8
 ├─ default.project.json      Rojo mapping (see §1)
 ├─ .mcp.json                 Project MCP servers (Roblox_Studio, FigCraft), started by `node tools/mcp/*.js` on any OS
 ├─ workspace.local.example.json  Template of workspace.local.json (git-ignored): this machine's FigCraft folder / port /
@@ -825,6 +829,11 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
 - **EditableMesh budget** (≈16 meshes / 46k vertices in Studio): handled by the animation LOD. Keep new fish
   meshes ≤ ~4–5k vertices. With 9 species in one tank (M2 test, Atlantis run) Studio hit the budget: some species
   glide unanimated ("Fish animation paused ... retried every 10s"), nothing breaks. To watch with 18 species (M7 load test).
+  **Measured 2026-11-01**: the client budget counts **triangles**, ~81,000 on the owner's PC (Studio Edit, plugins and
+  the server have none; a phone has its own, likely smaller); when it is full `CreateEditableMeshAsync` returns
+  **nil** (no error), and `Destroy()` frees it at once. Triangles per mesh: 2.5k (Golden Guppy) to 8.4k (Husky Dogfish,
+  Bunny Shark); the 6 heaviest species x 2 copies need ~83k. Fix planned in `ROADMAP_V1.1.md` (bones), with an optional
+  V1 stopgap (its A0).
 - **Scaling to many species (goal: dozens, maybe 100+). Decided 2026-10-29; item 1 built in V0.37.** Server, network and saves
   don't care about the species count (per-fish costs only), and the swim animation is already capped
   (`MAX_ANIMATED_SPECIES` = 6 at once; extra species glide unanimated). The real risk is **asset loading**: every
