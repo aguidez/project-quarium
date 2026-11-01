@@ -93,24 +93,24 @@ let EGGS = [
 		hatch: 120,
 		odds: { SilverAngelfish: 25, PirateFish: 55, ImperialDiscus: 20 },
 	},
-	{ name: "Wreck", price: 55e6, hatch: 135, odds: { ImperialDiscus: 55, Catfish: 45 } },
-	{ name: "Atlantis", price: 144e6, hatch: 150, odds: { Catfish: 25, BlueTang: 55, BabySunfish: 20 } },
-	{ name: "Trench", price: 6.1e9, hatch: 165, odds: { BabySunfish: 55, Lanternfish: 45 } },
-	{ name: "Volcano", price: 15.6e9, hatch: 180, odds: { Lanternfish: 25, Lionfish: 55, Dragonfish: 20 } },
-	{ name: "Crystal", price: 830e9, hatch: 180, odds: { Dragonfish: 55, WolfDogfish: 45 } },
-	{ name: "Cosmic", price: 1.8e12, hatch: 180, odds: { WolfDogfish: 25, BunnyShark: 55, MiniLeviathan: 20 } },
+	{ name: "Wreck", price: 78e6, hatch: 135, odds: { ImperialDiscus: 55, Catfish: 45 } },
+	{ name: "Atlantis", price: 210e6, hatch: 150, odds: { Catfish: 25, BlueTang: 55, BabySunfish: 20 } },
+	{ name: "Trench", price: 8.9e9, hatch: 165, odds: { BabySunfish: 55, Lanternfish: 45 } },
+	{ name: "Volcano", price: 23e9, hatch: 180, odds: { Lanternfish: 25, Lionfish: 55, Dragonfish: 20 } },
+	{ name: "Crystal", price: 1.2e12, hatch: 180, odds: { Dragonfish: 55, WolfDogfish: 45 } },
+	{ name: "Cosmic", price: 2.6e12, hatch: 180, odds: { WolfDogfish: 25, BunnyShark: 55, MiniLeviathan: 20 } },
 ];
 if (plan.EGGS) EGGS = plan.EGGS;
 // Rebirth n is REBIRTHS[n - 1] (rebirths.ts): price, total coin multiplier, start money
 let REBIRTHS = [
 	{ price: 5000, mult: 2.5, start: 300 },
 	{ price: 1300000, mult: 8, start: 300 },
-	{ price: 45e6, mult: 25, start: 300 },
-	{ price: 120e6, mult: 80, start: 300 },
-	{ price: 5.1e9, mult: 250, start: 300 },
-	{ price: 13e9, mult: 800, start: 300 },
-	{ price: 690e9, mult: 2500, start: 300 },
-	{ price: 1.5e12, mult: 8000, start: 300 },
+	{ price: 65e6, mult: 25, start: 300 },
+	{ price: 175e6, mult: 80, start: 300 },
+	{ price: 7.4e9, mult: 250, start: 300 },
+	{ price: 19e9, mult: 800, start: 300 },
+	{ price: 1e12, mult: 2500, start: 300 },
+	{ price: 2.2e12, mult: 8000, start: 300 },
 ];
 if (plan.REBIRTHS) REBIRTHS = plan.REBIRTHS;
 // Capacity milestones (oceanRewards.ts, kind "Capacity"): the tank holds `capacity` fish from `points` Ocean Points
@@ -149,6 +149,22 @@ const LIVE_QUEST_REWARDS = {
 	rebirth: { 2: 500, 3: 1500, 4: 4000, 5: 10000, 6: 25000, 7: 60000, 8: 150000 },
 };
 const QUEST_REWARDS = Object.assign({ discover: {}, rebirth: {} }, plan.QUEST_REWARDS || LIVE_QUEST_REWARDS);
+// The free side lines (quests.ts, live since V0.46). Hatchery: minutes of income at each total of fish hatched.
+// Collector (opens with "Full House"): its quests in order, a variant found or a number of Fish Index cells
+// (species x variant), each worth Ocean Points or minutes of income. Ocean (after "Full House"): minutes of income at `releases` fish
+// released to make room (a rebirth's release doesn't count). Titles and decor are not modelled.
+const SIDE_QUESTS = overrides.SIDE_QUESTS || plan.SIDE_QUESTS || {
+	hatchery: { at: [100, 300, 600, 900, 1200], minutes: 2 },
+	collector: [
+		{ variant: "Anomaly", minutes: 2 },
+		{ cells: 10, minutes: 2 },
+		{ variant: "Ghost", minutes: 3 },
+		{ cells: 25, ocean: 2500 },
+		{ variant: "Shiny", ocean: 2500 },
+		{ cells: 50, ocean: 0 },
+	],
+	ocean: { releases: 50, minutes: 3 },
+};
 const P = Object.assign(
 	{
 		collect: 0.5, // share of coin value the player collects (0.5 = average player, calibrated)
@@ -164,6 +180,14 @@ const P = Object.assign(
 		coinBoost: 1, // a coin multiplier on top of everything (gamepass estimate only)
 		hatchMult: null, // hatch-time multiplier once the Hen is owned, replacing HATCH's (paid Hen quests estimate only)
 		oceanBoost: 1, // an Ocean Points multiplier (gamepass estimate only)
+		// Daily / weekly quests (quests.ts pools, V0.46): the reference player plays hoursPerDay each day (BALANCE.md:
+		// the timeline is for 1 h a day) and claims, mid-session, the 3 dailies (dailyBoostMinutes of coin boost in
+		// all) and, mid-week, the 3 weeklies (weeklyBoostMinutes). The boost multiplies the coins by boostMult and
+		// runs down only while playing (PlayerData.coinBoostSeconds). 0 hours: no daily quests (play time only)
+		hoursPerDay: 1,
+		dailyBoostMinutes: 15,
+		weeklyBoostMinutes: 45,
+		boostMult: 2,
 		checkpoints: [15, 30, 60, 90, 120, 150, 180, 240, 300, 360],
 		horizon: 15 * 3600, // V1 ends at ~12h15 (all 18 species); room for the slowest players
 		players: 2000,
@@ -248,6 +272,15 @@ function simulate() {
 	let easterAt = null; // first easter egg fish hatched
 	let opened = 0; // eggs opened (Hatchery quests)
 	const openedAt = {}; // checkpoint -> eggs opened by then
+	let hatcheryStep = 0; // side lines (SIDE_QUESTS): next quest of each
+	let collectorStep = 0;
+	let released = 0; // fish released to make room
+	let oceanLineDone = false;
+	const cells = new Set(); // Fish Index cells: "type:variant"
+	const variantsFound = new Set();
+	const dayLength = P.hoursPerDay * 3600;
+	let boostLeft = 0; // seconds of quest coin boost
+	const sideAt = {}; // side quest -> time done ("Hatchery 100", "Collector Shiny"...)
 	const firstSixAt = () =>
 		FIRST_SIX.every((k) => discovered.has(k)) ? Math.max(...FIRST_SIX.map((k) => discovered.get(k))) : null;
 	const allAt = () => (discovered.size === SPECIES.length ? Math.max(...discovered.values()) : null);
@@ -261,8 +294,35 @@ function simulate() {
 		}
 		let earned = tankIps(fish, t);
 		earned *= P.collect * P.special * mult * P.coinBoost;
-		money += earned - (fish.length * P.food) / P.feedEvery;
+		const boost = boostLeft > 0 ? P.boostMult : 1;
+		if (boostLeft > 0) boostLeft--;
+		money += earned * boost - (fish.length * P.food) / P.feedEvery;
 		if (money < 0) money = 0;
+		// side lines: claimed as soon as done (+1: the onboarding fish was hatched too)
+		const hatchery = SIDE_QUESTS.hatchery;
+		while (hatcheryStep < hatchery.at.length && opened + 1 >= hatchery.at[hatcheryStep]) {
+			money += earned * 60 * hatchery.minutes;
+			sideAt[`Hatchery ${hatchery.at[hatcheryStep]} fish`] = t;
+			hatcheryStep++;
+		}
+		while (oceanUnlocked && collectorStep < SIDE_QUESTS.collector.length) {
+			const q = SIDE_QUESTS.collector[collectorStep];
+			if (q.variant ? !variantsFound.has(q.variant) : cells.size < q.cells) break;
+			ocean += q.ocean || 0;
+			money += earned * 60 * (q.minutes || 0);
+			sideAt[`Collector ${q.variant || q.cells + " cells"}`] = t;
+			collectorStep++;
+		}
+		if (!oceanLineDone && released >= SIDE_QUESTS.ocean.releases) {
+			money += earned * 60 * SIDE_QUESTS.ocean.minutes;
+			sideAt[`Ocean ${SIDE_QUESTS.ocean.releases} released`] = t;
+			oceanLineDone = true;
+		}
+		// daily / weekly quests, mid-session (see P.hoursPerDay)
+		if (dayLength > 0 && t % dayLength === Math.floor(dayLength / 2)) {
+			boostLeft += P.dailyBoostMinutes * 60;
+			if (Math.floor(t / dayLength) % 7 === 3) boostLeft += P.weeklyBoostMinutes * 60;
+		}
 		if (CHECKPOINTS.includes(t)) {
 			income[t] = earned;
 			oceanAtCheckpoint[t] = ocean;
@@ -300,6 +360,7 @@ function simulate() {
 					// (an easter egg fish is kept: it leaves by itself)
 					fish.sort((a, b) => (a.easter ? 1 : 0) - (b.easter ? 1 : 0) || fishIps(a, t) - fishIps(b, t));
 					release(fish.shift());
+					released++;
 				}
 				const egg = EGGS.find((e) => e.name === name);
 				const type = roll(drawOdds(egg));
@@ -315,6 +376,8 @@ function simulate() {
 				}
 				const variant = rollVariant();
 				fish.push({ type, born: t + P.reveal, vm: variant.mult, om: variant.ocean });
+				cells.add(`${type}:${variant.name}`);
+				if (variant.name !== "Normal") variantsFound.add(variant.name);
 				if (!discovered.has(type)) {
 					discovered.set(type, t);
 					// a story quest for this species pays minutes of the current income (claimed at once)
@@ -366,6 +429,7 @@ function simulate() {
 		oceanAt,
 		oceanAtCheckpoint,
 		openedAt,
+		sideAt,
 		income,
 		discovered,
 	};
@@ -506,3 +570,21 @@ const openedPerCheckpoint = CHECKPOINTS.map(
 		}`,
 );
 console.log("median eggs opened:", openedPerCheckpoint.join(", "));
+console.log("side quests (median, p10-p90):");
+const sideQuests = [...new Set(runs.flatMap((r) => Object.keys(r.sideAt)))];
+sideQuests.sort(
+	(a, b) =>
+		pct(
+			runs.map((r) => r.sideAt[a] ?? null),
+			0.5,
+		) -
+		pct(
+			runs.map((r) => r.sideAt[b] ?? null),
+			0.5,
+		),
+);
+for (const quest of sideQuests)
+	line(
+		`  ${quest}`,
+		runs.map((r) => r.sideAt[quest] ?? null),
+	);

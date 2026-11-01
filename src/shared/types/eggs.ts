@@ -112,10 +112,11 @@ export const EGG_TYPES: Record<EggType, EggConfig> = {
 		requires: "Amazon",
 	},
 	// V1 eggs (BALANCE.md §5): one per aquarium, priced 1.2x the rebirth that opens it, so it is reached after
-	// that rebirth (rebirth 3: 45M, rebirth 4: 120M, rebirth 5: 5.1B, rebirth 6: 13B, rebirth 7: 690B, rebirth 8: 1.5T)
+	// that rebirth (rebirth 3: 65M, rebirth 4: 175M, rebirth 5: 7.4B, rebirth 6: 19B, rebirth 7: 1T, rebirth 8: 2.2T; 1.45x
+	// the plan's since V0.46, with the rebirths)
 	Wreck: {
 		displayName: "Wreck Egg",
-		price: 55e6,
+		price: 78e6,
 		hatchTime: 135,
 		odds: [
 			{ fishType: "ImperialDiscus", chance: 55 },
@@ -126,7 +127,7 @@ export const EGG_TYPES: Record<EggType, EggConfig> = {
 	},
 	Atlantis: {
 		displayName: "Atlantis Egg",
-		price: 144e6,
+		price: 210e6,
 		hatchTime: 150,
 		odds: [
 			{ fishType: "Catfish", chance: 25 },
@@ -138,7 +139,7 @@ export const EGG_TYPES: Record<EggType, EggConfig> = {
 	},
 	Trench: {
 		displayName: "Trench Egg",
-		price: 6.1e9,
+		price: 8.9e9,
 		hatchTime: 165,
 		odds: [
 			{ fishType: "BabySunfish", chance: 55 },
@@ -149,7 +150,7 @@ export const EGG_TYPES: Record<EggType, EggConfig> = {
 	},
 	Volcano: {
 		displayName: "Volcano Egg",
-		price: 15.6e9,
+		price: 23e9,
 		hatchTime: 180,
 		odds: [
 			{ fishType: "Lanternfish", chance: 25 },
@@ -161,7 +162,7 @@ export const EGG_TYPES: Record<EggType, EggConfig> = {
 	},
 	Crystal: {
 		displayName: "Crystal Egg",
-		price: 830e9,
+		price: 1.2e12,
 		hatchTime: 180,
 		odds: [
 			{ fishType: "Dragonfish", chance: 55 },
@@ -172,7 +173,7 @@ export const EGG_TYPES: Record<EggType, EggConfig> = {
 	},
 	Cosmic: {
 		displayName: "Cosmic Egg",
-		price: 1.8e12,
+		price: 2.6e12,
 		hatchTime: 180,
 		odds: [
 			{ fishType: "WolfDogfish", chance: 25 },

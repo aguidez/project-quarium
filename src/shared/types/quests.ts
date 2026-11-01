@@ -35,8 +35,18 @@ export type QuestStat =
 	| "IndexCells"
 	/** Gauge: species hatched at least once (easter eggs aside): "find every species". */
 	| "SpeciesFound"
+	/** Gauge: species found in the quest's `variant` (its Fish Index cells): "find a Shiny". */
+	| "VariantFound"
+	/** Gauge: fish ever hatched, every species (PlayerData.hatched, kept through rebirths). */
+	| "TotalHatched"
 	/** Eggs opened. */
 	| "EggsOpened"
+	/** Coins picked up, by hand or by a companion (not the onboarding coin). */
+	| "CoinsCollected"
+	/** Meals eaten from the food the player dropped (not a companion's). */
+	| "FishFed"
+	/** Likes given to other players' aquariums. */
+	| "LikesGiven"
 	/** Fish of the quest's `variant` hatched. */
 	| "VariantHatched"
 	/** Fish released from the Ocean menu (a rebirth's release doesn't count). */
@@ -55,6 +65,8 @@ export const GAUGE_STATS: readonly QuestStat[] = [
 	"Rebirths",
 	"IndexCells",
 	"SpeciesFound",
+	"VariantFound",
+	"TotalHatched",
 ];
 
 /**
@@ -72,10 +84,18 @@ export type QuestReward =
 	 * something in every run (QuestService.getIncomeReward).
 	 */
 	| { kind: "IncomeMinutes"; minutes: number }
+	/**
+	 * Coins x QUEST_COIN_BOOST_MULTIPLIER for this many minutes of production (PlayerData.coinBoostSeconds): the
+	 * daily / weekly rewards. Worth about `minutes` of income, spread over the play instead of paid at once.
+	 */
+	| { kind: "CoinBoost"; minutes: number }
 	| { kind: "OceanPoints"; amount: number }
 	/** A title or a decor (shared/types/cosmetics, PlayerData.cosmetics). */
 	| { kind: "Title"; title: CosmeticId }
 	| { kind: "Decor"; decor: CosmeticId };
+
+/** Coin multiplier of the quest coin boost (CoinBoost rewards), multiplied with the others (like, pass, event). */
+export const QUEST_COIN_BOOST_MULTIPLIER = 2;
 
 export interface QuestConfig {
 	category: QuestCategory;
@@ -403,10 +423,238 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 3000,
 		rewards: [{ kind: "Perk", perk: "Jellyfish3" }],
 	},
+	// The side lines (BALANCE.md §5.9, ROADMAP M7): always something to do next to the Voyage. Gauges, so the goals a
+	// player already met complete as the quest opens.
+	// Hatchery: every fish ever hatched counts (PlayerData.hatched)
+	Hatchery1: {
+		category: "Story",
+		title: "Hatchling Keeper",
+		description: "Hatch 100 fish (all time).",
+		stat: "TotalHatched",
+		target: 100,
+		rewards: [{ kind: "IncomeMinutes", minutes: 2 }],
+	},
+	Hatchery2: {
+		category: "Story",
+		title: "Busy Hatchery",
+		description: "Hatch 300 fish (all time).",
+		stat: "TotalHatched",
+		target: 300,
+		rewards: [{ kind: "IncomeMinutes", minutes: 2 }],
+	},
+	Hatchery3: {
+		category: "Story",
+		title: "Egg Expert",
+		description: "Hatch 600 fish (all time).",
+		stat: "TotalHatched",
+		target: 600,
+		rewards: [{ kind: "IncomeMinutes", minutes: 2 }],
+	},
+	Hatchery4: {
+		category: "Story",
+		title: "Hatch Master",
+		description: "Hatch 900 fish (all time).",
+		stat: "TotalHatched",
+		target: 900,
+		rewards: [{ kind: "IncomeMinutes", minutes: 2 }],
+	},
+	Hatchery5: {
+		category: "Story",
+		title: "Golden Incubator",
+		description: "Hatch 1,200 fish (all time).",
+		stat: "TotalHatched",
+		target: 1200,
+		rewards: [
+			{ kind: "Decor", decor: "DecorIncubator" },
+			{ kind: "IncomeMinutes", minutes: 2 },
+		],
+	},
+	// Collector: the rare variants and the Fish Index (cells = species x variant), a rare find between two cell goals.
+	// Income before ~3 h, Ocean Points after: points early would bring the first milestones forward (BALANCE.md §5.9)
+	Collector1: {
+		category: "Story",
+		title: "Strange Glow",
+		description: "Find an Anomaly fish.",
+		stat: "VariantFound",
+		variant: "Anomaly",
+		target: 1,
+		rewards: [{ kind: "IncomeMinutes", minutes: 2 }],
+	},
+	Collector2: {
+		category: "Story",
+		title: "Growing Index",
+		description: "Fill 10 entries of the Fish Index.",
+		stat: "IndexCells",
+		target: 10,
+		rewards: [{ kind: "IncomeMinutes", minutes: 2 }],
+	},
+	Collector3: {
+		category: "Story",
+		title: "Ghostly Friend",
+		description: "Find a Ghost fish.",
+		stat: "VariantFound",
+		variant: "Ghost",
+		target: 1,
+		rewards: [{ kind: "IncomeMinutes", minutes: 3 }],
+	},
+	Collector4: {
+		category: "Story",
+		title: "Keen Collector",
+		description: "Fill 25 entries of the Fish Index.",
+		stat: "IndexCells",
+		target: 25,
+		rewards: [{ kind: "OceanPoints", amount: 2500 }],
+	},
+	Collector5: {
+		category: "Story",
+		title: "Shiny Hunter",
+		description: "Find a Shiny fish.",
+		stat: "VariantFound",
+		variant: "Shiny",
+		target: 1,
+		rewards: [{ kind: "OceanPoints", amount: 2500 }],
+	},
+	Collector6: {
+		category: "Story",
+		title: "The Collector",
+		description: "Fill 50 entries of the Fish Index.",
+		stat: "IndexCells",
+		target: 50,
+		rewards: [{ kind: "Title", title: "TitleCollector" }],
+	},
+	// Ocean: after "Full House" (which opens the Ocean menu), give fish back to the sea
+	Ocean1: {
+		category: "Story",
+		title: "Back to the Sea",
+		description: "Release 50 fish into the ocean.",
+		stat: "FishReleased",
+		target: 50,
+		rewards: [{ kind: "IncomeMinutes", minutes: 3 }],
+	},
+	Ocean2: {
+		category: "Story",
+		title: "Ocean Friend",
+		description: "Release a Shiny fish into the ocean.",
+		stat: "FishReleased",
+		variant: "Shiny",
+		target: 1,
+		rewards: [{ kind: "Title", title: "TitleOceanFriend" }],
+	},
+	// Daily quests (DAILY_QUEST_POOL): doable by anyone in a session, alone; coins x2 for 5 minutes each (BALANCE.md §5.9)
+	DailyCoins: {
+		category: "Daily",
+		title: "Coin Rush",
+		description: "Collect 150 coins.",
+		stat: "CoinsCollected",
+		target: 150,
+		rewards: [{ kind: "CoinBoost", minutes: 5 }],
+	},
+	DailyCoinsBig: {
+		category: "Daily",
+		title: "Big Haul",
+		description: "Collect 400 coins.",
+		stat: "CoinsCollected",
+		target: 400,
+		rewards: [{ kind: "CoinBoost", minutes: 5 }],
+	},
+	DailyEggs: {
+		category: "Daily",
+		title: "Egg Hunt",
+		description: "Open 10 eggs.",
+		stat: "EggsOpened",
+		target: 10,
+		rewards: [{ kind: "CoinBoost", minutes: 5 }],
+	},
+	DailyEggsBig: {
+		category: "Daily",
+		title: "Hatch Day",
+		description: "Open 20 eggs.",
+		stat: "EggsOpened",
+		target: 20,
+		rewards: [{ kind: "CoinBoost", minutes: 5 }],
+	},
+	DailyFeed: {
+		category: "Daily",
+		title: "Feeding Time",
+		description: "Feed your fish 30 times (food you drop).",
+		stat: "FishFed",
+		target: 30,
+		rewards: [{ kind: "CoinBoost", minutes: 5 }],
+	},
+	DailyAnomaly: {
+		category: "Daily",
+		title: "Lucky Find",
+		description: "Hatch an Anomaly fish.",
+		stat: "VariantHatched",
+		variant: "Anomaly",
+		target: 1,
+		rewards: [{ kind: "CoinBoost", minutes: 5 }],
+	},
+	// Weekly quests (WEEKLY_QUEST_POOL): coins x2 for 15 minutes each
+	WeeklyCoins: {
+		category: "Weekly",
+		title: "Coin Hoard",
+		description: "Collect 3,000 coins.",
+		stat: "CoinsCollected",
+		target: 3000,
+		rewards: [{ kind: "CoinBoost", minutes: 15 }],
+	},
+	WeeklyEggs: {
+		category: "Weekly",
+		title: "Egg Marathon",
+		description: "Open 100 eggs.",
+		stat: "EggsOpened",
+		target: 100,
+		rewards: [{ kind: "CoinBoost", minutes: 15 }],
+	},
+	WeeklyFeed: {
+		category: "Weekly",
+		title: "Gourmet Week",
+		description: "Feed your fish 300 times (food you drop).",
+		stat: "FishFed",
+		target: 300,
+		rewards: [{ kind: "CoinBoost", minutes: 15 }],
+	},
+	WeeklyGhost: {
+		category: "Weekly",
+		title: "Ghost Hunt",
+		description: "Hatch a Ghost fish.",
+		stat: "VariantHatched",
+		variant: "Ghost",
+		target: 1,
+		rewards: [{ kind: "CoinBoost", minutes: 15 }],
+	},
+	WeeklyRelease: {
+		category: "Weekly",
+		title: "Return to the Sea",
+		description: "Release 25 fish into the ocean.",
+		stat: "FishReleased",
+		target: 25,
+		rewards: [{ kind: "CoinBoost", minutes: 15 }],
+	},
+	// The social one: a week leaves time to meet other players (one like an hour, LIKE_COOLDOWN)
+	WeeklyLikes: {
+		category: "Weekly",
+		title: "Good Neighbour",
+		description: "Like 3 other players' aquariums.",
+		stat: "LikesGiven",
+		target: 3,
+		rewards: [{ kind: "CoinBoost", minutes: 15 }],
+	},
 };
 
 /** Story lines: each one has its quests in order, and opens once a quest of another line is claimed. */
-export type StoryLine = "Start" | "Ocean" | "Rebirth" | "Snail" | "Pelican" | "WaterHen" | "Swordfish" | "Jellyfish";
+export type StoryLine =
+	| "Start"
+	| "Ocean"
+	| "Rebirth"
+	| "Hatchery"
+	| "Collector"
+	| "Snail"
+	| "Pelican"
+	| "WaterHen"
+	| "Swordfish"
+	| "Jellyfish";
 
 export interface StoryLineConfig {
 	/** Small tag over its quests in the quest book. */
@@ -427,7 +675,7 @@ export interface StoryLineConfig {
 
 export const STORY_LINES: Record<StoryLine, StoryLineConfig> = {
 	Start: { displayName: "First steps", quests: ["Story1"], order: 1 },
-	Ocean: { displayName: "Ocean", quests: ["Story2"], requires: "Story1", order: 2 },
+	Ocean: { displayName: "Ocean", quests: ["Story2", "Ocean1", "Ocean2"], requires: "Story1", order: 2 },
 	// The main line: the rebirth, then the "Voyage" through the aquariums (its key stays "Rebirth" for the saves)
 	Rebirth: {
 		displayName: "Voyage",
@@ -455,27 +703,40 @@ export const STORY_LINES: Record<StoryLine, StoryLineConfig> = {
 	},
 	Snail: { displayName: "Snail", quests: ["Story3", "Story4", "Story5"], requires: "Story1", order: 4 },
 	Pelican: { displayName: "Pelican", quests: ["Story6", "Story7", "Story8"], requiresCompanion: "Pelican", order: 5 },
+	// The free side lines (ROADMAP M7): the Collector waits for "Full House", so a new player has 4 story quests at once
+	Hatchery: {
+		displayName: "Hatchery",
+		quests: ["Hatchery1", "Hatchery2", "Hatchery3", "Hatchery4", "Hatchery5"],
+		requires: "Story1",
+		order: 6,
+	},
+	Collector: {
+		displayName: "Collector",
+		quests: ["Collector1", "Collector2", "Collector3", "Collector4", "Collector5", "Collector6"],
+		requires: "Story2",
+		order: 7,
+	},
 	// The paid companion lines (ROADMAP M4): shown from the moment the companion is owned, locked without the pass
 	WaterHen: {
 		displayName: "Water Hen",
 		quests: ["WaterHen1", "WaterHen2", "WaterHen3"],
 		requiresCompanion: "WaterHen",
 		requiresPass: "WaterHenPass",
-		order: 6,
+		order: 8,
 	},
 	Swordfish: {
 		displayName: "Swordfish",
 		quests: ["Swordfish1", "Swordfish2", "Swordfish3"],
 		requiresCompanion: "Swordfish",
 		requiresPass: "SwordfishPass",
-		order: 7,
+		order: 9,
 	},
 	Jellyfish: {
 		displayName: "Jellyfish",
 		quests: ["Jellyfish1", "Jellyfish2", "Jellyfish3"],
 		requiresCompanion: "Jellyfish",
 		requiresPass: "JellyfishPass",
-		order: 8,
+		order: 10,
 	},
 };
 
@@ -546,9 +807,23 @@ export function getActiveStoryQuests(lines: QuestsData["lines"]): QuestProgress[
 	}
 	return active;
 }
-/** Ids of QUESTS drawn for the daily / weekly boards (none yet). */
-export const DAILY_QUEST_POOL: readonly string[] = [];
-export const WEEKLY_QUEST_POOL: readonly string[] = [];
+/** Ids of QUESTS drawn for the daily / weekly boards (3 of each, the same for every player). */
+export const DAILY_QUEST_POOL: readonly string[] = [
+	"DailyCoins",
+	"DailyCoinsBig",
+	"DailyEggs",
+	"DailyEggsBig",
+	"DailyFeed",
+	"DailyAnomaly",
+];
+export const WEEKLY_QUEST_POOL: readonly string[] = [
+	"WeeklyCoins",
+	"WeeklyEggs",
+	"WeeklyFeed",
+	"WeeklyGhost",
+	"WeeklyRelease",
+	"WeeklyLikes",
+];
 /** Quests per board, fewer if the pool is smaller. */
 export const DAILY_QUEST_COUNT = 3;
 export const WEEKLY_QUEST_COUNT = 3;

@@ -15,6 +15,7 @@ const CONFIRM_WINDOW = 15;
 const NEXT_FRENCH_COMMAND = "/nextfrench";
 const INCUBATORS_COMMAND = "/incubators";
 const PASS_COMMAND = "/pass";
+const BOOST_COMMAND = "/boost";
 /** The most incubators the test command gives (the V1 plan stops at 2). */
 const MAX_TEST_INCUBATORS = 4;
 
@@ -30,6 +31,7 @@ const MAX_TEST_INCUBATORS = 4;
  *  /incubators <n>      sets the player's incubators per egg type (saved: "/incubators 1" puts it back)
  *  /pass <Pass>         gives or takes a gamepass (e.g. "/pass Coins"), for this session only: the next join
  *                       asks Roblox again
+ *  /boost <minutes>     sets the player's quest coin boost to that many minutes (saved: "/boost 0" clears it)
  */
 class DevCommandServiceSingleton implements Lifecycle {
 	private resetAskedAt = new Map<Player, number>();
@@ -72,13 +74,22 @@ class DevCommandServiceSingleton implements Lifecycle {
 			if (player) this.onPass(player, text);
 		});
 		pass.Parent = TextChatService;
+
+		const boost = new Instance("TextChatCommand");
+		boost.Name = "DevBoost";
+		boost.PrimaryAlias = BOOST_COMMAND;
+		boost.Triggered.Connect((source, text) => {
+			const player = Players.GetPlayerByUserId(source.UserId);
+			if (player) this.onBoost(player, text);
+		});
+		boost.Parent = TextChatService;
 		Players.PlayerRemoving.Connect((player) => this.resetAskedAt.delete(player));
 	}
 
 	public onStart() {
 		if (RunService.IsStudio())
 			print(
-				`[Server] DevCommandService: ${RESET_COMMAND}, ${NEXT_FRENCH_COMMAND}, ${INCUBATORS_COMMAND}, ${PASS_COMMAND} available (Studio, place owner only).`,
+				`[Server] DevCommandService: ${RESET_COMMAND}, ${NEXT_FRENCH_COMMAND}, ${INCUBATORS_COMMAND}, ${PASS_COMMAND}, ${BOOST_COMMAND} available (Studio, place owner only).`,
 			);
 	}
 
@@ -107,6 +118,19 @@ class DevCommandServiceSingleton implements Lifecycle {
 		data.incubators = math.clamp(math.floor(count), 1, MAX_TEST_INCUBATORS);
 		DataService.sync(player);
 		DataService.notify(player, `Incubators per egg type: ${data.incubators}.`, "info");
+	}
+
+	private onBoost(player: Player, text: string) {
+		const data = DataService.getData(player);
+		if (!this.isAllowed(player) || !data) {
+			warn(`[Server] ${player.Name} tried ${BOOST_COMMAND}: refused (not the place's owner).`);
+			return;
+		}
+		const minutes = tonumber(text.split(" ")[1]);
+		if (minutes === undefined) return;
+		data.coinBoostSeconds = math.max(minutes, 0) * 60;
+		DataService.sync(player);
+		DataService.notify(player, `Quest coin boost: ${math.max(minutes, 0)} min.`, "info");
 	}
 
 	private onPass(player: Player, text: string) {

@@ -3,7 +3,7 @@
 > The development plan from the live game (V0.35) to V1: what to build, in which order, and how. The **numbers** live
 > in `BALANCE.md` §5 and `tools/balance-v1-plan.js`; this file is the **work**. Tick the boxes as tasks ship, and move
 > what a milestone ships into `PROJECT_CONTEXT.md` / `RELEASE_NOTES.md` as usual.
-> Last updated: 2026-11-01 (M7: animation stopgap shipped in V0.45, the load test as the "before" of ROADMAP_V1.1.md; M6 done in V0.44: V1 content complete; M5 done in V0.42, M4 done in V0.40, M3 done in V0.39, M2 done in V0.38, M0 in V0.37, M1 in V0.36; first version: 7 milestones, from the rebalance to rebirth 8).
+> Last updated: 2026-11-01 (M7: side lines, daily / weekly quests and the 18-species load test in V0.46; animation stopgap shipped in V0.45, the load test as the "before" of ROADMAP_V1.1.md; M6 done in V0.44: V1 content complete; M5 done in V0.42, M4 done in V0.40, M3 done in V0.39, M2 done in V0.38, M0 in V0.37, M1 in V0.36; first version: 7 milestones, from the rebalance to rebirth 8).
 
 **After V1**: `ROADMAP_V1.1.md`, the animation revamp (Blender skeletons instead of EditableMesh), starts once M7 is done.
 
@@ -135,10 +135,17 @@ Themes already built (`PirateWreck`, `Atlantis` in ServerStorage.Assets.Aquarium
 
 ### M7 — Side lines, polish, launch calibration
 
-- [ ] Side lines: Hatchery, Collector, Ocean (BALANCE.md §5.9).
-- [ ] Daily / weekly quest pools (retention; their rewards stay IncomeMinutes / cosmetics: no pace change).
-- [ ] Load test with 18 species (PROJECT_CONTEXT §4 protocol), mobile memory check: they are the "before" numbers
-      of the V1.1 animation revamp (`ROADMAP_V1.1.md` A0).
+- [x] Side lines: Hatchery, Collector, Ocean (BALANCE.md §5.9), shipped in V0.46. The Collector waits for "Full House"
+      (4 story quests at once for a new player); no sticker frames (decided by the owner): its 50-cell goal gives the
+      Collector title. The Golden Incubator decor: a generated nest, chosen by the owner among 3 candidates.
+- [x] Daily / weekly quest pools (retention), shipped in V0.46: 6 + 6 quests, one social weekly quest (like 3
+      aquariums); new stats CoinsCollected, FishFed, LikesGiven, gauges VariantFound, TotalHatched. Rewards: a **coin
+      boost** (x2 for 5 min a daily, 15 min a weekly; adds up, runs only while the tank produces, saved), decided by the
+      owner instead of a lump of income. The balance's reference player becomes **1 h a day with the dailies**
+      (simulator `P.hoursPerDay` 1): rebirths 3–8 and their eggs x1.45 to keep the end at ~12h (BALANCE.md §2).
+- [x] Load test with 18 species (PROJECT_CONTEXT §4), done in V0.46: 60 fps in every view, a simulated phone keeps
+      every visible fish moving (animated or swaying). The "before" numbers of `ROADMAP_V1.1.md`. The real mobile memory
+      check needs a phone: with the first players (calibration below).
 - [x] Swim animation stopgap (`ROADMAP_V1.1.md` A0; the EditableMesh budget is ~81k triangles on the owner's PC, the
       6 heaviest species alone need ~83k): rigs planned in triangles, budget adapted to the device, the other visible
       fish sway. Decided by the owner and shipped in V0.45.

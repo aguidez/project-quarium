@@ -2,7 +2,7 @@
 
 > Living map of the project. **Read it before exploring the code, and update it in the same change
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
-> Last updated: 2026-11-01 (V0.45: swim animation stopgap, rigs planned in triangles + sway; ROADMAP_V1.1.md: the post-V1 animation revamp plan, EditableMesh budget measured in §4;
+> Last updated: 2026-11-01 (V0.46, ROADMAP M7: daily / weekly coin boost (PlayerData.coinBoostSeconds, QuestBoostPill, "/boost"), rebirths 3–8 and their eggs x1.45, side lines Hatchery / Collector / Ocean, daily / weekly pools, quest stats CoinsCollected / FishFed / LikesGiven / VariantFound / TotalHatched, Golden Incubator decor, LikeService.onLikeGiven, simulator side lines + hoursPerDay, load test with 18 species in §4; V0.45: swim animation stopgap, rigs planned in triangles + sway; ROADMAP_V1.1.md: the post-V1 animation revamp plan, EditableMesh budget measured in §4;
 > V0.44, ROADMAP M6: rebirths 7–8 → CrystalCaverns / CosmicSanctuary themes, WolfDogfish
 > ("Husky Dogfish") / BunnyShark / MiniLeviathan (Mythic) with Moon / Star / Planet coins, Crystal and Cosmic eggs, Ocean
 > milestones 450,000 (tank 25) and 1,000,000 (OceanGuardian: title + whale statue), Voyage 12–16 (gauge SpeciesFound,
@@ -140,7 +140,8 @@ ProjetQuarium/
 │                            milestones, income and Ocean Points per checkpoint. Keep it in sync with the config and copy
 │                            its results into BALANCE.md. `--plan <file>` plays a planned economy instead (incubator and
 │                            hatch-speed milestones, quest bonuses), `--players n`, JSON overrides (coinBoost / oceanBoost /
-│                            hatchMult: gamepass estimates)
+│                            hatchMult: gamepass estimates; SIDE_QUESTS; P.hoursPerDay: 1 by default, the reference player
+│                            of 1 h a day and its daily / weekly coin boosts, 0 = one long session), the side lines (Hatchery, Collector, Ocean: SIDE_QUESTS) and when each is done
 ├─ tools/balance-v1-plan.js  The V1 plan played by the simulators (BALANCE.md §5): 18 species, 12 eggs, 8 rebirths,
 │                            Ocean milestones to 25 fish, second incubator, Water Hen, story quest bonuses, Pelican x1.33,
 │                            Snail x1.15, Jellyfish and Swordfish stages. Not in the game: becomes the config when V1 is built
@@ -204,16 +205,19 @@ ProjetQuarium/
    │     │                   (x2) / getPassCompanionSlots (+1)
    │     ├─ quests.ts        QUESTS (Story1 Snail, Story2 Ocean, Story3–5 the Snail's line, Story6–8 the Pelican's line,
    │     │                   Story9 then Voyage1–16 the main "Voyage" line, WaterHen1–3 / Swordfish1–3 / Jellyfish1–3 the paid
-   │     │                   companion lines),
-   │     │                   STORY_LINES (Start / Ocean / Rebirth (shown "Voyage") / Snail / Pelican / WaterHen / Swordfish /
+   │     │                   companion lines, Hatchery1–5 / Collector1–6 / Ocean1–2 the free side lines (V0.46), Daily* /
+   │     │                   Weekly* the board quests), DAILY_QUEST_POOL / WEEKLY_QUEST_POOL (6 each, 3 drawn per period),
+   │     │                   STORY_LINES (Start / Ocean / Rebirth (shown "Voyage") / Snail / Pelican / Hatchery / Collector / WaterHen / Swordfish /
    │     │                   Jellyfish (the last three: requiresCompanion + requiresPass): quests in
    │     │                   order, requires (a quest),
    │     │                   requiresCompanion, order), refreshStoryLines(lines, companions), getActiveStoryQuests,
    │     │                   isStoryQuestDone, getStoryLine, isQuestLocked (line `requiresPass`: shown, never counted
-   │     │                   nor claimed without the pass); stats: counters CoinMoney, OceanPoints, EggsOpened,
+   │     │                   nor claimed without the pass); stats: counters CoinMoney, CoinsCollected, FishFed (meals from
+   │     │                   food the player dropped), LikesGiven, OceanPoints, EggsOpened,
    │     │                   VariantHatched {variant}, FishReleased, CompanionStat {companion} (Snail / Swordfish coins, Pelican / Jellyfish feeds,
    │     │                   eggs opened with the Water Hen equipped),
-   │     │                   gauges (GAUGE_STATS) FishInTank, MoneyHeld, SpeciesHatched {fishType}, Rebirths, IndexCells, SpeciesFound
+   │     │                   gauges (GAUGE_STATS) FishInTank, MoneyHeld, SpeciesHatched {fishType}, Rebirths, IndexCells, SpeciesFound,
+   │     │                   VariantFound {variant} (species found in it), TotalHatched (every fish ever hatched)
    │     │                   (species hatched at least once, easter eggs excluded: Master Aquarist);
    │     │                   rewards Money / Companion / Feature / Perk / IncomeMinutes / OceanPoints / Title / Decor;
    │     │                   daily/weekly periods (UTC)
@@ -278,7 +282,9 @@ ProjetQuarium/
    │     ├─ FishService      Fish as data only (no server model): swim AI as SwimSegments, hunger (weak, never dies),
    │     │                   growth, coins / farts, cannibal eating, releases, beat coins, AFK freeze; easter egg fish:
    │     │                   coin from getTankIncomePerMinute, leave after their lifetime (onFishLeft); replication to the
-   │     │                   clients that watch each tank ("WatchAquariums" → FishSync messages)
+   │     │                   clients that watch each tank ("WatchAquariums" → FishSync messages); the quest coin boost
+   │     │                   (runCoinBoost: PlayerData.coinBoostSeconds runs down only while the tank produces, coins
+   │     │                   x QUEST_COIN_BOOST_MULTIPLIER in dropCoin; Player attributes CoinBoostSeconds / CoinBoostRunning)
    │     ├─ EggService       BuyEgg / OpenEgg: price, gating, incubation (up to PlayerData.incubators eggs per type, the
    │     │                   soonest opens first), draw (or forceNextHatch, Studio tests), variant with getVariantLuck,
    │     │                   quest stats EggsOpened / VariantHatched (+ CompanionStat WaterHen when it is equipped), hatch time ×
@@ -316,9 +322,10 @@ ProjetQuarium/
    │     │                   same charge attributes as the Pelican, shown by PelicanChargesController)
    │     ├─ QuestService     Progress from server stats (addProgress(stat, amount, subject {fishType, variant, companion});
    │     │                   reportGauges reads every gauge from PlayerData), claims, rewards (money / companion / feature /
-   │     │                   perk / IncomeMinutes: minutes × FishService.getTankIncomePerMinute (at least one fish of the best
+   │     │                   perk / CoinBoost (adds to PlayerData.coinBoostSeconds) / IncomeMinutes: minutes × FishService.getTankIncomePerMinute (at least one fish of the best
    │     │                   species hatched) × rebirth multiplier / Ocean Points / title / decor), daily / weekly boards;
-   │     │                   quests of a line whose pass isn't owned are skipped
+   │     │                   quests of a line whose pass isn't owned are skipped; an empty board of the current period is
+   │     │                   drawn again (boards drawn before the pools were filled, V0.46)
    │     ├─ OceanService     ReleaseFish (+ Ocean Points), FinishTutorial (any feature's tutorial), credits an easter egg
    │     │                   fish that leaves on its own (points, popup, its leaveMessage)
    │     ├─ RebirthService   "Rebirth" intent (needs the "Rebirth" feature, quest "Saving Up"): fish to the ocean,
@@ -330,14 +337,15 @@ ProjetQuarium/
    │     │                   dropped), grants a purchase from PromptGamePassPurchaseFinished (thank-you Reward),
    │     │                   "BuyGamePass" intent → PromptGamePassPurchase; a lost slot pass unequips the extra companion.
    │     │                   setTestPass for "/pass". The game's creator owns every pass of the game (Studio shows OWNED)
-   │     ├─ LikeService      Places a like board beside each tank, GiveLike (range / own tank / cooldown),
+   │     ├─ LikeService      Places a like board beside each tank, GiveLike (range / own tank / cooldown), onLikeGiven (QuestService),
    │     │                   keeps each owner's boost in memory (getCoinMultiplier), publishes likes + boost as aquarium attributes
    │     └─ DevCommandService  Studio-only chat commands (a TextChatCommand created only when RunService.IsStudio(),
    │                         and only the place's owner may use it): "/datareset" asks, "/datareset confirm" within 15 s
    │                         empties the tank, wipes the save to the template and kicks (stop / start the playtest);
    │                         "/nextfrench": the next egg opened hatches a French Fish (EggService.forceNextHatch);
    │                         "/incubators <n>": incubators per egg type (1–4, saved: "/incubators 1" puts it back);
-   │                         "/pass <GamePass>": gives / takes a pass for the session (the next join asks Roblox again)
+   │                         "/pass <GamePass>": gives / takes a pass for the session (the next join asks Roblox again);
+   │                         "/boost <minutes>": sets the quest coin boost (saved: "/boost 0" clears it)
    └─ client/
       ├─ main.client.ts      Registers controllers
       ├─ fishLook.ts         getFishTemplate / cloneFishTemplate (undefined until the server replicated the species),
@@ -435,6 +443,8 @@ ProjetQuarium/
          ├─ LikeBoard        Face of a like board (likes, "a like = x2" hint or boost countdown), mounted by LikeBoardController
          ├─ RebirthPanel     Rebirth menu: multiplier hero, what is lost / earned (Ocean Points preview), progress, 2-click confirm
          ├─ LikeBoostPill    The owner's own boost ("Liked! Coins x2 4:32"), under the top HUD
+         ├─ QuestBoostPill   The quest coin boost left ("QUEST BOOST x2 4:32", "PAUSED" when the tank doesn't produce), from
+         │                   the CoinBoostSeconds / CoinBoostRunning attributes, under the like pill (V0.46)
 ```
 
 **Studio-side (place file, not in Rojo):**
@@ -529,7 +539,8 @@ ProjetQuarium/
   `MiniLeviathan` (crested baby sea serpent: the mesh came out upright, so it is pitched −30° about X inside the
   template; 2.6 × 6.9 × 6.4), all with Anomaly / Shiny FishVariants; coins `MoonCoin` (Moon), `StarCoin` (Star),
   `PlanetCoin` (Planet), clones of the SunMedallion template; decor `Assets.Decor` (tag `DecorTemplate`, attr
-  `Cosmetic`, PrimaryPart Mesh): `WhaleStatue` (DecorWhaleStatue) and `GoldenTrophy` (DecorGoldenTrophy, gold tint).
+  `Cosmetic`, PrimaryPart Mesh): `WhaleStatue` (DecorWhaleStatue), `GoldenTrophy` (DecorGoldenTrophy, gold tint) and
+  `Incubator` (DecorIncubator, V0.46: a generated gem-rimmed nest with a spotted egg, 3 × 2.9 × 3, SurfaceAppearance tinted gold).
   Theme `CrystalCaverns` ("Crystal Caverns", rebirth 7): lavender sand, Slate base, Neon violet plinth, Slate rims,
   blue-violet `Water` (3a4f9a / 0.78), painted cave backdrop (stalactites, glowing crystals); decor: basalt tinted
   violet, crystal clusters tinted cyan / pink / violet with PointLights. Theme `CosmicSanctuary` ("Cosmic Sanctuary",
@@ -596,6 +607,7 @@ ProjetQuarium/
   | `oceanRewardsClaimed` | Ocean milestones claimed (kept through rebirths) |
   | `features`, `tutorialsDone` | Unlocked features, and those whose tutorial was seen |
   | `likesReceived`, `lastLikeGivenAt` | Likes received, last like given (cooldown, server time). The boost itself is not saved |
+  | `coinBoostSeconds` | Quest coin boost left (daily / weekly rewards, V0.46): adds up, runs down only while the tank produces (FishService.runCoinBoost), kept through rebirths |
   | `rebirths` | Rebirths done: coin multiplier and aquarium theme |
   | `perks` | Permanent quest bonuses (shared/types/perks), kept through rebirths |
   | `cosmetics` | Titles, decor and finishes earned (shared/types/cosmetics), kept forever |
@@ -686,10 +698,11 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   chases it and eats it, which resets it to Satiated. Species flagged `cannibal` eat smaller fish when weak (none yet). Hunger, growth and coins all stop while
   the owner is AFK (not tending) or still in the onboarding.
 - **Quests.** `QuestService.addProgress(stat, amount, subject)` handles counters (`CoinMoney`, excluding the onboarding
-  coin; `OceanPoints`; `EggsOpened` and `VariantHatched` from EggService.openEgg; `FishReleased` from OceanService's
-  releases; `CompanionStat` with the companion): a quest with a `fishType` / `variant` / `companion` only counts its own.
+  coin; `CoinsCollected` (every coin, by hand or by a companion); `FishFed` (FishService.onFishFed without a companion);
+  `LikesGiven` (LikeService.onLikeGiven); `OceanPoints`; `EggsOpened` and `VariantHatched` from EggService.openEgg;
+  `FishReleased` from OceanService's releases; `CompanionStat` with the companion): a quest with a `fishType` / `variant` / `companion` only counts its own.
   `reportGauges` reads every gauge from PlayerData (`FishInTank`, `MoneyHeld`, `SpeciesHatched`, `Rebirths`,
-  `IndexCells`) on each coin, spawn, claim, rebirth and every 5 s: a gauge quest already met completes as it opens.
+  `IndexCells`, `SpeciesFound`, `VariantFound`, `TotalHatched`) on each coin, spawn, claim, rebirth and every 5 s: a gauge quest already met completes as it opens.
   A line with `requiresPass` opens like the others, but its quests count nothing and can't be claimed without the
   pass (`isQuestLocked`; PlayerData.passes). A completed quest gets a notification and a badge;
   the player then sends `ClaimQuest`, which grants the reward (money, companion via CompanionService, or feature
@@ -725,6 +738,16 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   2.5 / 3 / 3.2); Jellyfish (V0.42, `CompanionStat` Jellyfish: fish that ate one of its pellets) Jellyfish1–3 "Snack
   Time" 300 / "Tentacle Chef" 1,000 / "Grand Feast" 3,000 → perks Jellyfish1–3 (3 charges every 6 s, every 5 s, 3
   pellets).
+  The free side lines (V0.46, ROADMAP M7, gauges): Hatchery (opened by Story1; `TotalHatched` 100 / 300 / 600 / 900 /
+  1,200 → 2 min of income each, the last one also the Golden Incubator decor), Collector (opened by Story2 "Full House";
+  first Anomaly, 10 Fish Index cells, first Ghost, 25 cells, first Shiny, 50 cells → the Collector title; the other
+  rewards in BALANCE.md §5.9), and the Ocean line goes on after Full House: Ocean1 "Back to the Sea" (release 50 fish →
+  3 min of income), Ocean2 "Ocean Friend" (release a Shiny → the Ocean Friend title).
+  Daily / weekly boards (V0.46): 3 quests drawn per period from DAILY_QUEST_POOL (collect 150 / 400 coins, open 10 / 20
+  eggs, feed 30 times, hatch an Anomaly → coins x2 for 5 min each) and WEEKLY_QUEST_POOL (collect 3,000 coins, open
+  100 eggs, feed 300 times, hatch a Ghost, release 25 fish, like 3 aquariums → x2 for 15 min each), the same draw for
+  every player. Reward kind `CoinBoost {minutes}`: PlayerData.coinBoostSeconds (adds up, multiplied with the like / pass /
+  event bonuses, runs down only while the tank produces, shown by QuestBoostPill).
   Perk rewards go to `PlayerData.perks`; CoinService / FishService / CompanionService read them when needed.
 - **Ocean.** `ReleaseFish {fishType, variant}`: the server checks the feature, that one of that kind *and* variant
   is alive and that `MIN_FISH_KEPT` fish remain. It releases the one of them that earns the least: lowest growth
@@ -827,6 +850,16 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   each while they sink, ~90 KB/s per client with ~200 coins in view (fish replication is only ~37 msg/s). Weak
   devices will feel (1) first. Studio caps at 15 fps when its window loses focus: steady 66.7 ms frames are that
   cap, not load.
+- **Load test with 18 species (2026-11-01, V0.46, ROADMAP M7; Studio solo, 6 tanks x 25 fish of all 18 species and
+  their variants, test store; harness removed afterwards).** All views at 60 fps. Aisle view (3 tanks, 75 fish
+  rendered): scripts 6.9 ms, render CPU 11.0 ms, GPU 2.5 ms; 32 fish animated (6 species), 68 swaying, the far tanks
+  static. Overview of the 6 tanks: 3.9 / 8.9 / 2.9 ms (most tanks beyond LOD_DISTANCE: static). 2.5D view of a tank
+  holding all 18 species: 4.2 / 7.8 / 2.1 ms, 6 species animated, the other 13 fish swaying. Simulated phone (~30k
+  triangles of EditableMesh budget, aisle view): budget settled at ~29.9k, 15 animated, 85 swaying, none static,
+  3.7 ms scripts. Server: negligible. Total client memory can't be read apart from Studio's in a solo playtest:
+  the real mobile check stays for the first players (ROADMAP M7 calibration). Seen once while 18 species replicated
+  for the first time: "Asset content representation is being generated" for ids that aren't in the place (Roblox
+  preparing recent assets), gone on the next playtest, every mesh loads.
 - **Studio captures** don't show BillboardGuis parented to PlayerGui (hunger badges, popups): check them by script.
 - **EditableMesh budget**: handled by the animation LOD. Keep new fish meshes ≤ ~4k triangles.
   **Measured 2026-11-01**: the client budget counts **triangles**, ~81,000 on the owner's PC (Studio Edit, plugins and
@@ -848,7 +881,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   1. **On-demand templates** (done, V0.37: server/fishAssets): templates in `ServerStorage`, a species is copied into
      ReplicatedStorage while one is present on the server (any tank), removed 60 s after the last one left; the
      loading screen preloads only those. Same for `Assets.FishVariants`, per variant present. The client waits for a
-     missing template (FishRenderController `pending`). Load test with 18 species still to do (ROADMAP M7).
+     missing template (FishRenderController `pending`). Load test with 18 species done in V0.46 (above).
   2. **Per-species budget** from the next species on: mesh ≤ ~3k vertices, texture 512×512.
   3. Later, for looks (the whole-body sway is done, V0.45): cheaper rigs (deform only the
      rear half, lower rate for small / far fish).
@@ -856,9 +889,8 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
      mesh cost almost nothing).
 - **Roblox moderation**: a "Firefighter" fish was dropped, its icon got the account a moderation warning (a nozzle in its
   mouth, read as a cigarette). Rules in CLAUDE.md §7.
-- **Not built yet**: the V1 content is complete since V0.44 (ROADMAP M6); left for M7: the side quest lines
-  (Hatchery, Collector, Ocean: the Collector / Ocean Friend titles exist but nothing grants them yet; the
-  DecorIncubator slot is commented out), daily / weekly quest content. The shelf arrows show since V0.38 (8 eggs). The Pelican's and the Snail's Ocean upgrades have their V1 values since V0.36 (x1.33 /
+- **Not built yet**: the V1 content is complete since V0.44 (ROADMAP M6) and its side lines and daily / weekly quests
+  since V0.46 (M7); left for M7: the calibration with real players. The shelf arrows show since V0.38 (8 eggs). The Pelican's and the Snail's Ocean upgrades have their V1 values since V0.36 (x1.33 /
   x1.15, ROADMAP M1). Kpop is the only admin event and Abyss the only recurring one (`recurring` in GAME_EVENTS).
 - **Admin events across servers** rely on MessagingService (best effort, a few seconds of delay; a server that misses
   the message still joins through the MemoryStore only when it starts). A server started during an admin event joins

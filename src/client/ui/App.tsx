@@ -18,7 +18,8 @@ import { CompanionPanel } from "./CompanionPanel";
 import { EggReveal } from "./EggReveal";
 import { EventBanner, TestEventButton } from "./EventBanner";
 import { FishIndexPanel } from "./FishIndexPanel";
-import { LikeBoostPill } from "./LikeBoostPill";
+import { LikeBoostPill, PILL_HEIGHT } from "./LikeBoostPill";
+import { QuestBoostPill } from "./QuestBoostPill";
 import { OceanPanel } from "./OceanPanel";
 import { RebirthPanel } from "./RebirthPanel";
 import { OnboardingPanel } from "./OnboardingPanel";
@@ -61,6 +62,8 @@ export interface AppProps {
 	subscribeBeat: (listener: (beat: number) => void) => () => void;
 	/** The local player's like boost ends then (server time; 0 = none). Session-only, not in PlayerData. */
 	likeBoostEndsAt: number;
+	/** The player has quest coin boost left (daily / weekly rewards): its pill shows, under the like pill. */
+	questBoosted: boolean;
 	/** Starts a test event; only given in Studio (the server ignores it elsewhere). */
 	onTestEvent?: (eventType: GameEventType) => void;
 	onClaimQuest: (questId: string) => void;
@@ -290,6 +293,13 @@ export function App(props: AppProps) {
 					key="LikeBoost"
 					endsAt={likeBoostEndsAt}
 					top={getTopHudBottom() + EVENT_BANNER_GAP}
+					scale={scale}
+				/>
+			)}
+			{props.questBoosted && menusVisible && (
+				<QuestBoostPill
+					key="QuestBoost"
+					top={getTopHudBottom() + EVENT_BANNER_GAP + (likeBoosted ? (PILL_HEIGHT + 8) * scale : 0)}
 					scale={scale}
 				/>
 			)}

@@ -18,6 +18,7 @@ import {
 	QuestReward,
 	QuestStat,
 	QuestsData,
+	QUEST_COIN_BOOST_MULTIPLIER,
 	getActiveStoryQuests,
 	getStoryLine,
 	STORY_LINES,
@@ -51,6 +52,8 @@ const LINE_PALETTES: Record<StoryLine, Palette> = {
 	Rebirth: PALETTES.purple,
 	Snail: PALETTES.green,
 	Pelican: PALETTES.blue,
+	Hatchery: PALETTES.amber,
+	Collector: PALETTES.red,
 	WaterHen: PALETTES.pink,
 	Swordfish: PALETTES.lagoon,
 	Jellyfish: PALETTES.purple,
@@ -106,6 +109,8 @@ function getRewardDisplay(reward: QuestReward): RewardDisplay {
 		return { name: `${formatShort(reward.amount)} points`, image: FEATURES.Ocean.image };
 	if (reward.kind === "Title") return { name: COSMETICS[reward.title].displayName, text: "TITLE" };
 	if (reward.kind === "Decor") return { name: COSMETICS[reward.decor].displayName, text: "DECOR" };
+	if (reward.kind === "CoinBoost")
+		return { name: `${reward.minutes} min boost`, text: `x${QUEST_COIN_BOOST_MULTIPLIER}` };
 	const companion = COMPANION_TYPES[reward.companion];
 	return { name: companion.displayName, image: companion.image };
 }
@@ -117,8 +122,10 @@ function getStatImage(config: QuestConfig): string | undefined {
 	if (stat === "OceanPoints" || stat === "FishReleased") return FEATURES.Ocean.image;
 	if (stat === "CompanionStat") return config.companion && COMPANION_TYPES[config.companion].image;
 	if (stat === "SpeciesHatched") return config.fishType && FISH_ICONS[config.fishType].Normal;
-	if (stat === "VariantHatched") return FISH_ICONS.Clownfish[config.variant ?? "Normal"];
-	if (stat === "EggsOpened") return EGG_SPRITES.Common.icon;
+	if (stat === "VariantHatched" || stat === "VariantFound") return FISH_ICONS.Clownfish[config.variant ?? "Normal"];
+	if (stat === "EggsOpened" || stat === "TotalHatched") return EGG_SPRITES.Common.icon;
+	if (stat === "FishFed") return FISH_ICONS.Basic.Normal;
+	if (stat === "LikesGiven") return V2_IMAGES.sparkle;
 	if (stat === "Rebirths") return FEATURES.Rebirth.image;
 	if (stat === "IndexCells") return V2_IMAGES.iconFishIndex;
 	return undefined;
@@ -207,7 +214,8 @@ function QuestCard(props: {
 	if (!config) return undefined;
 	const claimable = isClaimable(quest, props.passes);
 	// A paid line's quest without its pass: what it would give, with the pass it needs instead of a progress bar
-	const pass = line !== undefined && isQuestLocked(quest.id, props.passes) ? STORY_LINES[line].requiresPass : undefined;
+	const pass =
+		line !== undefined && isQuestLocked(quest.id, props.passes) ? STORY_LINES[line].requiresPass : undefined;
 	const ratio = math.clamp(quest.progress / config.target, 0, 1);
 	const reward = config.rewards[0] !== undefined ? getRewardDisplay(config.rewards[0]) : undefined;
 	const unit = config.stat === "CoinMoney" || config.stat === "MoneyHeld" ? "$" : "";

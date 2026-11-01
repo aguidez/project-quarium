@@ -10,6 +10,35 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.46 — 2026-11-01
+
+**New**
+- **Daily and weekly quests**: every day, 3 quests drawn for everyone (collect coins, open eggs, feed your fish,
+  hatch an Anomaly); every week, 3 bigger ones (3,000 coins, 100 eggs, a Ghost, release fish, like 3 other players'
+  aquariums...).
+- **Quest boost**: each daily quest gives **coins x2 for 5 minutes**, each weekly one **x2 for 15 minutes**. Boosts add
+  up, and the time only runs while your aquarium is producing: in the lobby, or when you leave the game, it waits
+  for you. A gold pill under the shop shows the time left. It stacks with the like boost and the other bonuses.
+- **Hatchery line**: hatch 100, 300, 600, 900 and 1,200 fish (all time) for minutes of income, and at the end a
+  **Golden Incubator** for your aquarium: a golden nest with its spotted egg, next to the trophy.
+- **Collector line**: find an Anomaly, a Ghost and a Shiny, and fill 10, 25 and 50 entries of the Fish Index; the last
+  one makes you a **Collector** (your title above your head).
+- **Ocean line**, after "Full House": release 50 fish into the ocean, then a Shiny, to become an **Ocean Friend**.
+
+**Balance**
+- The game is now tuned for a player of about 1 hour a day who does their daily quests: all eighteen species at
+  ~12h of play (about 13 days).
+- To make room for the quest boosts, rebirths 3 to 8 and the eggs they open cost 1.45x more: rebirth 3 65M (was 45M),
+  4 175M (120M), 5 7.4B (5.1B), 6 19B (13B), 7 1T (690B), 8 2.2T (1.5T); Wreck Egg 78M (55M), Atlantis 210M (144M),
+  Trench 8.9B (6.1B), Volcano 23B (15.6B), Crystal 1.2T (830B), Cosmic 2.6T (1.8T).
+- The side lines pay minutes of income early in the game (Ocean Points only from the 25th Fish Index entry), so the
+  first hours go a little faster. Details in BALANCE.md.
+
+**Fixes**
+- Today's daily and weekly boards were empty: they are drawn again as soon as you join.
+
+---
+
 ## V0.45 — 2026-11-01
 
 **Changes**

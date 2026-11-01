@@ -25,6 +25,7 @@ import {
 	QuestProgress,
 	QuestReward,
 	QuestStat,
+	QUEST_COIN_BOOST_MULTIPLIER,
 	getActiveStoryQuests,
 	getStoryLine,
 	refreshStoryLines,
@@ -36,6 +37,7 @@ import { CoinService } from "./CoinService";
 import { CompanionService } from "./CompanionService";
 import { DataService } from "./DataService";
 import { FishService } from "./FishService";
+import { LikeService } from "./LikeService";
 
 /** Daily / weekly boards are redrawn this soon after a reset (or after joining). */
 const BOARD_CHECK_INTERVAL = 5;
@@ -66,15 +68,18 @@ class QuestServiceSingleton implements Lifecycle {
 		CoinService.onCollected((player, frozen, value, companion) => {
 			if (frozen) return;
 			this.addProgress(player, "CoinMoney", value);
+			this.addProgress(player, "CoinsCollected", 1);
 			// The Snail's or the Swordfish's pickups
 			if (companion) this.addProgress(player, "CompanionStat", 1, { companion });
 			this.reportGauges(player);
 		});
 		FishService.onFishSpawned((owner) => this.reportGauges(owner));
 		FishService.onFishFed((owner, _fishType, companion) => {
-			// The Pelican's or the Jellyfish's feeds
+			// The Pelican's or the Jellyfish's feeds; the others are the player's own
 			if (companion) this.addProgress(owner, "CompanionStat", 1, { companion });
+			else this.addProgress(owner, "FishFed", 1);
 		});
+		LikeService.onLikeGiven((player) => this.addProgress(player, "LikesGiven", 1));
 	}
 
 	public onStart() {
@@ -100,7 +105,8 @@ class QuestServiceSingleton implements Lifecycle {
 			["Weekly", data.quests.weekly],
 		] as [QuestBoardCategory, QuestBoard][]) {
 			const period = getQuestPeriod(category, now);
-			if (board.period === period) continue;
+			// An empty board of the current period was drawn while its pool was empty (before V0.46): drawn again
+			if (board.period === period && (board.quests.size() > 0 || BOARDS[category].pool.size() === 0)) continue;
 			board.period = period;
 			board.quests = this.draw(category, period);
 			changed = true;
@@ -192,6 +198,20 @@ class QuestServiceSingleton implements Lifecycle {
 			for (const [fishType, count] of pairs(data.hatched)) if (count > 0 && !isEasterEgg(fishType)) species += 1;
 			return species;
 		}
+		if (config.stat === "VariantFound") {
+			const variant = config.variant;
+			if (variant === undefined) return 0;
+			let species = 0;
+			for (const fishType of getFishIndexOrder()) {
+				if (!isEasterEgg(fishType) && getHatchedVariant(data, fishType, variant) > 0) species += 1;
+			}
+			return species;
+		}
+		if (config.stat === "TotalHatched") {
+			let total = 0;
+			for (const [, count] of pairs(data.hatched)) total += count;
+			return total;
+		}
 		return 0;
 	}
 
@@ -267,6 +287,16 @@ class QuestServiceSingleton implements Lifecycle {
 				subtitle: "Ocean Points: they count toward the Ocean rewards.",
 				amount: 0,
 				item: { icon: "", name: `+${formatNumber(reward.amount)} Ocean Points`, image: FEATURES.Ocean.image },
+			};
+		} else if (reward.kind === "CoinBoost") {
+			const data = DataService.getData(player);
+			if (data) data.coinBoostSeconds += reward.minutes * 60;
+			DataService.sync(player);
+			celebration = {
+				title: "Coin boost!",
+				subtitle: `Coins x${QUEST_COIN_BOOST_MULTIPLIER} for ${reward.minutes} more minutes in your aquarium. It waits for you while you're away.`,
+				amount: 0,
+				item: { icon: `x${QUEST_COIN_BOOST_MULTIPLIER}`, name: `${reward.minutes} min boost` },
 			};
 		} else if (reward.kind === "Title" || reward.kind === "Decor") {
 			const id = reward.kind === "Title" ? reward.title : reward.decor;

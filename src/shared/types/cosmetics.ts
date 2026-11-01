@@ -91,7 +91,7 @@ export function getBestTitle(cosmetics: readonly CosmeticId[]): CosmeticId | und
 export const DECOR_SLOTS: Partial<Record<CosmeticId, Vector3>> = {
 	DecorWhaleStatue: new Vector3(-18.5, 4, -6),
 	DecorGoldenTrophy: new Vector3(19, 4, -6),
-	// DecorIncubator: with the Hatchery side line (ROADMAP M7)
+	DecorIncubator: new Vector3(15.2, 4, -5.6), // next to the trophy (Hatchery line, ROADMAP M7)
 };
 
 export function isDecor(cosmetic: CosmeticId): boolean {

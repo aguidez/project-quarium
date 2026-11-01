@@ -56,18 +56,19 @@ export interface RebirthConfig {
 
 /**
  * Rebirth n (1-based) is REBIRTHS[n - 1]. More levels (and themes) come with the next eggs. V1 plan (BALANCE.md §5):
- * ~x3.2 per rebirth, each new run gets back to its previous income in ~15–20 min.
+ * ~x3.2 per rebirth, each new run gets back to its previous income in ~15–20 min. Rebirths 3–8 cost 1.45x the plan's
+ * since V0.46: the daily / weekly coin boosts would otherwise end V1 at ~9h45 for a player of 1 h a day (BALANCE.md §2).
  */
 export const REBIRTHS: readonly RebirthConfig[] = [
 	{ price: 5000, multiplier: 2.5, startMoney: 300, theme: "Lagoon" },
 	{ price: 1300000, multiplier: 8, startMoney: 300, theme: "NeonCoral" },
-	{ price: 45e6, multiplier: 25, startMoney: 300, theme: "PirateWreck" },
-	{ price: 120e6, multiplier: 80, startMoney: 300, theme: "Atlantis" },
-	{ price: 5.1e9, multiplier: 250, startMoney: 300, theme: "MarianaTrench" },
-	{ price: 13e9, multiplier: 800, startMoney: 300, theme: "VolcanicTemple" },
-	{ price: 690e9, multiplier: 2500, startMoney: 300, theme: "CrystalCaverns" },
+	{ price: 65e6, multiplier: 25, startMoney: 300, theme: "PirateWreck" },
+	{ price: 175e6, multiplier: 80, startMoney: 300, theme: "Atlantis" },
+	{ price: 7.4e9, multiplier: 250, startMoney: 300, theme: "MarianaTrench" },
+	{ price: 19e9, multiplier: 800, startMoney: 300, theme: "VolcanicTemple" },
+	{ price: 1e12, multiplier: 2500, startMoney: 300, theme: "CrystalCaverns" },
 	// The last aquarium of V1
-	{ price: 1.5e12, multiplier: 8000, startMoney: 300, theme: "CosmicSanctuary" },
+	{ price: 2.2e12, multiplier: 8000, startMoney: 300, theme: "CosmicSanctuary" },
 ];
 
 /** The rebirth a player who has done `rebirths` of them can do next (undefined once all are done). */

@@ -13,6 +13,7 @@ import { FISH_TYPES, FishType } from "shared/types/fish";
 import { PlayerData } from "shared/types/playerData";
 import { FISH_VARIANTS, FishVariant } from "shared/types/variants";
 import { App } from "client/ui/App";
+import { BOOST_SECONDS_ATTRIBUTE } from "client/ui/QuestBoostPill";
 import { FISH_ICONS } from "client/ui/theme";
 import { AudioController } from "./AudioController";
 import { LikeBoardController } from "./LikeBoardController";
@@ -52,6 +53,8 @@ class UiControllerSingleton implements Lifecycle {
 	/** Rewards to celebrate, one after another and only once no reveal is playing. */
 	private rewards = new Array<QueuedReward>();
 	private nextRewardId = 0;
+	/** Whether the last render showed the quest boost pill. */
+	private questBoosted = false;
 
 	public onInit() {
 		const screenGui = new Instance("ScreenGui");
@@ -80,6 +83,10 @@ class UiControllerSingleton implements Lifecycle {
 		});
 		MusicEventController.onEventChanged(() => this.render());
 		LikeBoardController.onOwnBoostChanged(() => this.render());
+		// The quest boost pill shows / hides as the boost starts or ends (it counts down by itself)
+		Players.LocalPlayer.GetAttributeChangedSignal(BOOST_SECONDS_ATTRIBUTE).Connect(() => {
+			if (this.isQuestBoosted() !== this.questBoosted) this.render();
+		});
 		ShopKeeperController.onNearbyChanged(() => this.render());
 		this.render();
 	}
@@ -113,7 +120,13 @@ class UiControllerSingleton implements Lifecycle {
 		});
 	}
 
+	private isQuestBoosted(): boolean {
+		const seconds = Players.LocalPlayer.GetAttribute(BOOST_SECONDS_ATTRIBUTE);
+		return typeIs(seconds, "number") && seconds > 0;
+	}
+
 	private render() {
+		this.questBoosted = this.isQuestBoosted();
 		this.root?.render(
 			React.createElement(App, {
 				data: this.data,
@@ -134,6 +147,7 @@ class UiControllerSingleton implements Lifecycle {
 				playSfx: (name, playbackSpeed) => AudioController.play(name, playbackSpeed),
 				event: MusicEventController.getEvent(),
 				likeBoostEndsAt: LikeBoardController.getOwnBoostEndsAt(),
+				questBoosted: this.questBoosted,
 				shopNearby: ShopKeeperController.isNearby(),
 				subscribeBeat: (listener) => MusicEventController.onBeat(listener),
 				// Intents only: the server checks the quest is complete / the companion is owned and a slot is free

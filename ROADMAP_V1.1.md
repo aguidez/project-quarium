@@ -65,8 +65,8 @@ Sizes: S = a session, M = a few sessions, L = a big chunk. Owner actions are mar
       itself when the device refuses a mesh, rigs built one at a time, idle rigs freed at once when another species
       needs the room, a whole-body sway for the visible fish without a rig (no fish ever frozen), and the EditableMesh
       destroyed when the MeshPart creation fails (small leak). The sway and the budget code go away in A8.
-- [ ] The M7 load test with 18 species records the V1 numbers (client ms, frozen species, PC and mobile emulator):
-      they are the "before" of this roadmap.
+- [x] The M7 load test with 18 species records the V1 numbers (V0.46, PROJECT_CONTEXT §4): they are the "before" of
+      this roadmap (aisle view 6.9 ms scripts / 11.0 ms render, 6 species animated, the rest swaying).
 
 ### A1 — Blender in the project, as an MCP server (S–M)
 

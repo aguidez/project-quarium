@@ -164,7 +164,9 @@ export function sanitizeSave(save: SaveData) {
 	}
 	data.hatchedVariants = hatchedVariants;
 	data.incubating = sanitizeIncubating(data.incubating);
-	data.incubators = isCount(data.incubators) ? math.max(math.floor(data.incubators), DEFAULT_INCUBATORS) : DEFAULT_INCUBATORS;
+	data.incubators = isCount(data.incubators)
+		? math.max(math.floor(data.incubators), DEFAULT_INCUBATORS)
+		: DEFAULT_INCUBATORS;
 	data.eggsBought = filterRecord(data.eggsBought, EGG_TYPES);
 	if (!ONBOARDING_STEPS.includes(data.onboarding)) data.onboarding = DEFAULT_PLAYER_DATA.onboarding;
 	if (!isCount(data.money)) data.money = 0;
@@ -176,6 +178,7 @@ export function sanitizeSave(save: SaveData) {
 	);
 	if (!isCount(data.likesReceived)) data.likesReceived = 0;
 	if (!isCount(data.lastLikeGivenAt)) data.lastLikeGivenAt = 0;
+	if (!isCount(data.coinBoostSeconds)) data.coinBoostSeconds = 0;
 	data.rebirths = isCount(data.rebirths) ? math.min(math.floor(data.rebirths), REBIRTHS.size()) : 0;
 	sanitizeStoryLines(data.quests, data.companions);
 	// Rebirth unlocked before its quest existed (it came with the first affordable rebirth): line done

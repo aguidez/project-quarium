@@ -31,6 +31,7 @@ import { getEventCoinMultiplier } from "shared/types/events";
 import { getSatietyBonus } from "shared/types/perks";
 import { getRebirthMultiplier } from "shared/types/rebirths";
 import { getPassCoinMultiplier } from "shared/types/gamepasses";
+import { QUEST_COIN_BOOST_MULTIPLIER } from "shared/types/quests";
 import { SavedFish, SaveData } from "../saveData";
 import { FishAssets } from "../fishAssets";
 import { loadTemplates } from "../templates";
@@ -261,6 +262,7 @@ class FishServiceSingleton implements Lifecycle {
 			const frozen = paused || !isOnboardingDone(DataService.getOnboardingStep(owner));
 			if (frozen) this.frozenOwners.add(owner);
 			else this.frozenOwners.delete(owner);
+			this.runCoinBoost(owner, frozen ? 0 : elapsed);
 
 			for (const fish of fishes) {
 				if (!fish.alive) continue;
@@ -301,6 +303,21 @@ class FishServiceSingleton implements Lifecycle {
 		for (const fish of leaving) this.leaveTank(fish);
 	}
 
+	/**
+	 * The quest coin boost (PlayerData.coinBoostSeconds) runs down only while the tank produces; its time left and
+	 * whether it runs reach the owner's client as Player attributes (the HUD's boost chip), saved with the data.
+	 */
+	private runCoinBoost(owner: Player, elapsed: number) {
+		const data = DataService.getData(owner);
+		if (!data) return;
+		if (elapsed > 0 && data.coinBoostSeconds > 0)
+			data.coinBoostSeconds = math.max(data.coinBoostSeconds - elapsed, 0);
+		const left = math.ceil(data.coinBoostSeconds);
+		const running = left > 0 && elapsed > 0;
+		if (owner.GetAttribute("CoinBoostSeconds") !== left) owner.SetAttribute("CoinBoostSeconds", left);
+		if (owner.GetAttribute("CoinBoostRunning") !== running) owner.SetAttribute("CoinBoostRunning", running);
+	}
+
 	private payout(owner: Player, fish: FishEntity) {
 		if (fish.state === HungerState.Weak) this.fart(owner, fish);
 		else this.dropCoin(owner, fish);
@@ -308,7 +325,8 @@ class FishServiceSingleton implements Lifecycle {
 
 	/**
 	 * Coin value follows the fish's growth, times the owner's rebirth multiplier (permanent), the +50% Coins
-	 * pass, the like boost (doubled for a while) and the running event's bonus (abyssal raid x1.5). One coin out
+	 * pass, the like boost (doubled for a while), the quest coin boost (x2 while it lasts) and the running event's
+	 * bonus (abyssal raid x1.5). One coin out
 	 * of SPECIAL_COIN_ODDS is special (never a frozen one), one out of 5 for a shiny fish; a ghost
 	 * fish's special coins are ghost coins instead, worth GHOST_COIN_MULTIPLIER special ones.
 	 */
@@ -320,6 +338,7 @@ class FishServiceSingleton implements Lifecycle {
 			getRebirthMultiplier(data?.rebirths ?? 0) *
 			getPassCoinMultiplier(data?.passes ?? []) *
 			LikeService.getCoinMultiplier(owner) *
+			((data?.coinBoostSeconds ?? 0) > 0 ? QUEST_COIN_BOOST_MULTIPLIER : 1) *
 			getEventCoinMultiplier(owner) *
 			(ghost ? GHOST_COIN_MULTIPLIER : 1);
 		// An easter egg fish's coin (the French Fish's croissant) is worth a share of the tank's income

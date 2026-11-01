@@ -69,6 +69,11 @@ export interface PlayerData {
 	likesReceived: number;
 	/** When this player last liked an aquarium (server time; 0 = never): one like per LIKE_COOLDOWN. */
 	lastLikeGivenAt: number;
+	/**
+	 * Seconds of quest coin boost left (QUEST_COIN_BOOST_MULTIPLIER, daily / weekly rewards): they add up, and only
+	 * run down while the tank produces (FishService: not AFK, not paused, onboarding done), through rebirths.
+	 */
+	coinBoostSeconds: number;
 	/** Rebirths done (shared/types/rebirths): permanent coin multiplier and aquarium theme. */
 	rebirths: number;
 	/** Titles, decor and finishes earned (shared/types/cosmetics), kept forever. */
@@ -123,6 +128,7 @@ export const DEFAULT_PLAYER_DATA: PlayerData = {
 	tutorialsDone: [],
 	likesReceived: 0,
 	lastLikeGivenAt: 0,
+	coinBoostSeconds: 0,
 	rebirths: 0,
 	cosmetics: [],
 	passes: [],

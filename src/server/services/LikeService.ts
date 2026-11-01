@@ -28,6 +28,12 @@ class LikeServiceSingleton implements Lifecycle {
 	private boards = new Map<Aquarium, Model>();
 	/** When each boosted owner's boost ends (server time). Dropped when they leave: the boost is lost. */
 	private boostEndsAt = new Map<Player, number>();
+	private givenCallbacks = new Array<(giver: Player) => void>();
+
+	/** Registers a callback fired when a player gives a like (QuestService counts them). */
+	public onLikeGiven(callback: (giver: Player) => void) {
+		this.givenCallbacks.push(callback);
+	}
 
 	public onInit() {
 		DataService.registerAction("GiveLike", t.integer, (player, plot) => this.giveLike(player, plot));
@@ -109,6 +115,7 @@ class LikeServiceSingleton implements Lifecycle {
 		DataService.sync(player);
 		DataService.sync(owner);
 		this.publish(aquarium);
+		for (const callback of this.givenCallbacks) task.spawn(callback, player);
 
 		const minutes = LIKE_BOOST_DURATION / 60;
 		DataService.notify(
