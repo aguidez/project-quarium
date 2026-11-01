@@ -2,7 +2,7 @@
 
 > Living map of the project. **Read it before exploring the code, and update it in the same change
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
-> Last updated: 2026-11-01 (ROADMAP_V1.1.md: the post-V1 animation revamp plan, EditableMesh budget measured in §4;
+> Last updated: 2026-11-01 (V0.45: swim animation stopgap, rigs planned in triangles + sway; ROADMAP_V1.1.md: the post-V1 animation revamp plan, EditableMesh budget measured in §4;
 > V0.44, ROADMAP M6: rebirths 7–8 → CrystalCaverns / CosmicSanctuary themes, WolfDogfish
 > ("Husky Dogfish") / BunnyShark / MiniLeviathan (Mythic) with Moon / Star / Planet coins, Crystal and Cosmic eggs, Ocean
 > milestones 450,000 (tank 25) and 1,000,000 (OceanGuardian: title + whale statue), Voyage 12–16 (gauge SpeciesFound,
@@ -373,7 +373,9 @@ ProjetQuarium/
       │  ├─ PelicanChargesController  Charge gauge above the local player's on-demand Pelican (and Jellyfish, V0.42) (BillboardGui, local
       │  │                   child of its Body): one round slot per charge, a pellet when full, a pellet growing from
       │  │                   the centre while it refills, a pop when one is earned; hidden while MaxCharges is 0
-      │  ├─ FishAnimationController  EditableMesh swim deformation, shared per species, with camera LOD (also the Swordfish companion)
+      │  ├─ FishAnimationController  EditableMesh swim deformation, shared per species, with camera LOD (also the Swordfish companion);
+      │  │                   rigs planned in triangles (budget lowered when the device refuses a mesh, built one at a time),
+      │  │                   visible fish without a rig sway on a local Weld (V0.45)
       │  │                   (own tank in 2.5D; else tanks on screen within 110 studs; max 6 species) + beat puffs
       │  ├─ IncomePopupController  Floating "+X$" / "-X$" / "+X Ocean" billboards (MoneyPopup remote)
       │  ├─ AudioController  Background music, event music crossfade, SFX (PlaySfx remote or UI)
@@ -826,17 +828,21 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   devices will feel (1) first. Studio caps at 15 fps when its window loses focus: steady 66.7 ms frames are that
   cap, not load.
 - **Studio captures** don't show BillboardGuis parented to PlayerGui (hunger badges, popups): check them by script.
-- **EditableMesh budget** (≈16 meshes / 46k vertices in Studio): handled by the animation LOD. Keep new fish
-  meshes ≤ ~4–5k vertices. With 9 species in one tank (M2 test, Atlantis run) Studio hit the budget: some species
-  glide unanimated ("Fish animation paused ... retried every 10s"), nothing breaks. To watch with 18 species (M7 load test).
+- **EditableMesh budget**: handled by the animation LOD. Keep new fish meshes ≤ ~4k triangles.
   **Measured 2026-11-01**: the client budget counts **triangles**, ~81,000 on the owner's PC (Studio Edit, plugins and
   the server have none; a phone has its own, likely smaller); when it is full `CreateEditableMeshAsync` returns
   **nil** (no error), and `Destroy()` frees it at once. Triangles per mesh: 2.5k (Golden Guppy) to 8.4k (Husky Dogfish,
-  Bunny Shark); the 6 heaviest species x 2 copies need ~83k. Fix planned in `ROADMAP_V1.1.md` (bones), with an optional
-  V1 stopgap (its A0).
+  Bunny Shark); the 6 heaviest species x 2 copies need ~83k. **V1 stopgap (V0.45)**: FishAnimationController plans the
+  rigs in triangles (`INITIAL_TRIANGLE_BUDGET` 72k, `MAX_ANIMATED_SPECIES` 6 kept as a CPU cap), builds them one at a
+  time (room check included, so a refusal means the device is really full), lowers its budget to what is built the
+  first time the device refuses (one mesh lower on a refusal within the budget; local attribute
+  `SwimTriangleBudget` on the LocalPlayer), frees idle rigs at once when another species needs the room, and the
+  visible fish left without a rig **sway** (yaw around a point near the head + a little roll, on a local Weld that
+  replaces the template's WeldConstraint; client-built fish only). Tested with a simulated phone (~30k free): one
+  refusal, budget 29k, 3 species animated, 6 swaying, none frozen. The real fix is `ROADMAP_V1.1.md` (bones).
 - **Scaling to many species (goal: dozens, maybe 100+). Decided 2026-10-29; item 1 built in V0.37.** Server, network and saves
   don't care about the species count (per-fish costs only), and the swim animation is already capped
-  (`MAX_ANIMATED_SPECIES` = 6 at once; extra species glide unanimated). The real risk is **asset loading**: every
+  (triangle budget + `MAX_ANIMATED_SPECIES` = 6 at once; extra species sway). The real risk is **asset loading**: every
   template sits in `ReplicatedStorage.Assets.Fish`, so every client downloads (and the loading screen preloads) every
   species → long loads and mobile memory crashes at ~100. To do, **before ~15–20 species**:
   1. **On-demand templates** (done, V0.37: server/fishAssets): templates in `ServerStorage`, a species is copied into
@@ -844,7 +850,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
      loading screen preloads only those. Same for `Assets.FishVariants`, per variant present. The client waits for a
      missing template (FishRenderController `pending`). Load test with 18 species still to do (ROADMAP M7).
   2. **Per-species budget** from the next species on: mesh ≤ ~3k vertices, texture 512×512.
-  3. Later, for looks: a cheap whole-body sway for species beyond the animated cap; cheaper rigs (deform only the
+  3. Later, for looks (the whole-body sway is done, V0.45): cheaper rigs (deform only the
      rear half, lower rate for small / far fish).
   4. Production is the real limit (mesh + icon + config + balance per species): tool it (colour variants of a
      mesh cost almost nothing).

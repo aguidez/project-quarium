@@ -3,7 +3,7 @@
 > The development plan from the live game (V0.35) to V1: what to build, in which order, and how. The **numbers** live
 > in `BALANCE.md` §5 and `tools/balance-v1-plan.js`; this file is the **work**. Tick the boxes as tasks ship, and move
 > what a milestone ships into `PROJECT_CONTEXT.md` / `RELEASE_NOTES.md` as usual.
-> Last updated: 2026-11-01 (M7: animation stopgap decision and the load test as the "before" of ROADMAP_V1.1.md; M6 done in V0.44: V1 content complete; M5 done in V0.42, M4 done in V0.40, M3 done in V0.39, M2 done in V0.38, M0 in V0.37, M1 in V0.36; first version: 7 milestones, from the rebalance to rebirth 8).
+> Last updated: 2026-11-01 (M7: animation stopgap shipped in V0.45, the load test as the "before" of ROADMAP_V1.1.md; M6 done in V0.44: V1 content complete; M5 done in V0.42, M4 done in V0.40, M3 done in V0.39, M2 done in V0.38, M0 in V0.37, M1 in V0.36; first version: 7 milestones, from the rebalance to rebirth 8).
 
 **After V1**: `ROADMAP_V1.1.md`, the animation revamp (Blender skeletons instead of EditableMesh), starts once M7 is done.
 
@@ -139,8 +139,9 @@ Themes already built (`PirateWreck`, `Atlantis` in ServerStorage.Assets.Aquarium
 - [ ] Daily / weekly quest pools (retention; their rewards stay IncomeMinutes / cosmetics: no pace change).
 - [ ] Load test with 18 species (PROJECT_CONTEXT §4 protocol), mobile memory check: they are the "before" numbers
       of the V1.1 animation revamp (`ROADMAP_V1.1.md` A0).
-- [ ] Owner decision: a V1 stopgap for the swim animation or not (`ROADMAP_V1.1.md` A0: the EditableMesh budget is
-      ~81k triangles on the owner's PC, the 6 heaviest species alone need ~83k; mobile players may see frozen fish).
+- [x] Swim animation stopgap (`ROADMAP_V1.1.md` A0; the EditableMesh budget is ~81k triangles on the owner's PC, the
+      6 heaviest species alone need ~83k): rigs planned in triangles, budget adapted to the device, the other visible
+      fish sway. Decided by the owner and shipped in V0.45.
 - [ ] Calibration with real players: compare the playtime of the first players to the plan (rebirth 3 at ~3h00,
       end at ~12h15), adjust with the simulator (BALANCE.md §5.1 levers).
 

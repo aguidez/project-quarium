@@ -10,6 +10,20 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.45 — 2026-11-01
+
+**Changes**
+- Fish that can't get the full swim animation (too many species on screen, or a device with little memory, like
+  some phones) now sway gently as they swim instead of gliding frozen.
+- The swim animation adapts to the device: it animates as many species as the device's memory allows, the most
+  common ones of the tank first, and stops asking for more once the device says it is full.
+
+**Fixes**
+- On a crowded tank, some species stopped animating for a while (most often the Flame Gourami when arriving at your
+  aquarium from the lobby).
+
+---
+
 ## V0.44 — 2026-11-01
 
 **New**

@@ -3,7 +3,7 @@
 > The animation revamp: every fish, companion, event guest and NPC moves through a **skeleton made in Blender**
 > instead of the EditableMesh deformation of V1. It starts **once V1 is complete** (`ROADMAP.md`, M7 ticked). Tick the
 > boxes as tasks ship, and move what a step ships into `PROJECT_CONTEXT.md` / `RELEASE_NOTES.md` as usual.
-> Last updated: 2026-11-01 (Blender driven by the agent through an MCP server, A1; first version, decided by the
+> Last updated: 2026-11-01 (A0 stopgap shipped in V0.45; Blender driven by the agent through an MCP server, A1; first version, decided by the
 > owner: V1 first, then this whole roadmap).
 
 **V1.1 in one line**: Blender joins the toolchain (Windows and Mac) **as an MCP server**, like Roblox Studio and
@@ -61,10 +61,10 @@ Sizes: S = a session, M = a few sessions, L = a big chunk. Owner actions are mar
 
 ### A0 — Before V1.1 (decision, during V1 M7)
 
-- [ ] **Owner decision**: ship a V1 stopgap in M7 or not. Proposed (code only): an animation budget counted in
-      triangles that lowers itself when the device refuses a mesh, immediate release of the species out of view, a
-      whole-body sway for the species without a rig (no fish ever frozen), and destroying the EditableMesh when the
-      MeshPart creation fails (small leak). Without it, mobile players of V1 may see many frozen fish.
+- [x] **V1 stopgap** (decided by the owner, shipped in V0.45): an animation budget counted in triangles that lowers
+      itself when the device refuses a mesh, rigs built one at a time, idle rigs freed at once when another species
+      needs the room, a whole-body sway for the visible fish without a rig (no fish ever frozen), and the EditableMesh
+      destroyed when the MeshPart creation fails (small leak). The sway and the budget code go away in A8.
 - [ ] The M7 load test with 18 species records the V1 numbers (client ms, frozen species, PC and mobile emulator):
       they are the "before" of this roadmap.
 

@@ -1,5 +1,5 @@
 import { Janitor } from "@rbxts/janitor";
-import { AssetService, CollectionService, RunService, Workspace } from "@rbxts/services";
+import { AssetService, CollectionService, Players, RunService, Workspace } from "@rbxts/services";
 import { Lifecycle } from "shared/framework";
 import { TAGS } from "shared/tags";
 import { HungerState } from "shared/types/fish";
@@ -12,13 +12,19 @@ const FRAMES_PER_UPDATE = 2;
 // phases keep them from all beating their tails in sync without eating the EditableMesh budget
 const SWIM_VARIANTS = 2;
 const SLOW_SPEED = 0.45; // weak (unfed) / leaving fish move lazily
-// EditableMeshes share a memory budget: the rig of a fish type no fish uses anymore is freed after
-// RIG_RELEASE_DELAY seconds, and one the budget couldn't fit is tried again every RIG_RETRY_DELAY
+// EditableMeshes share a client memory budget counted in triangles (~81k measured on a PC, likely less on a
+// phone; when it is full CreateEditableMeshAsync returns nil). The rigs are planned in triangles: the budget starts
+// a bit under the PC's and drops to what is already built the first time the device refuses a mesh.
+const INITIAL_TRIANGLE_BUDGET = 72_000;
+const MIN_TRIANGLE_BUDGET = 10_000;
+const DEFAULT_MESH_TRIANGLES = 6_000; // planning guess for a mesh never built (the heaviest are ~8.4k)
+// The rig of a fish type no fish uses anymore is freed after RIG_RELEASE_DELAY seconds (at once when another species
+// needs its room), and one the budget couldn't fit is tried again every RIG_RETRY_DELAY
 const RIG_RELEASE_DELAY = 15;
 const RIG_RETRY_DELAY = 10;
 // Level of detail (see updateLod): only the tanks the player can see animate their fish
 const LOD_INTERVAL = 0.5; // seconds between two choices of what to animate
-const MAX_ANIMATED_SPECIES = 6; // x SWIM_VARIANTS EditableMeshes (+ lazy ones for weak fish)
+const MAX_ANIMATED_SPECIES = 6; // CPU cap, on top of the triangle budget
 const LOD_DISTANCE = 110; // studs from the camera to a tank center: zoomed out further, nothing swims
 const AQUARIUM_CENTER_HEIGHT = 12; // tank center above its pivot (the base)
 const AQUARIUM_RADIUS = 30; // the camera is this close: the tank counts as seen whatever the angle
@@ -34,6 +40,12 @@ const DORSAL_AMPLITUDE = 0.05; // dorsal / ventral fin flutter, × length
 const FIN_AMPLITUDE = 0.07; // pectoral fins paddling back and forth, × length
 const MOUTH_AMPLITUDE = 0.05; // lips parting, × half height
 const BODY_WAVE = 3; // phase lag (radians) of the swim wave from nose to tail tip
+
+// Sway: the cheap swim of a visible fish without a rig (over budget, or its rig still loading): the whole mesh
+// yaws around a point near its head and rolls a little, so no fish ever glides frozen
+const SWAY_YAW = math.rad(7);
+const SWAY_ROLL = math.rad(3);
+const SWAY_PIVOT = 0.3; // × length, ahead of the mesh center
 
 // Beat puff of music events (see pulse): the fish swells, mostly in girth, then deflates
 const PUFF_UP_TIME = 0.07;
@@ -69,6 +81,7 @@ interface AnimatedVertex {
 interface Variant {
 	mesh: EditableMesh;
 	source: MeshPart; // what fish meshes ApplyMesh from
+	triangles: number; // its share of the budget
 	vertices: AnimatedVertex[];
 	length: number;
 	halfHeight: number;
@@ -111,11 +124,22 @@ interface TrackedFish {
 	meshId: string;
 	aquarium?: Model; // tank it swims in (tagged Aquarium)
 	swimIndex: number; // which normal variant of its rig it plays
-	wanted: boolean; // chosen by the last LOD pass
+	visible: boolean; // in a watched tank (last LOD pass)
+	wanted: boolean; // its species was given a rig by the last LOD pass
 	rig?: Rig; // attached rig, undefined while showing its static mesh
 	current?: Variant;
 	attaching: boolean; // a rig build is in flight
+	sway?: Sway; // set up the first time it sways (local fish only)
+	swaying: boolean;
 	janitor: Janitor;
+}
+
+/** The local weld a swaying fish's mesh hangs from (it replaces the template's WeldConstraint). */
+interface Sway {
+	weld: Weld;
+	rest: CFrame; // the mesh on its body at the model's scale `restScale` (growth rescales the model)
+	restScale: number;
+	phase: number; // radians
 }
 
 /** The tank model a fish swims in. */
@@ -133,15 +157,21 @@ function findAquarium(fish: Instance): Model | undefined {
  * mouth) with EditableMesh, keeping their original texture. Purely visual and local:
  * FishRenderController builds and moves the models from the server's swim segments.
  *
- * Level of detail: EditableMeshes share a small memory budget and cost CPU, so only the
- * fish the player can actually see swim this way: in the 2.5D view, those of their own tank;
- * otherwise those of the tanks near the camera and on screen, nearest first, up to
- * MAX_ANIMATED_SPECIES species. The others keep their static mesh (still moved by FishRenderController).
+ * Level of detail: EditableMeshes share a small memory budget (in triangles) and cost CPU, so only
+ * the fish the player can actually see swim this way: in the 2.5D view, those of their own tank;
+ * otherwise those of the tanks near the camera and on screen, nearest first, the most common species
+ * first, as long as they fit the triangle budget (and MAX_ANIMATED_SPECIES). The other visible fish sway
+ * as a whole (see updateSways); the rest keep their static mesh (still moved by FishRenderController).
  */
 class FishAnimationControllerSingleton implements Lifecycle {
 	private rigs = new Map<string, Rig | "loading">(); // by MeshId
 	private failedAt = new Map<string, number>(); // os.clock() of the last failed rig build, by MeshId
 	private warned = new Set<string>(); // MeshIds whose failure was already reported
+	private triangleBudget = INITIAL_TRIANGLE_BUDGET;
+	private meshTriangles = new Map<string, number>(); // by MeshId, known once a variant was built
+	private wantedSpecies = new Set<string>(); // MeshIds given a rig by the last LOD pass
+	private swaying = new Set<TrackedFish>();
+	private building = false; // a rig or a lazy variant is being built (see withBuildLock)
 	/** Untouched copy of each mesh, to put a fish back to its static shape when it stops being animated. */
 	private staticMeshes = new Map<string, MeshPart>(); // by MeshId
 	private variants = new Array<Variant>(); // of every rig
@@ -172,7 +202,7 @@ class FishAnimationControllerSingleton implements Lifecycle {
 	public onStart() {
 		print("[Client] FishAnimationController started.");
 
-		RunService.Heartbeat.Connect(() => {
+		RunService.Heartbeat.Connect((dt) => {
 			this.frame += 1;
 			const now = os.clock();
 			this.variants.forEach((variant, index) => {
@@ -180,6 +210,7 @@ class FishAnimationControllerSingleton implements Lifecycle {
 				this.animate(variant, now - variant.updatedAt);
 				variant.updatedAt = now;
 			});
+			this.updateSways(dt);
 			this.updatePuffs(now);
 		});
 
@@ -214,8 +245,10 @@ class FishAnimationControllerSingleton implements Lifecycle {
 				meshId,
 				aquarium: findAquarium(model),
 				swimIndex: math.random(0, SWIM_VARIANTS - 1),
+				visible: false,
 				wanted: false,
 				attaching: false,
+				swaying: false,
 				janitor,
 			};
 			this.fishes.set(model, fish);
@@ -226,6 +259,7 @@ class FishAnimationControllerSingleton implements Lifecycle {
 			janitor.Add(model.GetAttributeChangedSignal("Hunger").Connect(() => this.refreshVariant(fish)));
 			janitor.Add(model.GetAttributeChangedSignal("Dead").Connect(() => this.refreshVariant(fish)));
 			janitor.Add(() => this.detach(fish, false), true);
+			janitor.Add(() => this.swaying.delete(fish), true);
 			this.updateLod(); // a fish dropped in the watched tank starts swimming right away
 		});
 	}
@@ -269,7 +303,10 @@ class FishAnimationControllerSingleton implements Lifecycle {
 		return candidates.map((candidate) => candidate.aquarium);
 	}
 
-	/** Picks the fish to animate (watched tanks, species budget) and switches the others to their static mesh. */
+	/**
+	 * Picks the fish to animate (watched tanks, triangle budget) and switches the others to their static mesh; the
+	 * visible fish left without a rig sway.
+	 */
 	private updateLod() {
 		const camera = Workspace.CurrentCamera;
 		if (!camera) return;
@@ -277,34 +314,99 @@ class FishAnimationControllerSingleton implements Lifecycle {
 		const byAquarium = new Map<Model, TrackedFish[]>();
 		for (const [, fish] of this.fishes) {
 			if (!fish) continue;
-			fish.wanted = false; // tanks out of sight, or fish outside any tank
+			fish.visible = false; // tanks out of sight, or fish outside any tank
+			fish.wanted = false;
 			if (!fish.aquarium) continue;
 			const list = byAquarium.get(fish.aquarium) ?? [];
 			list.push(fish);
 			byAquarium.set(fish.aquarium, list);
 		}
 
-		// Species budget: each watched tank in turn, its most common species first
+		// Each watched tank in turn, its most common species first, as long as they fit (a lighter one may still fit
+		// after a heavy one didn't)
 		const species = new Set<string>();
+		let planned = 0;
 		for (const aquarium of this.getWatchedAquariums(camera)) {
 			const list = byAquarium.get(aquarium) ?? [];
 			const counts = new Map<string, number>();
 			for (const fish of list) counts.set(fish.meshId, (counts.get(fish.meshId) ?? 0) + 1);
 			const ranked = new Array<string>();
 			for (const [meshId] of counts) ranked.push(meshId);
-			ranked.sort((a, b) => counts.get(a)! > counts.get(b)!);
+			// Ties: the species already rigged first, then a fixed order, so the passes don't swap rigs back and forth
+			ranked.sort((a, b) => {
+				const countA = counts.get(a)!;
+				const countB = counts.get(b)!;
+				if (countA !== countB) return countA > countB;
+				const riggedA = this.rigs.has(a);
+				if (riggedA !== this.rigs.has(b)) return riggedA;
+				return a < b;
+			});
 			for (const meshId of ranked) {
 				if (species.size() >= MAX_ANIMATED_SPECIES) break;
+				if (species.has(meshId)) continue;
+				const cost = this.getRigCost(meshId);
+				if (planned + cost > this.triangleBudget) continue;
 				species.add(meshId);
+				planned += cost;
 			}
-			for (const fish of list) fish.wanted = species.has(fish.meshId);
+			for (const fish of list) {
+				fish.visible = true;
+				fish.wanted = species.has(fish.meshId);
+			}
 		}
+		this.wantedSpecies = species;
 
+		// Detach first: the rigs they leave can make room for the new ones
+		for (const [, fish] of this.fishes) if (fish && !fish.wanted && fish.rig) this.detach(fish, true);
 		for (const [, fish] of this.fishes) {
 			if (!fish) continue;
 			if (fish.wanted && !fish.rig) this.attach(fish);
-			else if (!fish.wanted && fish.rig) this.detach(fish, true);
+			this.setSwaying(fish, fish.visible && !fish.rig);
 		}
+	}
+
+	/** Triangles a species' rig takes (its normal variants), guessed until one of them was built. */
+	private getRigCost(meshId: string): number {
+		return (this.meshTriangles.get(meshId) ?? DEFAULT_MESH_TRIANGLES) * SWIM_VARIANTS;
+	}
+
+	/** Triangles of every EditableMesh built. */
+	private getUsedTriangles(): number {
+		let used = 0;
+		for (const variant of this.variants) used += variant.triangles;
+		return used;
+	}
+
+	/** Frees idle rigs of the species the last LOD pass didn't keep until `needed` more triangles fit the budget. */
+	private makeRoom(needed: number) {
+		let used = this.getUsedTriangles();
+		for (const [meshId, rig] of this.rigs) {
+			if (used + needed <= this.triangleBudget) return;
+			if (rig === "loading" || this.wantedSpecies.has(meshId)) continue;
+			const variants = rig.slow ? [...rig.normal, rig.slow] : rig.normal;
+			if (variants.some((variant) => variant.users > 0)) continue;
+			this.rigs.delete(meshId);
+			for (const variant of variants) {
+				used -= variant.triangles;
+				this.destroyVariant(variant);
+			}
+		}
+	}
+
+	/** The device refused a mesh: the budget becomes what is already built (never less than MIN_TRIANGLE_BUDGET). */
+	private onBudgetFull(meshId: string) {
+		let budget = math.min(this.triangleBudget, this.getUsedTriangles());
+		// Refused again within the budget (the device doesn't count exactly in triangles): one more mesh's worth
+		// lower, so the retries settle
+		if (budget >= this.triangleBudget)
+			budget = this.triangleBudget - (this.meshTriangles.get(meshId) ?? DEFAULT_MESH_TRIANGLES);
+		budget = math.max(MIN_TRIANGLE_BUDGET, budget);
+		if (budget === this.triangleBudget) return;
+		this.triangleBudget = budget;
+		Players.LocalPlayer.SetAttribute("SwimTriangleBudget", budget); // local only, a debugging aid
+		warn(
+			`[Client] Fish animation budget lowered to ${budget} triangles (the device's EditableMesh budget is full)`,
+		);
 	}
 
 	/** Starts animating a fish (builds its species' rig first if needed, without blocking the LOD pass). */
@@ -322,8 +424,75 @@ class FishAnimationControllerSingleton implements Lifecycle {
 			fish.rig = rig;
 			rig.generation += 1;
 			fish.model.SetAttribute("Animated", true); // local only, a debugging aid
+			this.setSwaying(fish, false);
 			this.refreshVariant(fish);
 		});
+	}
+
+	// ---------------------------------------------------------------------
+	// Sway (visible fish without a rig)
+	// ---------------------------------------------------------------------
+
+	/** Starts or stops the sway of a fish; the mesh goes back to its rest pose when it stops. */
+	private setSwaying(fish: TrackedFish, swaying: boolean) {
+		if (swaying === fish.swaying) return;
+		if (swaying && !this.setupSway(fish)) return;
+		fish.swaying = swaying;
+		if (swaying) this.swaying.add(fish);
+		else {
+			this.swaying.delete(fish);
+			const sway = fish.sway;
+			if (sway && sway.weld.Parent) sway.weld.C0 = this.getSwayRest(fish, sway);
+		}
+	}
+
+	/** The mesh's rest pose on its body at the model's current scale. */
+	private getSwayRest(fish: TrackedFish, sway: Sway): CFrame {
+		const position = sway.rest.Position.mul(fish.model.GetScale() / sway.restScale);
+		return new CFrame(position).mul(sway.rest.Rotation);
+	}
+
+	/**
+	 * Hangs the mesh from a Weld it can sway on, in place of the template's WeldConstraint (once per fish). Only the
+	 * fish this client builds (FishRenderController): event guests and companions belong to the server.
+	 */
+	private setupSway(fish: TrackedFish): boolean {
+		if (fish.sway) return true;
+		if (!CollectionService.HasTag(fish.model, TAGS.Fish)) return false;
+		const body = fish.model.PrimaryPart ?? fish.model.FindFirstChild("Body");
+		if (!body || !body.IsA("BasePart")) return false;
+		const weld = new Instance("Weld");
+		weld.Part0 = body;
+		weld.Part1 = fish.mesh;
+		weld.C0 = body.CFrame.ToObjectSpace(fish.mesh.CFrame);
+		for (const child of fish.mesh.GetChildren()) if (child.IsA("WeldConstraint")) child.Destroy();
+		weld.Parent = fish.mesh;
+		fish.sway = { weld, rest: weld.C0, restScale: fish.model.GetScale(), phase: math.random() * TAU };
+		return true;
+	}
+
+	/** Each swaying fish yaws around a point near its head and rolls a little, lazily while weak, not at all dead. */
+	private updateSways(dt: number) {
+		for (const fish of this.swaying) {
+			const sway = fish.sway!;
+			if (!sway.weld.Parent) continue;
+			const dead = fish.model.GetAttribute("Dead") === true;
+			const weak = fish.model.GetAttribute("Hunger") === HungerState.Weak;
+			const speed = dead ? 0 : weak ? SLOW_SPEED : 1;
+			sway.phase = (sway.phase + dt * TAU * SWIM_FREQUENCY * speed) % TAU;
+			const amount = dead ? 0 : weak ? 0.6 : 1;
+			const pivot = new CFrame(0, 0, -fish.mesh.Size.Z * SWAY_PIVOT);
+			const swing = pivot
+				.mul(
+					CFrame.Angles(
+						0,
+						SWAY_YAW * amount * math.sin(sway.phase),
+						SWAY_ROLL * amount * math.sin(sway.phase - 1.2),
+					),
+				)
+				.mul(pivot.Inverse());
+			sway.weld.C0 = this.getSwayRest(fish, sway).mul(swing);
+		}
 	}
 
 	/** Stops animating a fish; `restore` puts its static mesh back (not needed when it's being removed). */
@@ -413,42 +582,82 @@ class FishAnimationControllerSingleton implements Lifecycle {
 		const failedAt = this.failedAt.get(meshId);
 		if (failedAt !== undefined && os.clock() - failedAt < RIG_RETRY_DELAY) return undefined;
 
-		this.rigs.set(meshId, "loading");
+		this.rigs.set(meshId, "loading"); // other fish of the species wait for this build
+		const [ok, rig] = pcall(() => this.withBuildLock(() => this.buildRig(meshId)));
+		if (ok && rig) this.rigs.set(meshId, rig);
+		else this.rigs.delete(meshId);
+		return ok ? rig : undefined;
+	}
+
+	/**
+	 * Rigs and lazy variants are built one at a time, room check included: when the device refuses a mesh,
+	 * `variants` then holds exactly what it accepted (see onBudgetFull).
+	 */
+	private withBuildLock<T>(build: () => T): T {
+		while (this.building) task.wait();
+		this.building = true;
+		const [ok, result] = pcall(build);
+		this.building = false;
+		if (!ok) throw result;
+		return result;
+	}
+
+	private buildRig(meshId: string): Rig | undefined {
+		const cost = this.getRigCost(meshId);
+		this.makeRoom(cost);
+		if (this.getUsedTriangles() + cost > this.triangleBudget) {
+			this.failedAt.set(meshId, os.clock()); // no room right now (rigs still in use): the sway goes on
+			return undefined;
+		}
 		const normal = new Array<Variant>();
+		let budgetFull = false;
 		const [ok, result] = pcall(() => {
-			for (let i = 0; i < SWIM_VARIANTS; i++)
-				normal.push(this.createVariant(meshId, 1, (TAU * i) / SWIM_VARIANTS));
+			for (let i = 0; i < SWIM_VARIANTS; i++) {
+				const variant = this.createVariant(meshId, 1, (TAU * i) / SWIM_VARIANTS);
+				if (!variant) {
+					budgetFull = true;
+					return;
+				}
+				normal.push(variant);
+			}
 		});
-		if (!ok) {
-			// Out of EditableMesh budget, or a new mesh still being processed by Roblox: try again later
-			for (const variant of normal) this.destroyVariant(variant);
-			if (!this.warned.has(meshId)) {
+		if (!ok || budgetFull) {
+			// Out of EditableMesh budget (the sway takes over), or a new mesh still being processed by Roblox: try
+			// again later
+			if (budgetFull)
+				this.onBudgetFull(meshId); // before freeing what the device did accept
+			else if (!this.warned.has(meshId)) {
 				this.warned.add(meshId);
 				warn(`[Client] Fish animation paused for ${meshId} (retried every ${RIG_RETRY_DELAY}s): ${result}`);
 			}
-			this.rigs.delete(meshId);
+			for (const variant of normal) this.destroyVariant(variant);
 			this.failedAt.set(meshId, os.clock());
 			return undefined;
 		}
 		this.failedAt.delete(meshId);
-		const rig: Rig = { normal, slowTried: false, generation: 0 };
-		this.rigs.set(meshId, rig);
-		for (const variant of normal) this.variants.push(variant);
-		return rig;
+		return { normal, slowTried: false, generation: 0 };
 	}
 
 	/** The lazy variant of a rig, built on first need; undefined if the budget can't fit it. */
 	private getSlowVariant(meshId: string, rig: Rig): Variant | undefined {
 		if (rig.slowTried) return rig.slow;
 		rig.slowTried = true;
-		const [ok, variant] = pcall(() => this.createVariant(meshId, SLOW_SPEED, 0));
-		if (!ok) return undefined;
+		const [ok, variant] = pcall(() =>
+			this.withBuildLock(() => {
+				// Optional: only if it fits (the weak fish keep the normal swim otherwise)
+				const cost = this.meshTriangles.get(meshId) ?? DEFAULT_MESH_TRIANGLES;
+				if (this.getUsedTriangles() + cost > this.triangleBudget) return undefined;
+				const created = this.createVariant(meshId, SLOW_SPEED, 0);
+				if (!created) this.onBudgetFull(meshId);
+				return created;
+			}),
+		);
+		if (!ok || !variant) return undefined;
 		if (this.rigs.get(meshId) !== rig) {
 			this.destroyVariant(variant); // released meanwhile
 			return undefined;
 		}
 		rig.slow = variant;
-		this.variants.push(variant);
 		return variant;
 	}
 
@@ -471,8 +680,13 @@ class FishAnimationControllerSingleton implements Lifecycle {
 		variant.source.Destroy();
 	}
 
-	private createVariant(meshId: string, speed: number, phase: number): Variant {
-		const mesh = AssetService.CreateEditableMeshAsync(Content.fromUri(meshId), { FixedSize: true });
+	/** A new animated copy of a mesh, counted in `variants`; undefined when the device's budget is full. */
+	private createVariant(meshId: string, speed: number, phase: number): Variant | undefined {
+		const mesh = AssetService.CreateEditableMeshAsync(Content.fromUri(meshId), { FixedSize: true }) as
+			EditableMesh | undefined;
+		if (!mesh) return undefined;
+		const triangles = mesh.GetFaces().size();
+		this.meshTriangles.set(meshId, triangles);
 
 		const ids = mesh.GetVertices();
 		let min = new Vector3(math.huge, math.huge, math.huge);
@@ -516,10 +730,15 @@ class FishAnimationControllerSingleton implements Lifecycle {
 			});
 		}
 
-		const source = AssetService.CreateMeshPartAsync(Content.fromObject(mesh));
-		return {
+		const [ok, source] = pcall(() => AssetService.CreateMeshPartAsync(Content.fromObject(mesh)));
+		if (!ok) {
+			mesh.Destroy(); // or it would hold its share of the budget for nothing
+			throw source;
+		}
+		const variant: Variant = {
 			mesh,
 			source,
+			triangles,
 			vertices,
 			length,
 			halfHeight,
@@ -530,6 +749,8 @@ class FishAnimationControllerSingleton implements Lifecycle {
 			mouth: phase,
 			users: 0,
 		};
+		this.variants.push(variant); // counted at once: builds run in parallel
+		return variant;
 	}
 
 	// ---------------------------------------------------------------------
