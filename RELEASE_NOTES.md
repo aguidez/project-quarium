@@ -10,6 +10,35 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.44 — 2026-11-01
+
+**New**
+- **Two new aquariums, the end of the voyage**:
+  - rebirth 7 (690B, coins x2,500) takes you to the **Crystal Caverns**: lavender sand, glowing crystal clusters and a
+    cave of stalactites and shining crystals;
+  - rebirth 8 (1.5T, coins x8,000) to the **Cosmic Sanctuary**: floating stones with glowing runes, golden and violet
+    crystals, a starry nebula and ringed planets. The Rebirth menu then says the voyage is complete, with more
+    aquariums in the next update.
+- **Three new Mythic fish**, each with its Anomaly, Ghost and Shiny looks in the Fish Index:
+  - **Husky Dogfish**: a round blue fish with a husky's face, dropping silver moon coins;
+  - **Bunny Shark**: a pink shark with long bunny ears, dropping golden star coins;
+  - **Mini Leviathan**: a little sea serpent with a frilly crest, dropping heavy ringed planet coins.
+- **Two new eggs**: the **Crystal Egg** (830B: Dragonfish or Husky Dogfish), after the Volcano Egg, and the
+  **Cosmic Egg** (1.8T: Husky Dogfish, Bunny Shark or Mini Leviathan).
+- **Titles**: your best title now floats above your head for everyone to see ("Master Aquarist", "Ocean Guardian").
+- **Decor in your aquarium**: trophies earned show up in your tank, whatever its theme.
+- **Ocean milestones**: at 450,000 points your aquarium holds **25 fish**, the maximum; at 1,000,000 you become an
+  **Ocean Guardian**: the title, and a whale statue in your tank.
+- **Voyage quests**: "Crystal Path" (rebirth 7: 60,000 Ocean Points), "Puppy in the Caves" (hatch a Husky Dogfish),
+  "To the Stars" (rebirth 8: 150,000 Ocean Points), "Leviathan" (hatch a Mini Leviathan) and "Master Aquarist"
+  (discover all 18 species: the Master Aquarist title, a golden trophy in your tank and 300,000 Ocean Points).
+
+**Balance**
+- New numbers from the V1 plan, unchanged: the average player reaches rebirth 7 at ~9h49, rebirth 8 at ~10h54 and all
+  eighteen species at ~12h16 (BALANCE.md).
+
+---
+
 ## V0.43 — 2026-10-31
 
 **New**

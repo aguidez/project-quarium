@@ -14,6 +14,9 @@ export type FishType =
 	| "Lanternfish"
 	| "Lionfish"
 	| "Dragonfish"
+	| "WolfDogfish"
+	| "BunnyShark"
+	| "MiniLeviathan"
 	| "FrenchFish";
 
 /** Rarity of a fish type, shown in the fish index, the egg odds and the hatch reveal. */
@@ -46,6 +49,9 @@ export type CoinType =
 	| "Nautilus"
 	| "CoralFan"
 	| "DragonScale"
+	| "Moon"
+	| "Star"
+	| "Planet"
 	| "Croissant";
 export const COIN_TYPES: readonly CoinType[] = [
 	"Bronze",
@@ -63,6 +69,9 @@ export const COIN_TYPES: readonly CoinType[] = [
 	"Nautilus",
 	"CoralFan",
 	"DragonScale",
+	"Moon",
+	"Star",
+	"Planet",
 	"Croissant",
 ];
 
@@ -352,6 +361,47 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 		scaleMax: 1.1,
 		speedMin: 1.8,
 		speedMax: 3,
+		hunger: DEFAULT_HUNGER,
+	},
+	// --- Rebirths 7–8 (ROADMAP M6), the last species of V1: Mythic. Cartoon faces, mouths closed, no teeth, horns or
+	// fangs (CLAUDE.md §7) ---
+	WolfDogfish: {
+		displayName: "Husky Dogfish",
+		rarity: "Mythic",
+		income: 1575000, // 105,000/s
+		oceanPoints: 13000,
+		coin: "Moon",
+		incomeInterval: 15, // a little shark howling at the moon: silver crescents
+		scaleMin: 0.9,
+		scaleMax: 1.1,
+		speedMin: 2.4,
+		speedMax: 3.8,
+		hunger: DEFAULT_HUNGER,
+	},
+	BunnyShark: {
+		displayName: "Bunny Shark",
+		rarity: "Mythic",
+		income: 4200000, // 210,000/s
+		oceanPoints: 20000,
+		coin: "Star",
+		incomeInterval: 20, // a pink shark with bunny ears, hopping through the water: golden stars
+		scaleMin: 0.95,
+		scaleMax: 1.1,
+		speedMin: 1.8,
+		speedMax: 3,
+		hunger: DEFAULT_HUNGER,
+	},
+	MiniLeviathan: {
+		displayName: "Mini Leviathan",
+		rarity: "Mythic",
+		income: 12600000, // 420,000/s
+		oceanPoints: 32000,
+		coin: "Planet",
+		incomeInterval: 30, // the rarest of all: a whole little planet now and then
+		scaleMin: 0.95,
+		scaleMax: 1.1,
+		speedMin: 1.6,
+		speedMax: 2.8,
 		hunger: DEFAULT_HUNGER,
 	},
 	// Easter egg (see EasterEggConfig): its coin is a croissant worth half the tank's income per minute

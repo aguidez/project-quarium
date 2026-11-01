@@ -187,6 +187,11 @@ class QuestServiceSingleton implements Lifecycle {
 			}
 			return cells;
 		}
+		if (config.stat === "SpeciesFound") {
+			let species = 0;
+			for (const [fishType, count] of pairs(data.hatched)) if (count > 0 && !isEasterEgg(fishType)) species += 1;
+			return species;
+		}
 		return 0;
 	}
 

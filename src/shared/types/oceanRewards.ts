@@ -21,7 +21,9 @@ export type OceanRewardId =
 	| "Swordfish"
 	| "Aquarium23"
 	| "Jellyfish"
-	| "PearlRims";
+	| "PearlRims"
+	| "Aquarium25"
+	| "OceanGuardian";
 
 /**
  * A companion upgrade multiplies what the companion does: the Snail's crawling speed, the Pelican's
@@ -167,6 +169,21 @@ export const OCEAN_MILESTONES: readonly OceanMilestone[] = [
 		title: "Pearl rims",
 		description: "A pearly finish on the rims of your aquarium, whatever its theme.",
 		reward: { kind: "Cosmetic", cosmetics: ["FinishPearlRims"] },
+	},
+	// Rebirths 7–8 (ROADMAP M6): the V1 maximum tank comes with rebirth 7, then the last goal of the Ocean
+	{
+		id: "Aquarium25",
+		points: 450000,
+		title: "Biggest aquarium",
+		description: "Your aquarium holds 25 fish, the biggest tank of the ocean.",
+		reward: { kind: "Capacity", capacity: 25 },
+	},
+	{
+		id: "OceanGuardian",
+		points: 1000000,
+		title: "Ocean Guardian",
+		description: "The title Ocean Guardian above your head, and a whale statue in your aquarium.",
+		reward: { kind: "Cosmetic", cosmetics: ["TitleOceanGuardian", "DecorWhaleStatue"] },
 	},
 ];
 

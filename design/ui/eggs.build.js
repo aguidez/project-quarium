@@ -238,6 +238,48 @@ const EGGS = {
 			`<path d="M66 104 L74 97 L84 102" fill="none" stroke="#FF8A3A" stroke-width="1.6" stroke-linecap="round"/>` +
 			sparkle(30, 22, 6, "#FFFFFF") + sparkle(78, 60, 3.5, "#FFD27A"),
 	},
+	// Crystal Caverns: lavender shell, faceted crystal shards (cyan, pink, violet) rising from the bottom
+	Crystal: {
+		outline: "#2A1A55",
+		defs: `<radialGradient id="shell" cx="0.38" cy="0.3" r="0.8">
+			<stop offset="0" stop-color="#FFFFFF"/><stop offset="0.5" stop-color="#C9B8FF"/><stop offset="1" stop-color="#6A4FC4"/>
+		</radialGradient>`,
+		decor:
+			[
+				[22, 120, 14, 46, "#7FE9FF", "#2A8FB0"],
+				[42, 120, 16, 60, "#FF9AD8", "#B04A8A"],
+				[62, 120, 14, 50, "#B98CFF", "#5A3AB0"],
+				[80, 120, 12, 38, "#7FE9FF", "#2A8FB0"],
+			]
+				.map(
+					([x, base, w, h, light, dark]) =>
+						`<path d="M${x - w / 2} ${base} L${x - w / 2} ${base - h * 0.7} L${x} ${base - h} L${x + w / 2} ${base - h * 0.7} L${x + w / 2} ${base} Z" fill="${light}" stroke="${dark}" stroke-width="1.6" stroke-linejoin="round"/>` +
+						`<path d="M${x} ${base - h} L${x} ${base}" stroke="#FFFFFF" stroke-width="1.2" opacity="0.7"/>`,
+				)
+				.join("") +
+			sparkle(30, 26, 6, "#FFFFFF") + sparkle(70, 34, 4, "#FFD6F2") + sparkle(54, 18, 3, "#BFF6FF"),
+	},
+	// Cosmic Sanctuary: midnight shell with a nebula, stars and a small ringed planet (no faces, no creatures)
+	Cosmic: {
+		outline: "#0A0820",
+		defs: `<radialGradient id="shell" cx="0.38" cy="0.3" r="0.8">
+			<stop offset="0" stop-color="#8E7BFF"/><stop offset="0.45" stop-color="#2E1F7A"/><stop offset="1" stop-color="#0B0A26"/>
+		</radialGradient>
+		<radialGradient id="nebula" cx="0.5" cy="0.5" r="0.5">
+			<stop offset="0" stop-color="#FF7AD0" stop-opacity="0.75"/><stop offset="1" stop-color="#FF7AD0" stop-opacity="0"/>
+		</radialGradient>
+		<linearGradient id="planet" x1="0" y1="0" x2="1" y2="1">
+			<stop offset="0" stop-color="#A9E8FF"/><stop offset="1" stop-color="#4A5CE0"/>
+		</linearGradient>`,
+		decor:
+			`<ellipse cx="40" cy="78" rx="36" ry="20" fill="url(#nebula)"/>` +
+			`<circle cx="64" cy="58" r="12" fill="url(#planet)" stroke="#1A1F6A" stroke-width="1.5"/>` +
+			`<ellipse cx="64" cy="58" rx="21" ry="5" fill="none" stroke="#FFD27A" stroke-width="2.4" transform="rotate(-16 64 58)"/>` +
+			[[24, 44, 1.6], [34, 96, 1.3], [78, 88, 1.5], [52, 104, 1.2], [20, 70, 1.1], [84, 40, 1.3], [46, 34, 1]]
+				.map(([cx, cy, r]) => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#FFF6D0"/>`)
+				.join("") +
+			sparkle(30, 26, 6, "#FFFFFF") + sparkle(26, 84, 3.5, "#FFE7A0") + sparkle(80, 100, 3, "#BFF6FF"),
+	},
 };
 
 function svg(body, defs = "") {

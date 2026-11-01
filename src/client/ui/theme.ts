@@ -196,6 +196,24 @@ export const FISH_ICONS: Record<FishType, Record<FishVariant, string>> = {
 		Ghost: "rbxassetid://104543312979275",
 		Shiny: "rbxassetid://89883389934153",
 	},
+	WolfDogfish: {
+		Normal: "rbxassetid://113379750149852",
+		Anomaly: "rbxassetid://85231797584530",
+		Ghost: "rbxassetid://118486190217943",
+		Shiny: "rbxassetid://111147344409728",
+	},
+	BunnyShark: {
+		Normal: "rbxassetid://107327208598706",
+		Anomaly: "rbxassetid://122949860094205",
+		Ghost: "rbxassetid://88194071263777",
+		Shiny: "rbxassetid://118888539697471",
+	},
+	MiniLeviathan: {
+		Normal: "rbxassetid://88991168701910",
+		Anomaly: "rbxassetid://76326534871685",
+		Ghost: "rbxassetid://102144531109970",
+		Shiny: "rbxassetid://122761530150036",
+	},
 	// Easter egg: no variant, every column is its one icon
 	FrenchFish: {
 		Normal: FRENCH_FISH_ICON,
@@ -280,6 +298,16 @@ export const EGG_SPRITES: Record<EggType, EggSprites> = {
 		icon: "rbxassetid://74526808969308", // VolcanoEgg.png
 		top: "rbxassetid://119121638443950", // VolcanoEggTop.png
 		bottom: "rbxassetid://121990538528263", // VolcanoEggBottom.png
+	},
+	Crystal: {
+		icon: "rbxassetid://136554331111983", // CrystalEgg.png
+		top: "rbxassetid://119129075650820", // CrystalEggTop.png
+		bottom: "rbxassetid://135259750384457", // CrystalEggBottom.png
+	},
+	Cosmic: {
+		icon: "rbxassetid://120088132643070", // CosmicEgg.png
+		top: "rbxassetid://106958821477467", // CosmicEggTop.png
+		bottom: "rbxassetid://77857068011328", // CosmicEggBottom.png
 	},
 };
 

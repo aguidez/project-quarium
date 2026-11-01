@@ -5,6 +5,7 @@ import { Lifecycle } from "shared/framework";
 import { TAGS } from "shared/tags";
 import { FRONT_GLASS_Z, getAquariumFrame, isInFocusZone } from "shared/types/aquarium";
 import { AQUARIUM_THEMES, AquariumTheme, getAquariumTheme } from "shared/types/rebirths";
+import { CosmeticId, DECOR_SLOTS, isDecor } from "shared/types/cosmetics";
 import { loadTemplates } from "../templates";
 import { DataService } from "./DataService";
 
@@ -44,6 +45,7 @@ export interface Aquarium {
 	owner?: Player;
 	theme?: AquariumTheme; // worn now (see applyTheme)
 	pearlRims?: boolean; // the Pearl rims finish worn now
+	decorKey?: string; // the owner's decor cosmetics placed now (sorted ids)
 	themeDecor?: Model;
 }
 
@@ -85,11 +87,15 @@ class AquariumServiceSingleton implements Lifecycle {
 	/** Players whose client reports the 2.5D focus view of their aquarium (see isTending). */
 	private focusedPlayers = new Set<Player>();
 	private themes = new Map<AquariumTheme, Model>();
+	private decorTemplates = new Map<CosmeticId, Model>();
 
 	public onInit() {
 		const themes = new Array<AquariumTheme>();
 		for (const [theme] of pairs(AQUARIUM_THEMES)) themes.push(theme);
 		this.themes = loadTemplates(TAGS.AquariumThemeTemplate, "Theme", themes);
+		const decorIds = new Array<CosmeticId>();
+		for (const [id] of pairs(DECOR_SLOTS)) decorIds.push(id);
+		this.decorTemplates = loadTemplates(TAGS.DecorTemplate, "Cosmetic", decorIds);
 
 		for (const instance of CollectionService.GetTagged(TAGS.Aquarium)) {
 			const aquarium = this.register(instance);
@@ -123,7 +129,8 @@ class AquariumServiceSingleton implements Lifecycle {
 			for (const aquarium of this.aquariums) {
 				const data = aquarium.owner ? DataService.getData(aquarium.owner) : undefined;
 				const pearlRims = data?.cosmetics.includes("FinishPearlRims") ?? false;
-				this.applyTheme(aquarium, getAquariumTheme(data?.rebirths ?? 0), pearlRims);
+				const decor = (data?.cosmetics ?? []).filter((cosmetic) => isDecor(cosmetic));
+				this.applyTheme(aquarium, getAquariumTheme(data?.rebirths ?? 0), pearlRims, decor);
 			}
 			task.wait(THEME_CHECK_INTERVAL);
 		}
@@ -139,12 +146,14 @@ class AquariumServiceSingleton implements Lifecycle {
 	 * holds parts named like the tank's (Sand, Backdrop, Base, Rim...): their look (and decals,
 	 * textures...) is copied onto the tank. Everything else is decor, cloned into the tank.
 	 */
-	private applyTheme(aquarium: Aquarium, theme: AquariumTheme, pearlRims: boolean) {
-		if (aquarium.theme === theme && aquarium.pearlRims === pearlRims) return;
+	private applyTheme(aquarium: Aquarium, theme: AquariumTheme, pearlRims: boolean, decorIds: CosmeticId[]) {
+		const decorKey = [...decorIds].sort().join(",");
+		if (aquarium.theme === theme && aquarium.pearlRims === pearlRims && aquarium.decorKey === decorKey) return;
 		const template = this.themes.get(theme);
 		if (!template) return;
 		aquarium.theme = theme;
 		aquarium.pearlRims = pearlRims;
+		aquarium.decorKey = decorKey;
 
 		aquarium.themeDecor?.Destroy();
 		// The decor built in Studio is the basic theme's: replaced for good by the template
@@ -180,6 +189,17 @@ class AquariumServiceSingleton implements Lifecycle {
 				part.CanQuery = false;
 				part.CanTouch = false;
 			}
+		}
+		// The owner's decor cosmetics (whale statue, golden trophy...), in their slots, with the theme's decor
+		for (const id of decorIds) {
+			const slot = DECOR_SLOTS[id];
+			const piece = this.decorTemplates.get(id)?.Clone();
+			if (!slot || !piece) continue;
+			CollectionService.RemoveTag(piece, TAGS.DecorTemplate);
+			const [, size] = piece.GetBoundingBox();
+			// The theme's Origin stands for the tank's frame: the slot is placed before the decor moves to the tank
+			piece.PivotTo(template.GetPivot().mul(new CFrame(slot.X, slot.Y + size.Y / 2, slot.Z)));
+			piece.Parent = decor;
 		}
 		decor.PivotTo(aquarium.cframe);
 		decor.Parent = aquarium.model;

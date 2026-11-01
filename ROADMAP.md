@@ -3,7 +3,7 @@
 > The development plan from the live game (V0.35) to V1: what to build, in which order, and how. The **numbers** live
 > in `BALANCE.md` §5 and `tools/balance-v1-plan.js`; this file is the **work**. Tick the boxes as tasks ship, and move
 > what a milestone ships into `PROJECT_CONTEXT.md` / `RELEASE_NOTES.md` as usual.
-> Last updated: 2026-10-31 (M5 done in V0.42, M4 done in V0.40, M3 done in V0.39, M2 done in V0.38, M0 in V0.37, M1 in V0.36; first version: 7 milestones, from the rebalance to rebirth 8).
+> Last updated: 2026-11-01 (M6 done in V0.44: V1 content complete; M5 done in V0.42, M4 done in V0.40, M3 done in V0.39, M2 done in V0.38, M0 in V0.37, M1 in V0.36; first version: 7 milestones, from the rebalance to rebirth 8).
 
 **V1 in one line**: 8 rebirths / aquariums, 18 species, 12 eggs, a tank of 25 fish, 5 companions (3 slots, the third one
 a gamepass), a "Voyage" main quest line to the end, ~12h15 for a free player to see everything (BALANCE.md §5.3).
@@ -114,13 +114,22 @@ Themes already built (`PirateWreck`, `Atlantis` in ServerStorage.Assets.Aquarium
       its gauge); sims match the plan.
 - [ ] Owner: put the Jellyfish Pass on sale on the Creator Dashboard.
 
-### M6 — Rebirths 7–8: Crystal Caverns and Cosmic Alien Sanctuary, end of V1 (~9h50 → ~12h15)
+### M6 — Rebirths 7–8: Crystal Caverns and Cosmic Sanctuary, end of V1 (~9h50 → ~12h15; shipped in V0.44)
 
-- [ ] Models: themes **Crystal Caverns** and **Cosmic Alien Sanctuary**, **Wolf-head Dogfish**, **Hammerhead
-      Shark**, **Mini Leviathan**, Crystal and Cosmic eggs.
-- [ ] Config: species 16–18, eggs Crystal (830B) and Cosmic (1.8T), REBIRTHS 7–8 (690B x2500, 1.5T x8000),
-      milestones 450,000 (tank 25), 1,000,000 (title + whale statue).
-- [ ] Quests: Voyage chapters to "Master Aquarist"; Rebirth menu: "V1 complete, more with the next update".
+- [x] Models: themes **Crystal Caverns** (lavender sand, glowing crystal clusters, painted cave backdrop) and
+      **Cosmic Sanctuary** (abstract: floating stones with Neon geometric runes, gold / violet crystals, nebula and
+      ringed planets; no faces), **Husky Dogfish** (a round blue fish with a husky face; the "wolf-head" versions read
+      as sharks), **Bunny Shark** (a pink shark with bunny ears: replaces the Hammerhead, every hammerhead prompt put
+      the hammer on top of the head), **Mini Leviathan** (pitched 30° in its template: the mesh came out upright),
+      their moon / star / planet coins, Crystal and Cosmic eggs; stickers and variant textures approved and uploaded once.
+- [x] Config: species 16–18, eggs Crystal (830B) and Cosmic (1.8T), REBIRTHS 7–8 (690B x2500, 1.5T x8000),
+      milestones 450,000 (tank 25), 1,000,000 (Ocean Guardian title + whale statue).
+- [x] Cosmetics: **titles** above the head (TitleService: the best one earned), **decor** in the tank (whale statue,
+      golden trophy: DECOR_SLOTS, placed by AquariumService with the theme).
+- [x] Quests: Voyage 12–16 to "Master Aquarist" (18 species: title + golden trophy); Rebirth menu: "Voyage complete!
+      ... More aquariums arrive with the next update!".
+- [x] Check: playtest on the test store (rebirths 7–8 and their themes, Crystal / Cosmic eggs, the three species and a
+      variant texture, milestones, title and whale statue); sims match the plan.
 
 ### M7 — Side lines, polish, launch calibration
 
@@ -185,10 +194,10 @@ Every item below is **described to the owner and approved before anything is gen
 | Lanternfish | A lure on a stick in front of the mouth; same name as the Abyss event's villain | Glowing dots on the body (photophores), no lure; cute, not the dark anglerfish; code id distinct from the event template |
 | Dragonfish | Dragon → fire breath | No fire, no smoke: glowing scales / fins instead |
 | Lionfish | Long thin spines | Wide soft fan fins, rounded tips |
-| Hammerhead Shark | Teeth, "hammer" | Closed smiling mouth, cartoon proportions |
-| Wolf-head Dogfish | Teeth, aggressive canine head | Friendly cartoon dog-wolf face, mouth closed or tongue out |
+| Bunny Shark (was Hammerhead Shark) | Teeth | Closed wavy smile, no teeth, soft bunny ears |
+| Husky Dogfish (was Wolf-head Dogfish) | Teeth, aggressive canine head | Friendly cartoon husky face, mouth closed |
 | Mini Leviathan | Monster, teeth, horns | Baby sea-serpent, round eyes, soft frills, no horns or fangs |
 | Volcanic Temple | Fire, lava next to round objects, torches | Glowing magma cracks in rock, warm light; no flames, no torches, no round object near the glow |
-| Cosmic Alien Sanctuary | Alien faces, "creepy" creatures | Abstract: crystals, planets, glowing runes, star backdrop; no faces |
+| Cosmic Sanctuary | Alien faces, "creepy" creatures | Abstract: crystals, planets, glowing runes, star backdrop; no faces |
 | Water Hen | — (a bird) | Cartoon moorhen; nothing in its beak |
 | Jellyfish | — | Round bell, soft tentacles |

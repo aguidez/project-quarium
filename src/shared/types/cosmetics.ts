@@ -4,8 +4,8 @@
  * - Title: a name shown with the player (quest "Master Aquarist", Ocean 1,000,000...);
  * - Decor: an ornament placed in the player's tank, whatever its theme;
  * - Finish: a look applied to the tank of every theme (Pearl rims).
- * The ids below are the ones the V1 plan grants. Pearl rims are shown since V0.42 (Ocean 300,000, AquariumService);
- * the titles and decor come with the content that grants them (ROADMAP M6), nothing grants them before.
+ * The ids below are the ones the V1 plan grants. Shown: Pearl rims since V0.42 (AquariumService), the titles (the best
+ * one above the player's head, TitleService) and the decor (AquariumService, at DECOR_SLOTS) since V0.44.
  */
 export type CosmeticKind = "Title" | "Decor" | "Finish";
 
@@ -70,4 +70,30 @@ export const COSMETICS: Record<CosmeticId, CosmeticConfig> = {
 
 export function isCosmeticId(value: unknown): value is CosmeticId {
 	return typeIs(value, "string") && COSMETICS[value as CosmeticId] !== undefined;
+}
+
+/** Titles from the most to the least prestigious: the player wears the first one they own (getBestTitle). */
+export const TITLE_ORDER: readonly CosmeticId[] = [
+	"TitleMasterAquarist",
+	"TitleOceanGuardian",
+	"TitleCollector",
+	"TitleOceanFriend",
+];
+
+export function getBestTitle(cosmetics: readonly CosmeticId[]): CosmeticId | undefined {
+	return TITLE_ORDER.find((title) => cosmetics.includes(title));
+}
+
+/**
+ * Where each decor stands in a tank, in the aquarium's frame (x right, z toward the back; the sand top is y 4): low in
+ * the front corners, out of the fish's way, whatever the theme. The models: ServerStorage.Assets.Decor (DecorTemplate).
+ */
+export const DECOR_SLOTS: Partial<Record<CosmeticId, Vector3>> = {
+	DecorWhaleStatue: new Vector3(-18.5, 4, -6),
+	DecorGoldenTrophy: new Vector3(19, 4, -6),
+	// DecorIncubator: with the Hatchery side line (ROADMAP M7)
+};
+
+export function isDecor(cosmetic: CosmeticId): boolean {
+	return COSMETICS[cosmetic].kind === "Decor";
 }

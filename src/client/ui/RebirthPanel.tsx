@@ -184,8 +184,8 @@ export function RebirthPanel(props: RebirthPanelProps) {
 				<Row
 					order={2}
 					image={V2_IMAGES.iconRebirth}
-					title="More rebirths are coming"
-					body="You have done every rebirth for now. The next ones arrive with the next eggs!"
+					title="Voyage complete!"
+					body="You reached the Cosmic Sanctuary, the last aquarium of the ocean for now. More aquariums arrive with the next update!"
 				/>
 			</Panel>
 		);

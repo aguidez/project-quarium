@@ -50,6 +50,10 @@ let FISH = {
 	// Rebirth 6 (V0.42, ROADMAP M5)
 	Lionfish: { income: 208000, interval: 8, ocean: 5000 },
 	Dragonfish: { income: 1300000, interval: 25, ocean: 8000 },
+	// Rebirths 7–8 (V0.44, ROADMAP M6): the end of V1
+	WolfDogfish: { income: 1575000, interval: 15, ocean: 13000 },
+	BunnyShark: { income: 4200000, interval: 20, ocean: 20000 },
+	MiniLeviathan: { income: 12600000, interval: 30, ocean: 32000 },
 };
 if (plan.FISH) FISH = plan.FISH;
 // Easter egg fish (fish.ts FishConfig.easterEgg): hidden chance (percent) per egg opened, taken from the egg's
@@ -93,6 +97,8 @@ let EGGS = [
 	{ name: "Atlantis", price: 144e6, hatch: 150, odds: { Catfish: 25, BlueTang: 55, BabySunfish: 20 } },
 	{ name: "Trench", price: 6.1e9, hatch: 165, odds: { BabySunfish: 55, Lanternfish: 45 } },
 	{ name: "Volcano", price: 15.6e9, hatch: 180, odds: { Lanternfish: 25, Lionfish: 55, Dragonfish: 20 } },
+	{ name: "Crystal", price: 830e9, hatch: 180, odds: { Dragonfish: 55, WolfDogfish: 45 } },
+	{ name: "Cosmic", price: 1.8e12, hatch: 180, odds: { WolfDogfish: 25, BunnyShark: 55, MiniLeviathan: 20 } },
 ];
 if (plan.EGGS) EGGS = plan.EGGS;
 // Rebirth n is REBIRTHS[n - 1] (rebirths.ts): price, total coin multiplier, start money
@@ -103,6 +109,8 @@ let REBIRTHS = [
 	{ price: 120e6, mult: 80, start: 300 },
 	{ price: 5.1e9, mult: 250, start: 300 },
 	{ price: 13e9, mult: 800, start: 300 },
+	{ price: 690e9, mult: 2500, start: 300 },
+	{ price: 1.5e12, mult: 8000, start: 300 },
 ];
 if (plan.REBIRTHS) REBIRTHS = plan.REBIRTHS;
 // Capacity milestones (oceanRewards.ts, kind "Capacity"): the tank holds `capacity` fish from `points` Ocean Points
@@ -112,9 +120,12 @@ let CAPACITY = [
 	{ points: 25000, capacity: 19 },
 	{ points: 70000, capacity: 21 },
 	{ points: 180000, capacity: 23 },
+	{ points: 450000, capacity: 25 },
 ];
 if (plan.CAPACITY) CAPACITY = plan.CAPACITY;
-let OCEAN_MILESTONES = [50, 100, 200, 500, 1500, 5000, 8000, 25000, 40000, 70000, 85000, 120000, 180000, 200000, 300000]; // oceanRewards.ts (only reported, except the capacity / incubator ones)
+let OCEAN_MILESTONES = [
+	50, 100, 200, 500, 1500, 5000, 8000, 25000, 40000, 70000, 85000, 120000, 180000, 200000, 300000, 450000, 1000000,
+]; // oceanRewards.ts (only reported, except the capacity / incubator ones)
 if (plan.OCEAN_MILESTONES) OCEAN_MILESTONES = plan.OCEAN_MILESTONES;
 // Incubator milestones (oceanRewards.ts, kind "Incubator"): from `points` Ocean Points, `count` eggs of the same type
 // can incubate at once
@@ -125,8 +136,17 @@ let HATCH = plan.HATCH || [{ points: 85000, mult: 0.85 }];
 // Story quest rewards that move the economy (quests.ts, the Voyage line): minutes of income when a species is
 // discovered, Ocean Points when rebirth n is done. Other rewards (perks, cosmetics) are not modelled.
 const LIVE_QUEST_REWARDS = {
-	discover: { FlameGourami: 5, ImperialDiscus: 5, Catfish: 5, BabySunfish: 5, Lanternfish: 5, Dragonfish: 5 },
-	rebirth: { 2: 500, 3: 1500, 4: 4000, 5: 10000, 6: 25000 },
+	discover: {
+		FlameGourami: 5,
+		ImperialDiscus: 5,
+		Catfish: 5,
+		BabySunfish: 5,
+		Lanternfish: 5,
+		Dragonfish: 5,
+		WolfDogfish: 5,
+		MiniLeviathan: 5,
+	},
+	rebirth: { 2: 500, 3: 1500, 4: 4000, 5: 10000, 6: 25000, 7: 60000, 8: 150000 },
 };
 const QUEST_REWARDS = Object.assign({ discover: {}, rebirth: {} }, plan.QUEST_REWARDS || LIVE_QUEST_REWARDS);
 const P = Object.assign(
@@ -145,7 +165,7 @@ const P = Object.assign(
 		hatchMult: null, // hatch-time multiplier once the Hen is owned, replacing HATCH's (paid Hen quests estimate only)
 		oceanBoost: 1, // an Ocean Points multiplier (gamepass estimate only)
 		checkpoints: [15, 30, 60, 90, 120, 150, 180, 240, 300, 360],
-		horizon: 11 * 3600, // the live content ends at ~9h (rebirth 6, ~9h05 for the 15 species)
+		horizon: 15 * 3600, // V1 ends at ~12h15 (all 18 species); room for the slowest players
 		players: 2000,
 	},
 	plan.P || {},
@@ -362,7 +382,7 @@ const min = (x) =>
 	x === null
 		? "never"
 		: x >= 5400
-			? `${Math.floor(x / 3600)}h${String(Math.round((x % 3600) / 60)).padStart(2, "0")}`
+			? `${Math.floor(Math.round(x / 60) / 60)}h${String(Math.round(x / 60) % 60).padStart(2, "0")}`
 			: (x / 60).toFixed(1) + "min";
 const line = (label, values) => {
 	const never = values.filter((x) => x === null || x === undefined).length;

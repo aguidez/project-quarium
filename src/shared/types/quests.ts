@@ -33,6 +33,8 @@ export type QuestStat =
 	| "Rebirths"
 	/** Gauge: Fish Index cells discovered (species x variant, easter eggs aside: the index's own count). */
 	| "IndexCells"
+	/** Gauge: species hatched at least once (easter eggs aside): "find every species". */
+	| "SpeciesFound"
 	/** Eggs opened. */
 	| "EggsOpened"
 	/** Fish of the quest's `variant` hatched. */
@@ -46,7 +48,14 @@ export type QuestStat =
 	| "CompanionStat";
 
 /** Stats read as a current value rather than counted (see QuestStat). */
-export const GAUGE_STATS: readonly QuestStat[] = ["FishInTank", "MoneyHeld", "SpeciesHatched", "Rebirths", "IndexCells"];
+export const GAUGE_STATS: readonly QuestStat[] = [
+	"FishInTank",
+	"MoneyHeld",
+	"SpeciesHatched",
+	"Rebirths",
+	"IndexCells",
+	"SpeciesFound",
+];
 
 /**
  * Rule (BALANCE.md §5.9): no quest reward multiplies the income or the Ocean Points permanently, so quests can be
@@ -262,6 +271,53 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 1,
 		rewards: [{ kind: "IncomeMinutes", minutes: 5 }],
 	},
+	Voyage12: {
+		category: "Story",
+		title: "Crystal Path",
+		description: "Rebirth into the Crystal Caverns (rebirth 7).",
+		stat: "Rebirths",
+		target: 7,
+		rewards: [{ kind: "OceanPoints", amount: 60000 }],
+	},
+	Voyage13: {
+		category: "Story",
+		title: "Puppy in the Caves",
+		description: "Hatch a Husky Dogfish.",
+		stat: "SpeciesHatched",
+		fishType: "WolfDogfish",
+		target: 1,
+		rewards: [{ kind: "IncomeMinutes", minutes: 5 }],
+	},
+	Voyage14: {
+		category: "Story",
+		title: "To the Stars",
+		description: "Rebirth into the Cosmic Sanctuary (rebirth 8).",
+		stat: "Rebirths",
+		target: 8,
+		rewards: [{ kind: "OceanPoints", amount: 150000 }],
+	},
+	Voyage15: {
+		category: "Story",
+		title: "Leviathan",
+		description: "Hatch a Mini Leviathan.",
+		stat: "SpeciesHatched",
+		fishType: "MiniLeviathan",
+		target: 1,
+		rewards: [{ kind: "IncomeMinutes", minutes: 5 }],
+	},
+	// The end of the Voyage (and of V1): every species of the ocean in the Fish Index
+	Voyage16: {
+		category: "Story",
+		title: "Master Aquarist",
+		description: "Find all 18 species of the ocean.",
+		stat: "SpeciesFound",
+		target: 18,
+		rewards: [
+			{ kind: "Title", title: "TitleMasterAquarist" },
+			{ kind: "Decor", decor: "DecorGoldenTrophy" },
+			{ kind: "OceanPoints", amount: 300000 },
+		],
+	},
 	// The Water Hen's line (Water Hen pass, BALANCE.md §5.9): eggs opened with it equipped. Slow on purpose: its
 	// effect is the smallest
 	WaterHen1: {
@@ -350,15 +406,7 @@ export const QUESTS: Record<string, QuestConfig> = {
 };
 
 /** Story lines: each one has its quests in order, and opens once a quest of another line is claimed. */
-export type StoryLine =
-	| "Start"
-	| "Ocean"
-	| "Rebirth"
-	| "Snail"
-	| "Pelican"
-	| "WaterHen"
-	| "Swordfish"
-	| "Jellyfish";
+export type StoryLine = "Start" | "Ocean" | "Rebirth" | "Snail" | "Pelican" | "WaterHen" | "Swordfish" | "Jellyfish";
 
 export interface StoryLineConfig {
 	/** Small tag over its quests in the quest book. */
@@ -396,6 +444,11 @@ export const STORY_LINES: Record<StoryLine, StoryLineConfig> = {
 			"Voyage9",
 			"Voyage10",
 			"Voyage11",
+			"Voyage12",
+			"Voyage13",
+			"Voyage14",
+			"Voyage15",
+			"Voyage16",
 		],
 		requires: "Story1",
 		order: 3,

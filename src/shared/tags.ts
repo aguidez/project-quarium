@@ -53,6 +53,8 @@ export const TAGS = {
 	 * Model with a PrimaryPart. Walking up to him opens the Shop panel (ShopKeeperController, client only).
 	 */
 	ShopKeeper: "ShopKeeper",
+	/** Studio-made decor model in ServerStorage.Assets.Decor (a cosmetic shown in its owner's tank). Attribute "Cosmetic". */
+	DecorTemplate: "DecorTemplate",
 	/**
 	 * Studio-made food look in ServerStorage.Assets.Food: a single anchored MeshPart (its size is the
 	 * food's size). Attribute "FoodLook". The default pellet (FoodLook "Pellet") has none: it is a ball.

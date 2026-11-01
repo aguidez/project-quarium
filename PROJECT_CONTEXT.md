@@ -2,7 +2,10 @@
 
 > Living map of the project. **Read it before exploring the code, and update it in the same change
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
-> Last updated: 2026-10-31 (V0.43: weak fish bubble sound instead of the fart one, coin chime with a combo pitch
+> Last updated: 2026-11-01 (V0.44, ROADMAP M6: rebirths 7–8 → CrystalCaverns / CosmicSanctuary themes, WolfDogfish
+> ("Husky Dogfish") / BunnyShark / MiniLeviathan (Mythic) with Moon / Star / Planet coins, Crystal and Cosmic eggs, Ocean
+> milestones 450,000 (tank 25) and 1,000,000 (OceanGuardian: title + whale statue), Voyage 12–16 (gauge SpeciesFound,
+> Master Aquarist), TitleService (best title above the head), decor in the tank (DECOR_SLOTS, tag DecorTemplate); V0.43: weak fish bubble sound instead of the fart one, coin chime with a combo pitch
 > (CoinService.playCoinSfx), Ocean milestone cards fit their width, variant chances shown with the player's luck
 > (getPlayerVariantLuck), companion cards show their live numbers (companionStats.ts); V0.42, ROADMAP M5: rebirth 6 → VolcanicTemple theme, Lionfish / Dragonfish (Legendary) +
 > CoralFan / DragonScale coins, Volcano egg, Ocean milestones 180,000–300,000, the Jellyfish companion (on-demand feeder,
@@ -36,19 +39,21 @@ coins. Around that core loop:
 - a Fish Index (collection): one row per species, one column per variant;
 - the Ocean: release fish (the player picks the kind and the variant) for Ocean Points, a progression score that
   unlocks milestones (50: the Pelican companion, 100: Snail speed x1.15, 200: a second companion slot, 500: the
-  Pelican feeds x1.33 as often, every 7.5 s, 1,500: the tank holds 15 fish, 5,000: a second incubator, 8,000 / 25,000: 17 / 19 fish, 40,000: rare variants x1.5, 70,000: 21 fish, 85,000: the Water Hen, 120,000: the Swordfish, 180,000: 23 fish, 200,000: the Jellyfish, 300,000: Pearl rims);
+  Pelican feeds x1.33 as often, every 7.5 s, 1,500: the tank holds 15 fish, 5,000: a second incubator, 8,000 / 25,000: 17 / 19 fish, 40,000: rare variants x1.5, 70,000: 21 fish, 85,000: the Water Hen, 120,000: the Swordfish, 180,000: 23 fish, 200,000: the Jellyfish, 300,000: Pearl rims, 450,000: 25 fish, 1,000,000: the Ocean Guardian title and a whale statue);
 - events: recurring ones drawn by each server every 5–15 min (the abyssal raid: the world goes dark, a lantern
   fish steals coins) and admin ones started on every server (the K-pop music event); never during the tutorial;
 - likes between players: a board beside each tank, a like doubles the owner's coins for 5 min;
 - gamepasses, sold in the Shop panel (BALANCE.md §5.10, never part of the balance): Third Companion Slot, x2 Ocean
   Points (fish released / rebirths), Lucky (rare variants x2) and +50% Coins;
-- rebirths: restart the run for a permanent coin multiplier and a new aquarium theme (6 levels so far: Lagoon, Neon Coral, Pirate Wreck, Atlantis, Mariana Trench, Volcanic Temple); while one is
+- rebirths: restart the run for a permanent coin multiplier and a new aquarium theme (8 levels: Lagoon, Neon Coral, Pirate Wreck, Atlantis, Mariana Trench, Volcanic Temple, Crystal Caverns, Cosmic Sanctuary); while one is
   affordable the Rebirth button pulses and a bubble reminds the player now and then;
+- cosmetics: titles above the head (the best one earned: TitleService), decor in the tank (whale statue, golden
+  trophy), Pearl rims;
 - easter eggs: secret fish hidden in every egg (the French Fish, see §3.4), their own Fish Index category.
 
-12 species (+ 1 secret), 8 eggs. The game is fast at first and slows down strongly after the first hours: **`BALANCE.md`** holds the
-expected progression (rebirth 1 ~28 min, six species ~1 h, rebirth 2 ~1h40, rebirth 3 ~3h01, rebirth 4 ~4h47, all twelve
-~5h42), the numbers and the rules,
+18 species (+ 1 secret), 12 eggs, 8 rebirths (the whole V1 plan, since V0.44). The game is fast at first and slows down strongly after the first hours: **`BALANCE.md`** holds the
+expected progression (rebirth 1 ~28 min, six species ~1 h, rebirth 2 ~1h40, rebirth 3 ~3h01, rebirth 4 ~4h47, rebirth 6
+~8h06, rebirth 8 ~10h54, all eighteen ~12h16), the numbers and the rules,
 and the **V1 plan** (§5: 18 species, 12 eggs, 8 rebirths, a tank of 25 fish, the Water Hen / Swordfish / Jellyfish
 companions with paid upgrade quests, a "Voyage" main quest line, ~12h15 to see everything; played by
 `tools/balance-v1-plan.js`). **`ROADMAP.md`** is the development plan of V1 (milestones M0–M7, recipes for a species /
@@ -186,14 +191,15 @@ ProjetQuarium/
    │     │                   (Ocean upgrades, its perks), the line under its ability on the companion card; player-wide
    │     │                   perks of its quest line (lasting / bouncy coins, Hearty meals) work without it: not shown
    │     ├─ cosmetics.ts     CosmeticId / COSMETICS (kind Title / Decor / Finish): the V1 titles, decor and Pearl rims;
-   │     │                   PlayerData.cosmetics. Pearl rims shown since V0.42 (AquariumService); titles and decor not displayed yet (M6)
+   │     │                   PlayerData.cosmetics. Pearl rims shown since V0.42 (AquariumService); titles (TITLE_ORDER, getBestTitle:
+   │     │                   TitleService) and decor (DECOR_SLOTS: tank-local position per decor id, isDecor: AquariumService) since V0.44
    │     ├─ gamepasses.ts    GamePass / GAME_PASSES (name, shop text, Roblox id, icon, badge "x2"…, shopOrder: the four
    │     │                   Shop passes; WaterHenPass 2057906427, SwordfishPass 2058734507, JellyfishPass 2061499264, sold
    │     │                   from their quest line, picture = the companion's sticker), getShopPasses, getPassById,
    │     │                   effects getPassCoinMultiplier (x1.5) / getPassOceanMultiplier (x2) / getPassVariantLuck
    │     │                   (x2) / getPassCompanionSlots (+1)
    │     ├─ quests.ts        QUESTS (Story1 Snail, Story2 Ocean, Story3–5 the Snail's line, Story6–8 the Pelican's line,
-   │     │                   Story9 then Voyage1–11 the main "Voyage" line, WaterHen1–3 / Swordfish1–3 / Jellyfish1–3 the paid
+   │     │                   Story9 then Voyage1–16 the main "Voyage" line, WaterHen1–3 / Swordfish1–3 / Jellyfish1–3 the paid
    │     │                   companion lines),
    │     │                   STORY_LINES (Start / Ocean / Rebirth (shown "Voyage") / Snail / Pelican / WaterHen / Swordfish /
    │     │                   Jellyfish (the last three: requiresCompanion + requiresPass): quests in
@@ -203,7 +209,8 @@ ProjetQuarium/
    │     │                   nor claimed without the pass); stats: counters CoinMoney, OceanPoints, EggsOpened,
    │     │                   VariantHatched {variant}, FishReleased, CompanionStat {companion} (Snail / Swordfish coins, Pelican / Jellyfish feeds,
    │     │                   eggs opened with the Water Hen equipped),
-   │     │                   gauges (GAUGE_STATS) FishInTank, MoneyHeld, SpeciesHatched {fishType}, Rebirths, IndexCells;
+   │     │                   gauges (GAUGE_STATS) FishInTank, MoneyHeld, SpeciesHatched {fishType}, Rebirths, IndexCells, SpeciesFound
+   │     │                   (species hatched at least once, easter eggs excluded: Master Aquarist);
    │     │                   rewards Money / Companion / Feature / Perk / IncomeMinutes / OceanPoints / Title / Decor;
    │     │                   daily/weekly periods (UTC)
    │     ├─ perks.ts         Perk (CoinLinger1 +1 s, CoinLinger2 +2 s, CoinBounce, FishSatiety +15 s full, PelicanDouble
@@ -228,7 +235,7 @@ ProjetQuarium/
    │     │                   recurring flag, EventSource, getRecurringEvents, getRecurringChance (minutes 5–15),
    │     │                   EVENT_IMMUNE_ATTRIBUTE + isEventImmune (tutorial)
    │     ├─ rebirths.ts      REBIRTHS (price, multiplier, start money, theme), AQUARIUM_THEMES (Basic, Lagoon,
-   │     │                   NeonCoral, PirateWreck, Atlantis, MarianaTrench, VolcanicTemple: rebirths 1–6), getNextRebirth,
+   │     │                   NeonCoral, PirateWreck, Atlantis, MarianaTrench, VolcanicTemple, CrystalCaverns, CosmicSanctuary: rebirths 1–8), getNextRebirth,
    │     │                   getRebirthMultiplier, getAquariumTheme, getRebirthOceanPoints, rebirth balance notes
    │     ├─ likes.ts         Like rules (1 per hour given, x2 coins for 5 min, restarted by each like), board offset, helpers
    │     ├─ onboarding.ts    Onboarding steps + rules (what is allowed / free at each step), ONBOARDING_REWARD,
@@ -249,7 +256,9 @@ ProjetQuarium/
    │     ├─ InteractionService  "Interact" remote: token bucket (10/s) shared by DropFood / CollectCoin
    │     ├─ AquariumService  Registers Studio tanks, assigns one per player, owner nameplate (base), runtime folders
    │     │                   (Fish/Food/Coins/Companions), focus reports ("SetFocus") + isTending / isAtOwnAquarium; themes by rebirth
-   │     │                   and the Pearl rims finish (FinishPearlRims cosmetic: pearly F3ECF7 rims, Reflectance 0.3, any theme)
+   │     │                   and the Pearl rims finish (FinishPearlRims cosmetic: pearly F3ECF7 rims, Reflectance 0.3, any theme);
+   │     │                   decor cosmetics (DecorTemplate models) cloned into the theme decor at DECOR_SLOTS, rebuilt when the
+   │     │                   theme, the rims or the decor change
    │     ├─ FoodService      Drops / sinks food pellets (DropFood), price per pellet, max 10 per player; throwFood (free
    │     │                   pellet thrown from above by the Pelican: falls through the air onto the surface, then sinks) and
    │     │                   releaseFood (a pellet let go in the water by the Jellyfish: sinks straight down from it);
@@ -310,6 +319,8 @@ ProjetQuarium/
    │     │                   fish that leaves on its own (points, popup, its leaveMessage)
    │     ├─ RebirthService   "Rebirth" intent (needs the "Rebirth" feature, quest "Saving Up"): fish to the ocean,
    │     │                   run reset, rebirths + 1, reward popup
+   │     ├─ TitleService     Polls every 1 s: a BillboardGui "PlayerTitle" on each character's Head with their best title
+   │     │                   (getBestTitle; gold LuckiestGuy text, 4.2 × 0.65 studs, MaxDistance 120), removed without one
    │     ├─ GamePassService  The only writer of PlayerData.passes: at join (onLoaded) asks Roblox for each pass on sale
    │     │                   (UserOwnsGamePassAsync, 3 tries; no answer keeps the saved state; passes without an id are
    │     │                   dropped), grants a purchase from PromptGamePassPurchaseFinished (thank-you Reward),
@@ -506,6 +517,19 @@ ProjetQuarium/
   decor: generated `TempleArch` (glowing carvings) on two Slate `Steps`, the Mariana basalt clusters tinted warm dark
   (SurfaceAppearance Color 110/72/62), flat Neon `MagmaVeins` on the sand, Bubbler. Deliberately absent (CLAUDE.md §7):
   flames, torches, smoke, round objects next to the glow (a generated "magma rocks" mesh looked like a campfire: dropped).
+- **Rebirths 7–8 content** (2026-11-01, V0.44): fish `WolfDogfish` ("Husky Dogfish": round blue fish with a husky face,
+  4.6 × 4.65 × 6; the wolf-head-on-a-shark versions read as sharks), `BunnyShark` (pink shark with bunny ears, wavy
+  smile, no teeth, 5 × 4.9 × 6; replaces the Hammerhead: every hammerhead prompt put the hammer on top of the head) and
+  `MiniLeviathan` (crested baby sea serpent: the mesh came out upright, so it is pitched −30° about X inside the
+  template; 2.6 × 6.9 × 6.4), all with Anomaly / Shiny FishVariants; coins `MoonCoin` (Moon), `StarCoin` (Star),
+  `PlanetCoin` (Planet), clones of the SunMedallion template; decor `Assets.Decor` (tag `DecorTemplate`, attr
+  `Cosmetic`, PrimaryPart Mesh): `WhaleStatue` (DecorWhaleStatue) and `GoldenTrophy` (DecorGoldenTrophy, gold tint).
+  Theme `CrystalCaverns` ("Crystal Caverns", rebirth 7): lavender sand, Slate base, Neon violet plinth, Slate rims,
+  blue-violet `Water` (3a4f9a / 0.78), painted cave backdrop (stalactites, glowing crystals); decor: basalt tinted
+  violet, crystal clusters tinted cyan / pink / violet with PointLights. Theme `CosmicSanctuary` ("Cosmic Sanctuary",
+  rebirth 8): pale sand, Neon gold plinth, gold Metal rims, deep indigo `Water` (2c2a6e), painted nebula backdrop with
+  stars and two ringed planets; decor: floating basalt stones with Neon geometric runes (diamonds and bars, no
+  letters), gold / violet crystals, Neon sand stars. Deliberately absent (CLAUDE.md §7): alien faces.
 - **Easter egg content** (2026-10-30): fish `FrenchFish` (4.2 × 4.6 × 4.4 studs, round, beret / Breton shirt / red
   scarf / baguette on its back, generated 1024² texture, no FishVariants), coin `CroissantCoin` (CoinType Croissant,
   mesh tilted −50° on X so the crescent faces the glass, SurfaceAppearance Color 1/0.86/0.55 so it reads golden, not
@@ -674,7 +698,9 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   quest opens): Freshwater Finds (a Flame Gourami → 5 min of income), Deeper Waters (rebirth 2 → 500 Ocean Points),
   Crown of the Reef (Imperial Discus → 5 min), Sunken Secrets (rebirth 3 → 1,500), Treasure of the Wreck (Catfish → 5
   min), The Lost City (rebirth 4 → 4,000), Atlantean Sun (Baby Sunfish → 5 min), Into the Deep (rebirth 5 → 10,000),
-  Light of the Deep (Lanternfish → 5 min), Heat Below (rebirth 6 → 25,000), Temple Guardian (Dragonfish → 5 min)
+  Light of the Deep (Lanternfish → 5 min), Heat Below (rebirth 6 → 25,000), Temple Guardian (Dragonfish → 5 min),
+  Crystal Path (rebirth 7 → 60,000), Puppy in the Caves (Husky Dogfish → 5 min), To the Stars (rebirth 8 → 150,000),
+  Leviathan (Mini Leviathan → 5 min), Master Aquarist (gauge SpeciesFound 18 → title, golden trophy, 300,000 points)
   and the Snail's line (stat `CompanionStat` Snail: coins its Snail
   picks up, `CoinService.onCollected`'s `companion`): Story3 "Little Helper" (20) → perk CoinLinger1 (coins stay 1 s
   longer on the sand), Story4 "Busy Snail" (100) → CoinLinger2 (+2 s more), Story5 "Snail Champion" (200) → CoinBounce
@@ -815,10 +841,9 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
      mesh cost almost nothing).
 - **Roblox moderation**: a "Firefighter" fish was dropped, its icon got the account a moderation warning (a nozzle in its
   mouth, read as a cigarette). Rules in CLAUDE.md §7.
-- **Not built yet**: the V1 content planned in BALANCE.md §5 and scheduled in ROADMAP.md (rebirths 7–8, eggs 11–12,
-  species 16–18, Ocean milestones above 300,000 with the tank 25, the Voyage quests after the Volcanic Temple; themes
-  Crystal Caverns and Cosmic Sanctuary to build), daily / weekly quest content. Titles and decor are stored but not
-  displayed (Pearl rims are, since V0.42): their looks come with the content that grants them. The shelf arrows show since V0.38 (8 eggs). The Pelican's and the Snail's Ocean upgrades have their V1 values since V0.36 (x1.33 /
+- **Not built yet**: the V1 content is complete since V0.44 (ROADMAP M6); left for M7: the side quest lines
+  (Hatchery, Collector, Ocean: the Collector / Ocean Friend titles exist but nothing grants them yet; the
+  DecorIncubator slot is commented out), daily / weekly quest content. The shelf arrows show since V0.38 (8 eggs). The Pelican's and the Snail's Ocean upgrades have their V1 values since V0.36 (x1.33 /
   x1.15, ROADMAP M1). Kpop is the only admin event and Abyss the only recurring one (`recurring` in GAME_EVENTS).
 - **Admin events across servers** rely on MessagingService (best effort, a few seconds of delay; a server that misses
   the message still joins through the MemoryStore only when it starts). A server started during an admin event joins

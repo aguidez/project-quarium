@@ -33,7 +33,7 @@ module.exports = {
 		Lionfish: { income: 208000, interval: 8, ocean: 5000 }, // 26,000/s
 		Dragonfish: { income: 1300000, interval: 25, ocean: 8000 }, // 52,000/s
 		WolfDogfish: { income: 1575000, interval: 15, ocean: 13000 }, // 105,000/s
-		Hammerhead: { income: 4200000, interval: 20, ocean: 20000 }, // 210,000/s
+		BunnyShark: { income: 4200000, interval: 20, ocean: 20000 }, // 210,000/s
 		MiniLeviathan: { income: 12600000, interval: 30, ocean: 32000 }, // 420,000/s
 	},
 	EGGS: [
@@ -54,7 +54,7 @@ module.exports = {
 		{ name: "Trench", price: 6.1e9, hatch: 165, odds: { BabySunfish: 55, Lanternfish: 45 } },
 		{ name: "Volcano", price: 15.6e9, hatch: 180, odds: { Lanternfish: 25, Lionfish: 55, Dragonfish: 20 } },
 		{ name: "Crystal", price: 830e9, hatch: 180, odds: { Dragonfish: 55, WolfDogfish: 45 } },
-		{ name: "Cosmic", price: 1.8e12, hatch: 180, odds: { WolfDogfish: 25, Hammerhead: 55, MiniLeviathan: 20 } },
+		{ name: "Cosmic", price: 1.8e12, hatch: 180, odds: { WolfDogfish: 25, BunnyShark: 55, MiniLeviathan: 20 } },
 	],
 	// Rebirth n: Lagoon, Neon Coral, Pirate Wreck, Atlantis, Mariana Trench, Volcanic Temple, Crystal Caverns, Cosmic Sanctuary
 	REBIRTHS: [
