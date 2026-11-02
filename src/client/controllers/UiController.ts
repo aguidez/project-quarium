@@ -1,12 +1,13 @@
 import { GamePass } from "shared/types/gamepasses";
 import React from "@rbxts/react";
 import { createRoot, Root } from "@rbxts/react-roblox";
-import { ContentProvider, Players, RunService } from "@rbxts/services";
+import { ContentProvider, Players } from "@rbxts/services";
 import { t } from "@rbxts/t";
 import { Lifecycle } from "shared/framework";
 import { EggHatch, getRemoteEvent, Reward } from "shared/network";
 import { COMPANION_TYPES, CompanionType } from "shared/types/companions";
 import { EGG_TYPES, EggType } from "shared/types/eggs";
+import { ADMIN_PANEL_ATTRIBUTE } from "shared/types/admin";
 import { GameEventType } from "shared/types/events";
 import { Feature } from "shared/types/features";
 import { FISH_TYPES, FishType } from "shared/types/fish";
@@ -85,6 +86,7 @@ class UiControllerSingleton implements Lifecycle {
 		LikeBoardController.onOwnBoostChanged(() => this.render());
 		Players.LocalPlayer.GetAttributeChangedSignal("TestSpeed").Connect(() => this.render());
 		Players.LocalPlayer.GetAttributeChangedSignal("TestNoPasses").Connect(() => this.render());
+		Players.LocalPlayer.GetAttributeChangedSignal(ADMIN_PANEL_ATTRIBUTE).Connect(() => this.render());
 		// The quest boost pill shows / hides as the boost starts or ends (it counts down by itself)
 		Players.LocalPlayer.GetAttributeChangedSignal(BOOST_SECONDS_ATTRIBUTE).Connect(() => {
 			if (this.isQuestBoosted() !== this.questBoosted) this.render();
@@ -182,10 +184,15 @@ class UiControllerSingleton implements Lifecycle {
 				onRebirth: () => this.actionRemote.FireServer("Rebirth"),
 				// Intent only: the server shows Roblox's prompt; the pass comes from Roblox, never from the client
 				onBuyPass: (pass: GamePass) => this.actionRemote.FireServer("BuyGamePass", pass),
-				// Studio test button: the server also refuses it outside Studio
-				onTestEvent: RunService.IsStudio()
-					? (eventType: GameEventType) => this.actionRemote.FireServer("StartTestEvent", eventType)
-					: undefined,
+				// Admin panel: only when the server allows it (AdminService), which checks every action again
+				admin:
+					Players.LocalPlayer.GetAttribute(ADMIN_PANEL_ATTRIBUTE) === true
+						? {
+								onStartEvent: (eventType: GameEventType) =>
+									this.actionRemote.FireServer("AdminStartEvent", eventType),
+								onStopEvent: () => this.actionRemote.FireServer("AdminStopEvent"),
+							}
+						: undefined,
 			}),
 		);
 	}

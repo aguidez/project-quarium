@@ -10,9 +10,10 @@ import {
 	GameEventType,
 	getActiveEvent,
 	getBeatLength,
+	GUEST_DANCE_JOINTS,
 	isEventImmune,
 } from "shared/types/events";
-import { STAGE_COLORS } from "client/ui/theme";
+import { EVENT_BANNER_STYLES } from "client/ui/theme";
 import { AudioController } from "./AudioController";
 import { FishAnimationController } from "./FishAnimationController";
 
@@ -31,6 +32,21 @@ const NOTE_TIME = 1.6;
 const NOTE_RISE = 6; // studs
 const NOTE_DRIFT = 3.5;
 const NOTE_SIZE = 2.6; // studs
+// Dancing guests (GUEST_DANCE_JOINTS)
+// The instrument's dance (the crab's saxophone, pivot at its middle): HOLD_BEATS on its side swaying once, then a trip
+// of CARRY_BEATS to the other side, low across the belly and tipped flat, its top leading (never up past the face),
+// HOLD_BEATS there, and back. Rolls are on the guest's facing axis, negative = its top toward the guest's right side
+const HOLD_BEATS = 2;
+const CARRY_BEATS = 2;
+const HOLD_SWAY = math.rad(12); // the lean outward on the beat while it stays on a side
+const SIDE_TILT = math.rad(28); // roll on the other side: the mirror of its tilt on its own side
+const CARRY_TIP = math.rad(90); // extra roll in the middle of a trip, toward where it goes
+const CARRY_DIP = 0.85; // studs lower in the middle of a trip: under the face
+const ROCK_ANGLE = math.rad(6); // the body rocks on the groove
+const BOB_HEIGHT = 0.3; // studs: up between the beats, down on them
+const SCUTTLE_HEIGHT = 0.12; // studs: little hops while walking
+const SCUTTLE_RATE = 16; // rad/s of those hops
+const WALKING_SPEED = 0.3; // studs/s: faster than this, the guest is walking
 const SPARKLE_TEXTURE = "rbxasset://textures/particles/sparkles_main.dds";
 
 type BeatListener = (beat: number) => void;
@@ -39,6 +55,17 @@ type EventListener = (event: ActiveEvent | undefined) => void;
 interface Guest {
 	body: BasePart;
 	light: PointLight;
+	/** Its event's stage colours (the banner's accents), cycled on the beat. */
+	colors: Color3[];
+	/** A guest with dance joints (GUEST_DANCE_JOINTS: the saxophone crab); `last` is its position a frame ago. */
+	dance?: { body: Motor6D; sway: Motor6D; arms: DanceArm[]; last: Vector3 };
+}
+
+/** An arm kept between its shoulder (the motor's pivot on the hips) and the grip it holds on the instrument. */
+interface DanceArm {
+	motor: Motor6D;
+	part: BasePart;
+	grip: Attachment;
 }
 
 /**
@@ -78,7 +105,10 @@ class MusicEventControllerSingleton implements Lifecycle {
 	public onStart() {
 		print("[Client] MusicEventController started.");
 		this.refreshEvent(); // already running when joining
-		RunService.RenderStepped.Connect(() => this.followBeat());
+		RunService.RenderStepped.Connect((dt) => {
+			this.followBeat();
+			this.animateDancers(dt);
+		});
 	}
 
 	/** The running event (undefined when none); listeners are told when it starts / ends. */
@@ -131,8 +161,8 @@ class MusicEventControllerSingleton implements Lifecycle {
 
 	private playBeat(beat: number) {
 		FishAnimationController.pulse();
-		const color = STAGE_COLORS[beat % STAGE_COLORS.size()];
 		for (const [, guest] of this.guests) {
+			const color = guest.colors[beat % guest.colors.size()];
 			this.flashLight(guest, color);
 			this.emitWave(guest, color);
 			this.emitNote(guest, beat, color);
@@ -154,10 +184,11 @@ class MusicEventControllerSingleton implements Lifecycle {
 
 		const janitor = new Janitor();
 		this.guestJanitors.set(instance, janitor);
+		const colors = EVENT_BANNER_STYLES[eventType].accents;
 
 		// Coloured stage light: lights up the tank around the guest, flashing on the beat
 		const light = janitor.Add(new Instance("PointLight"));
-		light.Color = STAGE_COLORS[0];
+		light.Color = colors[0];
 		light.Brightness = LIGHT_BRIGHTNESS;
 		light.Range = LIGHT_RANGE;
 		light.Shadows = false;
@@ -167,9 +198,9 @@ class MusicEventControllerSingleton implements Lifecycle {
 		const sparkles = janitor.Add(new Instance("ParticleEmitter"));
 		sparkles.Texture = SPARKLE_TEXTURE;
 		sparkles.Color = new ColorSequence([
-			new ColorSequenceKeypoint(0, STAGE_COLORS[0]),
-			new ColorSequenceKeypoint(0.5, STAGE_COLORS[2]),
-			new ColorSequenceKeypoint(1, STAGE_COLORS[3]),
+			new ColorSequenceKeypoint(0, colors[0]),
+			new ColorSequenceKeypoint(0.5, colors[2]),
+			new ColorSequenceKeypoint(1, colors[3]),
 		]);
 		sparkles.LightEmission = 1;
 		sparkles.LightInfluence = 0;
@@ -188,13 +219,104 @@ class MusicEventControllerSingleton implements Lifecycle {
 		sparkles.ShapeStyle = Enum.ParticleEmitterShapeStyle.Surface;
 		sparkles.Parent = body;
 
-		this.guests.set(instance, { body, light });
+		const danceBody = instance.FindFirstChild(GUEST_DANCE_JOINTS.body, true);
+		const sway = instance.FindFirstChild(GUEST_DANCE_JOINTS.sway, true);
+		const dance =
+			danceBody?.IsA("Motor6D") && sway?.IsA("Motor6D")
+				? { body: danceBody, sway, arms: this.findDanceArms(instance), last: body.Position }
+				: undefined;
+		this.guests.set(instance, { body, light, colors, dance });
 		janitor.Add(() => this.guests.delete(instance), true);
+	}
+
+	/** The arms of a dancing guest: `Arm` motors whose `Grip` value points at an Attachment (see GUEST_DANCE_JOINTS). */
+	private findDanceArms(guest: Model): DanceArm[] {
+		const arms = new Array<DanceArm>();
+		for (const motor of guest.GetDescendants()) {
+			if (!motor.IsA("Motor6D") || motor.Name !== GUEST_DANCE_JOINTS.arm || !motor.Part1) continue;
+			const grip = motor.FindFirstChild(GUEST_DANCE_JOINTS.grip);
+			const target = grip?.IsA("ObjectValue") ? grip.Value : undefined;
+			if (target?.IsA("Attachment")) arms.push({ motor, part: motor.Part1, grip: target });
+		}
+		return arms;
 	}
 
 	private untrackGuest(instance: Instance) {
 		this.guestJanitors.get(instance)?.Destroy();
 		this.guestJanitors.delete(instance);
+	}
+
+	/**
+	 * Dancing guests, every frame on the track's beat: the instrument goes from one side of the body to the other and
+	 * back (getCarryPose), the body rocks and dips on every beat, with little hops while it walks; the arms follow the
+	 * instrument from the shoulders. Local only: the server just moves the root.
+	 */
+	private animateDancers(dt: number) {
+		const config = this.event?.config;
+		const music = this.music;
+		const playing = config?.kind === "Music" && music !== undefined && music.IsPlaying;
+		const beat = playing ? (music.TimePosition - config.beatOffset) / getBeatLength(config) : 0;
+		for (const [, guest] of this.guests) {
+			const dance = guest.dance;
+			if (!dance) continue;
+			const position = guest.body.Position;
+			const walking = dt > 0 && position.sub(dance.last).Magnitude / dt > WALKING_SPEED;
+			dance.last = position;
+			// At rest (track not playing yet) the instrument stays on its own side
+			const rock = playing ? ROCK_ANGLE * math.cos((math.pi * beat) / 2) : 0;
+			const lift = playing ? BOB_HEIGHT * math.abs(math.sin(math.pi * beat)) : 0;
+			const hop = playing && walking ? SCUTTLE_HEIGHT * math.abs(math.sin(os.clock() * SCUTTLE_RATE)) : 0;
+			dance.body.Transform = new CFrame(0, lift + hop, 0).mul(CFrame.Angles(0, 0, rock));
+			const sway = playing ? this.getCarryPose(beat, dance.sway.C0.Position.X) : new CFrame();
+			dance.sway.Transform = sway;
+			this.reachGrips(dance.sway, sway, dance.arms);
+		}
+	}
+
+	/**
+	 * The instrument's offset from its rest pose (its own side, `side` studs from the middle of the hips) at this beat:
+	 * a stay on its side, a trip across, a stay on the other side, a trip back (HOLD_BEATS / CARRY_BEATS).
+	 */
+	private getCarryPose(beat: number, side: number): CFrame {
+		const cycle = 2 * (HOLD_BEATS + CARRY_BEATS);
+		const t = ((beat % cycle) + cycle) % cycle;
+		const smooth = (x: number) => x * x * (3 - 2 * x);
+		let across = 0; // 0 on its own side, 1 on the other one
+		let heading = 0; // +1 on the way over, -1 on the way back
+		let lean = 0; // the stay's sway, outward
+		if (t < HOLD_BEATS) {
+			lean = -HOLD_SWAY * math.sin((math.pi * t) / HOLD_BEATS);
+		} else if (t < HOLD_BEATS + CARRY_BEATS) {
+			across = smooth((t - HOLD_BEATS) / CARRY_BEATS);
+			heading = 1;
+		} else if (t < 2 * HOLD_BEATS + CARRY_BEATS) {
+			across = 1;
+			lean = HOLD_SWAY * math.sin((math.pi * (t - HOLD_BEATS - CARRY_BEATS)) / HOLD_BEATS);
+		} else {
+			across = 1 - smooth((t - 2 * HOLD_BEATS - CARRY_BEATS) / CARRY_BEATS);
+			heading = -1;
+		}
+		const trip = math.sin(math.pi * across); // 0 on the sides, 1 halfway
+		const roll = SIDE_TILT * across + heading * CARRY_TIP * trip + lean;
+		return new CFrame(-2 * side * across, -CARRY_DIP * trip, 0).mul(CFrame.Angles(0, 0, roll));
+	}
+
+	/**
+	 * Turns and stretches each arm (a cylinder along its X axis, pivot at the shoulder end) to reach its grip, worked out
+	 * in the hips' space from the joints themselves (reading the parts' CFrames would lag a frame behind).
+	 */
+	private reachGrips(sway: Motor6D, transform: CFrame, arms: DanceArm[]) {
+		const instrument = sway.C0.mul(transform).mul(sway.C1.Inverse()); // the instrument's root, in the hips' space
+		for (const arm of arms) {
+			const grip = instrument.mul(arm.grip.CFrame).Position;
+			const reach = arm.motor.C0.PointToObjectSpace(grip); // from the shoulder
+			const length = reach.Magnitude;
+			if (length < 0.05) continue;
+			const size = arm.part.Size;
+			arm.part.Size = new Vector3(length, size.Y, size.Z);
+			arm.motor.C1 = new CFrame(-length / 2, 0, 0);
+			arm.motor.Transform = CFrame.lookAt(Vector3.zero, reach).mul(CFrame.Angles(0, math.pi / 2, 0));
+		}
 	}
 
 	private flashLight(guest: Guest, color: Color3) {

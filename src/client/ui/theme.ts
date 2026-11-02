@@ -1,6 +1,7 @@
 // Shared UI tokens, taken from the FigCraft design (design/ui/shopbar.figcraft).
 
 import { EggType } from "shared/types/eggs";
+import type { GameEventType } from "shared/types/events";
 import type { AquariumTheme } from "shared/types/rebirths";
 import { FishRarity, FishType, FISH_TYPES } from "shared/types/fish";
 import { FishVariant } from "shared/types/variants";
@@ -374,7 +375,19 @@ export const EVENT_COLORS = {
 	bannerTop: Color3.fromHex("#3A1466"),
 	bannerBottom: Color3.fromHex("#14072A"),
 	subtitle: Color3.fromHex("#F3C6FF"),
-	testButtonBg: Color3.fromHex("#0D1D26"),
+};
+
+/** Island Breeze (music event): a sunny lagoon banner, stage colours of the beach (cycled on the beat). */
+export const ISLAND_COLORS = {
+	bannerTop: Color3.fromHex("#0F7C93"),
+	bannerBottom: Color3.fromHex("#06334A"),
+	subtitle: Color3.fromHex("#FFF0A6"),
+	stage: [
+		Color3.fromHex("#FFD23F"), // sun yellow
+		Color3.fromHex("#FF7A59"), // coral
+		Color3.fromHex("#2EE6C9"), // lagoon turquoise
+		Color3.fromHex("#FF5FA2"), // hibiscus pink
+	],
 };
 
 /** Abyssal raid: banner, the tanks' abyss backdrop and the lantern fish (AbyssEventController). */
@@ -428,13 +441,25 @@ export const UFO_COLORS = {
 	sleep: Color3.fromHex("#BFD8FF"),
 };
 
-/** Look of the event banner, per kind of event: music events flash on the beat, the raid glows slowly. */
-export const EVENT_BANNER_STYLES = {
-	Music: {
+/**
+ * Look of the event banner, per event: music events flash on the beat through their accents (also the stage colours of
+ * their guest, MusicEventController), the raids glow slowly from one accent to the other.
+ */
+export const EVENT_BANNER_STYLES: Record<
+	GameEventType,
+	{ top: Color3; bottom: Color3; subtitle: Color3; accents: Color3[] }
+> = {
+	Kpop: {
 		top: EVENT_COLORS.bannerTop,
 		bottom: EVENT_COLORS.bannerBottom,
 		subtitle: EVENT_COLORS.subtitle,
 		accents: STAGE_COLORS,
+	},
+	Island: {
+		top: ISLAND_COLORS.bannerTop,
+		bottom: ISLAND_COLORS.bannerBottom,
+		subtitle: ISLAND_COLORS.subtitle,
+		accents: ISLAND_COLORS.stage,
 	},
 	Abyss: {
 		top: ABYSS_COLORS.bannerTop,

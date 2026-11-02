@@ -99,6 +99,7 @@ interface PuffTarget {
 	strength: number;
 	base: Vector3;
 	applied?: Vector3; // size set by the last puff frame, undefined at rest
+	stretch?: Vector3; // the puff in `applied` (× base), to take it back out of a size someone else scaled
 }
 
 /** 0 at rest, quick swell to 1, slower deflate back to 0. */
@@ -560,16 +561,21 @@ class FishAnimationControllerSingleton implements Lifecycle {
 
 		for (const [fish, target] of this.puffTargets) {
 			const mesh = target.mesh;
-			// Size changed by someone else (the server growing the fish, or first frame): new rest size
-			if (target.applied === undefined || mesh.Size !== target.applied) target.base = mesh.Size;
+			// Size changed by someone else (growth, the alien fish's scream, or first frame): new rest size. Those use
+			// Model.ScaleTo, which scales the puffed size: take the puff back out, or it would add up frame after frame
+			if (target.applied === undefined || mesh.Size !== target.applied) {
+				target.base = target.applied !== undefined && target.stretch ? mesh.Size.div(target.stretch) : mesh.Size;
+			}
 			if (!this.puffing) {
 				mesh.Size = target.base;
 				target.applied = undefined;
+				target.stretch = undefined;
 				continue;
 			}
 			const amount = fish.GetAttribute("Dead") === true ? 0 : envelope * target.strength;
 			const girth = 1 + PUFF_GIRTH * amount;
-			mesh.Size = target.base.mul(new Vector3(girth, girth, 1 + PUFF_LENGTH * amount));
+			target.stretch = new Vector3(girth, girth, 1 + PUFF_LENGTH * amount);
+			mesh.Size = target.base.mul(target.stretch);
 			target.applied = mesh.Size;
 		}
 	}

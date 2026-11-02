@@ -4,7 +4,7 @@ import { EggHatch, Reward } from "shared/network";
 import { SfxName } from "shared/sounds";
 import { CompanionType } from "shared/types/companions";
 import { EggType } from "shared/types/eggs";
-import { ActiveEvent, GameEventType, TEST_EVENT_ORDER } from "shared/types/events";
+import { ActiveEvent, GameEventType } from "shared/types/events";
 import { Feature } from "shared/types/features";
 import { FishType } from "shared/types/fish";
 import { isOnboardingDone, STORY_QUEST_HINT_DELAY } from "shared/types/onboarding";
@@ -16,7 +16,8 @@ import { hasClaimableOceanReward, OceanRewardId } from "shared/types/oceanReward
 import { AQUARIUM_THEMES, formatMultiplier, getNextRebirth } from "shared/types/rebirths";
 import { CompanionPanel } from "./CompanionPanel";
 import { EggReveal } from "./EggReveal";
-import { EventBanner, TestEventButton } from "./EventBanner";
+import { AdminPanel } from "./AdminPanel";
+import { EventBanner } from "./EventBanner";
 import { FishIndexPanel } from "./FishIndexPanel";
 import { AquariumPanel } from "./AquariumPanel";
 import { CosmeticId } from "shared/types/cosmetics";
@@ -38,6 +39,10 @@ const MIN_SCALE = 0.4;
 const SIDE_MARGIN = 16; // gap kept between the bar and Roblox's topbar buttons
 const BAR_GAP = 6; // kept under the shop bar (the top of the free screen area)
 const EVENT_BANNER_GAP = 10; // under the top HUD
+// Admin button: bottom-left, above FocusController's "Back to lobby" button (16 px margin + 50 px high + 6 px bevel)
+const ADMIN_BUTTON_SIZE = new Vector2(150, 50);
+const ADMIN_BUTTON_MARGIN = 16;
+const ADMIN_BUTTON_BOTTOM = 82;
 const CUSTOMIZE_SIZE = new Vector2(200, 50);
 // "Aquarium full" reminder (opening a ready egg with no room): shown this long, at most once per cooldown,
 // and never again in the session once the player has released a fish (they know the way)
@@ -72,8 +77,8 @@ export interface AppProps {
 	onSetTitle: (title: TitleChoice) => void;
 	/** The owner's test modes ("/speed", "/passes off" in Studio), shown so they are never forgotten; undefined for everyone else. */
 	testMode?: string;
-	/** Starts a test event; only given in Studio (the server ignores it elsewhere). */
-	onTestEvent?: (eventType: GameEventType) => void;
+	/** The admin panel's intents, only given when the server allows this player (AdminService checks them again). */
+	admin?: { onStartEvent: (eventType: GameEventType) => void; onStopEvent: () => void };
 	onClaimQuest: (questId: string) => void;
 	onEquipCompanion: (companionType: CompanionType) => void;
 	onUnequipCompanion: (companionType: CompanionType) => void;
@@ -86,7 +91,7 @@ export interface AppProps {
 	shopNearby: boolean;
 }
 
-type MenuPanel = "Quests" | "Companions" | "FishIndex" | "Ocean" | "Rebirth" | "Shop" | "Aquarium";
+type MenuPanel = "Quests" | "Companions" | "FishIndex" | "Ocean" | "Rebirth" | "Shop" | "Aquarium" | "Admin";
 
 interface BarPlacement {
 	centerX: number;
@@ -261,15 +266,18 @@ export function App(props: AppProps) {
 					subscribeBeat={props.subscribeBeat}
 				/>
 			)}
-			{props.onTestEvent &&
-				TEST_EVENT_ORDER.map((eventType, index) => (
-					<TestEventButton
-						key={`Test${eventType}`}
-						eventType={eventType}
-						index={index}
-						onClick={() => props.onTestEvent?.(eventType)}
-					/>
-				))}
+			{props.admin && (
+				<Button3D
+					key="AdminButton"
+					palette={PALETTES.purple}
+					size={UDim2.fromOffset(ADMIN_BUTTON_SIZE.X, ADMIN_BUTTON_SIZE.Y)}
+					position={new UDim2(0, ADMIN_BUTTON_MARGIN, 1, -ADMIN_BUTTON_BOTTOM)}
+					anchorPoint={new Vector2(0, 1)}
+					zIndex={3}
+					text="ADMIN"
+					onClick={() => setOpenPanel(openPanel === "Admin" ? undefined : "Admin")}
+				/>
+			)}
 			{likeBoosted && (
 				<LikeBoostPill
 					key="LikeBoost"
@@ -453,6 +461,15 @@ export function App(props: AppProps) {
 						setOpenPanel(undefined);
 						props.onRebirth();
 					}}
+					onClose={() => setOpenPanel(undefined)}
+				/>
+			)}
+			{props.admin && openPanel === "Admin" && (
+				<AdminPanel
+					key="AdminPanel"
+					event={props.event}
+					onStartEvent={props.admin.onStartEvent}
+					onStopEvent={props.admin.onStopEvent}
 					onClose={() => setOpenPanel(undefined)}
 				/>
 			)}

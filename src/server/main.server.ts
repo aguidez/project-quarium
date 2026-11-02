@@ -1,5 +1,6 @@
 import { bootstrap } from "shared/framework";
 import { AbyssService } from "./services/AbyssService";
+import { AdminService } from "./services/AdminService";
 import { AquariumService } from "./services/AquariumService";
 import { CoinService } from "./services/CoinService";
 import { CompanionService } from "./services/CompanionService";
@@ -34,6 +35,7 @@ bootstrap([
 	AbyssService,
 	UfoService,
 	EventService,
+	AdminService,
 	CompanionService,
 	QuestService,
 	OceanService,

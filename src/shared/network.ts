@@ -27,7 +27,8 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
 	/**
 	 * "BuyEgg" | "OpenEgg" (payload: EggType) | "SetFocus" (payload: boolean, 2.5D view entered / left)
-	 * | "RequestSync" (no payload) | "StartTestEvent" (payload: GameEventType, Studio only)
+	 * | "RequestSync" (no payload) | "AdminStartEvent" (payload: GameEventType) | "AdminStopEvent" (no payload)
+	 *   (admin panel, see AdminService: refused without its right)
 	 * | "ClaimQuest" (payload: quest id) | "EquipCompanion" | "UnequipCompanion" (payload: CompanionType)
 	 * | "ReleaseFish" (payload: FishType) | "FinishTutorial" (payload: Feature)
 	 * | "WatchAquariums" (payload: PlotIndex[]: the tanks this client renders, see FishService)

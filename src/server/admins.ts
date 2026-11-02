@@ -1,3 +1,5 @@
+import { RunService } from "@rbxts/services";
+
 /**
  * Who may use the admin commands (events for every server...). Checked on the server, every time a
  * command runs: never trust anything the client says about it.
@@ -16,4 +18,12 @@ export function isGameOwner(player: Player): boolean {
 
 export function isAdmin(player: Player): boolean {
 	return isGameOwner(player) || ADMIN_USER_IDS.includes(player.UserId);
+}
+
+/**
+ * Who may open the admin panel (AdminService). For now everyone in a Studio playtest, never on a live server;
+ * for the release it becomes `isAdmin(player)`.
+ */
+export function canUseAdminPanel(_player: Player): boolean {
+	return RunService.IsStudio();
 }

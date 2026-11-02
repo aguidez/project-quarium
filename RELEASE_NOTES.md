@@ -10,6 +10,33 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.51 — 2026-11-02
+
+**New**
+- **Island Breeze**, a new music event that comes back regularly (one minute): a sunny island track, a turquoise and
+  yellow banner, and your fish dance to the beat. On the accented beats coins fall from your fish, more and more as
+  the song goes on, and for the finale every fish drops a coin at once. On average every fish earns twice its coins
+  during the minute, early in the game as late. Its guest star, a coral crab playing a golden saxophone, comes
+  into every aquarium: it walks sideways on the sand near the glass, always facing you, and dances on the beat,
+  passing its saxophone from one side of its body to the other.
+
+**Changes**
+- Behind the scenes, an **admin panel** replaces the four event test buttons (Studio playtests only for now): a
+  purple ADMIN button opens it, with one tab per kind of tool. Its first tab, Events, shows the event running (time
+  left, STOP) and starts any event. It is ready to be opened to the game's admins for the release.
+- Each music event now has its own stage colours (banner, the guest's lights, sparkles and music notes).
+- With three events in the draw instead of two, the abyssal raid and the UFO night come a little less often.
+
+**Balance**
+- Island Breeze is worth about one minute of income per event at every stage of the game (coins x2 for its minute),
+  unlike the K-pop event (admin only), whose beat coins grow with the slow late-game fish.
+
+**Fixes**
+- During a music event, the Alien Fish could grow bigger than its aquarium: its scream and the dance on the beat added
+  up their swelling instead of taking turns. A fish growing up during a music event had the same, smaller, problem.
+
+---
+
 ## V0.50 — 2026-11-02
 
 **Changes**

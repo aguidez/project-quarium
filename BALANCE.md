@@ -3,7 +3,7 @@
 > The game's balance: what an average player reaches after how long, and why. **Update it in the same task whenever a
 > number of the economy changes** (fish income, eggs, odds, rebirths, Ocean milestones, variants, food, capacity,
 > companions…): run the simulators, copy their results here, add a line to the history (§6).
-> Last updated: 2026-11-02 (V0.50: the V1 plan's tables, now duplicates of §2–§3, folded into §4 / §5; V0.49: UFO night).
+> Last updated: 2026-11-02 (V0.51: Island Breeze, a recurring music event paced on each fish's income; V0.50: the V1 plan's tables folded into §4 / §5).
 
 
 **Where the numbers live**: `src/shared/types/fish.ts` (species), `eggs.ts` (eggs), `rebirths.ts` (rebirths),
@@ -41,7 +41,7 @@ Options: `--players 300` (faster, noisier), a JSON of overrides (`'{"P":{"coinBo
   species in **~2h29** (2h13–2h43), x5 ~3h00. Coins x6 alone are not enough (~3h50): hatching and the Ocean milestones
   then hold the game back.
 - **Not modelled**: AFK time (coins and hunger stop while away), companions' extra pick-ups, the like boost (x2),
-  events (Abyss x1.5, K-pop beat coins, the UFO night's mutations and Alien Fish: §3 Easter eggs). The story quests' money and points are modelled (Voyage, Hatchery, Collector, Ocean lines). They all make real
+  events (Island Breeze x2 coins, Abyss x1.5, K-pop beat coins, the UFO night's mutations and Alien Fish: §3 Easter eggs). The story quests' money and points are modelled (Voyage, Hatchery, Collector, Ocean lines). They all make real
   players a bit faster than the simulator; the spread between players (p10–p90 below) is wider than these effects.
 - **Gamepasses are never part of the model** (§5.10).
 
@@ -152,13 +152,26 @@ simulator's medians move by less than the noise). Neither is one of the 18 speci
 
 **The UFO night** (V0.49, recurring with the Abyss, one minute; not in the simulator): 4–5 kidnappings per tank, each
 fish once. Per kidnapping the expected effect is tiny: green (55 %) +1 fish-minute of coins, red (20 %) −0.5, asleep
-(20 %) −1, so **+0.25 fish-minute** on average, ~+1 fish-minute per night: noise. A recurring event every ~11 min
-picks one of the two recurring events, so a UFO night every ~22 min of a server's life, ~2.7 an hour: over a 12 h
-run ~32 nights, ~145 kidnappings, **~6.5 better variants** (mostly Normal → Anomaly on fish soon replaced) and
-**~0.7 Alien Fish** (about one player in two meets one). The Alien Fish takes one slot (−1/25 of a full tank) but its
+(20 %) −1, so **+0.25 fish-minute** on average, ~+1 fish-minute per night: noise. A recurring event every ~12 min
+(~11 min of clock + the minute itself) picks one of the three recurring events, so a UFO night every ~36 min of a
+server's life, ~1.7 an hour: over a 12 h run ~20 nights, ~90 kidnappings, **~4 better variants** (mostly Normal →
+Anomaly on fish soon replaced) and **~0.45 Alien Fish** (about one player in two or three meets one). The Alien Fish takes one slot (−1/25 of a full tank) but its
 scream adds one coin of every fish every 30 s: + interval / 30 of the tank's income, **+17 % to +100 %** (4–5 s fish to
 30 s ones), more for a late-game tank (Mythics drop every 15–30 s). A lucky bonus, like the French Fish, that a player
 keeps; it is rare enough not to be part of the reference curve.
+
+**Music events: K-pop vs Island Breeze** (`events.ts` `beatCoins`; not in the simulator). The K-pop (admin only) gives
+every fish the same 20 % chance on each of its 130 beats a minute, ~26 extra coins per fish per minute whatever its pace:
+coins x(1 + 26 x interval / 60) for its minute, **+1.7 min of income** for a 4 s Guppy, +4.3 for a 10 s fish, +8.7 for
+20 s, **+13 min for a 30 s Mythic**. The later the game, the bigger the gift: recurring, it would add ~+40 % to a
+late-game hour, which is why it stays an admin event. **Island Breeze** (recurring, 124 BPM, 60 s) paces the coins on
+each fish's own interval: on every other beat (the track's accented backbeat, every 0.97 s) each fish drops its coin
+with chance boost x 0.97 s / its payout interval (variant included), the boost growing 0.5 → 1.5 over the minute
+(average 1), so **coins x2 on average (x1.5 at the start, x2.5 at the end) for every fish at every stage: +1 min of
+income**. The finale (~57 s) drops every fish's coin at once: + one interval of income, +4 s (Guppy) to +30 s (Mythic).
+Total **+1.1 to +1.5 min of income per event**; at ~1.7 an hour, +2 to +2.5 min an hour (**+3 to +4 %** while
+playing), less than the p10–p90 spread of the reference run. Studio check (V0.51, an 11-fish rebirth-5 tank): ~37 coins
+per 20 s before, 62 / 68 / 91 in the event's three 20 s thirds (x2.0 on the minute), finale 10 coins on one beat.
 
 ### Eggs (`eggs.ts`)
 
@@ -563,3 +576,4 @@ content (species, eggs, aquariums, capacity, companions themselves) away from fr
 | V0.46 | ROADMAP M7, live: side lines Hatchery (100 / 300 / 600 / 900 / 1,200 fish hatched → 2 min of income each, the last one the Golden Incubator), Collector (first Anomaly → 2 min, 10 cells → 2 min, first Ghost → 3 min, 25 cells → 2,500 points, first Shiny → 2,500 points, 50 cells → title; the plan's 250 / 750 / 2,500 points dropped after simulation), Ocean (50 fish released → 3 min); daily / weekly quests rewarded by a **coin boost** (x2 for 5 min a daily, 15 min a weekly, runs only while the tank produces). The reference player becomes **1 h a day with the dailies** (simulator `P.hoursPerDay` 1, the side lines in `SIDE_QUESTS`); rebirths 3–8 and their eggs x1.45 (65M / 175M / 7.4B / 19B / 1T / 2.2T, eggs 78M / 210M / 8.9B / 23B / 1.2T / 2.6T) | 1 h a day: rebirth 1 ~25 min, rebirth 2 ~1h21, rebirth 3 ~2h37, rebirth 8 ~10h53, all eighteen species **~12h13** (11h33–12h56), day 13; without the price change it was ~9h46. 3 h a day ~13h55, one long session ~15h22. Golden Incubator after the end for 2 players in 3 |
 | V0.48 | Daily quests from rebirth 2, weekly ones from rebirth 3 (the owner's choice: the first hours on the story quests); not re-tuned. Simulator `P.dailyFromRebirth` / `weeklyFromRebirth` | 1 h a day: rebirth 2 ~1h21 → ~1h32, rebirth 3 ~2h37 → ~2h47, rebirth 8 ~10h53 → ~11h05, all eighteen species **~12h13 → ~12h31** (11h39–13h12), still day 13 |
 | V0.49 | UFO night (recurring event, not modelled): mutations x2 / x0.5 / asleep for a minute (+0.25 fish-minute per kidnapping on average), 4.5 % a better variant, 0.5 % the Alien Fish (no coin, its scream: one coin from every other fish every 30 s, 500 points, stays) | Unchanged (events are not in the simulator); expected ~6.5 better variants and ~0.7 Alien Fish per 12 h run, the alien worth +17 % to +100 % of the tank's income while it stays |
+| V0.51 | Island Breeze (recurring music event, not modelled): 124 BPM, coins on every other beat with chance boost x 0.97 s / the fish's payout interval, boost 0.5 → 1.5, finale (every fish's coin once, ~57 s) | Unchanged (events are not in the simulator): x2 coins for the minute at every stage, +1.1 to +1.5 min of income per event, +3 to +4 % while playing. Three recurring events instead of two: UFO nights ~2.7 → ~1.7 an hour (~4 better variants, ~0.45 Alien Fish per 12 h run) |

@@ -67,6 +67,13 @@ const MIN_SCALE = 0.05;
 const PERFORM_CHANCE = 0.4;
 const PERFORM_TIME_MIN = 1.5;
 const PERFORM_TIME_MAX = 3;
+// Walking guest (the saxophone crab): on the sand, on a lane near the glass, always facing it, stepping sideways
+const WALK_SPEED = 2.2; // studs/s
+const WALK_LANE = 0.35; // fraction of the tank's half depth between its middle and the lane, toward the glass
+const WALK_MARGIN = 1.5; // studs kept from the side glasses
+const WALK_STEP_MIN = 3; // studs: never a shuffle on the spot
+const WALK_PAUSE_MIN = 0.8; // seconds dancing on a spot before the next step
+const WALK_PAUSE_MAX = 3;
 /** Longest sleep of the beat loop, so guests show up quickly in the tank of a player who just joined. */
 const MAX_LOOP_WAIT = 0.25;
 
@@ -117,11 +124,6 @@ class EventServiceSingleton implements Lifecycle {
 		const eventTypes = new Array<GameEventType>();
 		for (const [eventType] of pairs(GAME_EVENTS)) eventTypes.push(eventType);
 		this.templates = loadTemplates(TAGS.EventFishTemplate, "EventType", eventTypes);
-
-		// Test buttons of the UI: Studio only (a live server ignores them), an admin event of this server only
-		DataService.registerAction("StartTestEvent", isEventType, (_player, eventType) => {
-			if (RunService.IsStudio()) this.startEvent(eventType, "Admin", GAME_EVENTS[eventType].duration);
-		});
 
 		// Immune until loaded and done with the tutorial
 		Players.PlayerAdded.Connect((player) => player.SetAttribute(EVENT_IMMUNE_ATTRIBUTE, true));
@@ -221,14 +223,12 @@ class EventServiceSingleton implements Lifecycle {
 		const scope = RunService.IsStudio() ? " (Studio: this server only)" : "";
 
 		if (argument === "stop") {
-			if (!this.current) {
+			const wasAdmin = this.current?.adminId !== undefined;
+			if (!this.stopRunningEvent()) {
 				DataService.notify(player, "No event is running.", "info");
 				return;
 			}
-			const adminId = this.current.adminId;
-			this.stopEvent();
-			if (adminId !== undefined) this.broadcastStop(adminId);
-			DataService.notify(player, `Event stopped${adminId !== undefined ? scope : ""}.`, "info");
+			DataService.notify(player, `Event stopped${wasAdmin ? scope : ""}.`, "info");
 			return;
 		}
 		const eventType = names.find((name) => name.lower() === argument) as GameEventType | undefined;
@@ -244,7 +244,23 @@ class EventServiceSingleton implements Lifecycle {
 		DataService.notify(player, `${GAME_EVENTS[eventType].displayName} started on every server${scope}.`, "info");
 	}
 
-	private startAdminEvent(eventType: GameEventType) {
+	/**
+	 * Ends the running event (the "/event stop" command, the admin panel): everywhere when it is an admin event, only
+	 * here when it is this server's recurring one. False when none runs.
+	 */
+	public stopRunningEvent(): boolean {
+		if (!this.current) return false;
+		const adminId = this.current.adminId;
+		this.stopEvent();
+		if (adminId !== undefined) this.broadcastStop(adminId);
+		return true;
+	}
+
+	/**
+	 * Starts an admin event on every server, replacing whatever runs ("/event <name>", the admin panel). In Studio it
+	 * only reaches the playtest server: a playtest never starts events on the live servers.
+	 */
+	public startAdminEvent(eventType: GameEventType) {
 		const id = HttpService.GenerateGUID(false);
 		const duration = GAME_EVENTS[eventType].duration;
 		this.startEvent(eventType, "Admin", duration, id);
@@ -367,6 +383,13 @@ class EventServiceSingleton implements Lifecycle {
 	private run(token: number, eventType: GameEventType, config: MusicEventConfig, startsAt: number, endsAt: number) {
 		const beatLength = getBeatLength(config);
 		const firstBeatAt = startsAt + config.beatOffset;
+		const coins = config.beatCoins;
+		// Paced coins: the finale is the last drop beat at least finaleLead seconds before the end
+		const finaleBeat =
+			coins.mode === "Paced"
+				? math.max(math.floor((endsAt - coins.finaleLead - firstBeatAt) / beatLength / coins.every), 0) * coins.every
+				: math.huge;
+		let finaleDone = false;
 		let beat = 0;
 
 		while (token === this.token) {
@@ -376,7 +399,15 @@ class EventServiceSingleton implements Lifecycle {
 
 			const beatAt = firstBeatAt + beat * beatLength;
 			if (now >= beatAt) {
-				FishService.dropBeatCoins(config.beatCoinChance);
+				if (coins.mode === "Flat") {
+					FishService.dropBeatCoins(coins.chance);
+				} else if (!finaleDone && beat >= finaleBeat) {
+					finaleDone = true; // even if a hitch skipped its exact beat
+					FishService.dropBeatCoins(1);
+				} else if (!finaleDone && beat % coins.every === 0) {
+					const boost = coins.boostFrom + ((coins.boostTo - coins.boostFrom) * beat) / finaleBeat;
+					FishService.dropPacedBeatCoins(boost * coins.every * beatLength);
+				}
 				// After a hitch, skip the missed beats instead of dropping them all at once
 				beat = math.floor((now - firstBeatAt) / beatLength) + 1;
 				continue;
@@ -426,17 +457,21 @@ class EventServiceSingleton implements Lifecycle {
 		const guest: GuestFish = { aquarium, model, body: model.PrimaryPart!, alive: true };
 		this.guests.set(aquarium, guest);
 
-		// Pops in at the middle of the tank, facing the glass's side
+		// Pops in at the middle of the tank facing the glass's side, or (walking) on the sand facing the glass. Placed
+		// from its full size: it pops in around its centre, so a walker's feet touch the sand once grown
+		const walks = (GAME_EVENTS[eventType] as MusicEventConfig).guestMove === "Walk";
 		const bounds = aquarium.waterBounds;
 		const center = bounds.min.add(bounds.max).div(2);
+		const start = walks ? this.walkSpot(guest, 0) : CFrame.lookAt(center, this.randomSwimPoint(guest));
 		model.ScaleTo(MIN_SCALE);
-		model.PivotTo(CFrame.lookAt(center, this.randomSwimPoint(guest)));
+		model.PivotTo(start);
 		CollectionService.AddTag(model, TAGS.EventFish); // dance & effects, client-side
 		model.Parent = aquarium.fishFolder;
 
 		task.spawn(() => {
 			scaleModel(model, MIN_SCALE, 1, ENTER_TIME, Enum.EasingStyle.Back);
-			this.swimLoop(guest);
+			if (walks) this.walkLoop(guest);
+			else this.swimLoop(guest);
 		});
 	}
 
@@ -507,6 +542,39 @@ class EventServiceSingleton implements Lifecycle {
 				task.wait(this.rng.NextNumber(PERFORM_TIME_MIN, PERFORM_TIME_MAX));
 			}
 			task.wait(this.rng.NextNumber(0.1, 0.6));
+		}
+	}
+
+	/** A spot on the walking lane (on the sand, near the glass, facing it), `lateral` studs right of the tank's middle. */
+	private walkSpot(guest: GuestFish, lateral: number): CFrame {
+		const frame = guest.aquarium.cframe;
+		const bounds = guest.aquarium.waterBounds;
+		const depth = (math.abs(bounds.max.sub(bounds.min).Dot(frame.LookVector)) / 2) * WALK_LANE;
+		const center = bounds.min.add(bounds.max).div(2);
+		const spot = center.add(frame.RightVector.mul(lateral)).add(frame.LookVector.mul(depth));
+		const floor = new Vector3(spot.X, bounds.min.Y + guest.body.Size.Y / 2, spot.Z);
+		return CFrame.lookAt(floor, floor.add(frame.LookVector));
+	}
+
+	/** Steps sideways like a crab from spot to spot of its lane, dancing a while on each (its dance is client-side). */
+	private walkLoop(guest: GuestFish) {
+		const body = guest.body;
+		const bounds = guest.aquarium.waterBounds;
+		const width = math.abs(bounds.max.sub(bounds.min).Dot(guest.aquarium.cframe.RightVector));
+		const range = math.max(width / 2 - WALK_MARGIN - body.Size.X / 2, 0);
+		let lateral = 0;
+		while (guest.alive) {
+			let goal = this.rng.NextNumber(-range, range);
+			// Too close to where it stands: the same distance the other way (or toward the far side near a glass)
+			if (math.abs(goal - lateral) < WALK_STEP_MIN) {
+				goal = math.clamp(lateral + (goal >= lateral ? WALK_STEP_MIN : -WALK_STEP_MIN), -range, range);
+				if (math.abs(goal - lateral) < WALK_STEP_MIN) goal = lateral > 0 ? -range : range;
+			}
+			const distance = math.abs(goal - lateral);
+			const stepInfo = new TweenInfo(distance / WALK_SPEED, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut);
+			this.playTween(guest, TweenService.Create(body, stepInfo, { CFrame: this.walkSpot(guest, goal) }));
+			lateral = goal;
+			task.wait(this.rng.NextNumber(WALK_PAUSE_MIN, WALK_PAUSE_MAX));
 		}
 	}
 }

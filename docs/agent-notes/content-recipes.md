@@ -1,6 +1,6 @@
 ---
 name: content-recipes
-description: "Step-by-step recipes to add a fish species, an aquarium theme, a companion or an egg (assets, config, balance, checks)"
+description: "Step-by-step recipes to add a fish species, an aquarium theme, a companion, an egg or a music event (assets, config, balance, checks)"
 metadata:
   type: project
 ---
@@ -51,3 +51,24 @@ BALANCE.md is updated (CLAUDE.md §0c). Asset quirks: [[fish-asset-pipeline]].
 
 Sprite (design/ui/eggs.build.js → PNG ×2 through FigCraft or resvg → upload), `EggType`, `EGG_TYPES` (price, hatch,
 odds, `requires` = previous egg), shop order, `EGG_SPRITES` in theme.ts.
+
+## A new music event (with a guest star)
+
+1. `shared/types/events.ts`: a `GameEventType`, a `GAME_EVENTS` entry (kind "Music", `musicId`, `bpm`, `beatOffset`,
+   `beatCoins`, `guestMove`), its place in `ADMIN_EVENT_ORDER` (the admin panel); banner and stage colours in `client/ui/theme.ts`
+   (`EVENT_BANNER_STYLES`, keyed by event).
+2. Recurring events use **Paced** beat coins (worth the same minutes of income at every stage); Flat beat coins (K-pop)
+   grow with the slow late-game fish and stay admin-only. Write the value in BALANCE.md (§3 Music events).
+3. Measure the track's BPM and first beat with AudioAnalyzer ([[studio-mcp-ui-testing]]); put beat 0 on an accented
+   beat when the coins fall on one beat out of two.
+4. Guest: a Model in `ServerStorage.Assets.EventFish` (tag `EventFishTemplate`, attr `EventType`), invisible anchored
+   `Body` (PrimaryPart, bounding box, face toward −Z), everything else welded. A guest built from Parts (the saxophone
+   crab, nothing uploaded) dances through two Motor6Ds (`GUEST_DANCE_JOINTS`: `Dance` Body → Hips, `Sway` Hips → what
+   it holds); MusicEventController sets their `Transform` on the client every frame. Arms that hold the swinging thing
+   get their own `Arm` Motor6D from the hips (pivot at the shoulder, ObjectValue `Grip` → an Attachment of the sway
+   root): the client turns and stretches them to the grip, otherwise they slide off the shoulder (owner's feedback).
+   A swing must be wide to read in the 2.5D view (±14° looked like a twitch). The owner wanted the crab to pass its
+   saxophone from one side of its body to the other: in a front view anything crossing the body passes the face, so
+   the trip goes low across the belly with the instrument tipped flat (CLAUDE.md §7). Weld the parts (WeldConstraint)
+   to Hips / the sway root only once everything is in place. The place must then be saved in Studio: ServerStorage
+   is not synced by Rojo.

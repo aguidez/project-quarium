@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-02 (V0.50: cleanup before V1, history moved out of this file).
+> Last updated: 2026-11-02 (V0.51: Island Breeze, a recurring music event with paced beat coins; the admin panel).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -20,9 +20,10 @@ coins. Around that core loop:
 - a Fish Index (collection): one row per species, one column per variant, plus the easter eggs;
 - the Ocean: release fish (the player picks the kind and the variant) for Ocean Points, a progression score that
   unlocks milestones (companions, upgrades, tank size 10 → 25, a second incubator, variant luck, cosmetics);
-- events: recurring ones drawn by each server every 5–15 min (the abyssal raid: the world goes dark, a lantern
-  fish steals coins; the UFO night: a UFO beams the fish up one by one and drops them back mutated) and admin ones
-  started on every server (the K-pop music event); never during the tutorial;
+- events: recurring ones drawn by each server every 5–15 min (Island Breeze: a sunny music event, coins fall on the
+  beat; the abyssal raid: the world goes dark, a lantern fish steals coins; the UFO night: a UFO beams the fish up one
+  by one and drops them back mutated) and admin ones started on every server (the K-pop music event, too generous to
+  recur); never during the tutorial;
 - likes between players: a board beside each tank, a like doubles the owner's coins for 5 min;
 - gamepasses, sold by the fisherman's shop in the lobby (never part of the balance): Third Companion Slot, x2 Ocean
   Points, Lucky, +50% Coins, and the Water Hen / Swordfish / Jellyfish passes sold from their quest lines;
@@ -74,7 +75,12 @@ ProjetQuarium/
 ├─ .gitattributes            LF everywhere (CRLF for .bat/.cmd), binaries marked; .gitignore keeps local config out
 ├─ docs/agent-notes/         The agent's shared working knowledge (owner preferences, asset pipeline, Studio MCP
 │                            testing, lobby decor, moderation, player stats), index in its README
+├─ design/previews/          Images shown to the owner (Studio captures, mock-ups): crab-sax-preview.jpg (mock-
+│                            up), crab-sax-carry-1-right / -2-middle / -3-left.jpg (Island Breeze's guest dancing),
+│                            admin-panel-mockup.png / admin-panel-ingame.jpg (the admin panel)
 ├─ design/ui/
+│  ├─ admin-panel.figcraft   The admin panel (AdminPanel_Mockup), built by admin-panel.build.js (run through
+│  │                         figcraft-cli; it also exports design/previews/admin-panel-mockup.png)
 │  ├─ shopbar.figcraft       FigCraft source of the older UI frames: OnboardingCard, RewardPopup, CapacityPlaque,
 │  │                         EventBanner(Abyss), QuestPanel, CompanionPanel, OceanPanel / OceanCoach / PanelCoach,
 │  │                         LikeBoard / LikeBoostPill, LoadingScreen / TailSprite, RebirthPanel, OwnerPlate,
@@ -192,12 +198,16 @@ ProjetQuarium/
    │     │                   getCompanionMultiplier (Snail: speed, Pelican: feeding rate), getVariantLuck (from the claimed list)
    │     ├─ features.ts      Feature ("Ocean" and "Rebirth", unlocked by quests), FEATURES (drawn `image` per feature),
    │     │                   MIN_FISH_KEPT
+   │     ├─ admin.ts         ADMIN_PANEL_ATTRIBUTE (player: may open the admin panel), AdminTab / ADMIN_TABS (one
+   │     │                   tab per admin tool: Events for now)
    │     ├─ ufo.ts           UfoOutcome (Sleep / Green / Red / Variant / Alien), UFO_OUTCOME_ODDS, drawUfoOutcome, FishEffect
    │     │                   (Sleep / Green / Red) + FISH_EFFECT_DURATION + FISH_EFFECT_COIN_MULTIPLIER, getNextVariant,
    │     │                   UFO_TIMING / UFO_KIDNAP_TIME, UFO_BEAM_ATTRIBUTE
-   │     ├─ events.ts        GameEventType (Kpop, Abyss, Ufo), GAME_EVENTS: kind "Music" (bpm, beat coins), "Abyss" or
+   │     ├─ events.ts        GameEventType (Kpop, Island, Abyss, Ufo), GAME_EVENTS: kind "Music" (bpm, beatOffset,
+   │     │                   beatCoins Flat (K-pop) or Paced (Island: income-paced, growing boost, finale)), "Abyss" or
    │     │                   "Ufo", subtitle, optional musicId and coinMultiplier, duration, recurring flag;
-   │     │                   EVENT_ATTRIBUTES, LURKING_ATTRIBUTE, TEST_EVENT_ORDER, getActiveEvent,
+   │     │                   guestMove (Swim / Walk), GUEST_DANCE_JOINTS (Dance / Sway Motor6Ds);
+   │     │                   EVENT_ATTRIBUTES, LURKING_ATTRIBUTE, ADMIN_EVENT_ORDER, getActiveEvent,
    │     │                   getEventCoinMultiplier(owner), EventSource, getRecurringEvents, getRecurringChance,
    │     │                   EVENT_IMMUNE_ATTRIBUTE + isEventImmune (tutorial)
    │     ├─ rebirths.ts      REBIRTHS (price, multiplier, start money, theme), AQUARIUM_THEMES (Basic + the 8 themes),
@@ -214,7 +224,8 @@ ProjetQuarium/
    │  │                      ServerStorage.Assets.Fish / FishVariants; require(fishType, variant) copies them into
    │  │                      ReplicatedStorage.Assets.Fish / FishVariants before a fish's Spawn message, sweep(inUse)
    │  │                      (FishService, every 10 s) removes copies no tank used for 60 s
-   │  ├─ admins.ts           isGameOwner / isAdmin (owner of the place or its group + ADMIN_USER_IDS), checked server-side
+   │  ├─ admins.ts           isGameOwner / isAdmin (owner of the place or its group + ADMIN_USER_IDS), checked server-side;
+   │  │                      canUseAdminPanel (Studio playtests only for now; isAdmin at the release)
    │  ├─ saveData.ts         SaveData (profile: PlayerData + saved tank + stats), SavedFish, SAVE_TEMPLATE, sanitizeSave
    │  ├─ playerStats.ts      PlayerStats (server only, never synced): sessions, days, play / tending seconds, milestones
    │  │                      {tending, play, days, at} ("Onboarding:<step>", "Rebirth<n>", "Species:<type>", "AllSpecies",
@@ -265,7 +276,10 @@ ProjetQuarium/
    │     │                   only; MessagingService topic QuariumAdminEvent + MemoryStore hash QuariumEvents so new servers
    │     │                   join; never from Studio), keeps the players' EventImmune attribute. Music: beats on server
    │     │                   clock, guest fish per tank. Abyss / Ufo: runRaid hands the LanternFish / Ufo template to
-   │     │                   AbyssService / UfoService. "StartTestEvent" (Studio only: an admin event of that server)
+   │     │                   AbyssService / UfoService. startAdminEvent / stopRunningEvent (the "/event" command and the admin
+   │     │                   panel; in Studio: the playtest server only)
+   │     ├─ AdminService     Admin panel's server side: sets each player's AdminPanel attribute (canUseAdminPanel) and
+   │     │                   runs its actions, checking the right again: "AdminStartEvent", "AdminStopEvent"
    │     ├─ AbyssService     Abyssal raid: one lantern fish raid loop per owned tank until the event ends (§3.4)
    │     ├─ UfoService       UFO night: one UFO per owned tank (clone of the Ufo template, tag Ufo, anchored, moved by
    │     │                   PivotTo), kidnaps one fish at a time (each once per event), notifies the owner of the outcome;
@@ -353,7 +367,7 @@ ProjetQuarium/
       │  ├─ IncomePlaqueController  Brass plaque on the left of every owned tank's base: "+X$/s  x250" (or "paused"), from
       │  │                   the aquarium's INCOME_ATTRIBUTES
       │  ├─ MusicEventController  Follows the replicated event (any kind): its track if any; for music events, beat detection,
-      │  │                   Kpop guest effects, onBeat listeners; getEvent / onEventChanged; hides events from immune clients
+      │  │                   guest effects in its event's stage colours, onBeat listeners; getEvent / onEventChanged; hides events from immune clients
       │  ├─ AbyssEventController  Abyssal raid visuals (local): world darkness (Lighting + AbyssGrade, put back after), abyss
       │  │                   backdrop SurfaceGui on every tank, navy water, marine snow, lantern lure light and red eye glows
       │  ├─ UfoEventController  UFO night visuals (local): violet night (Lighting + UfoGrade), space backdrop on every tank,
@@ -378,8 +392,11 @@ ProjetQuarium/
          ├─ EggReveal        Hatch animation (rarity, odds (never an easter egg's: "SECRET"), "NEW!" first discovery)
          ├─ OnboardingPanel  Onboarding instruction card
          ├─ RewardPopup      Reward celebration (money / companion / feature, optional image)
-         ├─ EventBanner      Running event banner (style per event kind: beat flashes / slow glow) + one Studio test
-         │                   button per event (TEST_EVENT_ORDER)
+         ├─ EventBanner      Running event banner (style per event, EVENT_BANNER_STYLES: beat flashes / slow glow), formatTime
+         ├─ AdminPanel       Admin panel (FigCraft admin-panel.figcraft), opened by the purple ADMIN button (bottom-left,
+         │                   only with the AdminPanel attribute): scope chip, tabs (ADMIN_TABS); Events tab: NOW PLAYING
+         │                   (name, time left, STOP) and one row per event (ADMIN_EVENT_ORDER: badge, RECURRING / ADMIN
+         │                   ONLY, length, START)
          ├─ SideButtons      Left menu (3D squares, icon + label): Quests, Companions (once one is owned), Fish Index, Ocean
          │                   (once unlocked), Rebirth (gold halo pulsing + "!" while affordable, "REBIRTH READY!" bubble
          │                   driven by App: when it becomes affordable, then every 4 min, 8 s each) + coach bubbles (Quests:
@@ -437,7 +454,13 @@ ProjetQuarium/
     meshes come with their front on local −X: rotated so they face the glass.
   - `EventFish/` (tag `EventFishTemplate`, attr `EventType`): `KpopIdol` (Kpop), `LanternFish` (Abyss: near-black
     anglerfish, welded parts lit / faded by the client: `Lure` and per eye an `EyeShell`, a red Neon `Eye` and a
-    `Pupil`), `Ufo` (Ufo: silver saucer, root `Body` 8 × 4 × 8).
+    `Pupil`), `Ufo` (Ufo: silver saucer, root `Body` 8 × 4 × 8), `SaxCrab` (Island: a coral crab holding a golden
+    saxophone at its side, 54 Parts, no mesh, nothing uploaded; invisible anchored `Body` 6.3 × 3.5 × 3.7, face toward
+    −Z; Motor6D `Dance` Body → `Hips` (the crab's 27 parts welded to it, pivot at the bottom of the shell), Motor6D
+    `Sway` Hips → `SaxRoot` (saxophone and claws, pivot at their centre; Attachments `Grip1` / `Grip2` at
+    the claws' centres) and two Motor6D `Arm` Hips → each arm (pivot at the shoulder, ObjectValue `Grip` → its
+    Attachment); no `Mesh` MeshPart, so no swim deformation or beat puff). The saxophone has no mouthpiece and stays away from the face (moderation,
+    CLAUDE.md §7).
   - `Companions/` (tag `CompanionTemplate`, attr `CompanionType`): `Snail`, `Pelican`, `WaterHen`, `Swordfish`,
     `Jellyfish`; `Lobby/` (decor).
   - `Food/` (tag `FoodTemplate`, attr `FoodLook`; a single anchored MeshPart, its size is the food's): `Shrimp`.
@@ -525,7 +548,7 @@ ProjetQuarium/
 | | `SetAquariumTheme` (theme or "Auto"), `SetCosmeticShown` ({id, shown}), `SetTitle` (title, "Auto" or "None") | CustomizationService |
 | | `EquipCompanion` / `UnequipCompanion` (CompanionType) | CompanionService |
 | | `ReleaseFish` ({fishType, variant}), `FinishTutorial` (Feature), `ClaimOceanReward` (milestone id) | OceanService |
-| | `StartTestEvent` (GameEventType, **Studio only**) | EventService |
+| | `AdminStartEvent` (GameEventType), `AdminStopEvent` (no payload): admin panel, refused without `canUseAdminPanel` | AdminService |
 | | `WatchAquariums` (PlotIndex[], ≤ 6, debounced 0.25 s): only changes what this client receives | FishService |
 | | `GiveLike` (PlotIndex, from the board's prompt) | LikeService |
 | | `Rebirth` (no payload) | RebirthService |
@@ -554,7 +577,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   carry `Owner` and `CompanionType` (feeders also their charge attributes). `EventFish` models carry `EventType` (the
   lantern fish also `Lurking`; a UFO `Beaming`). Tanks carry `OwnerUserId`, `Likes`, `LikeBoostEndsAt`, `Theme` and the
   `INCOME_ATTRIBUTES`. `LikeBoard` models carry `PlotIndex`. Players carry `EventImmune`, `CoinBoostSeconds` /
-  `CoinBoostRunning` and `TestSpeed` (the owner's test chip).
+  `CoinBoostRunning`, `TestSpeed` (the owner's test chip) and `AdminPanel` (may open the admin panel).
 - **Events:** ReplicatedStorage attributes `EventType`, `EventStartsAt`, `EventEndsAt` and `EventSource`
   ("Recurring" / "Admin") (`EVENT_ATTRIBUTES`), with beats computed from `Workspace.GetServerTimeNow()`. Players carry
   `EventImmune` (true until loaded and while in the tutorial; absent = immune).
@@ -634,16 +657,29 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   claimable.
 - **Event sources.** *Recurring*: each server's clock starts with the server and again when any event ends. From
   minute 5 each new minute draws once, chance (m − 4) / 11 (minute 15: 100 %), only while at least one player isn't
-  immune; it then picks a random event with `recurring: true` (Abyss or Ufo). *Admin*: "/event <name>" (`isAdmin`)
+  immune; it then picks a random event with `recurring: true` (Island, Abyss or Ufo). *Admin*: "/event <name>" (`isAdmin`)
   starts any event with admin behaviour: locally, then MessagingService to every server, and a MemoryStore entry
   (expiring with the event) that servers started later join (if > 5 s left). An admin event replaces whatever runs; a
   recurring event never starts over one. "/event stop" ends the running event (everywhere if admin). In Studio the
-  command and the test buttons only touch the playtest server. *Immunity*: EventService sets `EventImmune` every
+  command and the admin panel only touch the playtest server. *Immunity*: EventService sets `EventImmune` every
   second (not loaded or onboarding not Done); immune owners get no guest, no raid, no UFO and no coin bonus, and
   MusicEventController hides the event from them; when the tutorial ends mid-event, the event joins them.
-- **Music event.** `EventService.startEvent` sets the attributes; the server beat loop calls
-  `FishService.dropBeatCoins(chance)`. Client: MusicEventController (music, beats, `onBeat` → FishAnimationController
-  puffs, banner).
+- **Music event.** `EventService.startEvent` sets the attributes; the server beat loop drops the beat coins. *Flat*
+  (K-pop, admin): `FishService.dropBeatCoins(chance)` on every beat, the same chance for every fish. *Paced* (Island
+  Breeze, recurring): on one beat out of `every` (2: the track's accented backbeat), `dropPacedBeatCoins(seconds)`, each
+  fish dropping with chance seconds / its own payout interval (variant included), seconds = boost x 2 beats, the boost
+  growing 0.5 → 1.5 over the event: every fish earns x2 of its own income on average. The finale (last drop beat
+  ≥ 2.5 s before the end) drops every fish's coin at once (`dropBeatCoins(1)`), then the beat drops nothing more.
+  Client: MusicEventController (music, beats, `onBeat` → FishAnimationController puffs, banner, the guest's effects in
+  the event's `EVENT_BANNER_STYLES` accents). *Guest move* (`guestMove`): "Swim" (K-pop idol) wanders through the
+  water like a fish with pauses facing the glass; "Walk" (the saxophone crab) stays on the sand on a lane 35 % of the
+  half depth toward the glass, always facing it, and steps sideways (2.2 studs/s, steps ≥ 3 studs, 0.8–3 s dancing on
+  each spot). *Dance* (guests with the `GUEST_DANCE_JOINTS` Motor6Ds, client-only `Transform` every frame on the
+  track's position, `getCarryPose`): the instrument goes from one side of the body to the other and back on an 8-beat
+  cycle: 2 beats on its side (one 12° lean outward), 2 beats across (low in front of the belly, 0.85 stud down halfway,
+  tipped flat with its top leading, so its neck never passes the face), 2 beats on the other side (tilt mirrored), 2
+  beats back; the body rocks ±6° and dips 0.3 stud on every beat, with little hops while it walks; each arm is turned and stretched from its shoulder to its grip every frame (worked out from the
+  joints in the hips' space, no frame of lag).
 - **Abyssal raid.** `AbyssService.run` until the end: in each owned tank, a loop waits for a coin (`findCoinToSteal`:
   most valuable, not frozen / bubble, ≥ 2.5 s left on the sand), then makes a pass, again and again (0.8–2.2 s of rest):
   the server clones `LanternFish` at the back of the tank, `Lurking` = true then false; it glides 1.2 s at 3 studs/s
@@ -720,10 +756,13 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   read as a cigarette). Rules in CLAUDE.md §7.
 - **Left before V1** (the owner's): gamepass prices at the alpha release, then the calibration with real players
   (`npm run stats` vs BALANCE.md §2). Kpop is the only admin-only
-  event; the UFO night's track is `musicId` 87373069356270.
+  event (its flat beat coins give a 30 s fish x14 for a minute); the UFO night's track is `musicId` 87373069356270.
 - **Admin events across servers** rely on MessagingService (best effort, a few seconds of delay; a server that misses
   the message joins through the MemoryStore only when it starts). Add admins by UserId in `server/admins.ts` (the
   game's owner always is one).
+- **Admin panel**: Studio playtests only for now (`canUseAdminPanel`). For the release, make it return
+  `isAdmin(player)`: the button then shows for admins on live servers and its events reach every server (the scope chip
+  says so). New admin tools go in their own tab (`ADMIN_TABS` + a tab component in AdminPanel.tsx + AdminService actions).
 - **Playtesting**: see `docs/agent-notes/studio-mcp-ui-testing.md` and `fish-asset-pipeline.md`. In short: stand at
   the tank CFrame × (0, 5, −14) to be in the focus zone, drive flows through remotes, feed fish in long tests, and
   mark temporary test values with `// TEMP TEST`, then restore them.

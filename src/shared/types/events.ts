@@ -8,7 +8,7 @@ import { ReplicatedStorage, Workspace } from "@rbxts/services";
  *   recurring event running, and no recurring event can start while it runs.
  * Players still in the tutorial are "event immune": events don't touch them (see isEventImmune).
  */
-export type GameEventType = "Kpop" | "Abyss" | "Ufo";
+export type GameEventType = "Kpop" | "Island" | "Abyss" | "Ufo";
 
 /** How the running event was started (replicated for information). */
 export type EventSource = "Recurring" | "Admin";
@@ -35,8 +35,45 @@ export interface MusicEventConfig extends BaseEventConfig {
 	bpm: number;
 	/** Seconds into the track of its first beat, so the effects land on the music. */
 	beatOffset: number;
-	/** Chance for each living fish to drop its coin on every beat (owner tending their tank only). */
-	beatCoinChance: number;
+	/** The coins the fish drop on the beat, on top of their regular ones (owner tending their tank only). */
+	beatCoins: FlatBeatCoins | PacedBeatCoins;
+	/**
+	 * How the guest star moves (EventService): "Swim" wanders through the water like a fish, now and then facing the glass;
+	 * "Walk" stays on the sand near the glass, always facing it, and steps sideways from one spot to another.
+	 */
+	guestMove: "Swim" | "Walk";
+}
+
+/**
+ * Joints of a guest that dances on the beat (MusicEventController, client-side only): the `Dance` Motor6D (root → hips)
+ * rocks and bobs the whole body, the `Sway` Motor6D (hips → instrument) swings what it holds from side to side. Each
+ * `Arm` Motor6D (hips → an arm, pivot at the shoulder) holds an ObjectValue `Grip` pointing at an Attachment of the
+ * instrument's root (the claw holding it): the arm is turned and stretched every frame to reach it.
+ */
+export const GUEST_DANCE_JOINTS = { body: "Dance", sway: "Sway", arm: "Arm", grip: "Grip" } as const;
+
+/**
+ * Every living fish drops its coin with the same chance on every beat, whatever its pace: a slow fish of the late game
+ * earns many times its income (x14 for a 30 s fish at 130 BPM). Generous: admin events only.
+ */
+export interface FlatBeatCoins {
+	mode: "Flat";
+	chance: number;
+}
+
+/**
+ * Coins on one beat out of `every`, each fish with a chance of boost × seconds between two drops / its income interval:
+ * on average every fish earns `boost` times its own income on top of it, whatever its pace, so the event is worth the same minutes of
+ * income at every stage of the game. The boost grows from `boostFrom` to `boostTo` (the show builds up); the finale
+ * (the last drop beat at least `finaleLead` seconds before the end) makes every fish drop its coin at once, then the
+ * beat drops nothing more.
+ */
+export interface PacedBeatCoins {
+	mode: "Paced";
+	every: number;
+	boostFrom: number;
+	boostTo: number;
+	finaleLead: number;
 }
 
 /**
@@ -69,7 +106,25 @@ export const GAME_EVENTS: Record<GameEventType, GameEventConfig> = {
 		recurring: false, // admin event
 		bpm: 130,
 		beatOffset: 0,
-		beatCoinChance: 0.2,
+		beatCoins: { mode: "Flat", chance: 0.2 },
+		guestMove: "Swim",
+	},
+	Island: {
+		kind: "Music",
+		displayName: "ISLAND BREEZE",
+		icon: "♫", // drawn as text in the banner's badge (no emoji)
+		subtitle: "The crab plays the sax: coins fall on the beat!",
+		musicId: "rbxassetid://117781439222323", // August Island Breeze, 60.8 s
+		musicVolume: 0.5,
+		duration: 60,
+		recurring: true,
+		bpm: 124,
+		// Measured in Studio (AudioAnalyzer onsets): beats every 0.484 s from 0.357 s, the accented ones (the island
+		// backbeat) from 0.841 s: beat 0 is the first accented one, so the coins (every 2 beats) fall on them
+		beatOffset: 0.841,
+		// x2 coins on average (+1 min of income per event at every stage), growing x1.5 → x2.5, then the finale
+		beatCoins: { mode: "Paced", every: 2, boostFrom: 0.5, boostTo: 1.5, finaleLead: 2.5 },
+		guestMove: "Walk", // the saxophone crab, on the sand like the Snail
 	},
 	Abyss: {
 		kind: "Abyss",
@@ -94,8 +149,8 @@ export const GAME_EVENTS: Record<GameEventType, GameEventConfig> = {
 	},
 };
 
-/** Display order of the Studio test buttons. */
-export const TEST_EVENT_ORDER: GameEventType[] = ["Kpop", "Abyss", "Ufo"];
+/** Display order of the events in the admin panel. */
+export const ADMIN_EVENT_ORDER: GameEventType[] = ["Kpop", "Island", "Abyss", "Ufo"];
 
 /** The events the recurring clock draws from. */
 export function getRecurringEvents(): GameEventType[] {

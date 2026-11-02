@@ -1,11 +1,10 @@
 import React, { useBinding, useEffect } from "@rbxts/react";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
-import { ActiveEvent, GAME_EVENTS, GameEventType } from "shared/types/events";
+import { ActiveEvent } from "shared/types/events";
 import { TextStroke } from "./kit";
 import {
 	COLORS,
 	EVENT_BANNER_STYLES,
-	EVENT_COLORS,
 	FONT_BLACK,
 	FONT_BOLD,
 	FONT_TITLE,
@@ -35,7 +34,8 @@ export interface EventBannerProps {
 	subscribeBeat: (listener: (beat: number) => void) => () => void;
 }
 
-function formatTime(seconds: number): string {
+/** "m:ss" of a countdown (the banner's timer, the admin panel's). */
+export function formatTime(seconds: number): string {
 	const total = math.max(math.ceil(seconds), 0);
 	return `${math.floor(total / 60)}:${"%02d".format(total % 60)}`;
 }
@@ -46,7 +46,7 @@ function formatTime(seconds: number): string {
  */
 export function EventBanner(props: EventBannerProps) {
 	const { event } = props;
-	const style = EVENT_BANNER_STYLES[event.config.kind];
+	const style = EVENT_BANNER_STYLES[event.eventType];
 	const onBeat = event.config.kind === "Music";
 	const [time, setTime] = useBinding(0); // seconds since mount
 	const [remaining, setRemaining] = useBinding(event.endsAt - event.startsAt);
@@ -198,41 +198,5 @@ export function EventBanner(props: EventBannerProps) {
 				</frame>
 			</frame>
 		</canvasgroup>
-	);
-}
-
-/**
- * Studio-only button starting a 1-minute test of an event (FigCraft: TestEventButton). `index`
- * stacks the buttons of the different events upward.
- */
-export function TestEventButton(props: { eventType: GameEventType; index: number; onClick: () => void }) {
-	const config = GAME_EVENTS[props.eventType];
-	return (
-		<textbutton
-			key={`Test${props.eventType}`}
-			AnchorPoint={new Vector2(0, 1)}
-			Position={
-				new UDim2(0, SIDE_MARGIN, 1, -TEST_BUTTON_BOTTOM - props.index * (TEST_BUTTON_HEIGHT + TEST_BUTTON_GAP))
-			}
-			Size={UDim2.fromOffset(0, TEST_BUTTON_HEIGHT)}
-			AutomaticSize={Enum.AutomaticSize.X}
-			BackgroundColor3={EVENT_COLORS.testButtonBg}
-			BackgroundTransparency={0.12}
-			Font={FONT_BOLD}
-			Text={`Test ${config.displayName} (1 min)`}
-			TextSize={15}
-			TextColor3={COLORS.white}
-			AutoButtonColor={true}
-			ZIndex={3}
-			Event={{ Activated: () => props.onClick() }}
-		>
-			<uicorner CornerRadius={new UDim(0, 12)} />
-			<uistroke
-				Color={EVENT_BANNER_STYLES[config.kind].accents[1]}
-				Thickness={2}
-				ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
-			/>
-			<uipadding PaddingLeft={new UDim(0, 14)} PaddingRight={new UDim(0, 14)} />
-		</textbutton>
 	);
 }

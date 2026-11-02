@@ -480,6 +480,20 @@ class FishServiceSingleton implements Lifecycle {
 		}
 	}
 
+	/**
+	 * Paced music event beat (see PacedBeatCoins): each living fish drops its coin with a chance of `seconds` / its own
+	 * interval between two coins (variant included), i.e. on average `seconds` of its own income, whatever its pace.
+	 */
+	public dropPacedBeatCoins(seconds: number) {
+		for (const [owner, fishes] of this.fishByOwner) {
+			if (this.frozenOwners.has(owner)) continue;
+			for (const fish of fishes) {
+				const chance = math.min(seconds / fish.payoutInterval, 1);
+				if (fish.alive && this.rng.NextNumber() < chance) this.payout(owner, fish);
+			}
+		}
+	}
+
 	private advanceHunger(fish: FishEntity, clock: number) {
 		if (fish.state === HungerState.Satiated) {
 			this.setState(fish, HungerState.Hungry, clock + fish.config.hunger.hungryDuration);
