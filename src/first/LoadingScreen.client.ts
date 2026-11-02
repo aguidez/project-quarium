@@ -6,38 +6,43 @@ const ReplicatedStorage = game.GetService("ReplicatedStorage");
 const ContentProvider = game.GetService("ContentProvider");
 const TweenService = game.GetService("TweenService");
 const RunService = game.GetService("RunService");
-const Workspace = game.GetService("Workspace");
 
-/** design/ui/loading/LoadingBannerClean.png: the banner without its baked bar (FigCraft: LoadingScreen). */
-const BACKGROUND = "rbxassetid://119725316551413";
-/** design/ui/loading/LoadingTail.png: the fish tail on the left end of the bar (FigCraft: TailSprite). */
-const TAIL = "rbxassetid://137183236921957";
-const BACKGROUND_COLOR = Color3.fromHex("#7EC8E8"); // the banner's sky, while the artwork downloads
-/** The bar is designed on the 1024 × 434 banner and scaled with the screen's height. */
-const DESIGN_HEIGHT = 434;
-const TRACK_WIDTH = 200;
-const TRACK_HEIGHT = 28;
-const TRACK_INSET = 4;
-const TAIL_SIZE = new Vector2(32, 40);
-const TAIL_OVERLAP = 6; // the tail tucks under the track's rounded end
-const BOTTOM_MARGIN = 10;
+// The owner's picture (design/ui/loading/LoadingArt.png), prepared by tools/loading-art.js
+/** LoadingBackground.png: the picture without its baked bar. */
+const BACKGROUND = "rbxassetid://116115984041240";
+/** LoadingLogo.png: the "Project: Quarium" logo cut out, top half full, bottom half with empty letters. */
+const LOGO = "rbxassetid://85036446211506";
+const BACKGROUND_COLOR = Color3.fromHex("#1E7FD0"); // the picture's water, while it downloads
+/** Size of the source picture: LOGO_RECT is measured on it. */
+const ART_SIZE = new Vector2(1672, 941);
+/** Where the logo sits on the picture (source pixels); also the size of each half of the logo sheet. */
+const LOGO_RECT = { x: 450, y: 117, w: 812, h: 298 };
+
+/** The water inside the logo is drawn in vertical slices, each with its own level: a moving wave. */
+const SLICES = 40;
+const WAVE_HEIGHT = 0.03; // of the logo's height
+const WAVES = 1.6; // across the logo
+const WAVE_SPEED = 2.6;
+/** Texture pixels each slice spills over its neighbours: hides the filtering seams between slices. */
+const SLICE_OVERLAP = 2;
+
 /** Set locally by UiController once the first PlayerData snapshot arrived (the save is loaded). */
 const DATA_LOADED_ATTRIBUTE = "DataLoaded";
 
 const MIN_TIME = 2.5; // seconds: the screen never just flashes by
 const MAX_TIME = 45; // seconds: never trap a player behind it (a failed data load kicks them anyway)
+const FULL_HOLD = 0.5; // seconds the full logo stays before the fade
 const FADE_TIME = 0.6;
 const ARTWORK_FADE_TIME = 0.4;
 const ARTWORK_WAIT = 8; // seconds the screen may stay up for its artwork alone (first download)
 const ARTWORK_MIN_VISIBLE = 1.5; // seconds the artwork stays on screen once shown
-const SMOOTHING = 6; // how fast the bar catches up with the real progress (per second)
-const TAIL_WIGGLE = 10; // degrees: the tail swishes while loading
+const SMOOTHING = 4; // how fast the water catches up with the real progress (per second)
 
 const player = Players.LocalPlayer;
 const startedAt = os.clock();
 
 // ---------------------------------------------------------------------
-// UI (FigCraft: LoadingScreen / LoadingBar)
+// UI
 // ---------------------------------------------------------------------
 
 function make<T extends keyof CreatableInstances>(
@@ -53,18 +58,6 @@ function make<T extends keyof CreatableInstances>(
 	return instance;
 }
 
-function gradient(top: string, bottom: string, parent: Instance) {
-	make(
-		"UIGradient",
-		{ Color: new ColorSequence(Color3.fromHex(top), Color3.fromHex(bottom)), Rotation: 90 },
-		parent,
-	);
-}
-
-function corner(radius: UDim, parent: Instance) {
-	make("UICorner", { CornerRadius: radius }, parent);
-}
-
 const gui = make("ScreenGui", {
 	Name: "LoadingScreen",
 	IgnoreGuiInset: true,
@@ -74,6 +67,9 @@ const gui = make("ScreenGui", {
 });
 // Fades as one piece
 const root = make("CanvasGroup", { Name: "Root", Size: UDim2.fromScale(1, 1), BackgroundColor3: BACKGROUND_COLOR }, gui);
+const artwork = make("Frame", { Name: "Artwork", Size: UDim2.fromScale(1, 1), BackgroundTransparency: 1 }, root);
+/** The artwork fades in once downloaded (every image follows it). */
+let artworkTransparency = 1;
 const background = make(
 	"ImageLabel",
 	{
@@ -81,124 +77,93 @@ const background = make(
 		Size: UDim2.fromScale(1, 1),
 		BackgroundTransparency: 1,
 		Image: BACKGROUND,
-		ImageTransparency: 1, // fades in once downloaded
+		ImageTransparency: 1,
 		ScaleType: Enum.ScaleType.Crop,
 	},
-	root,
+	artwork,
 );
 
-// "LOADING... 64%" above a fish-shaped bar: tail on the left, rounded track
-const bar = make(
-	"Frame",
-	{
-		Name: "LoadingBar",
-		AnchorPoint: new Vector2(0.5, 1),
-		Position: new UDim2(0.5, 0, 1, 0),
-		Size: UDim2.fromOffset(0, 0),
-		AutomaticSize: Enum.AutomaticSize.XY,
-		BackgroundTransparency: 1,
-	},
-	root,
-);
-const barScale = make("UIScale", {}, bar);
-make(
-	"UIListLayout",
-	{ HorizontalAlignment: Enum.HorizontalAlignment.Center, Padding: new UDim(0, 2), SortOrder: Enum.SortOrder.LayoutOrder },
-	bar,
-);
-make("UIPadding", { PaddingBottom: new UDim(0, BOTTOM_MARGIN) }, bar);
-
-const label = make(
-	"TextLabel",
-	{
-		Name: "Label",
-		LayoutOrder: 1,
-		Size: UDim2.fromOffset(TRACK_WIDTH, 24),
-		BackgroundTransparency: 1,
-		Font: Enum.Font.GothamBlack,
-		Text: "LOADING... 0%",
-		TextSize: 20,
-		TextColor3: Color3.fromHex("#DFF6FF"),
-	},
-	bar,
-);
-make("UIStroke", { Color: Color3.fromHex("#0F3B73"), Thickness: 3 }, label);
-
-const row = make(
-	"Frame",
-	{
-		Name: "Row",
-		LayoutOrder: 2,
-		Size: UDim2.fromOffset(TAIL_SIZE.X + TRACK_WIDTH - TAIL_OVERLAP, TAIL_SIZE.Y),
-		BackgroundTransparency: 1,
-	},
-	bar,
-);
-const tail = make(
+// The logo sheet, laid exactly over the logo painted in the background (placed by layoutLogo)
+const logo = make("Frame", { Name: "Logo", BackgroundTransparency: 1, ZIndex: 2 }, artwork);
+const empty = make(
 	"ImageLabel",
 	{
-		Name: "Tail",
-		AnchorPoint: new Vector2(0, 0.5),
-		Position: UDim2.fromScale(0, 0.5),
-		Size: UDim2.fromOffset(TAIL_SIZE.X, TAIL_SIZE.Y),
+		Name: "Empty",
+		Size: UDim2.fromScale(1, 1),
 		BackgroundTransparency: 1,
-		Image: TAIL,
+		Image: LOGO,
+		ImageTransparency: 1,
+		ImageRectOffset: new Vector2(0, LOGO_RECT.h),
+		ImageRectSize: new Vector2(LOGO_RECT.w, LOGO_RECT.h),
 	},
-	row,
+	logo,
 );
-const track = make(
-	"Frame",
-	{
-		Name: "Track",
-		AnchorPoint: new Vector2(1, 0.5),
-		Position: UDim2.fromScale(1, 0.5),
-		Size: UDim2.fromOffset(TRACK_WIDTH, TRACK_HEIGHT),
-		BackgroundColor3: Color3.fromHex("#FFFFFF"),
-		ClipsDescendants: true,
-		ZIndex: 2,
-	},
-	row,
-);
-gradient("#1B4A86", "#0F2E5C", track);
-corner(new UDim(0.5, 0), track);
-make("UIStroke", { Color: Color3.fromHex("#8FD8FF"), Thickness: 3, ApplyStrokeMode: Enum.ApplyStrokeMode.Border }, track);
 
-const fillHeight = TRACK_HEIGHT - TRACK_INSET * 2;
-const fill = make(
-	"Frame",
+// Each slice shows the full logo below its own water level: a crop of the sheet's top half
+interface Slice {
+	image: ImageLabel;
+	x: number;
+	width: number;
+}
+const slices: Slice[] = [];
+for (let i = 0; i < SLICES; i++) {
+	const x = math.max(math.floor((i * LOGO_RECT.w) / SLICES) - SLICE_OVERLAP, 0);
+	const width = math.min(math.floor(((i + 1) * LOGO_RECT.w) / SLICES) + SLICE_OVERLAP, LOGO_RECT.w) - x;
+	const image = make(
+		"ImageLabel",
+		{ Name: "Water", BackgroundTransparency: 1, Image: LOGO, Visible: false, ZIndex: 2 },
+		logo,
+	);
+	slices.push({ image, x, width });
+}
+
+// Once the water is over the whole logo, one image replaces the slices (no seam at all)
+const full = make(
+	"ImageLabel",
 	{
-		Name: "Fill",
-		Position: UDim2.fromOffset(TRACK_INSET, TRACK_INSET),
-		Size: UDim2.fromOffset(fillHeight, fillHeight),
-		BackgroundColor3: Color3.fromHex("#FFFFFF"),
-		ZIndex: 2,
+		Name: "Full",
+		Size: UDim2.fromScale(1, 1),
+		BackgroundTransparency: 1,
+		Image: LOGO,
+		ImageRectSize: new Vector2(LOGO_RECT.w, LOGO_RECT.h),
+		Visible: false,
+		ZIndex: 3,
 	},
-	track,
+	logo,
 );
-gradient("#8FE4FF", "#2C8EE6", fill);
-corner(new UDim(0.5, 0), fill);
-const shine = make(
-	"Frame",
-	{
-		Name: "Shine",
-		Position: new UDim2(0, 6, 0, 2),
-		Size: new UDim2(1, -12, 0, 5),
-		BackgroundColor3: Color3.fromHex("#FFFFFF"),
-		BackgroundTransparency: 0.6,
-		ZIndex: 2,
-	},
-	fill,
-);
-corner(new UDim(0.5, 0), shine);
+
+/** Water below `cut` (0 = top of the logo, 1 = bottom) in one slice. */
+function setLevel(slice: Slice, cut: number) {
+	const top = math.clamp(cut, 0, 1) * LOGO_RECT.h;
+	const height = LOGO_RECT.h - top;
+	slice.image.Visible = height > 0.5;
+	if (!slice.image.Visible) return;
+	slice.image.ImageTransparency = artworkTransparency;
+	slice.image.ImageRectOffset = new Vector2(slice.x, top);
+	slice.image.ImageRectSize = new Vector2(slice.width, height);
+	slice.image.Position = UDim2.fromScale(slice.x / LOGO_RECT.w, top / LOGO_RECT.h);
+	slice.image.Size = UDim2.fromScale(slice.width / LOGO_RECT.w, height / LOGO_RECT.h);
+}
+
+/** Follows the background's Crop scaling: the picture fills the screen, centred, its overflow cut off. */
+let laidOutFor: Vector2 | undefined;
+function layoutLogo() {
+	const screen = root.AbsoluteSize;
+	if (laidOutFor === screen || screen.X <= 0) return;
+	laidOutFor = screen;
+	const scale = math.max(screen.X / ART_SIZE.X, screen.Y / ART_SIZE.Y);
+	const origin = screen.sub(ART_SIZE.mul(scale)).div(2);
+	logo.Position = UDim2.fromOffset(origin.X + LOGO_RECT.x * scale, origin.Y + LOGO_RECT.y * scale);
+	logo.Size = UDim2.fromOffset(LOGO_RECT.w * scale, LOGO_RECT.h * scale);
+}
 
 gui.Parent = player.WaitForChild("PlayerGui");
 ReplicatedFirst.RemoveDefaultLoadingScreen();
 
-// Shown right away on the plain sky colour; the artwork fades in once downloaded
+// Shown right away on the plain water colour; the artwork fades in once downloaded
 let artworkShownAt: number | undefined;
 task.spawn(() => {
-	ContentProvider.PreloadAsync([background, tail]);
-	TweenService.Create(background, new TweenInfo(ARTWORK_FADE_TIME), { ImageTransparency: 0 }).Play();
+	ContentProvider.PreloadAsync([background, empty]);
 	artworkShownAt = os.clock();
 });
 
@@ -213,17 +178,25 @@ function artworkSeen(): boolean {
 // ---------------------------------------------------------------------
 
 let target = 0; // real progress (0..1)
-let shown = 0; // what the bar displays, catching up smoothly
+let shown = 0; // what the logo displays, catching up smoothly
 
 const heartbeat = RunService.RenderStepped.Connect((dt) => {
-	const viewport = Workspace.CurrentCamera?.ViewportSize;
-	barScale.Scale = viewport ? math.clamp(viewport.Y / DESIGN_HEIGHT, 0.8, 3.2) : 1;
-
+	layoutLogo();
+	if (artworkShownAt !== undefined && artworkTransparency > 0) {
+		artworkTransparency = math.max(1 - (os.clock() - artworkShownAt) / ARTWORK_FADE_TIME, 0);
+		background.ImageTransparency = artworkTransparency;
+		empty.ImageTransparency = artworkTransparency;
+	}
 	shown += (target - shown) * math.min(dt * SMOOTHING, 1);
-	const room = TRACK_WIDTH - TRACK_INSET * 2 - fillHeight;
-	fill.Size = UDim2.fromOffset(fillHeight + room * shown, fillHeight);
-	label.Text = `LOADING... ${math.floor(shown * 100 + 0.5)}%`;
-	tail.Rotation = math.sin((os.clock() - startedAt) * 5) * TAIL_WIGGLE;
+	// From just below the logo (empty) to just above it (full), the wave included
+	const level = 1 + WAVE_HEIGHT - shown * (1 + WAVE_HEIGHT * 3);
+	const t = os.clock() - startedAt;
+	full.Visible = level + WAVE_HEIGHT <= 0;
+	full.ImageTransparency = artworkTransparency;
+	for (let i = 0; i < SLICES; i++) {
+		const wave = math.sin((i / SLICES) * WAVES * math.pi * 2 - t * WAVE_SPEED) * WAVE_HEIGHT;
+		setLevel(slices[i], level + wave);
+	}
 });
 
 function timedOut(): boolean {
@@ -259,6 +232,7 @@ creep(0.97, () => player.GetAttribute(DATA_LOADED_ATTRIBUTE) !== true);
 
 target = 1;
 while (shown < 0.995 || os.clock() - startedAt < MIN_TIME || !artworkSeen()) task.wait();
+task.wait(FULL_HOLD);
 
 const fade = TweenService.Create(root, new TweenInfo(FADE_TIME, Enum.EasingStyle.Quad), { GroupTransparency: 1 });
 fade.Play();

@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-02 (V0.54: leaderboard titles, the day's top 10 of each board wears a tiered nameplate).
+> Last updated: 2026-11-02 (V0.55: the owner's aquarium picture as loading screen, its logo fills with water).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -115,8 +115,9 @@ ProjectQuarium/
 │  ├─ eggs.build.js          → design/ui/eggs/*.svg + .png: egg sprites (whole, top / bottom halves, 3 cracks); PNG ×2
 │  │                         through FigCraft (file.import / export) or @resvg/resvg-js (200×240); ids in theme.ts EGG_SPRITES
 │  ├─ gate.build.js          Locked-gate icon of gated eggs (design/ui/eggs/LockedGate)
-│  └─ loading/               LoadingBanner.png (the owner's beach banner, original) → LoadingBannerClean.png (baked bar
-│                            erased) + LoadingTail.png (fish tail of the bar); ids in src/first/LoadingScreen.client.ts
+│  └─ loading/               LoadingArt.png (the owner's aquarium picture, 1672 × 941, source) → LoadingBackground.png
+│                            (1024 px) + LoadingLogo.png (logo sheet: full on top, empty letters below), made by
+│                            tools/loading-art.js; ids in src/first/LoadingScreen.client.ts
 ├─ tools/mcp/                MCP launchers (Node, any OS; nothing on stdout): figcraft.js starts the FigCraft app with
 │                            its control port if needed then `figcraft-cli mcp --attach`; roblox-studio.js finds Studio's
 │                            MCP server (Windows mcp.bat / macOS StudioMCP / override); run-stdio.js shared stdio pass-through
@@ -139,14 +140,19 @@ ProjectQuarium/
 ├─ tools/fish-variant-recolor.js  Hue rotation of a species' texture into its Anomaly / Shiny looks (`sheet <Type>` to
 │                            pick the angles, `build variant-spec.json`; optional tint for grey fish); pipeline in its header
 ├─ tools/pass-icons.js       Gamepass, Shop and Aquarium icons drawn as SVG in the V2 style, rendered with @resvg/resvg-js
+├─ tools/loading-art.js     Loading screen art from design/ui/loading/LoadingArt.png: logo cut out along its navy outline,
+│                            its empty version, a preview; prints LOGO_RECT / ART_SIZE to copy into LoadingScreen.client.ts
 ├─ tools/fish-sticker-icons.js  Sticker icons from black / white Studio captures of a fish sheet (difference matting,
 │                            outline, rim, shadow, shiny sparkles; pipeline in its header)
 └─ src/
    ├─ first/
-   │  └─ LoadingScreen.client.ts  ReplicatedFirst loading screen: banner + live fish-shaped bar; imports NOTHING (no
-   │                         ReplicatedStorage yet), plain instances. Steps: game.IsLoaded → preload ReplicatedStorage.Assets
-   │                         models → wait for the local "DataLoaded" attribute (UiController, first sync). 2.5 s min, 45 s
-   │                         max; also waits for the artwork (≤ 8 s) and shows it ≥ 1.5 s, then fades
+   │  └─ LoadingScreen.client.ts  ReplicatedFirst loading screen: the owner's picture (ScaleType Crop) and,
+   │                         laid exactly over its painted logo (LOGO_RECT scaled like the crop), the logo sheet: empty letters,
+   │                         then the full logo revealed from the bottom by 40 ImageRectOffset slices (a moving wave; one full
+   │                         image once filled); imports NOTHING (no ReplicatedStorage yet). Waits for its artwork (≤ 8 s) and
+   │                         shows it ≥ 1.5 s. Steps: game.IsLoaded → preload
+   │                         ReplicatedStorage.Assets models → wait for the local "DataLoaded" attribute (UiController, first
+   │                         sync). 2.5 s min, 45 s max, then fades
    ├─ shared/                Code + config used by both sides (ReplicatedStorage)
    │  ├─ framework.ts        Lifecycle + bootstrap
    │  ├─ format.ts           formatNumber ("1,234,567", from 1e12 "1.23T") / formatShort ("25K", "1.5M", "1.8T", "1Qa"):

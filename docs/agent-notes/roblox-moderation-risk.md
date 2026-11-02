@@ -16,3 +16,5 @@ On 2026-10-29 Roblox moderation gave the user's account a warning ("illegal or r
 - If an asset was flagged, its sibling uploads (variant textures, other icons of the same design) can be flagged next: tell the user their ids so they can archive them in the Creator Dashboard.
 
 Related: [[fish-asset-pipeline]]
+
+- **Text in uploads** (2026-11-02): the owner approved uploading the loading screen pictures that carry the game's name "Project: Quarium" (LoadingBackground.png 116115984041240, LoadingLogo.png 85036446211506). Other text still needs their go first.

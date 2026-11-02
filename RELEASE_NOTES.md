@@ -10,6 +10,16 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.55 — 2026-11-02
+
+**Changes**
+- **New loading screen**: the beach picture and its fish-shaped bar are replaced by a new picture, a sunny aquarium
+  with its fish, a snail and two eggs on the sand. The name **Project: Quarium** is the loading bar: its letters start
+  empty, dark as glass, and fill with water from the bottom as the game loads, a small wave rolling on the surface.
+  Once the name is full, the screen fades into the game.
+
+---
+
 ## V0.54 — 2026-11-02
 
 **New**
