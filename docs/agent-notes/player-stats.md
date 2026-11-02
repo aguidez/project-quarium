@@ -12,6 +12,13 @@ metadata:
 - **Read a profile from Studio** (Edit datamodel, no playtest needed): `DataStoreService:GetDataStore("PlayerData_v1")
   :GetAsync("Player_" .. StudioService:GetUserId())` returns `{Data = {player, tank, stats}, MetaData = {...}}`
   (ProfileStore). `HttpService:JSONEncode` it to get a dump for `npm run stats -- --file`.
+- **Keep a player off the leaderboards** (`SaveData.leaderboardBanned`, V0.53): only while they are **offline**
+  (ProfileStore would write its in-memory copy back over it), in Studio's Edit datamodel, with the owner's OK:
+  `local key = "Player_" .. userId; DataStoreService:GetDataStore("PlayerData_v1"):UpdateAsync(key, function(p, info)
+  if p.MetaData.ActiveSession then return nil end; p.Data.leaderboardBanned = true; return p, info:GetUserIds(),
+  info:GetMetadata() end)` (returning nil cancels if they are online), then `RemoveAsync(tostring(userId))` on the
+  three OrderedDataStores `Leaderboard_OceanPoints_v1`, `Leaderboard_Income_v1`, `Leaderboard_PlayTime_v1` so they
+  leave the boards at once (LeaderboardService also removes them at their next join). `false` lifts it.
 - **DataStore version history keeps one version per UTC hour** (the last write of that hour): `ListVersionsAsync` +
   `GetVersionAsync` show what a save looked like hour by hour, and `MetaData.SessionLoadCount` tells sessions apart.
   On 2026-11-01 it showed the owner's save turned into a fresh one: the owner had reset it on purpose,

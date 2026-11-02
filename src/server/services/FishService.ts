@@ -373,15 +373,36 @@ class FishServiceSingleton implements Lifecycle {
 			LikeService.getCoinMultiplier(owner) *
 			((data?.coinBoostSeconds ?? 0) > 0 ? QUEST_COIN_BOOST_MULTIPLIER : 1) *
 			getEventCoinMultiplier(owner);
-		let shares = 1;
-		for (const fish of fishes) if (fish.alive && fish.config.easterEgg) shares += fish.config.easterEgg.incomeShare;
-		const perSecond = math.floor(((this.getTankIncomePerMinute(owner) * shares) / 60) * multiplier + 0.5);
+		const perSecond = math.floor(
+			((this.getTankIncomePerMinute(owner) * this.getIncomeShares(fishes)) / 60) * multiplier + 0.5,
+		);
 		const set = (name: string, value: number | boolean) => {
 			if (model.GetAttribute(name) !== value) model.SetAttribute(name, value);
 		};
 		set(INCOME_ATTRIBUTES.perSecond, perSecond);
 		set(INCOME_ATTRIBUTES.multiplier, multiplier);
 		set(INCOME_ATTRIBUTES.paused, frozen);
+	}
+
+	/** The tank's income in shares of getTankIncomePerMinute: 1 plus each easter egg fish's share. */
+	private getIncomeShares(fishes: ReadonlySet<FishEntity>): number {
+		let shares = 1;
+		for (const fish of fishes) if (fish.alive && fish.config.easterEgg) shares += fish.config.easterEgg.incomeShare;
+		return shares;
+	}
+
+	/**
+	 * The tank's lasting income per second (the lobby's income leaderboard): its theoretical income times the rebirth
+	 * and Coins pass multipliers, without what only lasts a while (like, quest boost, event) nor the test speed.
+	 */
+	public getSteadyIncomePerSecond(owner: Player): number {
+		const fishes = this.fishByOwner.get(owner);
+		const data = DataService.getData(owner);
+		if (!fishes || !data) return 0;
+		const multiplier = getRebirthMultiplier(data.rebirths) * getPassCoinMultiplier(data.passes);
+		return math.floor(
+			((this.getTankIncomePerMinute(owner) * this.getIncomeShares(fishes)) / 60) * multiplier + 0.5,
+		);
 	}
 
 	private payout(owner: Player, fish: FishEntity, plain = false) {

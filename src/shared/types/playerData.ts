@@ -9,6 +9,7 @@ import { createQuestsData, QuestsData } from "./quests";
 import { getVariantLuck, OceanRewardId } from "./oceanRewards";
 import { getPerkHatchMultiplier, Perk } from "./perks";
 import { FishVariant } from "./variants";
+import type { LeaderboardId } from "./leaderboards";
 import { GamePass, getPassCompanionSlots, getPassVariantLuck } from "./gamepasses";
 
 /**
@@ -91,6 +92,13 @@ export interface PlayerData {
 	hiddenCosmetics: CosmeticId[];
 	titleChoice: TitleChoice;
 	/**
+	 * The player's rank (1–10) in the day's top 10 of each board: the leaderboard titles held (cosmetics.ts
+	 * LEADERBOARD_TITLES). Written only by LeaderboardService from its daily snapshot, at join and when a new day's
+	 * snapshot comes; `leaderboardRanksDay` is the UTC day it is from (a stale one is cleared at join).
+	 */
+	leaderboardRanks: Partial<Record<LeaderboardId, number>>;
+	leaderboardRanksDay: number;
+	/**
 	 * Gamepasses owned (shared/types/gamepasses): written by the server from Roblox at join (GamePassService,
 	 * ROADMAP M3), never from the client. Empty until then.
 	 */
@@ -149,6 +157,8 @@ export const DEFAULT_PLAYER_DATA: PlayerData = {
 	themeChoice: "Auto",
 	hiddenCosmetics: [],
 	titleChoice: "Auto",
+	leaderboardRanks: {},
+	leaderboardRanksDay: -1,
 	passes: [],
 };
 

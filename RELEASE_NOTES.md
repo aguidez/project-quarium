@@ -10,6 +10,43 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.54 — 2026-11-02
+
+**New**
+- **Leaderboard titles**: every day at midnight UTC, the top 10 of each leaderboard win its title until the next
+  day's ranking: **Ocean Legend** (Ocean Points), **Tank Tycoon** (coins per second) and **Devoted Keeper** (time
+  played). The title floats above the head on a nameplate that shows your rank: **gold** for #1, **silver** for #2,
+  **bronze** for #3 and **blue** from #4 to #10, with the board's icon. Drop out of the top 10 and the title is gone
+  at the next ranking; a notice tells you when you win or lose one.
+- The Customize menu lists the leaderboard titles you hold with their rank ("OCEAN LEGEND #2"); "Automatic" wears
+  your best rank first.
+
+**Changes**
+- The bronze medals of the leaderboards are now copper, easier to tell from the gold.
+
+---
+
+## V0.53 — 2026-11-02
+
+**New**
+- **Leaderboards** in the lobby: three driftwood signs set as an alcove in the north-west corner of the beach, turned
+  toward the middle of the lobby so they read from both sides. In the middle, **Ocean Legends** (the most Ocean Points); on its left,
+  **Richest Tanks** (coins per second of the aquarium, with the rebirth multiplier and the +50% Coins pass, without the boosts that only last a
+  while); on its right, **Devoted Keepers** (time spent in the game). They are shared by every server: each sign shows
+  the top 10 with their avatar (gold, silver and bronze medals for the podium) and scrolls down to the 100th. Your own
+  row shows in green, and the bottom of each sign always gives your rank ("100+" beyond the top) and your score.
+  The players of your server move on the boards live; the others every few minutes.
+- Moderation: a player can be kept off the leaderboards (a flag in their save).
+
+**Changes**
+- The coral, surfboards and rocks of the north-west corner moved a little to make room for the leaderboards.
+
+**Fixes**
+- The south boardwalk overlapped the east promenade where they meet: the two wood textures flickered on top of each
+  other there.
+
+---
+
 ## V0.52 — 2026-11-02
 
 **New**

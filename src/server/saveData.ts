@@ -1,6 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import { COMPANION_TYPES, CompanionType } from "shared/types/companions";
-import { isCosmeticId } from "shared/types/cosmetics";
+import { isCosmeticId, isLeaderboardTitle } from "shared/types/cosmetics";
+import { LEADERBOARD_IDS, LEADERBOARD_TITLE_RANKS, LeaderboardId } from "shared/types/leaderboards";
 import { isThemeChoice } from "shared/types/customization";
 import { EGG_TYPES, EggType } from "shared/types/eggs";
 import { FEATURES } from "shared/types/features";
@@ -51,6 +52,11 @@ export interface SaveData {
 	player: PlayerData;
 	tank: SavedFish[];
 	stats: PlayerStats;
+	/**
+	 * Moderation: the player is kept off the lobby leaderboards (LeaderboardService). Server only, never synced; set by
+	 * hand on the profile while the player is offline (docs/agent-notes/player-stats.md).
+	 */
+	leaderboardBanned: boolean;
 }
 
 /** Template of new profiles; ProfileStore copies it and Reconcile() fills fields added since. */
@@ -58,6 +64,7 @@ export const SAVE_TEMPLATE: SaveData = {
 	player: DEFAULT_PLAYER_DATA,
 	tank: [],
 	stats: createPlayerStats(),
+	leaderboardBanned: false,
 };
 
 function isFishType(value: unknown): value is FishType {
@@ -154,6 +161,7 @@ function sanitizeStoryLines(quests: QuestsData, companions: readonly CompanionTy
  */
 export function sanitizeSave(save: SaveData) {
 	save.stats = sanitizePlayerStats(save.stats);
+	if (!typeIs(save.leaderboardBanned, "boolean")) save.leaderboardBanned = false;
 	const data = save.player;
 
 	const fish = { ...DEFAULT_PLAYER_DATA.fish };
@@ -216,7 +224,18 @@ export function sanitizeSave(save: SaveData) {
 	if (!typeIs(data.incubationMultiplier, "number") || !(data.incubationMultiplier > 0)) data.incubationMultiplier = 1;
 	syncIncubationSpeed(data, Workspace.GetServerTimeNow());
 	data.features = data.features.filter((f) => FEATURES[f] !== undefined);
-	data.cosmetics = data.cosmetics.filter((c, i) => isCosmeticId(c) && data.cosmetics.indexOf(c) === i);
+	// Leaderboard titles are held through leaderboardRanks, never owned
+	data.cosmetics = data.cosmetics.filter(
+		(c, i) => isCosmeticId(c) && !isLeaderboardTitle(c) && data.cosmetics.indexOf(c) === i,
+	);
+	const ranks: Partial<Record<LeaderboardId, number>> = {};
+	for (const board of LEADERBOARD_IDS) {
+		const rank = typeIs(data.leaderboardRanks, "table") ? data.leaderboardRanks[board] : undefined;
+		if (typeIs(rank, "number") && rank >= 1 && rank <= LEADERBOARD_TITLE_RANKS && rank % 1 === 0)
+			ranks[board] = rank;
+	}
+	data.leaderboardRanks = ranks;
+	if (!typeIs(data.leaderboardRanksDay, "number")) data.leaderboardRanksDay = -1;
 	// The aquarium choices: an unknown value falls back to the default (everything earned shows)
 	if (!isThemeChoice(data.themeChoice)) data.themeChoice = "Auto";
 	data.hiddenCosmetics = (typeIs(data.hiddenCosmetics, "table") ? data.hiddenCosmetics : []).filter(

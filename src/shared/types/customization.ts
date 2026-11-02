@@ -1,4 +1,5 @@
-import { COSMETICS, CosmeticId, getBestTitle } from "./cosmetics";
+import { COSMETICS, CosmeticId, LEADERBOARD_TITLES, TITLE_ORDER } from "./cosmetics";
+import { LEADERBOARD_IDS, LeaderboardId } from "./leaderboards";
 import { AquariumTheme, AQUARIUM_THEMES, getAquariumTheme, REBIRTHS } from "./rebirths";
 
 /**
@@ -45,13 +46,44 @@ export function isCosmeticShown(
 	return data.cosmetics.includes(id) && !data.hiddenCosmetics.includes(id);
 }
 
-/** The title above the head: the one picked if earned, none, or the best one ("Auto"). */
-export function getDisplayedTitle(data: {
+/** What the title functions read from PlayerData. */
+export interface TitleData {
 	cosmetics: readonly CosmeticId[];
-	titleChoice: TitleChoice;
-}): CosmeticId | undefined {
+	/** The player's rank in the day's top 10 of each board (the leaderboard titles held). */
+	leaderboardRanks: Partial<Record<LeaderboardId, number>>;
+}
+
+/** The leaderboard rank behind a held leaderboard title (undefined for an earned title or one not held). */
+export function getTitleRank(data: TitleData, title: CosmeticId): number | undefined {
+	const board = COSMETICS[title].leaderboard;
+	return board !== undefined ? data.leaderboardRanks[board] : undefined;
+}
+
+/**
+ * Every title the player may wear, the most prestigious first: the leaderboard titles held (best rank first, the boards'
+ * order between equal ranks), then the earned ones (TITLE_ORDER).
+ */
+export function getOwnedTitles(data: TitleData): CosmeticId[] {
+	const held = new Array<{ title: CosmeticId; rank: number; order: number }>();
+	LEADERBOARD_IDS.forEach((board, order) => {
+		const rank = data.leaderboardRanks[board];
+		if (rank !== undefined) held.push({ title: LEADERBOARD_TITLES[board], rank, order });
+	});
+	held.sort((a, b) => (a.rank !== b.rank ? a.rank < b.rank : a.order < b.order));
+	const titles = held.map((entry) => entry.title);
+	for (const title of TITLE_ORDER) if (data.cosmetics.includes(title)) titles.push(title);
+	return titles;
+}
+
+export function getBestTitle(data: TitleData): CosmeticId | undefined {
+	return getOwnedTitles(data)[0];
+}
+
+/** The title above the head: the one picked if still held, none, or the best one ("Auto"). */
+export function getDisplayedTitle(data: TitleData & { titleChoice: TitleChoice }): CosmeticId | undefined {
 	const choice = data.titleChoice;
 	if (choice === "None") return undefined;
-	if (choice !== "Auto" && data.cosmetics.includes(choice)) return choice;
-	return getBestTitle(data.cosmetics);
+	const owned = getOwnedTitles(data);
+	if (choice !== "Auto" && owned.includes(choice)) return choice;
+	return owned[0];
 }

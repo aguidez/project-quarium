@@ -14,6 +14,7 @@ import { FoodService } from "./services/FoodService";
 import { GamePassService } from "./services/GamePassService";
 import { TitleService } from "./services/TitleService";
 import { InteractionService } from "./services/InteractionService";
+import { LeaderboardService } from "./services/LeaderboardService";
 import { LikeService } from "./services/LikeService";
 import { OnboardingService } from "./services/OnboardingService";
 import { OceanService } from "./services/OceanService";
@@ -47,5 +48,6 @@ bootstrap([
 	TitleService,
 	CustomizationService,
 	StatsService,
+	LeaderboardService,
 	DevCommandService,
 ]);

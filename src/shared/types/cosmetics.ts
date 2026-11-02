@@ -6,7 +6,11 @@
  * - Finish: a look applied to the tank of every theme (Pearl rims).
  * The ids below are the ones the V1 plan grants. Shown: Pearl rims since V0.42 (AquariumService), the titles (the best
  * one above the player's head, TitleService) and the decor (AquariumService, at DECOR_SLOTS) since V0.44.
+ * The leaderboard titles are the exception: held only while in the day's top 10 of their board (PlayerData.leaderboardRanks),
+ * never in PlayerData.cosmetics (customization.ts getOwnedTitles).
  */
+import type { LeaderboardId } from "./leaderboards";
+
 export type CosmeticKind = "Title" | "Decor" | "Finish";
 
 export type CosmeticId =
@@ -14,6 +18,9 @@ export type CosmeticId =
 	| "TitleMasterAquarist"
 	| "TitleCollector"
 	| "TitleOceanFriend"
+	| "TitleOceanLegend"
+	| "TitleTankTycoon"
+	| "TitleDevotedKeeper"
 	| "DecorWhaleStatue"
 	| "DecorGoldenTrophy"
 	| "DecorIncubator"
@@ -23,6 +30,8 @@ export interface CosmeticConfig {
 	kind: CosmeticKind;
 	displayName: string;
 	description: string;
+	/** A leaderboard title: held by the top 10 of this board, for a day. */
+	leaderboard?: LeaderboardId;
 }
 
 export const COSMETICS: Record<CosmeticId, CosmeticConfig> = {
@@ -45,6 +54,24 @@ export const COSMETICS: Record<CosmeticId, CosmeticConfig> = {
 		kind: "Title",
 		displayName: "Ocean Friend",
 		description: "A title for those who set a Shiny free.",
+	},
+	TitleOceanLegend: {
+		kind: "Title",
+		displayName: "Ocean Legend",
+		description: "Held by the top 10 of the Ocean Points leaderboard.",
+		leaderboard: "OceanPoints",
+	},
+	TitleTankTycoon: {
+		kind: "Title",
+		displayName: "Tank Tycoon",
+		description: "Held by the top 10 of the income leaderboard.",
+		leaderboard: "Income",
+	},
+	TitleDevotedKeeper: {
+		kind: "Title",
+		displayName: "Devoted Keeper",
+		description: "Held by the top 10 of the time leaderboard.",
+		leaderboard: "PlayTime",
 	},
 	DecorWhaleStatue: {
 		kind: "Decor",
@@ -72,7 +99,10 @@ export function isCosmeticId(value: unknown): value is CosmeticId {
 	return typeIs(value, "string") && COSMETICS[value as CosmeticId] !== undefined;
 }
 
-/** Titles from the most to the least prestigious: the player wears the first one they own (getBestTitle). */
+/**
+ * The earned titles from the most to the least prestigious: after the leaderboard titles, the player wears the first one
+ * they own (customization.ts getBestTitle).
+ */
 export const TITLE_ORDER: readonly CosmeticId[] = [
 	"TitleMasterAquarist",
 	"TitleOceanGuardian",
@@ -80,8 +110,15 @@ export const TITLE_ORDER: readonly CosmeticId[] = [
 	"TitleOceanFriend",
 ];
 
-export function getBestTitle(cosmetics: readonly CosmeticId[]): CosmeticId | undefined {
-	return TITLE_ORDER.find((title) => cosmetics.includes(title));
+/** The title of each leaderboard, in the boards' order (Ocean first: the best of two equal ranks). */
+export const LEADERBOARD_TITLES: Record<LeaderboardId, CosmeticId> = {
+	OceanPoints: "TitleOceanLegend",
+	Income: "TitleTankTycoon",
+	PlayTime: "TitleDevotedKeeper",
+};
+
+export function isLeaderboardTitle(id: CosmeticId): boolean {
+	return COSMETICS[id].leaderboard !== undefined;
 }
 
 /**

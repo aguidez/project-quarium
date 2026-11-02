@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-02 (V0.52: the starfall, a recurring event whose star gauge chooses the next egg's variant).
+> Last updated: 2026-11-02 (V0.54: leaderboard titles, the day's top 10 of each board wears a tiered nameplate).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -26,12 +26,15 @@ coins. Around that core loop:
   guarantees the next egg a rarer variant) and admin ones started on every server (the K-pop music event, too generous to
   recur); never during the tutorial;
 - likes between players: a board beside each tank, a like doubles the owner's coins for 5 min;
+- leaderboards: three signs in the lobby (Ocean Points in the middle, the tank's income per second, the time played),
+  global tops of 100 kept in OrderedDataStores;
 - gamepasses, sold by the fisherman's shop in the lobby (never part of the balance): Third Companion Slot, x2 Ocean
   Points, Lucky, +50% Coins, and the Water Hen / Swordfish / Jellyfish passes sold from their quest lines;
 - rebirths: restart the run for a permanent coin multiplier and a new aquarium theme (8 levels: Lagoon, Neon Coral,
   Pirate Wreck, Atlantis, Mariana Trench, Volcanic Temple, Crystal Caverns, Cosmic Sanctuary);
 - cosmetics: titles above the head, decor in the tank, Pearl rims; the player can pick the theme, title and shown
-  decor (Customize button);
+  decor (Customize button); the leaderboard titles are held, not earned: the day's top 10 of each board wears its
+  title on a nameplate (gold #1, silver #2, bronze #3, navy #4–#10) until the next day's ranking;
 - easter eggs: secret fish hidden in every egg (the French Fish) or made by an event (the Alien Fish of the UFO
   night), their own Fish Index category.
 
@@ -79,8 +82,13 @@ ProjetQuarium/
 ├─ design/previews/          Images shown to the owner (Studio captures, mock-ups): crab-sax-preview.jpg (mock-
 │                            up), crab-sax-carry-1-right / -2-middle / -3-left.jpg (Island Breeze's guest dancing),
 │                            admin-panel-mockup.png / admin-panel-ingame.jpg (the admin panel), star-gauge-mockup.png
-│                            (the starfall's gauge and the star power pill), star-power-pill-ingame.jpg
+│                            (the starfall's gauge and the star power pill), star-power-pill-ingame.jpg,
+│                            leaderboards-mockup.png / leaderboards-ingame.jpg, leaderboard-titles-mockup.png /
+│                            leaderboard-titles-ingame.jpg (the nameplates' four tiers)
 ├─ design/ui/
+│  ├─ leaderboards.figcraft  The lobby leaderboards (Leaderboards_Mockup: the three signs on the beach, Board_ocean /
+│  │                         _income / _time faces; LeaderboardTitles_Mockup: the nameplates, Plate_<board>_<tier>),
+│  │                         built by leaderboards.build.js (figcraft-cli; exports both previews)
 │  ├─ starfall.figcraft      The starfall's star gauge (StarGauge_Mockup: in the tank view, its states, the star power
 │  │                         pills), built by
 │  │                         starfall.build.js (figcraft-cli; exports design/previews/star-gauge-mockup.png)
@@ -169,11 +177,14 @@ ProjetQuarium/
    │     │                   kept; run by DataService.sync, buyEgg and sanitizeSave)
    │     ├─ companionStats.ts getCompanionStats(companion, data): what a companion does now with its bonuses (Ocean
    │     │                   upgrades, its perks): the line under its ability on the companion card
-   │     ├─ customization.ts ThemeChoice (a reached theme or "Auto"), TitleChoice (an earned title, "Auto" = the best,
+   │     ├─ customization.ts ThemeChoice (a reached theme or "Auto"), TitleChoice (a title held, "Auto" = the best,
    │     │                   "None"); getUnlockedThemes / getThemeOrder, getDisplayedTheme, isHideable (Decor / Finish),
-   │     │                   isCosmeticShown, getDisplayedTitle
-   │     ├─ cosmetics.ts     CosmeticId / COSMETICS (kind Title / Decor / Finish), TITLE_ORDER, getBestTitle, DECOR_SLOTS
-   │     │                   (tank-local position per decor id), isDecor
+   │     │                   isCosmeticShown; titles: TitleData, getOwnedTitles (leaderboard titles held, best rank first,
+   │     │                   then the earned ones in TITLE_ORDER), getBestTitle, getTitleRank, getDisplayedTitle
+   │     ├─ cosmetics.ts     CosmeticId / COSMETICS (kind Title / Decor / Finish; `leaderboard` on the three leaderboard
+   │     │                   titles TitleOceanLegend / TitleTankTycoon / TitleDevotedKeeper, never in PlayerData.cosmetics),
+   │     │                   TITLE_ORDER (earned titles), LEADERBOARD_TITLES, isLeaderboardTitle, DECOR_SLOTS (tank-local
+   │     │                   position per decor id), isDecor
    │     ├─ gamepasses.ts    GamePass / GAME_PASSES (name, shop text, Roblox id, icon, badge, shopOrder), getShopPasses,
    │     │                   getPassById, getPassCoinMultiplier (x1.5) / getPassOceanMultiplier (x2) /
    │     │                   getPassVariantLuck (x2) / getPassCompanionSlots (+1). The companion passes (WaterHenPass,
@@ -214,6 +225,11 @@ ProjetQuarium/
    │     │                   timing, floor), STAR_BARS (variant guaranteed per bar, better chances), STAR_MAX_BARS,
    │     │                   drawStarSize, getFinalStarCharge, getStarVariantOdds / rollStarVariant, getGuaranteedVariant,
    │     │                   the StarSize / Caught / Fading attributes of a star hitbox
+   │     ├─ leaderboards.ts  LeaderboardId (OceanPoints / Income / PlayTime), LEADERBOARD_IDS, LEADERBOARD_SIZE (100),
+   │     │                   LEADERBOARD_ATTRIBUTE ("Board" on a sign), LeaderboardEntry {userId, name, value},
+   │     │                   LeaderboardSync {boards, own?}, formatPlayTime ("212h 05m"), formatLeaderboardValue;
+   │     │                   titles: LEADERBOARD_TITLE_RANKS (10), getLeaderboardDay (UTC day), TitleTier (Gold / Silver /
+   │     │                   Bronze / Common) + getTitleTier(rank), TITLE_TIER_STYLES (nameplate colours), TITLE_PLATE_IMAGES
    │     ├─ events.ts        GameEventType (Kpop, Island, Abyss, Ufo, Starfall), GAME_EVENTS: kind "Music" (bpm,
    │     │                   beatOffset, beatCoins Flat (K-pop) or Paced (Island: income-paced, growing boost, finale)),
    │     │                   "Abyss", "Ufo" or "Starfall", subtitle, optional musicId and coinMultiplier, duration, recurring flag;
@@ -237,7 +253,8 @@ ProjetQuarium/
    │  │                      (FishService, every 10 s) removes copies no tank used for 60 s
    │  ├─ admins.ts           isGameOwner / isAdmin (owner of the place or its group + ADMIN_USER_IDS), checked server-side;
    │  │                      canUseAdminPanel (Studio playtests only for now; isAdmin at the release)
-   │  ├─ saveData.ts         SaveData (profile: PlayerData + saved tank + stats), SavedFish, SAVE_TEMPLATE, sanitizeSave
+   │  ├─ saveData.ts         SaveData (profile: PlayerData + saved tank + stats + leaderboardBanned), SavedFish,
+   │  │                      SAVE_TEMPLATE, sanitizeSave
    │  ├─ playerStats.ts      PlayerStats (server only, never synced): sessions, days, play / tending seconds, milestones
    │  │                      {tending, play, days, at} ("Onboarding:<step>", "Rebirth<n>", "Species:<type>", "AllSpecies",
    │  │                      "Ocean:<id>", "Quest:<id>"; tending -1 = reached before the stats existed: `legacy`), coins
@@ -273,7 +290,8 @@ ProjetQuarium/
    │     │                   nor release), mutations (effect / effectLeft: Sleep freezes the fish, Green / Red x2 / x0.5 its
    │     │                   coins), pickKidnapTarget / beamUp / beamDown, the alien fish's scream (Scream message,
    │     │                   AlienScream SFX, one plain coin from every other awake fish); easter egg fish: coin from
-   │     │                   getTankIncomePerMinute, leave after their lifetime (onFishLeft); onFishSpawned / onFishFed
+   │     │                   getTankIncomePerMinute, leave after their lifetime (onFishLeft); getSteadyIncomePerSecond (the income
+   │     │                   leaderboard: theoretical income x rebirth x Coins pass, no temporary boost); onFishSpawned / onFishFed
    │     │                   callbacks, findHungryFishPosition / hasHungryFish (feeders); replication to the clients that
    │     │                   watch each tank ("WatchAquariums" → FishSync messages); the quest coin boost (runCoinBoost:
    │     │                   PlayerData.coinBoostSeconds runs down only while the tank produces, coins x
@@ -321,8 +339,15 @@ ProjetQuarium/
    │     │                   profiles (testSpeedUsed / testNoPasses) send nothing (the dashboard can't delete an event)
    │     ├─ CustomizationService  "SetAquariumTheme", "SetCosmeticShown" ({id, shown}), "SetTitle": checks, then PlayerData's
    │     │                   choices; AquariumService and TitleService apply them
-   │     ├─ TitleService     Polls every 1 s: a BillboardGui "PlayerTitle" on each character's Head with getDisplayedTitle
-   │     │                   (gold LuckiestGuy text, 4.2 × 0.65 studs, MaxDistance 120), removed without one
+   │     ├─ LeaderboardService  The lobby leaderboards (§3.4): one OrderedDataStore per board
+   │     │                   (Leaderboard_<Id>_v1, key = UserId), writes its players' scores every 2 min (changed ones only)
+   │     │                   and when they leave (sampled in onSave), reads the top 100 every 2 min, names from UserService,
+   │     │                   merges its players' live scores and sends LeaderboardSync every 30 s and at join; the titles'
+   │     │                   daily snapshot (DataStore LeaderboardTitles_v1, key Daily) → PlayerData.leaderboardRanks (§3.4)
+   │     ├─ TitleService     Polls every 1 s: a BillboardGui "PlayerTitle" on each character's Head with getDisplayedTitle:
+   │     │                   an earned title is gold LuckiestGuy text (4.2 × 0.65 studs); a leaderboard title a nameplate in
+   │     │                   its rank's tier (pill + rank badge + board icon, laid out in design px and drawn in scale, 0.65
+   │     │                   stud tall); MaxDistance 120, rebuilt when the title or its rank changes, removed without one
    │     ├─ GamePassService  The only writer of PlayerData.passes: at join asks Roblox for each pass on sale
    │     │                   (UserOwnsGamePassAsync, 3 tries; no answer keeps the saved state; passes without an id are
    │     │                   dropped), grants a purchase from PromptGamePassPurchaseFinished (thank-you Reward),
@@ -338,7 +363,9 @@ ProjetQuarium/
    │                         (1–10, PlayerStats.testSpeed, saved so it also applies on the published game: coins, hatch
    │                         time, Ocean Points x it via getTestSpeed; red "TEST SPEED x6" chip; the profile is left out
    │                         of npm run stats); "/passes off|on" (plays without the passes, saved; "NO PASSES" chip);
-   │                         "/ufo <Outcome>|off" (forces the UFO outcome, session only)
+   │                         "/ufo <Outcome>|off" (forces the UFO outcome, session only); "/lbtitle <Board> <1-10>|off"
+   │                         (holds a leaderboard title at that rank to see its nameplate; the next join or day puts the real
+   │                         ranks back)
    └─ client/
       ├─ main.client.ts      Registers controllers
       ├─ fishLook.ts         getFishTemplate / cloneFishTemplate (undefined until the server replicated the species),
@@ -393,6 +420,8 @@ ProjetQuarium/
       │  │                   shooting streaks on every tank, night-blue water, golden tank light, shooting stars in the sky
       │  │                   around the camera; draws each Star hitbox (★ glyph billboard with halo, light, trail,
       │  │                   sparkles), bursts it when "Caught", blinks it while "Fading"
+      │  ├─ LeaderboardController  Local SurfaceGui (React LeaderboardBoard) in PlayerGui, adorned to the "Screen" part of
+      │  │                   each sign (tag Leaderboard; in PlayerGui so the list takes the wheel / drag), from LeaderboardSync
       │  └─ LikeBoardController  Local SurfaceGui (React LikeBoard) on every like board + local "Like" ProximityPrompt;
       │                      getOwnBoostEndsAt / onOwnBoostChanged (own tank's boost, for the pill)
       └─ ui/                 React components
@@ -449,7 +478,13 @@ ProjetQuarium/
          ├─ RebirthPanel     Multiplier hero, what is lost / earned (Ocean Points preview), progress, 2-click confirm;
          │                   after rebirth 8: "Voyage complete! More aquariums arrive with the next update!"
          ├─ AquariumPanel    Customization: THEME cards (Automatic, then every theme in rebirth order, the ones not reached
-         │                   locked), DECOR & FINISHES cards with a SHOWN / HIDDEN switch, TITLE buttons; scrolls past 470 px
+         │                   locked), DECOR & FINISHES cards with a SHOWN / HIDDEN switch, TITLE buttons (getOwnedTitles; a
+         │                   leaderboard title with its rank: "OCEAN LEGEND #2"); scrolls past 470 px. The Customize button
+         │                   shows once a rebirth, a cosmetic or a leaderboard title is held
+         ├─ LeaderboardBoard Face of a leaderboard sign (FigCraft leaderboards.figcraft), 440 x 540 px: ribbon title and
+         │                   medallion (Ocean icon / coin / drawn clock), 10 rows of a ScrollingFrame holding up to 100
+         │                   (medals 1-3, avatar headshot, display name, score; own row green), the player's rank ("100+")
+         │                   and score at the bottom. Scores with letters ("$7.2M/s", "212h 05m") in Fredoka
          ├─ LikeBoard        Face of a like board (likes, "a like = x2" hint or boost countdown), mounted by LikeBoardController
          ├─ LikeBoostPill    The owner's own like boost ("Liked! Coins x2 4:32"), under the top HUD
          └─ QuestBoostPill   The quest coin boost left ("QUEST BOOST x2 4:32", "PAUSED" when the tank doesn't produce)
@@ -463,6 +498,13 @@ ProjetQuarium/
   both ends of the central aisle: `FishingHutEast` (113, 0, 0, facing −X) and `FishingHutWest` (−113, 0, 0, facing +X).
   Each: `Hut` (driftwood shack, counter window), `Fisherman` (tag `ShopKeeper`, PrimaryPart its MeshPart, no
   collision), `SignAnchor` (a BillboardGui "SHOP" plate). Layout constraints: `docs/agent-notes/lobby-decor-constraints.md`.
+  `Leaderboards` (folder): an alcove of three signs in the north-west corner, turned 30° from the north fence toward
+  the middle of the lobby (along the corner's diagonal, open to players coming from either side): `OceanPointsBoard`
+  (centre, ground (−103, 0, 67), screen 11 studs wide), `IncomeBoard` (north-east, the viewers' left) and
+  `PlayTimeBoard` (south-west), 8 wide, turned 35° toward the viewers. 4.8 studs from the west fence, 2.5 from the
+  north one, 3.5 west of the line where they would start to cover Aquarium4 in its 2.5D view. Each: tag `Leaderboard`, attribute `Board`, PrimaryPart `Screen` (its Front face carries the board; keep
+  the 440 : 540 aspect), whitewashed planks, driftwood trims, posts with rope and white caps, a lobby Starfish /
+  Seashell clone on top (`Topper`). Parts only, nothing uploaded.
 - **Template layout** (every model below): invisible root (`Body`; `Hitbox` x1.25 for coins) + welded `Mesh`
   MeshPart, head / front toward −Z, texture in a **SurfaceAppearance** (tinted by its `Color` when needed), built at
   the right size (never `ScaleTo`: CompanionService tweens back to scale 1). Generated meshes, ≤ ~4k triangles.
@@ -513,8 +555,9 @@ ProjetQuarium/
 
 - **Saving (ProfileStore).** `DataService` opens one profile per player (store `PlayerData_v1`, key
   `Player_<UserId>`), holding a `SaveData` (`server/saveData.ts`): `player` (the PlayerData below, synced to the
-  client), `tank` (the fish: type, adult scale, age, hunger and time left, variant; not a UFO effect) and `stats` (`server/playerStats.ts`,
-  never synced; read offline by `npm run stats`). On load: `Reconcile()` (fields added to `DEFAULT_PLAYER_DATA`
+  client), `tank` (the fish: type, adult scale, age, hunger and time left, variant; not a UFO effect), `stats` (`server/playerStats.ts`,
+  never synced; read offline by `npm run stats`) and `leaderboardBanned` (moderation, server only: kept off the
+  leaderboards; set by hand while the player is offline, docs/agent-notes/player-stats.md). On load: `Reconcile()` (fields added to `DEFAULT_PLAYER_DATA`
   since), then `sanitizeSave` (drops ids removed from the config, migrates old shapes, restarts the story where it
   was). A failed load kicks the player (never play on unsaved default data). `getData` is undefined until loaded:
   actions sent before are ignored.
@@ -557,6 +600,7 @@ ProjetQuarium/
   | `features`, `tutorialsDone` | Unlocked features, and those whose tutorial was seen |
   | `likesReceived`, `lastLikeGivenAt` | Likes received, last like given (cooldown, server time). The boost itself is not saved |
   | `themeChoice`, `hiddenCosmetics`, `titleChoice` | The aquarium choices (customization.ts): theme worn ("Auto" = the newest reached), earned decor / finishes hidden (everything earned shows by default), title shown ("Auto" = the best, "None") |
+  | `leaderboardRanks`, `leaderboardRanksDay` | The player's rank (1–10) in the day's top 10 of each board, and that UTC day: the leaderboard titles held. Written only by LeaderboardService from the daily snapshot (at join and when a new day's comes); ranks of an older day are cleared at join |
   | `coinBoostSeconds` | Quest coin boost left (daily / weekly rewards): adds up, runs down only while the tank produces, kept through rebirths |
   | `starPower` | Star power kept from a starfall (0–3 bars): the next opened egg draws its variant from getStarVariantOdds and spends it; kept through rebirths |
   | `starCharge` | The star gauge of the starfall running now (0 otherwise): banked into starPower at the event's end, or by sanitizeSave if the player left mid-event (without the floor) |
@@ -599,6 +643,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
 | `Reward` | `{title, subtitle, amount, item?: {icon, name, image?}}` | RewardPopup (after any reveal) |
 | `MoneyPopup` | `{position, amount, special, ocean?, stolen?, ghost?}` | IncomePopupController |
 | `PlaySfx` | `(SfxName, pitch)` | AudioController |
+| `LeaderboardSync` | `{boards: Record<LeaderboardId, LeaderboardEntry[]>, own?}` (every 30 s, at join) | LeaderboardController |
 | `FishSync` | `FishMessage`: `Tank` (full state of a newly watched tank), `Spawn`, `Swim` (new segment), `State` (hunger, growth, paused, UFO effect), `Remove` (Eaten / Released / Gone / Abducted), `Scream` (an alien fish) | FishRenderController |
 
 **Replicated state outside remotes:**
@@ -607,7 +652,8 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   carry `Owner` and `CompanionType` (feeders also their charge attributes). `EventFish` models carry `EventType` (the
   lantern fish also `Lurking`; a UFO `Beaming`). `Star` hitboxes (starfall) carry `StarSize`, then `Fading` or
   `Caught`. Tanks carry `OwnerUserId`, `Likes`, `LikeBoostEndsAt`, `Theme` and the
-  `INCOME_ATTRIBUTES`. `LikeBoard` models carry `PlotIndex`. Players carry `EventImmune`, `CoinBoostSeconds` /
+  `INCOME_ATTRIBUTES`. `LikeBoard` models carry `PlotIndex`; `Leaderboard` signs carry `Board`. Players carry `EventImmune`,
+  `CoinBoostSeconds` /
   `CoinBoostRunning`, `TestSpeed` (the owner's test chip) and `AdminPanel` (may open the admin panel).
 - **Events:** ReplicatedStorage attributes `EventType`, `EventStartsAt`, `EventEndsAt` and `EventSource`
   ("Recurring" / "Admin") (`EVENT_ATTRIBUTES`), with beats computed from `Workspace.GetServerTimeNow()`. Players carry
@@ -738,6 +784,21 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   `EggService.openEgg`: with `starPower` > 0 (not the onboarding egg, not an easter egg), the variant comes from
   `rollStarVariant(power, luck)` and the power is spent. Client: StarfallEventController, StarGauge (during the
   event), StarPowerPill (after it), banner.
+- **Leaderboards.** LeaderboardService samples each player's scores (Ocean Points, `getSteadyIncomePerSecond`,
+  `PlayerStats.playSeconds`) on every push, write and save. Every 2 min it `SetAsync`s the changed ones into the
+  board's OrderedDataStore and reads the top 100 (`GetSortedAsync`), and it writes the last sample when the player
+  leaves (sampled by the final save's onSave, before FishService empties the tank). A player counts only 30 s after
+  loading (the tank respawns its fish first). Every 30 s the server's live players replace their stored entry, the
+  lists are re-sorted and cut to 100, and each client gets `LeaderboardSync` with its own scores. A profile with
+  `SaveData.leaderboardBanned` (moderation) or `testSpeedUsed` (the owner's `/speed`) is left out and its entries
+  removed from the stores.
+- **Leaderboard titles.** Every minute each server checks the UTC day. Without today's snapshot in memory it reads the
+  DataStore key (`LeaderboardTitles_v1` / `Daily`: `{day, ranks: {board: UserIds best first}}`); if that one is
+  older, the server takes a new one from the stores' top 10 (`GetSortedAsync(false, 10)`, all three boards or nothing)
+  and writes it with `UpdateAsync`, keeping an already newer value (the first server to see the day wins). Each
+  loaded player then gets `leaderboardRanks` from it (none for an excluded profile), with a notice per title gained
+  or lost. Offline players need nothing: their ranks are recomputed when they join. Titles: Ocean Legend (Ocean
+  Points), Tank Tycoon (income), Devoted Keeper (time); "Auto" wears the best rank first, then the earned titles.
 - **Rebirth.** Claiming "Saving Up" unlocks the "Rebirth" feature: a notice, the side button with a "NEW" coach
   bubble (its tutorial ends when the menu opens) and a "!" badge whenever a rebirth is affordable. "Rebirth" needs a
   second click. Server: refused during a hatch reveal; Ocean Points from `getRebirthOceanPoints` (variants included),
@@ -802,6 +863,13 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
 - **Starfall**: its track is `musicId` 88076339607645 (the owner's choice). The stars are a ★ text glyph on a billboard
   (no uploaded image). The sky shooting stars over the lobby were only seen in the 2.5D view in Studio (the playtest
   camera stays on the tank).
+- **Leaderboards**: DataStore budget per server ≈ 3 reads / 2 min plus ≤ 3 writes per player / 2 min (only changed
+  scores). Studio playtests write to the same stores as live servers: the owner's profile stays off them only
+  because it used `/speed`; test other accounts knowingly. A store failure (no API access) leaves the boards with
+  this server's players only (one warning). Names come from UserService, cached per server ("..." until known).
+  A SurfaceGui only takes input from PlayerGui with an Adornee, which the scrolling list needs. The wheel scrolls
+  the list; whether it also zooms the camera over a sign was not checked. The titles' snapshot ranks the stored
+  scores at midnight UTC (a live player's last 2 min may be missing) and Studio playtests write the real snapshot too.
 - **Admin events across servers** rely on MessagingService (best effort, a few seconds of delay; a server that misses
   the message joins through the MemoryStore only when it starts). Add admins by UserId in `server/admins.ts` (the
   game's owner always is one).

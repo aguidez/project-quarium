@@ -1,4 +1,4 @@
-import { Players, RunService, TextChatService } from "@rbxts/services";
+import { Players, RunService, TextChatService, Workspace } from "@rbxts/services";
 import { Lifecycle } from "shared/framework";
 import { isGameOwner } from "../admins";
 import { CoinService } from "./CoinService";
@@ -10,6 +10,7 @@ import { UfoService } from "./UfoService";
 import { UFO_OUTCOME_ORDER, UfoOutcome } from "shared/types/ufo";
 import { GAME_PASSES, isGamePass } from "shared/types/gamepasses";
 import { MAX_TEST_SPEED } from "../playerStats";
+import { getLeaderboardDay, LEADERBOARD_IDS, LEADERBOARD_TITLE_RANKS } from "shared/types/leaderboards";
 
 const RESET_COMMAND = "/datareset";
 const CONFIRM_WORD = "confirm";
@@ -22,6 +23,7 @@ const BOOST_COMMAND = "/boost";
 const SPEED_COMMAND = "/speed";
 const PASSES_COMMAND = "/passes";
 const UFO_COMMAND = "/ufo";
+const LB_TITLE_COMMAND = "/lbtitle";
 /** The most incubators the test command gives (the V1 plan stops at 2). */
 const MAX_TEST_INCUBATORS = 4;
 
@@ -44,6 +46,8 @@ const MAX_TEST_INCUBATORS = 4;
  *  /passes off|on       the owner plays without their gamepasses (saved, also on the published game) or with them again
  *  /ufo <Outcome>|off   the UFOs of the next UFO nights bring the owner's fish back with that outcome (Sleep, Green, Red,
  *                       Variant, Alien), for this session; "/ufo off" puts the odds back
+ *  /lbtitle <Board> <rank>|off  holds that board's leaderboard title at that rank (1–10) to see its nameplate (Board:
+ *                       OceanPoints, Income, PlayTime); the next join or day's snapshot puts the real ranks back
  */
 class DevCommandServiceSingleton implements Lifecycle {
 	private resetAskedAt = new Map<Player, number>();
@@ -122,13 +126,22 @@ class DevCommandServiceSingleton implements Lifecycle {
 			if (player) this.onUfo(player, text);
 		});
 		ufo.Parent = TextChatService;
+
+		const lbTitle = new Instance("TextChatCommand");
+		lbTitle.Name = "DevLeaderboardTitle";
+		lbTitle.PrimaryAlias = LB_TITLE_COMMAND;
+		lbTitle.Triggered.Connect((source, text) => {
+			const player = Players.GetPlayerByUserId(source.UserId);
+			if (player) this.onLeaderboardTitle(player, text);
+		});
+		lbTitle.Parent = TextChatService;
 		Players.PlayerRemoving.Connect((player) => this.resetAskedAt.delete(player));
 	}
 
 	public onStart() {
 		if (RunService.IsStudio())
 			print(
-				`[Server] DevCommandService: ${RESET_COMMAND}, ${NEXT_FRENCH_COMMAND}, ${INCUBATORS_COMMAND}, ${PASS_COMMAND}, ${BOOST_COMMAND}, ${SPEED_COMMAND}, ${PASSES_COMMAND}, ${UFO_COMMAND} available (Studio, place owner only).`,
+				`[Server] DevCommandService: ${RESET_COMMAND}, ${NEXT_FRENCH_COMMAND}, ${INCUBATORS_COMMAND}, ${PASS_COMMAND}, ${BOOST_COMMAND}, ${SPEED_COMMAND}, ${PASSES_COMMAND}, ${UFO_COMMAND}, ${LB_TITLE_COMMAND} available (Studio, place owner only).`,
 			);
 	}
 
@@ -157,6 +170,38 @@ class DevCommandServiceSingleton implements Lifecycle {
 		data.incubators = math.clamp(math.floor(count), 1, MAX_TEST_INCUBATORS);
 		DataService.sync(player);
 		DataService.notify(player, `Incubators per egg type: ${data.incubators}.`, "info");
+	}
+
+	private onLeaderboardTitle(player: Player, text: string) {
+		if (!this.isAllowed(player)) {
+			warn(`[Server] ${player.Name} tried ${LB_TITLE_COMMAND}: refused (not the place's owner).`);
+			return;
+		}
+		const data = DataService.getData(player);
+		const words = text.split(" ");
+		const board = LEADERBOARD_IDS.find((id) => id.lower() === words[1]?.lower());
+		const rank = tonumber(words[2]);
+		const off = words[2]?.lower() === "off";
+		if (
+			!data ||
+			board === undefined ||
+			(!off && (rank === undefined || rank < 1 || rank > LEADERBOARD_TITLE_RANKS))
+		) {
+			DataService.notify(
+				player,
+				`Usage: ${LB_TITLE_COMMAND} ${LEADERBOARD_IDS.join(" | ")} <1-10> | off`,
+				"info",
+			);
+			return;
+		}
+		data.leaderboardRanks[board] = off ? undefined : math.floor(rank!);
+		data.leaderboardRanksDay = getLeaderboardDay(Workspace.GetServerTimeNow());
+		DataService.sync(player);
+		DataService.notify(
+			player,
+			off ? `${board} title: off.` : `${board} title held at #${math.floor(rank!)}.`,
+			"info",
+		);
 	}
 
 	private onUfo(player: Player, text: string) {

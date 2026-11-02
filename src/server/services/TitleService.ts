@@ -1,21 +1,45 @@
-import { Players } from "@rbxts/services";
+import { Players, TextService } from "@rbxts/services";
 import { Lifecycle } from "shared/framework";
 import { COSMETICS, CosmeticId } from "shared/types/cosmetics";
-import { getDisplayedTitle } from "shared/types/customization";
+import { getDisplayedTitle, getTitleRank } from "shared/types/customization";
+import {
+	getTitleTier,
+	LeaderboardId,
+	TITLE_PLATE_IMAGES,
+	TITLE_TIER_STYLES,
+	TitleTierStyle,
+} from "shared/types/leaderboards";
 import { DataService } from "./DataService";
 
 /** Titles are checked this often (earned from a quest or an Ocean milestone, or a new character). */
 const CHECK_INTERVAL = 1;
 const BILLBOARD_NAME = "PlayerTitle";
 const TITLE_COLOR = Color3.fromHex("#FFD54A");
-const TITLE_STROKE = Color3.fromHex("#071320");
+const OUTLINE = Color3.fromHex("#071320");
+const WHITE = new Color3(1, 1, 1);
+
+// Leaderboard nameplate, laid out in design pixels (FigCraft leaderboards.figcraft, Plate_*) and drawn in scale, so the
+// billboard keeps its size in studs: a pill of PLATE_HEIGHT px, a rank badge overhanging its left end, the board's icon
+// on its right end
+const PLATE_HEIGHT = 56;
+const PLATE_DEPTH = 6;
+const PLATE_TEXT_SIZE = 28;
+const PLATE_TEXT_X = 70; // where the title starts, after the badge
+const PLATE_ICON_ROOM = 58;
+const BADGE_SIZE = 66;
+/** Room around the plate for what overhangs it (badge on the left, sparkle on the top). */
+const MARGIN = { left: 10, top: 14, right: 4, bottom: 2 };
+/** Studs per design pixel: a 56 px plate is 0.65 stud tall, the height of the earned titles. */
+const STUDS_PER_PX = 0.65 / PLATE_HEIGHT;
 
 /**
- * Titles (cosmetics.ts, kind Title): the best title a player owns (TITLE_ORDER) floats above their character's head, for
- * every player to see. Server-made BillboardGui, so it replicates; nothing is stored beyond PlayerData.cosmetics.
+ * Titles (cosmetics.ts, kind Title): the title a player wears (getDisplayedTitle: their pick, else the best one they
+ * hold) floats above their character's head, for every player to see. Earned titles are gold text; a leaderboard title
+ * (held by the day's top 10 of its board) is a nameplate in its rank's tier: gold #1, silver #2, copper bronze #3, navy
+ * for #4 to #10. Server-made BillboardGui, so it replicates; nothing is stored beyond PlayerData.
  */
 class TitleServiceSingleton implements Lifecycle {
-	/** The title shown on each player's current character ("" for none). */
+	/** The title shown on each player's current character ("" for none, "title#rank" for a leaderboard title). */
 	private shown = new Map<Player, string>();
 
 	public onInit() {
@@ -35,23 +59,21 @@ class TitleServiceSingleton implements Lifecycle {
 		if (!head?.IsA("BasePart")) return;
 		const data = DataService.getData(player);
 		const title = data ? getDisplayedTitle(data) : undefined; // the player's pick, else the best one
+		const rank = data && title ? getTitleRank(data, title) : undefined;
 		const existing = head.FindFirstChild(BILLBOARD_NAME);
-		const key = title ?? "";
+		const key = title === undefined ? "" : rank === undefined ? title : `${title}#${rank}`;
 		// A new character has no billboard yet: rebuild it even if the title didn't change
 		if (this.shown.get(player) === key && (existing !== undefined) === (title !== undefined)) return;
 		this.shown.set(player, key);
 		existing?.Destroy();
-		if (title) this.build(head, title);
+		if (!title) return;
+		const board = COSMETICS[title].leaderboard;
+		if (board !== undefined && rank !== undefined) this.buildPlate(head, title, board, rank);
+		else this.buildText(head, title);
 	}
 
-	private build(head: BasePart, title: CosmeticId) {
-		const billboard = new Instance("BillboardGui");
-		billboard.Name = BILLBOARD_NAME;
-		billboard.Size = UDim2.fromScale(4.2, 0.65); // studs: readable from the lobby without hiding the tank
-		billboard.StudsOffset = new Vector3(0, 2.6, 0); // above the default name
-		billboard.MaxDistance = 120;
-		billboard.LightInfluence = 0;
-		billboard.ResetOnSpawn = false;
+	private buildText(head: BasePart, title: CosmeticId) {
+		const billboard = this.billboard(UDim2.fromScale(4.2, 0.65)); // studs: readable from the lobby without hiding the tank
 		const label = new Instance("TextLabel");
 		label.Size = UDim2.fromScale(1, 1);
 		label.BackgroundTransparency = 1;
@@ -59,12 +81,196 @@ class TitleServiceSingleton implements Lifecycle {
 		label.Text = COSMETICS[title].displayName.upper();
 		label.TextScaled = true;
 		label.TextColor3 = TITLE_COLOR;
-		const stroke = new Instance("UIStroke");
-		stroke.Color = TITLE_STROKE;
-		stroke.Thickness = 2;
-		stroke.Parent = label;
+		this.stroke(label, OUTLINE, 2);
 		label.Parent = billboard;
 		billboard.Parent = head;
+	}
+
+	private billboard(size: UDim2): BillboardGui {
+		const billboard = new Instance("BillboardGui");
+		billboard.Name = BILLBOARD_NAME;
+		billboard.Size = size;
+		billboard.StudsOffset = new Vector3(0, 2.6, 0); // above the default name
+		billboard.MaxDistance = 120;
+		billboard.LightInfluence = 0;
+		billboard.ResetOnSpawn = false;
+		return billboard;
+	}
+
+	private stroke(parent: GuiObject, color: Color3, thickness: number, border = false) {
+		const stroke = new Instance("UIStroke");
+		stroke.Color = color;
+		stroke.Thickness = thickness;
+		stroke.LineJoinMode = Enum.LineJoinMode.Round;
+		if (border) stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border;
+		stroke.Parent = parent;
+	}
+
+	private buildPlate(head: BasePart, title: CosmeticId, board: LeaderboardId, rank: number) {
+		const style = TITLE_TIER_STYLES[getTitleTier(rank)];
+		const text = COSMETICS[title].displayName.upper();
+		const textWidth = TextService.GetTextSize(
+			text,
+			PLATE_TEXT_SIZE,
+			Enum.Font.LuckiestGuy,
+			new Vector2(1000, 100),
+		).X;
+		const plateWidth = PLATE_TEXT_X + textWidth + 8 + PLATE_ICON_ROOM;
+		const width = MARGIN.left + plateWidth + MARGIN.right;
+		const height = MARGIN.top + PLATE_HEIGHT + PLATE_DEPTH + MARGIN.bottom;
+		// Design pixels (from the plate's top-left corner) to the billboard's scale
+		const at = (x: number, y: number) => UDim2.fromScale((MARGIN.left + x) / width, (MARGIN.top + y) / height);
+		const size = (w: number, h: number) => UDim2.fromScale(w / width, h / height);
+
+		const billboard = this.billboard(UDim2.fromScale(width * STUDS_PER_PX, height * STUDS_PER_PX));
+		billboard.StudsOffset = new Vector3(0, 2.7, 0);
+		const frame = (name: string, parent: Instance, x: number, y: number, w: number, h: number, zIndex: number) => {
+			const f = new Instance("Frame");
+			f.Name = name;
+			f.Position = at(x, y);
+			f.Size = size(w, h);
+			f.BackgroundColor3 = WHITE;
+			f.BorderSizePixel = 0;
+			f.ZIndex = zIndex;
+			f.Parent = parent;
+			const corner = new Instance("UICorner");
+			corner.CornerRadius = new UDim(0.5, 0);
+			corner.Parent = f;
+			return f;
+		};
+		const gradient = (parent: Instance, top: Color3, bottom: Color3) => {
+			const g = new Instance("UIGradient");
+			g.Color = new ColorSequence(top, bottom);
+			g.Rotation = 90;
+			g.Parent = parent;
+		};
+		const label = (
+			parent: Instance,
+			x: number,
+			y: number,
+			w: number,
+			h: number,
+			value: string,
+			outline: Color3,
+			zIndex: number,
+		) => {
+			const l = new Instance("TextLabel");
+			l.Position = at(x, y);
+			l.Size = size(w, h);
+			l.BackgroundTransparency = 1;
+			l.Font = Enum.Font.LuckiestGuy;
+			l.Text = value;
+			l.TextScaled = true;
+			l.TextColor3 = WHITE;
+			l.ZIndex = zIndex;
+			this.stroke(l, outline, 2);
+			l.Parent = parent;
+		};
+
+		const shadow = frame("Shadow", billboard, 0, PLATE_DEPTH, plateWidth, PLATE_HEIGHT, 1);
+		shadow.BackgroundColor3 = style.shadow;
+		this.stroke(shadow, OUTLINE, 2, true);
+		const face = frame("Face", billboard, 0, 0, plateWidth, PLATE_HEIGHT, 2);
+		gradient(face, style.faceTop, style.faceBottom);
+		this.stroke(face, OUTLINE, 2, true);
+		const gloss = frame("Gloss", billboard, 30, 4, plateWidth - 60, 20, 3);
+		gloss.BackgroundTransparency = style.gloss;
+		label(billboard, PLATE_TEXT_X, 9, textWidth + 4, PLATE_HEIGHT - 16, text, style.shadow, 5);
+		this.buildIcon(billboard, board, at(plateWidth - 50, 9), size(38, 38));
+
+		const badge = frame("RankBadge", billboard, -8, -5, BADGE_SIZE, BADGE_SIZE, 6);
+		gradient(badge, style.badgeTop, style.badgeBottom);
+		this.stroke(badge, OUTLINE, 2, true);
+		label(billboard, -8 + 12, -5 + 14, BADGE_SIZE - 24, BADGE_SIZE - 26, tostring(rank), style.badgeShadow, 7); // over the badge
+		for (const [i, sparkle] of ipairs(this.sparkles(style, plateWidth))) {
+			const image = new Instance("ImageLabel");
+			image.Name = `Sparkle${i}`;
+			image.Position = at(sparkle.x, sparkle.y);
+			image.Size = size(sparkle.size, sparkle.size);
+			image.BackgroundTransparency = 1;
+			image.Image = TITLE_PLATE_IMAGES.sparkle;
+			image.ZIndex = 7;
+			image.Parent = billboard;
+		}
+		billboard.Parent = head;
+	}
+
+	private sparkles(style: TitleTierStyle, plateWidth: number) {
+		const all = [
+			{ x: plateWidth - 30, y: -12, size: 26 },
+			{ x: 52, y: PLATE_HEIGHT - 8, size: 18 },
+		];
+		const result = new Array<{ x: number; y: number; size: number }>();
+		for (let i = 0; i < math.min(style.sparkles, all.size()); i++) result.push(all[i]);
+		return result;
+	}
+
+	/** The board's icon at the plate's right end: the Ocean side icon, a gold coin or a white clock, drawn like the signs'. */
+	private buildIcon(parent: Instance, board: LeaderboardId, position: UDim2, size: UDim2) {
+		if (board === "OceanPoints") {
+			const image = new Instance("ImageLabel");
+			image.Name = "Icon";
+			image.Position = position;
+			image.Size = size;
+			image.BackgroundTransparency = 1;
+			image.Image = TITLE_PLATE_IMAGES.ocean;
+			image.ScaleType = Enum.ScaleType.Fit;
+			image.ZIndex = 5;
+			image.Parent = parent;
+			return;
+		}
+		const disc = new Instance("Frame");
+		disc.Name = "Icon";
+		disc.Position = position;
+		disc.Size = size;
+		disc.BackgroundColor3 = WHITE;
+		disc.BorderSizePixel = 0;
+		disc.ZIndex = 5;
+		const corner = new Instance("UICorner");
+		corner.CornerRadius = new UDim(0.5, 0);
+		corner.Parent = disc;
+		const gradient = new Instance("UIGradient");
+		gradient.Rotation = 90;
+		gradient.Color =
+			board === "Income"
+				? new ColorSequence(Color3.fromHex("#FFE680"), Color3.fromHex("#E89A00"))
+				: new ColorSequence(WHITE, Color3.fromHex("#D8F7E2"));
+		gradient.Parent = disc;
+		this.stroke(disc, OUTLINE, 2, true);
+		const mark = (name: string, pos: UDim2, markSize: UDim2, color: Color3) => {
+			const f = new Instance("Frame");
+			f.Name = name;
+			f.Position = pos;
+			f.Size = markSize;
+			f.BackgroundColor3 = color;
+			f.BorderSizePixel = 0;
+			f.ZIndex = 6;
+			const c = new Instance("UICorner");
+			c.CornerRadius = new UDim(0.5, 0);
+			c.Parent = f;
+			f.Parent = disc;
+		};
+		if (board === "Income") {
+			mark("Inner", UDim2.fromScale(0.17, 0.17), UDim2.fromScale(0.66, 0.66), Color3.fromHex("#FFC21A"));
+			const symbol = new Instance("TextLabel");
+			symbol.Size = UDim2.fromScale(1, 1);
+			symbol.Position = UDim2.fromScale(0, 0.06);
+			symbol.BackgroundTransparency = 1;
+			symbol.Font = Enum.Font.LuckiestGuy;
+			symbol.Text = "$";
+			symbol.TextScaled = true;
+			symbol.TextColor3 = Color3.fromHex("#B86E00");
+			symbol.ZIndex = 7;
+			const padding = new Instance("UIPadding");
+			padding.PaddingTop = new UDim(0.22, 0);
+			padding.PaddingBottom = new UDim(0.22, 0);
+			padding.Parent = symbol;
+			symbol.Parent = disc;
+		} else {
+			mark("HandUp", UDim2.fromScale(0.45, 0.2), UDim2.fromScale(0.1, 0.32), OUTLINE);
+			mark("HandRight", UDim2.fromScale(0.45, 0.45), UDim2.fromScale(0.28, 0.1), Color3.fromHex("#1C9C52"));
+		}
+		disc.Parent = parent;
 	}
 }
 

@@ -12,6 +12,7 @@ import { FishRenderController } from "./controllers/FishRenderController";
 import { FocusController } from "./controllers/FocusController";
 import { HudController } from "./controllers/HudController";
 import { IncomePopupController } from "./controllers/IncomePopupController";
+import { LeaderboardController } from "./controllers/LeaderboardController";
 import { LikeBoardController } from "./controllers/LikeBoardController";
 import { MusicEventController } from "./controllers/MusicEventController";
 import { OnboardingController } from "./controllers/OnboardingController";
@@ -40,6 +41,7 @@ bootstrap([
 	UfoEventController,
 	StarfallEventController,
 	LikeBoardController,
+	LeaderboardController,
 	PelicanChargesController,
 	CompanionAnimationController,
 	ShopKeeperController,

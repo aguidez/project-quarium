@@ -5,6 +5,7 @@ import { EggType } from "./types/eggs";
 import { FishType, HungerState } from "./types/fish";
 import { PlayerData } from "./types/playerData";
 import { FishEffect } from "./types/ufo";
+import { LeaderboardSync } from "./types/leaderboards";
 import { FishVariant } from "./types/variants";
 
 // Define all client <-> server contracts here
@@ -22,6 +23,8 @@ export interface ServerToClientEvents {
 	Reward: (reward: Reward) => void;
 	/** Fish of the tanks this client watches (see FishMessage): the client builds and moves them itself. */
 	FishSync: (message: FishMessage) => void;
+	/** The lobby leaderboards (LeaderboardService, every 30 s and at join): the tops and the player's own scores. */
+	LeaderboardSync: (sync: LeaderboardSync) => void;
 }
 
 export interface ClientToServerEvents {

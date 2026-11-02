@@ -84,4 +84,9 @@ export const TAGS = {
 	 * the tank's parts (look copied onto them); the rest is decor. Tanks carry the attribute "Theme".
 	 */
 	AquariumThemeTemplate: "AquariumThemeTemplate",
+	/**
+	 * A leaderboard sign of the lobby (Workspace.Lobby.Leaderboards, built in Studio). Attribute "Board" (LeaderboardId);
+	 * its "Screen" part carries the board on its Front face (LeaderboardController draws it).
+	 */
+	Leaderboard: "Leaderboard",
 } as const;

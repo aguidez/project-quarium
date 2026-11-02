@@ -1,7 +1,7 @@
 import { t } from "@rbxts/t";
 import { Lifecycle } from "shared/framework";
 import { COSMETICS, isCosmeticId } from "shared/types/cosmetics";
-import { getUnlockedThemes, isHideable, isThemeChoice } from "shared/types/customization";
+import { getOwnedTitles, getUnlockedThemes, isHideable, isThemeChoice } from "shared/types/customization";
 import { DataService } from "./DataService";
 
 const isShownChange = t.interface({ id: t.string, shown: t.boolean });
@@ -33,7 +33,8 @@ class CustomizationServiceSingleton implements Lifecycle {
 			const data = DataService.getData(player);
 			if (!data) return;
 			if (title === "Auto" || title === "None") data.titleChoice = title;
-			else if (isCosmeticId(title) && COSMETICS[title].kind === "Title" && data.cosmetics.includes(title))
+			// An earned title, or a leaderboard title held today
+			else if (isCosmeticId(title) && COSMETICS[title].kind === "Title" && getOwnedTitles(data).includes(title))
 				data.titleChoice = title;
 			else return;
 			DataService.sync(player);

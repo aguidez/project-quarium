@@ -21,7 +21,7 @@ import { EventBanner } from "./EventBanner";
 import { FishIndexPanel } from "./FishIndexPanel";
 import { AquariumPanel } from "./AquariumPanel";
 import { CosmeticId } from "shared/types/cosmetics";
-import { ThemeChoice, TitleChoice } from "shared/types/customization";
+import { getOwnedTitles, ThemeChoice, TitleChoice } from "shared/types/customization";
 import { LikeBoostPill, PILL_HEIGHT } from "./LikeBoostPill";
 import { QuestBoostPill } from "./QuestBoostPill";
 import { OceanPanel } from "./OceanPanel";
@@ -151,6 +151,9 @@ export function App(props: AppProps) {
 	}, [props.shopNearby]);
 	// The menus show up once the tutorial is over, so they never distract from it
 	const menusVisible = data !== undefined && isOnboardingDone(data.onboarding);
+	// Something to customize: a theme, a cosmetic, or a leaderboard title held today
+	const canCustomize =
+		data !== undefined && (data.rebirths > 0 || data.cosmetics.size() > 0 || getOwnedTitles(data).size() > 0);
 	const oceanUnlocked = data !== undefined && data.features.includes("Ocean");
 	const oceanTutorial = oceanUnlocked && !data.tutorialsDone.includes("Ocean");
 	// Rebirth: the menu shows up the first time one is affordable, with a coach bubble until opened
@@ -377,7 +380,7 @@ export function App(props: AppProps) {
 					fullReminder={openPanel === undefined ? fullReminder : undefined}
 				/>
 			)}
-			{menusVisible && (data.rebirths > 0 || data.cosmetics.size() > 0) && (
+			{menusVisible && canCustomize && (
 				// Next to FocusController's "Back to lobby" / "My aquarium" (220 x 50 face at 16 px from the bottom-left corner,
 				// its 6 px bevel below): the same baseline, in the lobby and in the tank view
 				<Button3D
@@ -422,6 +425,7 @@ export function App(props: AppProps) {
 					themeChoice={data.themeChoice}
 					hiddenCosmetics={data.hiddenCosmetics}
 					titleChoice={data.titleChoice}
+					leaderboardRanks={data.leaderboardRanks}
 					onSetTheme={props.onSetTheme}
 					onSetShown={props.onSetCosmeticShown}
 					onSetTitle={props.onSetTitle}

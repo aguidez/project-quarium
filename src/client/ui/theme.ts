@@ -525,3 +525,13 @@ export const REBIRTH_COLORS = {
 	heroText: Color3.fromHex("#6B3A0E"),
 	heroTextStroke: Color3.fromHex("#8A4A12"),
 };
+
+/** The lobby leaderboards (FigCraft: leaderboards.figcraft): podium medals, the player's own row, values per board. */
+export const LEADERBOARD_COLORS = {
+	silver: palette("#F4F7FA", "#AEBBC8", "#8C99A6", "#4A5866"),
+	bronze: palette("#F7B48A", "#C0672F", "#93461C", "#4E220C"), // copper, far from the gold (as the titles' bronze)
+	ownTop: Color3.fromHex("#2E6B4A"),
+	ownBottom: Color3.fromHex("#1B4732"),
+	avatar: Color3.fromHex("#9FC3E8"),
+	clockFace: Color3.fromHex("#D8F7E2"),
+};

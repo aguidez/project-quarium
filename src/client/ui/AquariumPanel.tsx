@@ -1,7 +1,9 @@
 import React, { useBinding } from "@rbxts/react";
-import { COSMETICS, CosmeticId, getBestTitle, TITLE_ORDER } from "shared/types/cosmetics";
+import { COSMETICS, CosmeticId } from "shared/types/cosmetics";
 import {
 	getDisplayedTheme,
+	getOwnedTitles,
+	getTitleRank,
 	getThemeOrder,
 	getUnlockedThemes,
 	isCosmeticShown,
@@ -9,6 +11,7 @@ import {
 	ThemeChoice,
 	TitleChoice,
 } from "shared/types/customization";
+import type { LeaderboardId } from "shared/types/leaderboards";
 import { AQUARIUM_THEMES, AquariumTheme } from "shared/types/rebirths";
 import { Button3D, Chip, Plate, TextStroke } from "./kit";
 import { Panel, PANEL_INNER_WIDTH } from "./Panel";
@@ -38,6 +41,8 @@ export interface AquariumPanelProps {
 	themeChoice: ThemeChoice;
 	hiddenCosmetics: readonly CosmeticId[];
 	titleChoice: TitleChoice;
+	/** The leaderboard titles held today (rank per board). */
+	leaderboardRanks: Partial<Record<LeaderboardId, number>>;
 	onSetTheme: (theme: ThemeChoice) => void;
 	onSetShown: (id: CosmeticId, shown: boolean) => void;
 	onSetTitle: (title: TitleChoice) => void;
@@ -264,11 +269,16 @@ export function AquariumPanel(props: AquariumPanelProps) {
 		);
 	}
 
-	const titles = TITLE_ORDER.filter((id) => props.cosmetics.includes(id));
-	const best = getBestTitle(props.cosmetics);
+	// Leaderboard titles first, with the rank that holds them today ("OCEAN LEGEND #1")
+	const titles = getOwnedTitles(props);
+	const titleLabel = (id: CosmeticId) => {
+		const rank = getTitleRank(props, id);
+		return COSMETICS[id].displayName.upper() + (rank !== undefined ? ` #${rank}` : "");
+	};
+	const best = titles[0];
 	const titleButtons = [
-		{ choice: "Auto" as TitleChoice, label: best ? `BEST: ${COSMETICS[best].displayName.upper()}` : "AUTOMATIC" },
-		...titles.map((id) => ({ choice: id as TitleChoice, label: COSMETICS[id].displayName.upper() })),
+		{ choice: "Auto" as TitleChoice, label: best ? `BEST: ${titleLabel(best)}` : "AUTOMATIC" },
+		...titles.map((id) => ({ choice: id as TitleChoice, label: titleLabel(id) })),
 		{ choice: "None" as TitleChoice, label: "NO TITLE" },
 	].map(({ choice, label }, index) => (
 		<Button3D
