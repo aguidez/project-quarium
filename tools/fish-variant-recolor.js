@@ -1,26 +1,19 @@
-// Fish variant recolouring (offline), used to make the Anomaly / Shiny textures and icons (Ghost needs none).
+// Fish variant recolouring (offline), used to make the Anomaly / Shiny textures (Ghost needs none; the icons are
+// the stickers of tools/fish-sticker-icons.js).
 // Pipeline: pull each species ColorMap out of Studio (EditableImage -> raw RGBA, ≤ 1024², POSTed to a local
 // server while HttpService.HttpEnabled is on for a moment) into TEX_DIR as <Type>.rgba + <Type>.json {w, h};
 // run "build" with design/ui/fish/variants/variant-spec.json ([hue°, saturation ×, lightness +] per variant);
-// serve the PNGs on 127.0.0.1 and upload them with the Studio MCP upload_image; ids go to shared/types/variants.ts
-// (textures) and client/ui/theme.ts (icons).
+// serve the PNGs on 127.0.0.1 and upload them with the Studio MCP upload_image; ids go to variant-spec.json
+// "_colorMaps" and into the FishVariantAppearance instances (ServerStorage.Assets.FishVariants).
 // Hue rotation in HSL that keeps neutrals (black / white / grey) as they are.
-//   node recolor.js sheet          -> sheet.png: every icon at hues 0, 60 ... 300 (to choose the angles)
-//   node recolor.js build <json>   -> textures/out/<Type>_<Variant>.png and icons/<Type>_<Variant>.png
+//   node fish-variant-recolor.js sheet <Type>    -> TEX_DIR/out/sheet_<Type>.png: the texture at hues 0, 60 ... 300
+//                                                  (to choose the angles)
+//   node fish-variant-recolor.js build <json>    -> TEX_DIR/out/<Type>_<Variant>.png
 const path = require("path");
 const fs = require("fs");
 // jimp 0.22 is a devDependency (npm install); JIMP=<path> still points to another copy
 const Jimp = require(process.env.JIMP || "jimp");
 
-const DESIGN = path.join(__dirname, "..", "design", "ui");
-const ICONS = {
-	Basic: DESIGN + "/GuppyIcon.png",
-	Big: DESIGN + "/NeonIcon.png",
-	RedTetra: DESIGN + "/RedTetraIcon.png",
-	Clownfish: DESIGN + "/fish/ClownfishIcon.png",
-	ZebraDanio: DESIGN + "/fish/ZebraDanioIcon.png",
-	FlameGourami: DESIGN + "/fish/FlameGouramiIcon.png",
-};
 const TEX = process.env.TEX_DIR || path.join(__dirname, "textures"); // <Type>.rgba + .json pulled from Studio
 
 function rgbToHsl(r, g, b) {
@@ -81,50 +74,41 @@ function recolor(data, deg, sat = 1, light = 0, tint) {
 	}
 }
 
-async function sheet() {
+function readTexture(type) {
+	const size = JSON.parse(fs.readFileSync(path.join(TEX, type + ".json"), "utf8"));
+	const raw = fs.readFileSync(path.join(TEX, type + ".rgba"));
+	return new Jimp({ data: Buffer.from(raw), width: size.w, height: size.h });
+}
+
+async function sheet(type) {
 	const hues = [0, 60, 120, 180, 240, 300];
-	const cell = 150;
-	const types = Object.keys(ICONS);
-	const out = new Jimp(cell * hues.length, cell * types.length * 0.6, 0x1b2a35ff);
-	for (const [row, type] of types.entries()) {
-		const icon = await Jimp.read(ICONS[type]);
-		icon.contain(cell - 10, cell * 0.6 - 10);
-		for (const [col, deg] of hues.entries()) {
-			const copy = icon.clone();
-			recolor(copy.bitmap.data, deg);
-			out.composite(copy, col * cell + 5, row * cell * 0.6 + 5);
-		}
+	const cell = 256;
+	const texture = readTexture(type);
+	texture.contain(cell, cell);
+	const out = new Jimp(cell * hues.length, cell, 0x1b2a35ff);
+	for (const [col, deg] of hues.entries()) {
+		const copy = texture.clone();
+		recolor(copy.bitmap.data, deg);
+		out.composite(copy, col * cell, 0);
 	}
-	await out.writeAsync(path.join(process.env.ICON_DIR || __dirname, "sheet.png"));
-	console.log("sheet.png written");
+	fs.mkdirSync(path.join(TEX, "out"), { recursive: true });
+	await out.writeAsync(path.join(TEX, "out", `sheet_${type}.png`));
+	console.log(`sheet_${type}.png written`);
 }
 
 async function build(spec) {
 	fs.mkdirSync(path.join(TEX, "out"), { recursive: true });
-	fs.mkdirSync(process.env.ICON_DIR || path.join(__dirname, "icons"), { recursive: true });
 	for (const [type, variants] of Object.entries(spec)) {
 		if (type.startsWith("_")) continue; // notes / uploaded ids
-		const size = JSON.parse(fs.readFileSync(path.join(TEX, type + ".json"), "utf8"));
-		const raw = fs.readFileSync(path.join(TEX, type + ".rgba"));
 		for (const [variant, [deg, sat, light, tint]] of Object.entries(variants)) {
-			const tex = new Jimp({ data: Buffer.from(raw), width: size.w, height: size.h });
+			const tex = readTexture(type);
 			recolor(tex.bitmap.data, deg, sat, light, tint);
 			await tex.writeAsync(path.join(TEX, "out", `${type}_${variant}.png`));
-			// Species added after the sticker icons have no flat icon: their stickers come from Studio captures
-			if (!ICONS[type]) {
-				console.log(type, variant, "done (texture only)");
-				continue;
-			}
-			const icon = await Jimp.read(ICONS[type]);
-			recolor(icon.bitmap.data, deg, sat, light, tint);
-			await icon.writeAsync(
-				path.join(process.env.ICON_DIR || path.join(__dirname, "icons"), `${type}_${variant}.png`),
-			);
 			console.log(type, variant, "done");
 		}
 	}
 }
 
 const [mode, arg] = process.argv.slice(2);
-if (mode === "sheet") sheet();
+if (mode === "sheet") sheet(arg);
 else if (mode === "build") build(JSON.parse(fs.readFileSync(arg, "utf8")));

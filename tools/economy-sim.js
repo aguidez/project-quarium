@@ -5,9 +5,10 @@
 // best unlocked egg, fill empty slots, swap the weakest fish once the tank is full, complete the
 // Fish Index, rebirth as soon as they can, release the weakest fish for room once the Ocean is open).
 // Prints median / p10 / p90 times of each step, and the median income at a few checkpoints.
-// Usage: node tools/economy-sim.js [--plan tools/balance-v1-plan.js] [--players 500] ['{"P":{"collect":0.6}}']
+// Usage: node tools/economy-sim.js [--plan <file.js>] [--players 500] ['{"P":{"collect":0.6}}']
 //   --plan: plays a planned economy (a module exporting FISH, EGGS, REBIRTHS, CAPACITY, OCEAN_MILESTONES,
-//           P) instead of the live config below: BALANCE.md's V1 preview is balance-v1-plan.js
+//           INCUBATORS, HATCH, QUEST_REWARDS, SIDE_QUESTS, P) instead of the live config below: write one to
+//           preview a future update (the V1 plan was tools/balance-v1-plan.js, removed in V0.50: it is in the game)
 //   e.g. no rebirth: node tools/economy-sim.js '{"P":{"rebirths":0}}'
 //   gamepass x2 coins (an estimate, never a target): '{"P":{"coinBoost":2}}', x2 Ocean Points: oceanBoost
 const args = process.argv.slice(2);

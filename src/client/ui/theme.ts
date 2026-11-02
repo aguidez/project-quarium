@@ -73,7 +73,6 @@ export const V2_IMAGES = {
 	iconFishIndex: "rbxassetid://117500058635391",
 	iconOcean: "rbxassetid://86767682222210",
 	iconRebirth: "rbxassetid://123446163856086",
-	iconShop: "rbxassetid://128028502564290", // design/ui/passes/Pass_Shop.png (tools/pass-icons.js)
 	iconAquarium: "rbxassetid://102450232903984", // design/ui/passes/Pass_Aquarium.png (tools/pass-icons.js)
 	ribbonTailLeft: "rbxassetid://132217540092284", // white tail + grey fold, 64x56 design px
 	ribbonTailRight: "rbxassetid://119721448521037",
@@ -232,10 +231,7 @@ export const FISH_ICONS: Record<FishType, Record<FishVariant, string>> = {
 		Shiny: ALIEN_FISH_ICON,
 	},
 };
-/** Width / height of the sticker icons. */
-export const FISH_ICON_ASPECT = 256 / 160;
 
-/** Face colours of a found variant's slot (FigCraft: ItemSlot_<Variant>). */
 /** A colour per aquarium theme (AquariumPanel's theme cards): its water / mood, light to dark. */
 export const THEME_PALETTES: Record<AquariumTheme, Palette> = {
 	Basic: palette("#9BD7FF", "#3EA0F0", "#2A78C0", "#14406E"),
@@ -249,6 +245,7 @@ export const THEME_PALETTES: Record<AquariumTheme, Palette> = {
 	CosmicSanctuary: palette("#9A7CFF", "#5A3CC8", "#3A2490", "#140A40"),
 };
 
+/** Face colours of a found variant's slot (FigCraft: ItemSlot_<Variant>). */
 export const VARIANT_PALETTES: Record<FishVariant, Palette> = {
 	Normal: PALETTES.blue,
 	Anomaly: PALETTES.purple,
@@ -458,14 +455,6 @@ export const OCEAN_COLORS = {
 	top: Color3.fromHex("#1FA9C9"),
 	bottom: Color3.fromHex("#0B5C7A"),
 	light: Color3.fromHex("#7FF0FF"),
-	buttonTop: Color3.fromHex("#5BE7F5"),
-	buttonBottom: Color3.fromHex("#1689B5"),
-	buttonStroke: Color3.fromHex("#0B4F6E"),
-	disabledTop: Color3.fromHex("#8A949B"),
-	disabledBottom: Color3.fromHex("#59626A"),
-	/** "Sure?": a rare variant's Release button after the first click. */
-	confirmTop: Color3.fromHex("#FF7A66"),
-	confirmBottom: Color3.fromHex("#C2311F"),
 };
 
 /** Like boards beside the aquariums and the owner's boost pill (FigCraft: LikeBoard, LikeBoostPill): beach palette. */
@@ -484,17 +473,6 @@ export const LIKE_COLORS = {
 
 /** Rebirth menu (FigCraft: RebirthPanel): the multiplier "hero" card, progress and buttons. */
 export const REBIRTH_COLORS = {
-	heroTop: Color3.fromHex("#FFD36B"),
-	heroBottom: Color3.fromHex("#E8963A"),
-	heroStroke: Color3.fromHex("#FFF1C2"),
 	heroText: Color3.fromHex("#6B3A0E"),
 	heroTextStroke: Color3.fromHex("#8A4A12"),
-	rowText: Color3.fromHex("#9FB8C8"),
-	progressStroke: Color3.fromHex("#2A4A5C"),
-	confirmTop: Color3.fromHex("#FF9A7E"),
-	confirmBottom: Color3.fromHex("#E5402F"),
-	confirmStroke: Color3.fromHex("#8A1F12"),
-	disabledTop: Color3.fromHex("#8A949B"),
-	disabledBottom: Color3.fromHex("#59626A"),
-	disabledStroke: Color3.fromHex("#3A4248"),
 };

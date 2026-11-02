@@ -4,7 +4,8 @@
 // "soonest coin" choice), FishService (hunger: satiated -> hungry 15 s -> weak, a weak fish earns nothing),
 // FoodService (pellets thrown from the beak, max 10 in the water) and CoinService (coins sink at 4 studs/s,
 // stay 5 s on the sand + perks). Keep it in sync with them, and write the results in BALANCE.md.
-// Usage: node tools/companion-sim.js [pelican|snail] [--plan tools/balance-v1-plan.js]
+// Usage: node tools/companion-sim.js [pelican|snail] [--plan <file.js>]   (a plan may export PELICAN_UPGRADE,
+//        PELICAN_STAGES, SNAIL_UPGRADE, SNAIL_STAGES to preview other companion numbers)
 const which = process.argv[2] || "all";
 const planIndex = process.argv.indexOf("--plan");
 const plan = planIndex > 0 ? require(require("path").resolve(process.argv[planIndex + 1])) : {};

@@ -2,7 +2,7 @@
 
 ## 0. Project Context (READ FIRST, KEEP UP TO DATE)
 - **Before any research or change**, read `PROJECT_CONTEXT.md` (stack & conventions, annotated tree, data & events flow, known limits). Use it to go straight to the right files instead of browsing the whole project; only open what the task needs.
-- **Every change must keep `PROJECT_CONTEXT.md` accurate, in the same task**: new / renamed / removed file, service, controller, UI component, remote or action, PlayerData field, tag or attribute, quest, feature, game system, balance rule or known limit. Update its "Last updated" date. A task isn't finished while the context file is stale.
+- **Every change must keep `PROJECT_CONTEXT.md` accurate, in the same task**: new / renamed / removed file, service, controller, UI component, remote or action, PlayerData field, tag or attribute, quest, feature, game system, balance rule or known limit. Update its "Last updated" line (date + version + a few words, never a running changelog). It describes the game **as it is now**: history goes in `RELEASE_NOTES.md`, numbers in `BALANCE.md`; remove what a change makes obsolete instead of stacking "since V0.xx" notes. A task isn't finished while the context file is stale.
 
 ## 0b. Release Notes (KEEP UP TO DATE)
 - `RELEASE_NOTES.md` records every change to the game, patch by patch, newest version at the top.

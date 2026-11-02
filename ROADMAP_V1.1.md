@@ -1,7 +1,7 @@
 # ROADMAP — Projet Quarium V1.1 "Animations"
 
 > The animation revamp: every fish, companion, event guest and NPC moves through a **skeleton made in Blender**
-> instead of the EditableMesh deformation of V1. It starts **once V1 is complete** (`ROADMAP.md`, M7 ticked). Tick the
+> instead of the EditableMesh deformation of V1. It starts **once V1 is complete** (the owner's calibration with real players done). Tick the
 > boxes as tasks ship, and move what a step ships into `PROJECT_CONTEXT.md` / `RELEASE_NOTES.md` as usual.
 > Last updated: 2026-11-01 (A0 stopgap shipped in V0.45; Blender driven by the agent through an MCP server, A1; first version, decided by the
 > owner: V1 first, then this whole roadmap).
@@ -32,7 +32,7 @@ at its own rhythm, with behaviour animations (eat, turn, dash, rest...) and real
 
 ## 2. Principles
 
-- **V1 first.** Nothing here starts before `ROADMAP.md` M7 is done.
+- **V1 first.** Nothing here starts before the V1 calibration with real players is done.
 - **Both systems live side by side** until the end: a template says which one it uses (attribute `Rig = "Bones"`),
   the EditableMesh path stays the fallback of the species not converted yet. Species are converted in batches, each
   batch playable on its own.
@@ -126,7 +126,7 @@ The whole pipeline on one fish, to settle the open questions (§5) before conver
       **Open Cloud** (`tools/blender/upload.js`: Assets API, the model uploaded from the command line; then inserted
       into ServerStorage by MCP). Open Cloud needs an **Owner**-created API key, stored only in
       `workspace.local.json` (key `robloxOpenCloudKey`, never committed; documented in the template and SETUP.md).
-- [ ] The species recipe (`ROADMAP.md` §3.1) gets its rig step; a one-page checklist per batch in the agent note.
+- [ ] The species recipe (`docs/agent-notes/content-recipes.md`) gets its rig step; a one-page checklist per batch in the agent note.
 
 ### A4 — The runtime: bones in the game (M)
 
@@ -189,7 +189,7 @@ Each one gets a rig made by its own Blender script (not the fish one) and replac
 - [ ] Load test with 18 species, 6 tanks x 25 fish, PC and mobile emulator: compare with A0's "before" numbers, and
       write the results in PROJECT_CONTEXT §4.
 - [ ] Docs: PROJECT_CONTEXT (controllers, templates, tools/blender, the known limits), SETUP.md, the agent note,
-      `ROADMAP.md` §3.1 / §3.3 recipes with the rig step; release notes of the V1.1 version.
+      the species / companion recipes of `docs/agent-notes/content-recipes.md` with the rig step; release notes of the V1.1 version.
 - [ ] **Owner**: archive the old fish meshes on the Creator Dashboard once nothing uses them (optional).
 
 ---

@@ -11,6 +11,7 @@ step, a tool quirk), add or update a note here and its line below, in the same t
 - [Lobby decor constraints](lobby-decor-constraints.md) — beach lobby layout, focus-camera cones to keep clear, 80/20 palette, terrain/MCP quirks
 - [Studio MCP UI testing](studio-mcp-ui-testing.md) — clicking React UI in playtests: scaled captures vs mouse coords, instance names, camera/require quirks, saves, dev chat commands (and sending them from a script), gamepasses in Studio, Rojo half-syncing, load test recipe (leave the 2.5D view first), driving an event test and catching short visuals
 - [Fish asset pipeline](fish-asset-pipeline.md) — generate_mesh quirks, templates, sprite upload, EditableMesh budget, playtest shortcuts, UI icons without FigCraft (resvg), variant stickers before upload (EditableImage), name ↔ look checks with the owner, upright meshes pitched in the template, decor / title cosmetics, never save Studio mid-capture, generated fish with a face on one side only
+- [Content recipes](content-recipes.md) — step by step: a new fish species, aquarium theme, companion or egg (assets, config, balance, checks)
 - [No emoji in the UI](no-emoji-in-ui.md) — player-facing texts, designs and notes stay emoji-free; draw icons instead
 - [Roblox moderation risk](roblox-moderation-risk.md) — a firefighter-fish icon got the account a ToS warning; no bomb/weapon-like shapes, ask before risky themes
 - [UI V2 arcade style](ui-v2-arcade-style.md) — owner-approved Pet Sim-like UI; build every screen from client/ui/kit.tsx, never flat

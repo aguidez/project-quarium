@@ -10,6 +10,18 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.50 — 2026-11-02
+
+**Changes**
+- Behind the scenes, a cleanup before V1 (nothing changes in the game): unused colours and icon ids of the first UI
+  removed from the code; the first flat fish icons, their build scripts, the old shop bar picture, the old variant
+  icons and textures (all already uploaded or replaced by the sticker icons) the V1 balance plan and the V1 roadmap (both done)
+  removed from the project; the variant recolouring tool now works on textures only.
+- The project's working documents (project map, balance, roadmap) were trimmed of their history and of the numbers
+  that had gone out of date, so they describe the game as it is now.
+
+---
+
 ## V0.49 — 2026-11-02
 
 **New**

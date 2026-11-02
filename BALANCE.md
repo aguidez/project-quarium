@@ -1,15 +1,10 @@
 # BALANCE — Projet Quarium
 
-> The game's balance: what an average player reaches after how long, and why, today (V0.44: the whole V1 plan is live) and in the **V1 plan**
-> (18 species, 8 aquariums, a tank of 25 fish). **Update it in the same task whenever a number of the economy changes**
-> (fish income, eggs, odds, rebirths, Ocean milestones, variants, food, capacity, companions…): run the simulators,
-> copy their results here, add a line to the history (§7).
-> Last updated: 2026-11-02 (V0.48: daily quests from rebirth 2, weekly from 3, all eighteen species ~12h31, §2 / §5.9; V0.46, ROADMAP M7: side lines, daily / weekly coin boosts, reference player 1 h a day, rebirths 3–8 and their eggs x1.45, all eighteen species ~12h13, §1 / §2 / §3 / §4 / §5.9; V0.44, ROADMAP M6: rebirths 7–8, Husky Dogfish / Bunny Shark / Mini Leviathan, Crystal and Cosmic eggs,
-> Ocean milestones 450,000 (tank 25) and 1,000,000 (Ocean Guardian title + whale statue), Voyage 12–16 are live: the V1 plan is complete; the live simulator plays 15 h; V0.42, ROADMAP M5: rebirth 6, Lionfish / Dragonfish, Volcano Egg, Ocean milestones 180,000–300,000,
-> the Jellyfish with its pass quests, Pearl rims, Voyage 10–11 are live; the live simulator plays 11 h; V0.40, ROADMAP M4: rebirth 5, Lanternfish, Trench Egg, Ocean milestones 70,000–120,000,
-> Water Hen and Swordfish companions with their pass quests, Voyage quests 8–9 are live; V0.38, ROADMAP M2: rebirths 3–4, Catfish / Blue Tang / Baby Sunfish, Wreck and Atlantis eggs,
-> Ocean milestones 5,000–40,000 and the Voyage quests are live; V0.36, ROADMAP M1: the Snail and Pelican nerfs are live; before: V1 plan with the owner's species, aquariums and companions: Water Hen, Swordfish,
-> Jellyfish, paid companion quests, Snail and Pelican nerfs).
+> The game's balance: what an average player reaches after how long, and why. **Update it in the same task whenever a
+> number of the economy changes** (fish income, eggs, odds, rebirths, Ocean milestones, variants, food, capacity,
+> companions…): run the simulators, copy their results here, add a line to the history (§6).
+> Last updated: 2026-11-02 (V0.50: the V1 plan's tables, now duplicates of §2–§3, folded into §4 / §5; V0.49: UFO night).
+
 
 **Where the numbers live**: `src/shared/types/fish.ts` (species), `eggs.ts` (eggs), `rebirths.ts` (rebirths),
 `variants.ts` (variants), `oceanRewards.ts` (Ocean milestones), `companions.ts` / `perks.ts` / `quests.ts`
@@ -18,12 +13,12 @@
 | Tool | What it plays |
 |---|---|
 | `node tools/economy-sim.js` | The live economy (mirrors the config: keep it in sync), 2,000 average players second by second |
-| `node tools/economy-sim.js --plan tools/balance-v1-plan.js` | The V1 plan (§5): same player, planned species / eggs / rebirths / milestones / quest bonuses |
-| `node tools/companion-sim.js` | AFK farming: how many fish the Pelican keeps fed, the share of the coins the Snail and the Swordfish (live since V0.40) pick up, the Jellyfish (live since V0.42) |
+| `node tools/companion-sim.js` | AFK farming: how many fish the Pelican keeps fed, the share of the coins the Snail and the Swordfish pick up, the Jellyfish |
 
-The development plan of V1 (what to build, in which order) is `ROADMAP.md`.
+How to add content (species, theme, companion, egg): `docs/agent-notes/content-recipes.md`.
 
-Options: `--players 300` (faster, noisier), a JSON of overrides (`'{"P":{"coinBoost":2}}'`, see the file headers).
+Options: `--players 300` (faster, noisier), a JSON of overrides (`'{"P":{"coinBoost":2}}'`, see the file headers),
+`--plan <file.js>` to preview a planned economy (how the V1 plan was tuned before it was built).
 
 ---
 
@@ -182,7 +177,7 @@ keeps; it is rare enough not to be part of the reference curve.
 | Crystal | 1.2T (830B) | 180 s | Dragonfish 55, Husky Dogfish 45 | a Volcano Egg |
 | Cosmic | 2.6T (1.8T) | 180 s | Husky Dogfish 25, Bunny Shark 55, Mini Leviathan 20 | a Crystal Egg |
 
-One egg of each type incubates at a time, two from the 5,000-point Ocean milestone (~2h59): the hatch time paces the
+One egg of each type incubates at a time, two from the 5,000-point Ocean milestone (~2h44): the hatch time paces the
 farming of the best egg. Eggs bought while the **Water Hen** is equipped hatch 15 % faster (up to 35 % with its pass
 quests).
 
@@ -205,25 +200,27 @@ Ocean milestones (and so the tank size), perks and likes. The fish go to the oce
 
 ### Ocean milestones (`oceanRewards.ts`)
 
-| Points | Reward | Reached (median) |
-|---|---|---|
-| 50 | Pelican | ~30 min |
-| 100 | Faster Snail: speed x1.15 | ~48 min |
-| 200 | Second companion slot | ~75 min |
-| 500 | Hungry Pelican: feeds x1.33 as often (every 7.5 s) | ~1h34 |
-| 1,500 | Aquarium holds 15 fish instead of 10 | ~1h40 (with rebirth 2) |
-| 5,000 | Second incubator: 2 eggs of the same kind at once | ~2h59 (just before rebirth 3) |
-| 8,000 | Aquarium holds 17 fish | ~3h01 (with rebirth 3) |
-| 25,000 | Aquarium holds 19 fish | ~4h47 (with rebirth 4) |
-| 40,000 | Lucky ocean: rare variants x1.5 (Anomaly 15 %, Ghost 7.5 %, Shiny 1.5 %) | ~5h21 |
-| 70,000 | Aquarium holds 21 fish | ~6h12 (with rebirth 5) |
-| 85,000 | Water Hen (companion: eggs hatch 15 % faster while equipped) | ~6h13 |
-| 120,000 | Swordfish (companion: grabs the coins in the water, as a maxed Snail) | ~7h17 |
-| 180,000 | Aquarium holds 23 fish | ~8h06 (with rebirth 6) |
-| 200,000 | Jellyfish (companion: feeds on demand, as a maxed Pelican) | ~8h06 |
-| 300,000 | Pearl rims (cosmetic: a pearly finish on the rims, every theme) | ~9h04 |
-| 450,000 | Aquarium holds 25 fish (the maximum) | ~9h48 (with rebirth 7) |
-| 1,000,000 | "Ocean Guardian" title above the head + a whale statue in the tank (cosmetics) | ~11h28 |
+When each one is reached: §2.
+
+| Points | Reward |
+|---|---|
+| 50 | Pelican |
+| 100 | Faster Snail: speed x1.15 |
+| 200 | Second companion slot |
+| 500 | Hungry Pelican: feeds x1.33 as often (every 7.5 s) |
+| 1,500 | Aquarium holds 15 fish instead of 10 |
+| 5,000 | Second incubator: 2 eggs of the same kind at once |
+| 8,000 | Aquarium holds 17 fish |
+| 25,000 | Aquarium holds 19 fish |
+| 40,000 | Lucky ocean: rare variants x1.5 (Anomaly 15 %, Ghost 7.5 %, Shiny 1.5 %) |
+| 70,000 | Aquarium holds 21 fish |
+| 85,000 | Water Hen (companion: eggs hatch 15 % faster while equipped) |
+| 120,000 | Swordfish (companion: grabs the coins in the water, as a maxed Snail) |
+| 180,000 | Aquarium holds 23 fish |
+| 200,000 | Jellyfish (companion: feeds on demand, as a maxed Pelican) |
+| 300,000 | Pearl rims (cosmetic: a pearly finish on the rims, every theme) |
+| 450,000 | Aquarium holds 25 fish (the maximum) |
+| 1,000,000 | "Ocean Guardian" title above the head + a whale statue in the tank (cosmetics) |
 
 A release earns the species' points x 1 / 2 / 3 / 5 (Normal / Anomaly / Ghost / Shiny).
 
@@ -265,16 +262,12 @@ Shiny 1 % (coins 1.2x as often, 3x more sparkling coins: +35 %), Ghost 5 % (ghos
 
 ---
 
-## 5. V1 plan (fully live since V0.44)
+## 5. V1 design (fully live since V0.44)
 
-Species 1–12, eggs 1–8, rebirths 1–4, the Ocean milestones up to 40,000 and the Voyage quests up to Atlantis are
-live since V0.38 (ROADMAP M2, §3) with the plan's numbers; species 13, the Trench Egg, rebirth 5, the milestones
-70,000–120,000, the Water Hen and the Swordfish (with their pass quests) and the Voyage quests 8–9 since V0.40 (M4); species 14–15, the Volcano Egg, rebirth 6, the milestones 180,000–300,000, the
-Jellyfish (with its pass quests), Pearl rims and the Voyage quests 10–11 since V0.42 (M5); species 16–18, the Crystal and Cosmic eggs, rebirths 7–8, the milestones
-450,000–1,000,000 and the Voyage quests 12–16 since V0.44 (M6): the whole plan is in the game. The Hammerhead Shark of the plan became the **Bunny Shark** (same numbers), the Wolf-head Dogfish the **Husky Dogfish**. The **Pelican's** and the **Snail's** Ocean
-upgrades already have their V1 values in the game since V0.36 (§5.8, ROADMAP M1). Everything else is new. Source of truth: `tools/balance-v1-plan.js` (it becomes the
-config when V1 is built); the development plan is `ROADMAP.md`. Every new design goes through the moderation check of
-CLAUDE.md §7 (watch list in ROADMAP.md §4) before any asset is generated.
+Why the V1 content (18 species, 12 eggs, 8 rebirths, a tank of 25 fish, 5 companions, the Voyage line) is shaped the way
+it is. It was tuned as a plan first (`tools/balance-v1-plan.js`, removed in V0.50 once fully in the game: see git
+history); its live numbers are §2–§3. Every new design goes through the moderation check of CLAUDE.md §7 before any asset is
+generated.
 
 ### 5.1 Goals and verdict
 
@@ -283,8 +276,8 @@ fish through the Ocean Points, a fast first 2 hours then a progressive slowdown 
 own every species (normal) and every aquarium**; variants are a side goal outside that count; gamepasses help but never
 set the pace.
 
-**Verdict: 12–14 h is a good length for this content.** The plan gives **~12h16** median (11h37–12h53 p10–p90) for the
-simulator's average player.
+**Verdict: 12–14 h is a good length for this content.** The plan gave **~12h16** for one long session; the live game
+gives **~12h31** (11h39–13h12) for the reference player of 1 h a day (§2).
 - 18 species and 8 aquariums in ~12 h is a new species every ~45 min and a new aquarium every ~1h30 on average:
   nobody runs out of goals.
 - Real sessions last 20–45 min: 12 h is ~3–5 weeks for a regular player, enough time to ship V1.1 before the first
@@ -292,7 +285,7 @@ simulator's average player.
 - Shorter (≤ 10 h) would empty the game in 2 weeks; longer (≥ 16 h) would stretch the last runs to 2h30+ with a single
   new species each.
 - Real players get things the simulator doesn't count (likes, events, clicking above 50 %): if V1 ends under ~12 h in
-  practice, the levers are the run 5–7 prices (+10 % ≈ +20 min each) or rebirth 8 past its cliff (§5.3: end ~14 h),
+  practice, the levers are the run 5–7 prices (+10 % ≈ +20 min each) or rebirth 8 past its cliff (§5.3),
   never longer hatches.
 
 ### 5.2 How many eggs? (the calculation)
@@ -310,141 +303,56 @@ Three constraints fix the number of eggs; they all give **12** (6 live + 6 new, 
    - **15 eggs** (9 new): 1.5 eggs per run, the climb back after each rebirth crosses 3 more eggs (one more buy and
      hatch each), and each egg becomes a 40-min stop rather than a goal.
 
-### 5.3 Expected progression (V1 plan)
+### 5.3 Shape of the curve
 
-`node tools/economy-sim.js --plan tools/balance-v1-plan.js` (300 players, Voyage quest bonuses and the free Water Hen
-included). The first 2h30 are the live game (§2), unchanged.
+Runs of ~25 min, ~1h05, ~1h15, then **~1h05–1h55 from run 3 on**. The game is fast for 3 hours (9 species, 3
+aquariums), then gives a new aquarium every ~1h30 and a new species every ~50 min. Runs with 2 new species (4, 6, 8)
+are shorter than the runs with 1 (3, 5, 7) because their income jumps more. Live timeline: §2.
 
-| Time (median, p10–p90) | What the average player reaches | Run length |
-|---|---|---|
-| ~28 min (21–36) | Rebirth 1: x2.5, Lagoon | run 0: 28 min |
-| ~1h00 | The first six species | |
-| ~1h39 (1h26–1h55) | Rebirth 2: x8, Neon Coral Lagoon; tank 15 | run 1: 1h11 |
-| ~2h28 (2h05–2h52) | Species 9, Imperial Discus | |
-| **~3h01** (2h43–3h20) | **Rebirth 3** (45M): x25, **Sunken Pirate Wreck**; second incubator; tank 17 | run 2: 1h22 |
-| ~3h53 (3h27–4h18) | Species 10, Catfish (Wreck Egg, 55M) | |
-| **~4h47** (4h24–5h10) | **Rebirth 4** (120M): x80, **Atlantis Ruins**; tank 19 | run 3: 1h46 |
-| ~5h36 / ~5h43 | Species 11–12, Blue Tang / Baby Sunfish (Atlantis Egg, 144M) | |
-| **~6h14** (5h45–6h37) | **Rebirth 5** (5.1B): x250, **Mariana Trench**; tank 21; **Water Hen** | run 4: 1h27 |
-| ~7h06 (6h35–7h37) | Species 13, Lanternfish (Trench Egg, 6.1B) | |
-| ~7h16 | **Swordfish** (Ocean 120,000) | |
-| **~8h07** (7h35–8h36) | **Rebirth 6** (13B): x800, **Underwater Volcanic Temple**; tank 23; **Jellyfish** | run 5: 1h53 |
-| ~8h59 / ~9h06 | Species 14–15, Lionfish / Dragonfish (Volcano Egg, 15.6B) | |
-| **~9h49** (9h16–10h21) | **Rebirth 7** (690B): x2,500, **Crystal Caverns**; **tank 25** | run 6: 1h42 |
-| ~10h54 (10h20–11h28) | **Rebirth 8** (1.5T): x8,000, **Cosmic Alien Sanctuary** (last aquarium) | run 7: 1h05 |
-| ~11h12 | Species 16, Husky Dogfish (Crystal Egg, 830B: often found right after rebirth 8) | |
-| ~12h02 | Species 17, Bunny Shark (Cosmic Egg, 1.8T) | |
-| **~12h16** (11h37–12h53) | **Species 18, Mini Leviathan: all 18 species and all 8 aquariums = end of V1** | run 8: 1h22 |
-| after | Variants, Fish Index, Ocean 1,000,000 (~11h30), "Master Aquarist", daily / weekly | |
-
-**Shape of the curve**: runs of 28 min, 1h11, 1h22, then **1h05–1h53 from run 3 on** (mean 1h33). The game is fast
-for 3 hours (9 species, 3 aquariums), then gives a new aquarium every ~1h30 and a new species every ~50 min. Runs with
-2 new species (4, 6, 8) are shorter than the runs with 1 (3, 5, 7) because their income jumps more.
-
-**Cliffs to know** (§4): rebirth 4 between 108M (~4h00) and 116M (~4h53): the plan stays after it (the player enjoys a
-Catfish tank before rebirthing); rebirth 8 between 1.64T (~11h28) and 1.72T (~13h15): the plan stays before it,
-otherwise the end moves to ~14h30. Rebirth 6 sits just above one (4B → ~7h00, 13B → ~8h25). Never move these three
-prices by more than ~5 % without re-running the simulator.
-
-**Money collected per minute** (median): 3h 1.5M, 4h 9.3M, 6h 174M, 8h 1.7B, 10h 19B, 12h 606B, 14h 3.4T.
-**Ocean Points** (median): 3h 6.4k, 4h 13.8k, 6h 55k, 8h 139k, 10h 521k, 12h 1.1M.
-**Eggs opened** (median): 1h 64, 2h 145, 4h 286, 6h 448, 8h 625, 10h 910, 12h 1,174.
+**Cliffs to know** (§4), measured on the plan's prices (before the x1.45 of V0.46): rebirth 4 sat just after one (the
+player enjoys a Catfish tank before rebirthing), rebirth 8 just before one (past it the end moved ~2 h later), rebirth
+6 just above one. Never move these three prices by more than ~5 % without re-running the simulator.
 
 ### 5.4 Species (18)
 
-The owner's species, placed by aquarium theme (the slot's numbers stay, the species can swap slots freely).
+The owner's species, placed by aquarium theme (live numbers: §3). The plan's Hammerhead Shark became the **Bunny
+Shark** and its Wolf-head Dogfish the **Husky Dogfish** (same numbers).
 
-| # | Species | Rarity | Egg | Coin value / interval | Income/s (baby) | Adult (x1.5) | Ocean Points |
-|---|---|---|---|---|---|---|---|
-| 1–9 | (live, §3) | Common → Rare | 1–6 | | 1 → 700 | | 1 → 500 |
-| 10 | Catfish | Epic | Wreck, Atlantis | 16,000 / 10 s | 1,600 | 2,400 | 800 |
-| 11 | Blue Tang | Epic | Atlantis | 19,200 / 6 s | 3,200 | 4,800 | 1,300 |
-| 12 | Baby Sunfish | Epic | Atlantis, Trench | 130,000 / 20 s | 6,500 | 9,750 | 2,000 |
-| 13 | Lanternfish | Legendary | Trench, Volcano | 156,000 / 12 s | 13,000 | 19,500 | 3,200 |
-| 14 | Lionfish | Legendary | Volcano | 208,000 / 8 s | 26,000 | 39,000 | 5,000 |
-| 15 | Dragonfish | Legendary | Volcano, Crystal | 1.3M / 25 s | 52,000 | 78,000 | 8,000 |
-| 16 | Husky Dogfish (plan: Wolf-head Dogfish) | Mythic | Crystal, Cosmic | 1.575M / 15 s | 105,000 | 157,500 | 13,000 |
-| 17 | Bunny Shark (plan: Hammerhead Shark) | Mythic | Cosmic | 4.2M / 20 s | 210,000 | 315,000 | 20,000 |
-| 18 | Mini Leviathan | Mythic | Cosmic | 12.6M / 30 s | 420,000 | 630,000 | 32,000 |
-
-- Income x2 per species (the live ones go x2–2.5), Ocean Points x1.6 (the milestones follow the rebirths).
+- Income x2 per species from species 10 (the first nine go x2–2.5), Ocean Points x1.6 (the milestones follow the rebirths).
 - Rarities: 3 per label (Common 1–3, Uncommon 4–6, Rare 7–9, Epic 10–12, Legendary 13–15, Mythic 16–18).
 - Intervals alternate quick / slow so that each species feels different and the coin count stays around 1–1.5 coins/s
   for a full tank, the range the collectors are tuned for (§5.8).
-- The Lanternfish species is not the Abyss event's villain: a different look and a different code id (ROADMAP §4).
+- The Lanternfish species is not the Abyss event's villain: a different look and a different code id.
 
 ### 5.5 Eggs (12)
 
-| # | Egg | Price | Hatch | Odds | Opened by (run) |
-|---|---|---|---|---|---|
-| 1–6 | Common → Neon Coral (live, §3) | 100 $ → 2.5M | 3 → 120 s | | runs 0–2 |
-| 7 | **Wreck** | 55M | 135 s | Discus 55, **Catfish 45** | rebirth 3 (45M) |
-| 8 | **Atlantis** | 144M | 150 s | Catfish 25, **Blue Tang 55**, **Baby Sunfish 20** | rebirth 4 (120M) |
-| 9 | **Trench** | 6.1B | 165 s | Baby Sunfish 55, **Lanternfish 45** | rebirth 5 (5.1B) |
-| 10 | **Volcano** | 15.6B | 180 s | Lanternfish 25, **Lionfish 55**, **Dragonfish 20** | rebirth 6 (13B) |
-| 11 | **Crystal** | 830B | 180 s | Dragonfish 55, **Husky Dogfish 45** | rebirth 7 (690B) |
-| 12 | **Cosmic** | 1.8T | 180 s | Dogfish 25, **Bunny Shark 55**, **Mini Leviathan 20** | rebirth 8 (1.5T) |
-
-- Each egg costs **1.2x the rebirth that opens it** (§4) and is unlocked by buying the previous one, as today.
+- One egg per aquarium (§5.2); from egg 7 on each costs **1.2x the rebirth that opens it** (§4) and is unlocked by
+  buying the previous one.
 - Hatch times grow by 15 s per egg and **stop at 3 min**: beyond that, waiting for an egg feels like a punishment.
   The late game is paced by the prices; the Water Hen and the second incubator shorten the waits (§5.7, §5.8).
 - Rarest of each egg: 45 % in the 1-species eggs, 20 % in the 2-species eggs. With 2 incubators at 3 min, a 20 %
   species takes a median ~3 hatches (~5 min) and a p90 ~10 hatches (~15 min) once the player can buy the egg in a row;
   the real wait is the money for those eggs, which the timeline includes.
-- The shop shelf shows 6 slots today: with 12 eggs it shows the 6 around the best unlocked one, or scrolls (ROADMAP M0).
 
 ### 5.6 Rebirths and aquariums (8)
 
-| Rebirth | Price | Coins (total) | Aquarium | Status | Reached (median) |
-|---|---|---|---|---|---|
-| 1 | 5,000 $ | x2.5 | Lagoon Aquarium | live | ~28 min |
-| 2 | 1.3M | x8 | Neon Coral Lagoon | live | ~1h39 |
-| 3 | 45M | x25 | Sunken Pirate Wreck | live (V0.38) | ~3h01 |
-| 4 | 120M | x80 | Atlantis Ruins | live (V0.38) | ~4h47 |
-| 5 | 5.1B | x250 | Mariana Trench | to build | ~6h14 |
-| 6 | 13B | x800 | Underwater Volcanic Temple | to build | ~8h07 |
-| 7 | 690B | x2,500 | Crystal Caverns | live (V0.44) | ~9h49 |
-| 8 | 1.5T | x8,000 | Cosmic Sanctuary | live (V0.44) | ~10h54 |
-
-- Crystal Caverns links the Volcanic Temple (glowing rock) to the Cosmic Sanctuary (crystals, light): a cave of big
-  soft crystals in pastel colours, glowing from inside.
 - Start money stays 300 $. Multipliers ~x3.2 per rebirth (§4): after each rebirth the income is back to its previous
   level in ~15–20 min.
-- The prices are not a regular ladder (45M → 120M → 5.1B → 13B → 690B → 1.5T): each one sits on the savings curve of
-  its run, and the runs bringing 2 new species earn much more. The simulator tuned them on target times.
+- The prices are not a regular ladder: each one sits on the savings curve of its run, and the runs bringing 2 new
+  species earn much more. The simulator tuned them on target times.
+- Crystal Caverns links the Volcanic Temple (glowing rock) to the Cosmic Sanctuary (crystals, light).
 - After rebirth 8 the Rebirth menu says the next aquariums come with the next update. Money keeps growing after the end
-  (~3T/min at 14 h): clamp it at 1e15 so a player farming for days never gets near 2^53 (exact integers of a Luau
-  number). Both done in V0.37 (ROADMAP M0: MAX_MONEY, T / Qa).
+  (~3T/min at 14 h): it is clamped at 1e15 (MAX_MONEY) so a player farming for days never gets near 2^53 (exact
+  integers of a Luau number).
 
 ### 5.7 Ocean Points and milestones (tank 10 → 25)
 
-Ocean Points come from releases, and above all from the whole tank released at each rebirth (median after rebirths
-1–8: 51, 2.4k, 10k, 35k, 95k, 229k, 527k, 925k, Voyage quest points included). Species points grow x1.6 per species,
-so every rebirth roughly triples the total: the milestones are spaced x2–3.
+Ocean Points come from releases, and above all from the whole tank released at each rebirth. Species points grow x1.6
+per species, so every rebirth roughly triples the total: the milestones are spaced x2–3 (live table: §3).
 
-| Points | Reward | Reached (median) | Moment |
-|---|---|---|---|
-| 50 | Pelican | ~30 min | rebirth 1 (live) |
-| 100 | Faster Snail: **x1.15** (live since V0.36, was x1.5) | ~48 min | §5.8 |
-| 200 | Second companion slot | ~1h15 | (live) |
-| 500 | Hungry Pelican: **x1.33, every 7.5 s** (live since V0.36, was x2.5) | ~1h34 | §5.8 |
-| 1,500 | **Tank 15** | ~1h39 | rebirth 2 (live) |
-| 5,000 | **Second incubator**: 2 eggs of the same type at once | ~2h58 | just before rebirth 3 (live since V0.38) |
-| 8,000 | **Tank 17** | ~3h01 | rebirth 3 (live since V0.38) |
-| 25,000 | **Tank 19** | ~4h47 | rebirth 4 (live since V0.38) |
-| 40,000 | Lucky ocean: variant chances x1.5 (Anomaly 15 %, Ghost 7.5 %, Shiny 1.5 %) | ~5h23 | side goal (+1.8 % income: not modelled; live since V0.38) |
-| 70,000 | **Tank 21** | ~6h13 | rebirth 5 (live since V0.40) |
-| 85,000 | **Water Hen** (companion: eggs hatch 15 % faster) | ~6h15 | rebirth 5 (live since V0.40) |
-| 120,000 | **Swordfish** (companion: coin collector) | ~7h16 | run 5 (live since V0.40) |
-| 180,000 | **Tank 23** | ~8h06 | rebirth 6 (live since V0.42) |
-| 200,000 | **Jellyfish** (companion: feeder) | ~8h07 | rebirth 6 (live since V0.42) |
-| 300,000 | Pearl rims: a pearly finish on the tank's rims (cosmetic, every theme) | ~9h15 | (live since V0.42) |
-| 450,000 | **Tank 25** (the V1 maximum) | ~9h49 | rebirth 7 (live since V0.44) |
-| 1,000,000 | "Ocean Guardian" title + a whale statue decor | ~11h29 | the last goal of the Ocean (live since V0.44) |
-
-- **Capacity 15 → 25 by steps of 2** (after the live 10 → 15), each on a rebirth: the new run starts with a bigger tank,
-  +10–13 % income each. 25 comes at rebirth 7 (~9h50): the last two runs are played with the full tank.
-- What changes the pace (capacity, incubator, Water Hen) is in the simulation; Lucky ocean, Pearl rims and the title
+- **Capacity 15 → 25 by steps of 2** (after 10 → 15), each on a rebirth: the new run starts with a bigger tank,
+  +10–13 % income each. 25 comes at rebirth 7: the last two runs are played with the full tank.
+- What changes the pace (capacity, incubator, Water Hen) is in the simulation; Lucky ocean, Pearl rims and the titles
   don't change it.
 
 ### 5.8 Companions and AFK farming
@@ -452,7 +360,7 @@ so every rebirth roughly triples the total: the milestones are spaced x2–3.
 **AFK** = the player stays in front of their tank (focus view) without doing anything. Outside the focus view the tank is
 frozen (no coins, no hunger) and there is no offline income. A fish left without food is weak 45 s after its last meal
 and only farts 1 $ bubbles, so **AFK income = coins collected x fish not weak**. Both come from
-`node tools/companion-sim.js --plan tools/balance-v1-plan.js` (the Pelican's perch animation, intervals, pellets and
+`node tools/companion-sim.js` (the Pelican's perch animation, intervals, pellets and
 charges, a fish eating a pellet in 1–3 s; the collectors' speed, reach, coins sinking at 4 studs/s and lying 5 s + perks
 on the sand). Reference coin rate: **1 coin/s ≈ a full V1 tank of 15 fish**, 1.5/s for 25 fish.
 
@@ -516,7 +424,7 @@ new looks, the upgrades are what their passes sell.
 
 | Stage | Hatch time | Effect on the free timeline |
 |---|---|---|
-| Water Hen (free, Ocean 85,000) | -15 % | Included: end ~12h27 → ~12h16 |
+| Water Hen (free, Ocean 85,000) | -15 % | Included: end ~12h27 → ~12h16 (V1 plan) |
 | + pass quests 1 / 2 / 3 | -22 % / -28 % / **-35 %** | -35 %: end → ~11h54 (-22 min) |
 
 Hatch speed matters little in this economy (the waits are for money, not for eggs): the Water Hen is a comfort, which
@@ -530,33 +438,33 @@ coins toward the next egg or rebirth.
 
 ### 5.9 Story quests V1
 
-Today the story is 9 quests, all done in ~1h30 (companions, Ocean, Rebirth). V1 adds a **main line that runs to the end
-of the content** and side lines that always leave something to do.
+The story has a **main line that runs to the end of the content** and side lines that always leave something to do
+(goals and rewards in `quests.ts`; when each is reached: §2).
 
 **Rule: at any time the player has 2 to 4 open story quests, and one of them is the main line.**
 
 **Main line "Voyage"** (the Rebirth line, renamed: it continues after "Saving Up"; two quests per aquarium: find its
 signature species, then reach the next aquarium)
 
-| Aquarium | Quest | Goal | Reward | Expected (median) |
-|---|---|---|---|---|
-| Basic | Saving Up (live) | Hold 5,000 $ | Rebirth feature | ~25 min |
-| Lagoon | Freshwater Finds | Hatch a Flame Gourami | 5 min of income | ~1h00 |
-| | Deeper Waters | Rebirth 2 | 500 Ocean Points | ~1h39 |
-| Neon Coral | Crown of the Reef | Hatch an Imperial Discus | 5 min of income | ~2h28 |
-| | Sunken Secrets | Rebirth 3 | 1,500 Ocean Points | ~3h01 |
-| Pirate Wreck | Treasure of the Wreck | Hatch a Catfish | 5 min of income | ~3h53 |
-| | The Lost City | Rebirth 4 | 4,000 Ocean Points | ~4h47 |
-| Atlantis | Atlantean Sun | Hatch a Baby Sunfish | 5 min of income | ~5h43 |
-| | Into the Deep | Rebirth 5 | 10,000 Ocean Points | ~6h14 |
-| Mariana Trench | Light of the Deep | Hatch a Lanternfish | 5 min of income | ~7h06 |
-| | Heat Below | Rebirth 6 | 25,000 Ocean Points | ~8h07 |
-| Volcanic Temple | Temple Guardian | Hatch a Dragonfish | 5 min of income | ~9h06 |
-| | Crystal Path | Rebirth 7 | 60,000 Ocean Points | ~9h49 |
-| Crystal Caverns | Puppy in the Caves | Hatch a Husky Dogfish | 5 min of income | ~11h12 |
-| | To the Stars | Rebirth 8 | 150,000 Ocean Points | ~10h54 (done at once if already there) |
-| Cosmic Sanctuary | Leviathan | Hatch a Mini Leviathan | 5 min of income | ~12h14 |
-| | Master Aquarist | All 18 species in the Fish Index | Title "Master Aquarist", golden trophy decor, 300,000 Ocean Points | ~12h16 |
+| Aquarium | Quest | Goal | Reward |
+|---|---|---|---|
+| Basic | Saving Up | Hold 5,000 $ | Rebirth feature |
+| Lagoon | Freshwater Finds | Hatch a Flame Gourami | 5 min of income |
+| | Deeper Waters | Rebirth 2 | 500 Ocean Points |
+| Neon Coral | Crown of the Reef | Hatch an Imperial Discus | 5 min of income |
+| | Sunken Secrets | Rebirth 3 | 1,500 Ocean Points |
+| Pirate Wreck | Treasure of the Wreck | Hatch a Catfish | 5 min of income |
+| | The Lost City | Rebirth 4 | 4,000 Ocean Points |
+| Atlantis | Atlantean Sun | Hatch a Baby Sunfish | 5 min of income |
+| | Into the Deep | Rebirth 5 | 10,000 Ocean Points |
+| Mariana Trench | Light of the Deep | Hatch a Lanternfish | 5 min of income |
+| | Heat Below | Rebirth 6 | 25,000 Ocean Points |
+| Volcanic Temple | Temple Guardian | Hatch a Dragonfish | 5 min of income |
+| | Crystal Path | Rebirth 7 | 60,000 Ocean Points |
+| Crystal Caverns | Puppy in the Caves | Hatch a Husky Dogfish | 5 min of income |
+| | To the Stars | Rebirth 8 | 150,000 Ocean Points (done at once if already there) |
+| Cosmic Sanctuary | Leviathan | Hatch a Mini Leviathan | 5 min of income |
+| | Master Aquarist | All 18 species in the Fish Index | Title "Master Aquarist", golden trophy decor, 300,000 Ocean Points |
 
 The Voyage quests read **gauges** (the Fish Index, the rebirth count), not counters: a quest whose goal is already met
 when it opens completes at once (e.g. a Dogfish hatched before rebirth 8), so the line never blocks.
@@ -565,26 +473,24 @@ when it opens completes at once (e.g. a Dogfish hatched before rebirth 8), so th
 
 | Line (opens with) | Quests (goal → reward) | Price |
 |---|---|---|
-| Snail (Story1, live) | 20 / 100 / 200 coins picked up → Lasting coins, Lasting coins II, Bouncy coins | free |
-| Pelican (owning it, live) | 50 / 150 / 500 feeds → Hearty meals, Double serving, Smart Pelican | free |
+| Snail (Story1) | 20 / 100 / 200 coins picked up → Lasting coins, Lasting coins II, Bouncy coins | free |
+| Pelican (owning it) | 50 / 150 / 500 feeds → Hearty meals, Double serving, Smart Pelican | free |
 | **Water Hen** (owning it) | eggs opened with it equipped: 50 / 150 / 400 → hatch -22 / -28 / -35 % | Water Hen pass |
 | **Swordfish** (owning it) | coins picked up: 300 / 1,000 / 3,000 → speed x1.4 reach 2.5, x1.8 reach 3, x2.2 reach 3.2 | Swordfish pass |
 | **Jellyfish** (owning it) | feeds: 300 / 1,000 / 3,000 → 3 charges every 6 s, every 5 s, 3 pellets | Jellyfish pass |
-| **Hatchery** (Story1; live V0.46) | hatch 100 / 300 / 600 / 900 / 1,200 fish, all time (gauge TotalHatched) → 2 min of income each, the last one also the Golden Incubator decor | free |
-| **Collector** ("Full House"; live V0.46) | in order: first Anomaly → 2 min of income, 10 Fish Index cells → 2 min, first Ghost → 3 min, 25 cells → 2,500 Ocean Points, first Shiny → 2,500 points, 50 cells → the "Collector" title (no sticker frames: decided by the owner; income before ~3 h: §4) | free |
-| **Ocean** ("Full House"; live V0.46) | release 50 fish → 3 min of income; release a Shiny → "Ocean Friend" title | free |
+| **Hatchery** (Story1) | hatch 100 / 300 / 600 / 900 / 1,200 fish, all time (gauge TotalHatched) → 2 min of income each, the last one also the Golden Incubator decor | free |
+| **Collector** ("Full House") | in order: first Anomaly → 2 min of income, 10 Fish Index cells → 2 min, first Ghost → 3 min, 25 cells → 2,500 Ocean Points, first Shiny → 2,500 points, 50 cells → the "Collector" title (no sticker frames: decided by the owner; income before ~3 h: §4) | free |
+| **Ocean** ("Full House") | release 50 fish → 3 min of income; release a Shiny → "Ocean Friend" title | free |
 
 The paid lines are shown in the quest book from the moment the companion is owned, locked, with their pass: the player
 sees what they would get. Pace of the paid lines: at 20 fish the Jellyfish feeds ~20 fish a minute (300 feeds ≈ 15 min
 of play, 3,000 ≈ 2h30); the Swordfish picks up ~1 coin/s (300 ≈ 5 min, 3,000 ≈ 50 min); the Water Hen sees ~1–1.5
 eggs a minute late in the game (400 ≈ 5 h): it is the slow one, on purpose (its effect is the smallest).
 
-**New quest stats**: `SpeciesHatched` (a given species, gauge from `hatched`), `Rebirths` (gauge), `EggsOpened`,
-`VariantHatched`, `IndexCells` (gauge), `FishReleased`, and a stat per companion (coins picked up, feeds, eggs opened
-while equipped). **New reward kinds**: `IncomeMinutes` (minutes of the tank's current income x rebirth multiplier, so it
-is worth something in every run), `OceanPoints`, `Title`, `Decor`. A line can require a gamepass.
+**Reward kinds** worth knowing: `IncomeMinutes` (minutes of the tank's current income x rebirth multiplier, so it is
+worth something in every run), `OceanPoints`, `CoinBoost`, `Title`, `Decor`. A line can require a gamepass.
 
-**Daily and weekly quests** (live V0.46, `DAILY_QUEST_POOL` / `WEEKLY_QUEST_POOL`; since V0.48 the dailies open at rebirth 2
+**Daily and weekly quests** (`DAILY_QUEST_POOL` / `WEEKLY_QUEST_POOL`; the dailies open at rebirth 2
 and the weeklies at rebirth 3, `BOARD_UNLOCK_REBIRTHS`: the first hours stay on the story): 3 quests a day drawn among 6
 (collect 150 / 400 coins, open 10 / 20 eggs, feed 30 times, hatch an Anomaly), 3 a week among 6 (collect 3,000 coins,
 open 100 eggs, feed 300 times, hatch a Ghost, release 25 fish, like 3 aquariums). Doable alone in one session, except
@@ -614,14 +520,11 @@ permanently**, so quests can be added or reworded without touching the pace.
 
 ### 5.10 Gamepasses (outside the balance)
 
-Live since V0.39 (ROADMAP M3): Third companion slot, x2 Ocean Points, Lucky, +50 % Coins; the companion passes come
-with M4–M5.
-
-Rule: **the free timeline (§5.3) is the only target.** Prices and milestones are tuned for a player with no pass and are
+Rule: **the free timeline (§2) is the only target.** Prices and milestones are tuned for a player with no pass and are
 never raised because passes exist. A pass shortens the game or adds comfort for its owner; it never locks progression
 content (species, eggs, aquariums, capacity, companions themselves) away from free players.
 
-| Pass | What it does | Effect on the V1 end (median, simulator) |
+| Pass | What it does | Effect on the V1 end (median, simulator, measured on the V1 plan: one long session) |
 |---|---|---|
 | Water Hen pass | Its 3 upgrade quests (hatch up to -35 %) | 12h16 → ~11h54 |
 | Swordfish pass | Its 3 upgrade quests (~96 % of the coins AFK) | none on the timeline (an active player); AFK income ~x1.6 |
@@ -642,24 +545,7 @@ content (species, eggs, aquariums, capacity, companions themselves) away from fr
 
 ---
 
-## 6. Live → V1: changes to existing numbers
-
-| What | Live (V0.35) | V1 | Why |
-|---|---|---|---|
-| Pelican's Ocean upgrade (500 points) | x2.5, every 4 s: keeps 25 fish fed | **x1.33, every 7.5 s**: 15 fish | Owner's brief; the Jellyfish takes over with its pass. **Shipped in V0.36** (M1) |
-| Snail's Ocean upgrade (100 points) | x1.5: ~72 % of the coins at 1 coin/s | **x1.15**: ~61 % | Owner's brief; the Swordfish takes over with its pass. **Shipped in V0.36** (M1) |
-| Ocean milestones above 1,500 | none | second incubator, tank 17 → 25 by 2s, Water Hen, Swordfish, Jellyfish, Lucky ocean, cosmetics | Ocean Points stay a progression all game long |
-| Companion slots | 2 (Ocean 200) | 2 free + a third with a gamepass | Owner's model |
-| Egg prices from egg 7 on | — | 1.2x the rebirth that opens them | Same rule as the Neon Coral Egg (§4) |
-| Rebirth multipliers | x2.5, x8 | x2.5, x8, x25, x80, x250, x800, x2,500, x8,000 | ~x3.2 per rebirth (§4) |
-| Rebirth line of the quest book | "Saving Up" only | the "Voyage" main line, 17 quests | Something to do until the end of V1 |
-
-Rebirths 1–2, eggs 1–6 and species 1–9 do not move: the first 2h30 stay as tested. The two nerfs shipped first, in
-V0.36 (ROADMAP M1).
-
----
-
-## 7. History
+## 6. History
 
 | Version | Change | Effect (medians) |
 |---|---|---|

@@ -35,6 +35,7 @@ sourcemap.json
 /tools/icons/
 /tools/textures/
 /design/ui/redesign-v2.json
+/design/ui/passes/_sheet.png
 npm-debug.log*
 
 # ---- OS clutter ----
