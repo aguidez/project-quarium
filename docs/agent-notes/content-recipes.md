@@ -34,7 +34,9 @@ BALANCE.md is updated (CLAUDE.md §0c). Asset quirks: [[fish-asset-pipeline]].
 2. Build in Studio under `ServerStorage.Assets.AquariumThemes.<Theme>` (tag `AquariumThemeTemplate`, attr `Theme`,
    PrimaryPart `Origin`, `Style/` parts named like the tank's including `Water`, `Decor/` low along the back and sides,
    CanQuery off), backdrop as a SurfaceGui of Frames (no uploaded image), props by `generate_mesh` tinted by
-   SurfaceAppearance Color.
+   SurfaceAppearance Color. The sand's top is at y = 3.5 above `Origin` (the Style parts sit elsewhere, only their
+   look is copied): put each prop's bottom at ~3.4, or on the prop it stands on. A prop at 4.4+ floats (Atlantis
+   corals, V0.56); check every prop's lowest corner against 3.5 before saving.
 3. `AQUARIUM_THEMES` entry, rebirth wired in `REBIRTHS`, `THEME_PALETTES` colour; screen_capture through the focus
    camera: fish and coins stay readable, nothing hides the front.
 

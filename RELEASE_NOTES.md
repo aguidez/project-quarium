@@ -10,6 +10,23 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.57 — 2026-11-02
+
+**Fixes**
+- **Aquarium panel (Customize)**: its themes, decor cards and titles sat a little to the left of the window; they
+  are now centred, the scroll bar keeping its room on the right. The white ring around the chosen theme is no longer
+  cut off on the left side of the first column.
+
+---
+
+## V0.56 — 2026-11-02
+
+**Fixes**
+- **Atlantis aquarium**: the two corals at the foot of the columns floated about a stud above the sand; they now
+  rest on it like the rest of the decor.
+
+---
+
 ## V0.55 — 2026-11-02
 
 **Changes**

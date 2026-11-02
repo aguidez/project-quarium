@@ -21,6 +21,7 @@ const WHITE = new Color3(1, 1, 1);
 // The sections grow with what the player earned up to this height, then scroll (the panel must fit small screens)
 const LIST_MAX_HEIGHT = 470;
 const SCROLL_ROOM = 14; // right of the content, for the scroll bar
+const RING_ROOM = 6; // left of the content: the list clips, and the chosen card's ring spills 4 px out of the card
 const SECTION_GAP = 18;
 const THEME_COLUMNS = 5;
 const CELL_GAP = 12;
@@ -81,6 +82,10 @@ function SectionTitle(props: { order: number; title: string; text: string }) {
 
 /** A grid of cells, as tall as its rows. */
 function Grid(props: { order: number; name: string; cell: Vector2; children: React.ReactNode }) {
+	// Cell widths are whole pixels: the pixels a full row leaves over go half on each side, so the grid stays centred
+	const width = math.floor(props.cell.X);
+	const columns = math.floor((PANEL_INNER_WIDTH + CELL_GAP) / (width + CELL_GAP));
+	const spare = PANEL_INNER_WIDTH - columns * width - (columns - 1) * CELL_GAP;
 	return (
 		<frame
 			key={props.name}
@@ -89,8 +94,9 @@ function Grid(props: { order: number; name: string; cell: Vector2; children: Rea
 			AutomaticSize={Enum.AutomaticSize.Y}
 			BackgroundTransparency={1}
 		>
+			<uipadding PaddingLeft={new UDim(0, math.floor(spare / 2))} />
 			<uigridlayout
-				CellSize={UDim2.fromOffset(props.cell.X, props.cell.Y)}
+				CellSize={UDim2.fromOffset(width, props.cell.Y)}
 				CellPadding={UDim2.fromOffset(CELL_GAP, CELL_GAP)}
 				SortOrder={Enum.SortOrder.LayoutOrder}
 			/>
@@ -296,85 +302,94 @@ export function AquariumPanel(props: AquariumPanelProps) {
 
 	return (
 		<Panel title="AQUARIUM" banner={PALETTES.pink} onClose={props.onClose}>
-			<scrollingframe
-				key="List"
+			{/* As wide as the content, so the panel centres it; the list's side rooms spill into the panel's padding */}
+			<frame
+				key="ListArea"
 				LayoutOrder={1}
-				Size={contentHeight.map((h) =>
-					UDim2.fromOffset(PANEL_INNER_WIDTH + SCROLL_ROOM, math.min(h, LIST_MAX_HEIGHT)),
-				)}
+				Size={contentHeight.map((h) => UDim2.fromOffset(PANEL_INNER_WIDTH, math.min(h, LIST_MAX_HEIGHT)))}
 				BackgroundTransparency={1}
-				BorderSizePixel={0}
-				CanvasSize={contentHeight.map((h) => UDim2.fromOffset(0, h))}
-				ScrollingDirection={Enum.ScrollingDirection.Y}
-				ScrollBarThickness={6}
-				ScrollBarImageColor3={PALETTES.pink.base}
-				ScrollBarImageTransparency={contentHeight.map((h) => (h > LIST_MAX_HEIGHT ? 0 : 1))}
 			>
-				<frame
-					key="Content"
-					Size={UDim2.fromOffset(PANEL_INNER_WIDTH, 0)}
-					AutomaticSize={Enum.AutomaticSize.Y}
+				<scrollingframe
+					key="List"
+					Position={UDim2.fromOffset(-RING_ROOM, 0)}
+					Size={contentHeight.map((h) =>
+						UDim2.fromOffset(PANEL_INNER_WIDTH + RING_ROOM + SCROLL_ROOM, math.min(h, LIST_MAX_HEIGHT)),
+					)}
 					BackgroundTransparency={1}
-					Change={{
-						// Its height before the panel's UIScale: the list grows with it, then scrolls
-						AbsoluteSize: (frame) =>
-							setContentHeight(
-								frame.AbsoluteSize.Y * (PANEL_INNER_WIDTH / math.max(frame.AbsoluteSize.X, 1)),
-							),
-					}}
+					BorderSizePixel={0}
+					CanvasSize={contentHeight.map((h) => UDim2.fromOffset(0, h))}
+					ScrollingDirection={Enum.ScrollingDirection.Y}
+					ScrollBarThickness={6}
+					ScrollBarImageColor3={PALETTES.pink.base}
+					ScrollBarImageTransparency={contentHeight.map((h) => (h > LIST_MAX_HEIGHT ? 0 : 1))}
 				>
-					<uipadding PaddingTop={new UDim(0, 4)} PaddingBottom={new UDim(0, 6)} />
-					<uilistlayout Padding={new UDim(0, 10)} SortOrder={Enum.SortOrder.LayoutOrder} />
-					<SectionTitle
-						order={1}
-						title="THEME"
-						text="Pick any aquarium you reached. Automatic follows your newest one."
-					/>
-					<Grid order={2} name="Themes" cell={THEME_CARD}>
-						{themeCards}
-					</Grid>
 					<frame
-						key="Gap1"
-						LayoutOrder={3}
-						Size={UDim2.fromOffset(1, SECTION_GAP - 10)}
+						key="Content"
+						Position={UDim2.fromOffset(RING_ROOM, 0)}
+						Size={UDim2.fromOffset(PANEL_INNER_WIDTH, 0)}
+						AutomaticSize={Enum.AutomaticSize.Y}
 						BackgroundTransparency={1}
-					/>
-					<SectionTitle
-						order={4}
-						title="DECOR & FINISHES"
-						text={
-							items.size() > 0
-								? "Show or hide what you earned in your tank."
-								: "Earn decor and finishes with the quests and the Ocean."
-						}
-					/>
-					{items.size() > 0 && (
-						<Grid order={5} name="Items" cell={ITEM_CARD}>
-							{items}
+						Change={{
+							// Its height before the panel's UIScale: the list grows with it, then scrolls
+							AbsoluteSize: (frame) =>
+								setContentHeight(
+									frame.AbsoluteSize.Y * (PANEL_INNER_WIDTH / math.max(frame.AbsoluteSize.X, 1)),
+								),
+						}}
+					>
+						<uipadding PaddingTop={new UDim(0, 4)} PaddingBottom={new UDim(0, 6)} />
+						<uilistlayout Padding={new UDim(0, 10)} SortOrder={Enum.SortOrder.LayoutOrder} />
+						<SectionTitle
+							order={1}
+							title="THEME"
+							text="Pick any aquarium you reached. Automatic follows your newest one."
+						/>
+						<Grid order={2} name="Themes" cell={THEME_CARD}>
+							{themeCards}
 						</Grid>
-					)}
-					<frame
-						key="Gap2"
-						LayoutOrder={6}
-						Size={UDim2.fromOffset(1, SECTION_GAP - 10)}
-						BackgroundTransparency={1}
-					/>
-					<SectionTitle
-						order={7}
-						title="TITLE"
-						text={
-							titles.size() > 0
-								? "The title floating above your head, for everyone to see."
-								: "Earn titles with the quests and the Ocean."
-						}
-					/>
-					{titles.size() > 0 && (
-						<Grid order={8} name="Titles" cell={TITLE_BUTTON}>
-							{titleButtons}
-						</Grid>
-					)}
-				</frame>
-			</scrollingframe>
+						<frame
+							key="Gap1"
+							LayoutOrder={3}
+							Size={UDim2.fromOffset(1, SECTION_GAP - 10)}
+							BackgroundTransparency={1}
+						/>
+						<SectionTitle
+							order={4}
+							title="DECOR & FINISHES"
+							text={
+								items.size() > 0
+									? "Show or hide what you earned in your tank."
+									: "Earn decor and finishes with the quests and the Ocean."
+							}
+						/>
+						{items.size() > 0 && (
+							<Grid order={5} name="Items" cell={ITEM_CARD}>
+								{items}
+							</Grid>
+						)}
+						<frame
+							key="Gap2"
+							LayoutOrder={6}
+							Size={UDim2.fromOffset(1, SECTION_GAP - 10)}
+							BackgroundTransparency={1}
+						/>
+						<SectionTitle
+							order={7}
+							title="TITLE"
+							text={
+								titles.size() > 0
+									? "The title floating above your head, for everyone to see."
+									: "Earn titles with the quests and the Ocean."
+							}
+						/>
+						{titles.size() > 0 && (
+							<Grid order={8} name="Titles" cell={TITLE_BUTTON}>
+								{titleButtons}
+							</Grid>
+						)}
+					</frame>
+				</scrollingframe>
+			</frame>
 		</Panel>
 	);
 }

@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-02 (V0.55: the owner's aquarium picture as loading screen, its logo fills with water).
+> Last updated: 2026-11-02 (V0.57: Aquarium panel content centred; V0.56: Atlantis corals grounded on the sand).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -547,7 +547,8 @@ ProjectQuarium/
   - `AquariumThemes/<Theme>` (tag `AquariumThemeTemplate`, attr `Theme`): PrimaryPart `Origin` = the tank frame,
     `Style/` parts named like the tank's (Sand, Backdrop, Base, Plinth, Rim*, `Water`: every theme has one, so a tank
     changing owner gets its water back; look + children such as a painted backdrop SurfaceGui copied onto the tank),
-    `Decor/` cloned into the tank (CanQuery off, low along the back and sides: fish and coins stay visible).
+    `Decor/` cloned into the tank (CanQuery off, low along the back and sides: fish and coins stay visible; props rest
+    on the sand, whose top is at y = 3.5 above `Origin`, or sink ~0.1 into it).
     Backdrops are SurfaceGuis drawn with Frames only (no uploaded image); props are generated meshes. Each theme left
     out the props at risk of moderation (CLAUDE.md §7): no cannons, skulls, swords, bottles, trident,
     torches, flames, smoke, faces; magma is flat Neon veins (a rock ring around a glow read as a campfire).

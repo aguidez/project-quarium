@@ -15,7 +15,7 @@ step, a tool quirk), add or update a note here and its line below, in the same t
 - [Previews in the project](previews-in-project.md) — show the owner images as a clickable link to design/previews/, never a temp path
 - [No emoji in the UI](no-emoji-in-ui.md) — player-facing texts, designs and notes stay emoji-free; draw icons instead
 - [Roblox moderation risk](roblox-moderation-risk.md) — a firefighter-fish icon got the account a ToS warning; no bomb/weapon-like shapes, ask before risky themes
-- [UI V2 arcade style](ui-v2-arcade-style.md) — owner-approved Pet Sim-like UI; build every screen from client/ui/kit.tsx, never flat; FigCraft round parents are frames
+- [UI V2 arcade style](ui-v2-arcade-style.md) — owner-approved Pet Sim-like UI; build every screen from client/ui/kit.tsx, never flat; FigCraft round parents are frames; scroll lists centred, with room for rings
 - [Shell heredoc quirk](shell-heredoc-quirk.md) — (Windows Git Bash) heredocs with apostrophes break; write scripts with the Write tool
 - [Two machines: Windows and Mac](two-machines-windows-mac.md) — the owner switches between a Windows PC and a Mac; add the Mac variant next to Windows, never replace it; FigCraft app + CLI per OS; rebuild (`npx rbxtsc`) after every pull or Studio plays a stale build
 - [Player statistics](player-stats.md) — what the saves record (V0.47), reading profiles from Studio / Open Cloud, the DataStore's hourly version history; banning a player from the leaderboards
