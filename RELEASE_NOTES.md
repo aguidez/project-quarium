@@ -1,4 +1,4 @@
-# Release Notes — Projet Quarium
+# Release Notes — Project: Quarium
 
 Every change to the game, patch by patch. The newest version is at the top.
 

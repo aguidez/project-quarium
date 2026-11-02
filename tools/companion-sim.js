@@ -1,4 +1,4 @@
-// Companion simulator for Projet Quarium: how many fish the Pelican keeps fed, and what share of the coins
+// Companion simulator for Project: Quarium: how many fish the Pelican keeps fed, and what share of the coins
 // the Snail picks up, while the player stays in front of the tank without doing anything (AFK farming).
 // Mirrors CompanionService (Pelican: perch animation, feed interval, pellets, charges; Snail: speed, reach,
 // "soonest coin" choice), FishService (hunger: satiated -> hungry 15 s -> weak, a weak fish earns nothing),

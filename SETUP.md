@@ -1,4 +1,4 @@
-# SETUP — work on Projet Quarium from a new machine
+# SETUP — work on Project: Quarium from a new machine
 
 Works on **Windows** and **macOS** (Roblox Studio has no Linux version: on Linux you can code, build and run the
 simulators, but not test in Studio). Run `npm run doctor` at the end: it checks everything below.
@@ -22,9 +22,9 @@ Accounts: the **Roblox account that owns the game** (or Team Create access to it
 ## 2. Get the project
 
 ```sh
-git clone https://github.com/aguidez/project-quarium.git ProjetQuarium
-# or, with an SSH key on your GitHub account: git clone git@github.com:aguidez/project-quarium.git ProjetQuarium
-cd ProjetQuarium
+git clone https://github.com/aguidez/project-quarium.git ProjectQuarium
+# or, with an SSH key on your GitHub account: git clone git@github.com:aguidez/project-quarium.git ProjectQuarium
+cd ProjectQuarium
 npm install            # packages (roblox-ts, @rbxts/*, eslint, jimp and @resvg/resvg-js for the image tools)
 aftman install         # or: rokit install  -> rojo 7.7.1 on the PATH
 npx rbxtsc             # build: must end with no error, creates out/ and include/
@@ -48,7 +48,7 @@ cp workspace.local.example.json workspace.local.json      # Windows PowerShell: 
 | `robloxStudioMcp` | the Studio MCP server isn't found automatically | path of `StudioMCP` (macOS) or `mcp.bat` / `StudioMCP.exe` (Windows) |
 | `robloxFontsDir` | the Roblox fonts aren't found (FigCraft V2 build script) | Studio's `content/fonts` folder |
 | `robloxOpenCloudKey` | you read the real players' statistics (`npm run stats`) | an Open Cloud API key, see below. **Secret**: only in this file, never in git |
-| `robloxUniverseId` | another experience than Projet Quarium's (10773319506) | its universe id (`game.GameId`) |
+| `robloxUniverseId` | another experience than Project: Quarium's (10773319506) | its universe id (`game.GameId`) |
 
 Each key can also be given as an environment variable (`FIGCRAFT_DIR`, `ROBLOX_STUDIO_MCP`, `ROBLOX_FONTS_DIR`,
 `ROBLOX_OPEN_CLOUD_KEY`...).
@@ -57,8 +57,8 @@ Default locations searched without config: Studio MCP in `%LOCALAPPDATA%\Roblox\
 
 **Open Cloud key (players' statistics, optional).** `npm run stats` (`tools/player-stats.js`) reads every player
 profile of the live DataStore to compare the real players with the balance simulator (ROADMAP M7). On the Creator
-Dashboard: *Open Cloud → API Keys → Create API Key*; name it (e.g. "Quarium stats"), add the API system **Data
-Stores**, pick the experience **Projet Quarium** and only the operations **List entry keys** and **Read entry**
+Dashboard: *Open Cloud → API Keys → Create API Key*; name it (e.g. "Project Quarium stats"), add the API system **Data
+Stores**, pick the experience **Project: Quarium** and only the operations **List entry keys** and **Read entry**
 (`universe-datastores.objects:list` / `:read`: the tool never writes); accepted IP addresses: your own, or
 `0.0.0.0/0`; an expiration date is wise. Copy the key into `robloxOpenCloudKey`. Each machine can have its own key.
 

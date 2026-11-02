@@ -1,4 +1,4 @@
-# ROADMAP — Projet Quarium V1.1 "Animations"
+# ROADMAP — Project: Quarium V1.1 "Animations"
 
 > The animation revamp: every fish, companion, event guest and NPC moves through a **skeleton made in Blender**
 > instead of the EditableMesh deformation of V1. It starts **once V1 is complete** (the owner's calibration with real players done). Tick the

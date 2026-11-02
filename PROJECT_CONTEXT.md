@@ -1,4 +1,4 @@
-# PROJECT_CONTEXT — Projet Quarium
+# PROJECT_CONTEXT — Project: Quarium
 
 > Living map of the project. **Read it before exploring the code, and update it in the same change
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
@@ -65,7 +65,7 @@ How to add content: `docs/agent-notes/content-recipes.md`. **`ROADMAP_V1.1.md`**
 ## 2. Annotated tree
 
 ```
-ProjetQuarium/
+ProjectQuarium/
 ├─ CLAUDE.md                 Project rules (read first)
 ├─ SETUP.md                  New machine / OS: prerequisites, install steps, machine config, shared vs local
 ├─ PROJECT_CONTEXT.md        This file

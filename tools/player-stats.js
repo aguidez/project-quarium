@@ -9,7 +9,7 @@
 const fs = require("fs");
 const config = require("./local-config");
 
-const UNIVERSE_ID = config.get("robloxUniverseId", "10773319506"); // Projet Quarium's experience (game.GameId)
+const UNIVERSE_ID = config.get("robloxUniverseId", "10773319506"); // Project: Quarium's experience (game.GameId)
 const args = process.argv.slice(2);
 const flag = (name) => {
 	const i = args.indexOf(name);

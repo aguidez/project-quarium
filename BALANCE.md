@@ -1,4 +1,4 @@
-# BALANCE — Projet Quarium
+# BALANCE — Project: Quarium
 
 > The game's balance: what an average player reaches after how long, and why. **Update it in the same task whenever a
 > number of the economy changes** (fish income, eggs, odds, rebirths, Ocean milestones, variants, food, capacity,

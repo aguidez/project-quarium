@@ -1,4 +1,4 @@
-// Economy simulator for Projet Quarium. Mirrors src/shared/types/fish.ts, eggs.ts, rebirths.ts and the
+// Economy simulator for Project: Quarium. Mirrors src/shared/types/fish.ts, eggs.ts, rebirths.ts and the
 // capacity milestones of oceanRewards.ts: keep the numbers below in sync when the balance changes, and
 // write the results in BALANCE.md.
 // Monte Carlo over many "average players" (collect 50% of the coins, feed their fish, save for the
