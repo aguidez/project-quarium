@@ -8,7 +8,7 @@ import { ReplicatedStorage, Workspace } from "@rbxts/services";
  *   recurring event running, and no recurring event can start while it runs.
  * Players still in the tutorial are "event immune": events don't touch them (see isEventImmune).
  */
-export type GameEventType = "Kpop" | "Abyss";
+export type GameEventType = "Kpop" | "Abyss" | "Ufo";
 
 /** How the running event was started (replicated for information). */
 export type EventSource = "Recurring" | "Admin";
@@ -47,7 +47,15 @@ export interface AbyssEventConfig extends BaseEventConfig {
 	kind: "Abyss";
 }
 
-export type GameEventConfig = MusicEventConfig | AbyssEventConfig;
+/**
+ * UFO night: the world goes dark under green spotlights, tank backdrops turn into space, and a UFO over every owned
+ * aquarium beams fish up one by one and drops them back changed (UfoService, shared/types/ufo).
+ */
+export interface UfoEventConfig extends BaseEventConfig {
+	kind: "Ufo";
+}
+
+export type GameEventConfig = MusicEventConfig | AbyssEventConfig | UfoEventConfig;
 
 export const GAME_EVENTS: Record<GameEventType, GameEventConfig> = {
 	Kpop: {
@@ -74,10 +82,20 @@ export const GAME_EVENTS: Record<GameEventType, GameEventConfig> = {
 		recurring: true,
 		coinMultiplier: 1.5,
 	},
+	Ufo: {
+		kind: "Ufo",
+		displayName: "UFO NIGHT",
+		icon: "UFO", // drawn as text in the banner's badge (no emoji)
+		subtitle: "UFOs beam your fish up... and bring them back changed!",
+		musicId: "rbxassetid://87373069356270",
+		musicVolume: 0.5,
+		duration: 60, // 4 to 5 kidnappings per tank (UfoService)
+		recurring: true,
+	},
 };
 
 /** Display order of the Studio test buttons. */
-export const TEST_EVENT_ORDER: GameEventType[] = ["Kpop", "Abyss"];
+export const TEST_EVENT_ORDER: GameEventType[] = ["Kpop", "Abyss", "Ufo"];
 
 /** The events the recurring clock draws from. */
 export function getRecurringEvents(): GameEventType[] {

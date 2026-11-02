@@ -8,7 +8,7 @@ export const TAGS = {
 	 * A fish model, built locally by each client (FishRenderController): the server has none.
 	 * Attributes (local): "FishId", "FishType", "Hunger" (HungerState), "GrowthStage" (index in the fish
 	 * type's growth stages), "Variant" (FishVariant), "Paused" (owner AFK: no hunger, growth or coins), "Dead" (leaving the tank),
-	 * "Animated" (FishAnimationController debugging aid).
+	 * "Animated" (FishAnimationController debugging aid), "Asleep" (a UFO night mutation: idles, "z Z z" bubble).
 	 */
 	Fish: "Fish",
 	/**
@@ -44,6 +44,11 @@ export const TAGS = {
 	EventFish: "EventFish",
 	/** Studio-made event fish model in ServerStorage.Assets, laid out like a FishTemplate. Attribute "EventType". */
 	EventFishTemplate: "EventFishTemplate",
+	/**
+	 * A UFO of the UFO night (UfoService), flying over its tank: a clone of the "Ufo" EventFishTemplate (not an
+	 * EventFish: never animated as a fish). Attribute "Beaming" (shared/types/ufo UFO_BEAM_ATTRIBUTE).
+	 */
+	Ufo: "Ufo",
 	/** An equipped companion in its owner's aquarium. Attributes: "Owner" (UserId), "CompanionType". */
 	Companion: "Companion",
 	/** Studio-made companion model in ServerStorage.Assets, laid out like a FishTemplate. Attribute "CompanionType". */

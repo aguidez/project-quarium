@@ -51,7 +51,8 @@ export interface FishIndexPanelProps {
 
 /** Eggs a fish hatches from, with the odds: "Common Egg 80% · Improved Egg 30%", in shop order. */
 function getSources(fishType: FishType): string {
-	if (isEasterEgg(fishType)) return "Hides in any egg, now and then";
+	const easterEgg = FISH_TYPES[fishType].easterEgg;
+	if (easterEgg) return easterEgg.source;
 	const eggTypes = new Array<EggType>();
 	for (const [eggType] of pairs(EGG_TYPES)) {
 		if (getHatchChance(eggType, fishType) > 0) eggTypes.push(eggType);
@@ -269,7 +270,7 @@ function FishRow(props: {
 					text={
 						discovered
 							? fish.easterEgg
-								? `A ${fish.coin.lower()} every ${fish.incomeInterval / 60} min`
+								? fish.easterEgg.perk
 								: `${formatNumber(fish.income)}$ every ${fish.incomeInterval}s`
 							: "Hatch it to see its stats"
 					}

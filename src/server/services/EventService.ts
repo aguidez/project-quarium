@@ -14,7 +14,6 @@ import { t } from "@rbxts/t";
 import { Lifecycle } from "shared/framework";
 import { TAGS } from "shared/tags";
 import {
-	AbyssEventConfig,
 	EVENT_ATTRIBUTES,
 	EVENT_IMMUNE_ATTRIBUTE,
 	EVENT_LEAD_TIME,
@@ -34,6 +33,7 @@ import { AbyssService } from "./AbyssService";
 import { Aquarium, AquariumService } from "./AquariumService";
 import { DataService } from "./DataService";
 import { FishService } from "./FishService";
+import { UfoService } from "./UfoService";
 
 const isEventType = t.keyOf(GAME_EVENTS);
 
@@ -97,7 +97,7 @@ function utcNow(): number {
  * Players still in the tutorial are event immune (EVENT_IMMUNE_ATTRIBUTE, kept up to date here): no guest,
  * thief or bonus in their tank, and their client shows nothing of the event.
  *
- * The abyssal raid is run by AbyssService. A music event replaces the background music, sends its star
+ * The abyssal raid is run by AbyssService, the UFO night by UfoService. A music event replaces the background music, sends its star
  * fish to swim in every owned aquarium and, on each beat of the track, lets every fish drop its coin with
  * the event's chance. The beats are timed on the server clock from the replicated start time, which the
  * clients also use to sync the track and the dance effects.
@@ -325,8 +325,12 @@ class EventServiceSingleton implements Lifecycle {
 		const config = GAME_EVENTS[eventType];
 		if (config.kind === "Music") {
 			task.spawn(() => this.run(token, eventType, config, startsAt, endsAt));
+		} else if (config.kind === "Abyss") {
+			const run = (template: Model) => AbyssService.run(template, config, startsAt, endsAt);
+			task.spawn(() => this.runRaid(token, eventType, endsAt, run));
 		} else {
-			task.spawn(() => this.runAbyss(token, eventType, config, startsAt, endsAt));
+			const run = (template: Model) => UfoService.run(template, config, startsAt, endsAt);
+			task.spawn(() => this.runRaid(token, eventType, endsAt, run));
 		}
 	}
 
@@ -345,18 +349,14 @@ class EventServiceSingleton implements Lifecycle {
 		ReplicatedStorage.SetAttribute(EVENT_ATTRIBUTES.source, undefined);
 		for (const [, guest] of this.guests) this.removeGuest(guest);
 		AbyssService.stop(); // its lantern fish flee
+		UfoService.stop(); // its UFOs give their fish back and leave
 	}
 
-	private runAbyss(
-		token: number,
-		eventType: GameEventType,
-		config: AbyssEventConfig,
-		startsAt: number,
-		endsAt: number,
-	) {
+	/** An event run by its own service (the abyssal raid, the UFO night) with the event's model as `template`. */
+	private runRaid(token: number, eventType: GameEventType, endsAt: number, run: (template: Model) => void) {
 		const template = this.templates.get(eventType);
-		if (template) AbyssService.run(template, config, startsAt, endsAt);
-		// Without its template there is no thief, but the world still goes dark until the end
+		if (template) run(template);
+		// Without its template there is no thief / UFO, but the world still goes dark until the end
 		while (token === this.token && Workspace.GetServerTimeNow() < endsAt) task.wait(MAX_LOOP_WAIT);
 		if (token === this.token) {
 			print(`[Server] Event ${eventType} ended.`);

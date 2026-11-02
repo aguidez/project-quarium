@@ -4,6 +4,7 @@ import { SwimSegment } from "./swim";
 import { EggType } from "./types/eggs";
 import { FishType, HungerState } from "./types/fish";
 import { PlayerData } from "./types/playerData";
+import { FishEffect } from "./types/ufo";
 import { FishVariant } from "./types/variants";
 
 // Define all client <-> server contracts here
@@ -85,17 +86,20 @@ export interface FishView {
 	hunger: HungerState;
 	paused: boolean; // owner AFK: hunger and coins frozen
 	segment: SwimSegment;
+	/** A UFO's mutation for a while (shared/types/ufo): asleep, or coins x2 / x0.5 with a green / red aura. */
+	effect?: FishEffect;
 }
 
 /** Why a fish leaves the tank: eaten by a cannibal, released to the ocean, or gone (its owner left). */
-export type FishRemoval = "Eaten" | "Released" | "Gone";
+export type FishRemoval = "Eaten" | "Released" | "Gone" | "Abducted"; // Abducted: beamed up into a UFO (it comes back)
 
 /** What the server tells the clients watching a tank about its fish; positions are computed from the segments. */
 export type FishMessage =
 	| { kind: "Tank"; plot: number; fish: FishView[] } // full state, when the client starts watching the tank
 	| { kind: "Spawn"; fish: FishView }
 	| { kind: "Swim"; id: number; segment: SwimSegment }
-	| { kind: "State"; id: number; hunger: HungerState; growthStage: number; paused: boolean }
+	| { kind: "State"; id: number; hunger: HungerState; growthStage: number; paused: boolean; effect?: FishEffect }
+	| { kind: "Scream"; id: number } // an alien fish screams: a wave through its tank (FishService)
 	| { kind: "Remove"; id: number; cause: FishRemoval; by?: number }; // by: the predator
 
 export interface EggHatch {

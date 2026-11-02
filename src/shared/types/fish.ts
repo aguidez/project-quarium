@@ -17,7 +17,8 @@ export type FishType =
 	| "WolfDogfish"
 	| "BunnyShark"
 	| "MiniLeviathan"
-	| "FrenchFish";
+	| "FrenchFish"
+	| "AlienFish";
 
 /** Rarity of a fish type, shown in the fish index, the egg odds and the hatch reveal. */
 export type FishRarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythic" | "Secret";
@@ -133,16 +134,26 @@ export interface FishConfig {
  * An easter egg fish hides in every egg with a chance shown nowhere, taken from the egg's most common
  * fish (see getDrawOdds). It hatches without a variant, its coins (every `incomeInterval`) are worth
  * `incomeShare` of the tank's theoretical income per minute (FishService.getTankIncomePerMinute) instead
- * of `income`, and it doesn't stay: after `lifetime` seconds in the water (its age: frozen offline and
- * while the tank is paused, like its growth) it leaves for the ocean by itself, Ocean Points included.
+ * of `income` (none at 0), and with a `lifetime` it doesn't stay: after that many seconds in the water (its
+ * age: frozen offline and while the tank is paused, like its growth) it leaves for the ocean by itself, Ocean
+ * Points included. The alien fish (UFO event) never hatches from an egg and stays: it screams instead.
  */
 export interface EasterEggConfig {
-	/** Percent per egg opened. */
+	/** Percent per egg opened (0: never from an egg). */
 	hatchChance: number;
+	/** Fish Index: where it comes from (in place of the eggs and odds), and what it does (in place of its coins). */
+	source: string;
+	perk: string;
 	incomeShare: number;
-	lifetime: number;
+	/** Seconds in the water before it leaves on its own; none: it stays until released. */
+	lifetime?: number;
 	/** Told to the owner when it leaves on its own. */
-	leaveMessage: string;
+	leaveMessage?: string;
+	/**
+	 * Seconds between two screams (FishService): a wave through its tank that makes every other fish drop one plain
+	 * coin (never sparkling nor ghost), on top of their own (their timers don't move). Only while the tank produces.
+	 */
+	screamInterval?: number;
 }
 
 export const DEFAULT_HUNGER: HungerConfig = {
@@ -422,9 +433,34 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 		growth: [{ age: 0, size: 1, coinMultiplier: 1 }], // hatches grown up: it is only passing through
 		easterEgg: {
 			hatchChance: 0.1,
+			source: "Hides in any egg, now and then",
+			perk: "A croissant every 1 min",
 			incomeShare: 0.5,
 			lifetime: 60 * 60,
 			leaveMessage: "The French Fish went off to join a protest. Au revoir!",
+		},
+	},
+	// Easter egg of the UFO event (0.5 % of the fish a UFO brings back): no coin of its own, it stays, and its scream
+	// makes the whole tank drop a coin every 30 s (EasterEggConfig.screamInterval)
+	AlienFish: {
+		displayName: "Alien Fish",
+		rarity: "Secret",
+		income: 0,
+		oceanPoints: 500,
+		coin: "Bronze", // never dropped (incomeShare 0)
+		incomeInterval: 60,
+		scaleMin: 0.95,
+		scaleMax: 1.05,
+		speedMin: 2.5,
+		speedMax: 4,
+		hunger: DEFAULT_HUNGER,
+		growth: [{ age: 0, size: 1, coinMultiplier: 1 }], // comes back grown up
+		easterEgg: {
+			hatchChance: 0,
+			source: "Brought back by a UFO, now and then",
+			perk: "Screams every 30s: your fish drop coins",
+			incomeShare: 0,
+			screamInterval: 30,
 		},
 	},
 };

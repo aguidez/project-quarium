@@ -6,6 +6,8 @@ import { DataService } from "./DataService";
 import { EggService } from "./EggService";
 import { FishService } from "./FishService";
 import { GamePassService } from "./GamePassService";
+import { UfoService } from "./UfoService";
+import { UFO_OUTCOME_ORDER, UfoOutcome } from "shared/types/ufo";
 import { GAME_PASSES, isGamePass } from "shared/types/gamepasses";
 import { MAX_TEST_SPEED } from "../playerStats";
 
@@ -19,6 +21,7 @@ const PASS_COMMAND = "/pass";
 const BOOST_COMMAND = "/boost";
 const SPEED_COMMAND = "/speed";
 const PASSES_COMMAND = "/passes";
+const UFO_COMMAND = "/ufo";
 /** The most incubators the test command gives (the V1 plan stops at 2). */
 const MAX_TEST_INCUBATORS = 4;
 
@@ -39,6 +42,8 @@ const MAX_TEST_INCUBATORS = 4;
  *                       applies when the owner plays the published game ("/speed 1" puts it back); the profile is
  *                       then left out of the players' statistics
  *  /passes off|on       the owner plays without their gamepasses (saved, also on the published game) or with them again
+ *  /ufo <Outcome>|off   the UFOs of the next UFO nights bring the owner's fish back with that outcome (Sleep, Green, Red,
+ *                       Variant, Alien), for this session; "/ufo off" puts the odds back
  */
 class DevCommandServiceSingleton implements Lifecycle {
 	private resetAskedAt = new Map<Player, number>();
@@ -108,13 +113,22 @@ class DevCommandServiceSingleton implements Lifecycle {
 			if (player) this.onPasses(player, text);
 		});
 		passes.Parent = TextChatService;
+
+		const ufo = new Instance("TextChatCommand");
+		ufo.Name = "DevUfo";
+		ufo.PrimaryAlias = UFO_COMMAND;
+		ufo.Triggered.Connect((source, text) => {
+			const player = Players.GetPlayerByUserId(source.UserId);
+			if (player) this.onUfo(player, text);
+		});
+		ufo.Parent = TextChatService;
 		Players.PlayerRemoving.Connect((player) => this.resetAskedAt.delete(player));
 	}
 
 	public onStart() {
 		if (RunService.IsStudio())
 			print(
-				`[Server] DevCommandService: ${RESET_COMMAND}, ${NEXT_FRENCH_COMMAND}, ${INCUBATORS_COMMAND}, ${PASS_COMMAND}, ${BOOST_COMMAND}, ${SPEED_COMMAND}, ${PASSES_COMMAND} available (Studio, place owner only).`,
+				`[Server] DevCommandService: ${RESET_COMMAND}, ${NEXT_FRENCH_COMMAND}, ${INCUBATORS_COMMAND}, ${PASS_COMMAND}, ${BOOST_COMMAND}, ${SPEED_COMMAND}, ${PASSES_COMMAND}, ${UFO_COMMAND} available (Studio, place owner only).`,
 			);
 	}
 
@@ -143,6 +157,24 @@ class DevCommandServiceSingleton implements Lifecycle {
 		data.incubators = math.clamp(math.floor(count), 1, MAX_TEST_INCUBATORS);
 		DataService.sync(player);
 		DataService.notify(player, `Incubators per egg type: ${data.incubators}.`, "info");
+	}
+
+	private onUfo(player: Player, text: string) {
+		if (!this.isAllowed(player)) {
+			warn(`[Server] ${player.Name} tried ${UFO_COMMAND}: refused (not the place's owner).`);
+			return;
+		}
+		const word = text.split(" ")[1]?.lower();
+		const outcome = UFO_OUTCOME_ORDER.find((candidate) => candidate.lower() === word);
+		if (word === "off") {
+			UfoService.forceOutcome(player, undefined);
+			DataService.notify(player, "UFO outcomes: normal odds again.", "info");
+		} else if (outcome !== undefined) {
+			UfoService.forceOutcome(player, outcome as UfoOutcome);
+			DataService.notify(player, `Your fish will come back from the UFOs: ${outcome}.`, "info");
+		} else {
+			DataService.notify(player, `Usage: ${UFO_COMMAND} ${UFO_OUTCOME_ORDER.join(" | ")} | off`, "info");
+		}
 	}
 
 	private onPasses(player: Player, text: string) {

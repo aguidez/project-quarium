@@ -209,6 +209,36 @@ class DataServiceController implements Lifecycle {
 		this.sync(player);
 	}
 
+	/**
+	 * A living fish becomes another (a UFO's better variant, or the alien fish): the counts move, and the new species /
+	 * variant is found in the Fish Index (hatched / hatchedVariants), like a hatch.
+	 */
+	public changeFish(
+		player: Player,
+		fromType: FishType,
+		fromVariant: FishVariant,
+		toType: FishType,
+		toVariant: FishVariant,
+	) {
+		const data = this.getData(player);
+		if (!data) return;
+		data.fish[fromType] = math.max(0, data.fish[fromType] - 1);
+		const living = data.fishVariants[fromType];
+		if (fromVariant !== "Normal" && living) living[fromVariant] = math.max(0, (living[fromVariant] ?? 0) - 1);
+
+		data.fish[toType] += 1;
+		if (toType !== fromType) data.hatched[toType] = (data.hatched[toType] ?? 0) + 1;
+		if (toVariant !== "Normal") {
+			const variants = data.hatchedVariants[toType] ?? {};
+			variants[toVariant] = (variants[toVariant] ?? 0) + 1;
+			data.hatchedVariants[toType] = variants;
+			const alive = data.fishVariants[toType] ?? {};
+			alive[toVariant] = (alive[toVariant] ?? 0) + 1;
+			data.fishVariants[toType] = alive;
+		}
+		this.sync(player);
+	}
+
 	/** Starts incubating a bought egg (the caller has already charged its price). */
 	public startIncubation(player: Player, eggType: EggType, hatchAt: number) {
 		const data = this.getData(player);

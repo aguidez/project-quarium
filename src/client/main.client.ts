@@ -1,8 +1,10 @@
 import { bootstrap } from "shared/framework";
 import { AbyssEventController } from "./controllers/AbyssEventController";
+import { UfoEventController } from "./controllers/UfoEventController";
 import { AquariumInteractionController } from "./controllers/AquariumInteractionController";
 import { AudioController } from "./controllers/AudioController";
 import { CapacityPlaqueController } from "./controllers/CapacityPlaqueController";
+import { IncomePlaqueController } from "./controllers/IncomePlaqueController";
 import { FishAnimationController } from "./controllers/FishAnimationController";
 import { FishIndicatorController } from "./controllers/FishIndicatorController";
 import { FishRenderController } from "./controllers/FishRenderController";
@@ -31,8 +33,10 @@ bootstrap([
 	AudioController,
 	OnboardingController,
 	CapacityPlaqueController,
+	IncomePlaqueController,
 	MusicEventController,
 	AbyssEventController,
+	UfoEventController,
 	LikeBoardController,
 	PelicanChargesController,
 	CompanionAnimationController,

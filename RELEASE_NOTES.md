@@ -10,6 +10,40 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.49 — 2026-11-02
+
+**New**
+- **UFO Night**, a new event that comes back regularly (one minute): night falls, the back of every tank turns into
+  deep space (stars, nebulas, planets) and green searchlights sweep over the aquariums. A flying saucer comes over your
+  tank and beams your fish up, one at a time, 4 to 5 in the minute (never the same one twice). A few seconds later it
+  drops each one back into the water, changed:
+  - **Asleep** (20 %): it dozes for a minute ("z Z z"): it doesn't swim, eat or drop coins, and doesn't get hungry
+    (no hunger or pause icon over it meanwhile);
+  - **Green aura** (55 %): its coins are worth **x2** for a minute;
+  - **Red aura** (20 %): its coins are worth **x0.5** for a minute;
+  - **Better variant** (4.5 %): it comes back one variant higher, for good (Normal → Anomaly → Ghost → Shiny; a Shiny
+    gets the green aura instead);
+  - **Alien Fish** (0.5 %): it comes back as a brand new secret fish. The Alien Fish drops no coin, but every 30
+    seconds it lets out a scream that makes every other fish of the tank drop a coin on the spot (on top of their own).
+    It stays until you release it, and it has its own place among the secret fish of the Fish Index.
+  A message tells you what happened to each fish. The minute of an aura or of sleep only runs while your tank produces.
+  The night has its own music.
+
+**Changes**
+- **Every aquarium shows what it earns** on a brass plaque at the front of its base ("+5,353,600$/s x250", or
+  "paused" while its owner is away): you can now see what the other players' tanks give. It counts everything that
+  boosts the coins right now (rebirths, Coins pass, like boost, quest boost, event). The coins line at the top of the
+  screen is gone, and with it the "Walk up to the glass..." reminder: the tank view gets a little more room.
+- The tank view leaves room above the aquarium while a UFO flies over it.
+- The **Abyssal Raid** and the UFO Night now take turns: a random event still starts every 5 to 15 minutes, and it is
+  one or the other, so each comes about half as often as the raid did alone.
+
+**Fixes**
+- The Fish Index describes each secret fish on its own: where it comes from and what it does (the Alien Fish no
+  longer claims to hide in eggs and drop coins).
+- The tank view now makes room above the aquarium when a companion perches on it (or a UFO arrives) during the camera's
+  fly-in, instead of keeping the tank cut at the top.
+
 ## V0.48 — 2026-11-02
 
 **New**

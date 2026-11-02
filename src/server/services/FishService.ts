@@ -26,12 +26,20 @@ import {
 	getSpecialCoinOdds,
 	getVariantIncomeMultiplier,
 } from "shared/types/variants";
+import { INCOME_ATTRIBUTES } from "shared/types/aquarium";
 import { isOnboardingDone } from "shared/types/onboarding";
 import { getEventCoinMultiplier } from "shared/types/events";
 import { getSatietyBonus } from "shared/types/perks";
 import { getRebirthMultiplier } from "shared/types/rebirths";
 import { getPassCoinMultiplier } from "shared/types/gamepasses";
 import { QUEST_COIN_BOOST_MULTIPLIER } from "shared/types/quests";
+import {
+	FISH_EFFECT_COIN_MULTIPLIER,
+	FISH_EFFECT_DURATION,
+	FishEffect,
+	getNextVariant,
+	UfoOutcome,
+} from "shared/types/ufo";
 import { getTestSpeed } from "../playerStats";
 import { SavedFish, SaveData } from "../saveData";
 import { FishAssets } from "../fishAssets";
@@ -43,6 +51,7 @@ import { FoodService } from "./FoodService";
 import { LikeService } from "./LikeService";
 
 const TICK = 0.25; // hunger & coin drop update rate (seconds)
+const INCOME_PUBLISH_INTERVAL = 1; // seconds between two updates of the tanks' income attributes (publishIncome)
 const ASSET_SWEEP_PERIOD = 10; // seconds between two looks for fish templates no tank uses anymore (FishAssets)
 const SWIM_MARGIN = 1.5;
 const TURN_TIME = 0.6;
@@ -89,6 +98,15 @@ interface FishEntity {
 	nextPayoutAt: number;
 	paused: boolean; // owner AFK, as last told to the clients
 	alive: boolean;
+	/** Beamed up into a UFO (UfoService): out of the water and of the clients until it comes back, frozen meanwhile. */
+	away: boolean;
+	/** Moved by a UFO's beam: its swim loop waits and issues no segment of its own. */
+	held: boolean;
+	/** A UFO's mutation (shared/types/ufo) and the seconds of play it still lasts. */
+	effect?: FishEffect;
+	effectLeft: number;
+	/** os.clock() of an alien fish's next scream (EasterEggConfig.screamInterval). */
+	nextScreamAt: number;
 }
 
 /** `byCompanion` (fed callbacks): the companion that gave the food (the Pelican, the Jellyfish), if any. */
@@ -118,6 +136,7 @@ class FishServiceSingleton implements Lifecycle {
 	private fedCallbacks = new Array<FishCallback>();
 	private leftCallbacks = new Array<FishLeftCallback>();
 	private lastTickAt = os.clock();
+	private lastIncomeAt = 0;
 	// Tanks each client renders (its requests are validated, debounced and only change what it receives)
 	private watched = new Map<Player, Set<number>>();
 	private pendingWatch = new Map<Player, number[]>();
@@ -209,7 +228,7 @@ class FishServiceSingleton implements Lifecycle {
 		const fish = new Array<FishView>();
 		for (const [, fishes] of this.fishByOwner) {
 			for (const entity of fishes) {
-				if (entity.alive && entity.plot === plot) fish.push(this.getView(entity));
+				if (entity.alive && !entity.away && entity.plot === plot) fish.push(this.getView(entity));
 			}
 		}
 		return { kind: "Tank", plot, fish };
@@ -226,6 +245,7 @@ class FishServiceSingleton implements Lifecycle {
 			hunger: fish.state,
 			paused: fish.paused,
 			segment: fish.segment,
+			effect: fish.effect,
 		};
 	}
 
@@ -243,6 +263,7 @@ class FishServiceSingleton implements Lifecycle {
 			hunger: fish.state,
 			growthStage: fish.growthStage,
 			paused: fish.paused,
+			effect: fish.effect,
 		});
 	}
 
@@ -255,6 +276,8 @@ class FishServiceSingleton implements Lifecycle {
 		this.lastTickAt = clock;
 
 		const leaving = new Array<FishEntity>();
+		const publishIncome = clock - this.lastIncomeAt >= INCOME_PUBLISH_INTERVAL;
+		if (publishIncome) this.lastIncomeAt = clock;
 		for (const [owner, fishes] of this.fishByOwner) {
 			// AFK owner (back in the 3D lobby): their fish are frozen in time, so they don't get hungry,
 			// don't grow and drop nothing until the owner is back in the 2.5D view. Eggs keep hatching.
@@ -264,6 +287,7 @@ class FishServiceSingleton implements Lifecycle {
 			if (frozen) this.frozenOwners.add(owner);
 			else this.frozenOwners.delete(owner);
 			this.runCoinBoost(owner, frozen ? 0 : elapsed);
+			if (publishIncome) this.publishIncome(owner, fishes, frozen);
 
 			for (const fish of fishes) {
 				if (!fish.alive) continue;
@@ -272,10 +296,20 @@ class FishServiceSingleton implements Lifecycle {
 					fish.paused = paused;
 					this.sendState(fish);
 				}
-				if (frozen) {
+				// A UFO's mutation lasts a minute of play
+				if (fish.effect !== undefined && !frozen && !fish.away) {
+					fish.effectLeft -= elapsed;
+					if (fish.effectLeft <= 0) {
+						fish.effect = undefined;
+						this.sendState(fish);
+					}
+				}
+				// Frozen: AFK owner, onboarding, kidnapped by a UFO, or asleep (a UFO's mutation): no hunger, no growth, no coin
+				if (frozen || fish.away || fish.effect === "Sleep") {
 					fish.stateEndsAt += elapsed;
 					fish.nextPayoutAt += elapsed;
 					fish.bornAt += elapsed;
+					fish.nextScreamAt += elapsed;
 					continue;
 				}
 
@@ -289,9 +323,14 @@ class FishServiceSingleton implements Lifecycle {
 
 				// An easter egg fish's time in the tank is its age: frozen offline and while paused, like growth
 				const easterEgg = fish.config.easterEgg;
-				if (easterEgg && clock - fish.bornAt >= easterEgg.lifetime) {
+				if (easterEgg?.lifetime !== undefined && clock - fish.bornAt >= easterEgg.lifetime) {
 					leaving.push(fish);
 					continue;
+				}
+				// The alien fish's scream: the whole tank drops a coin
+				if (easterEgg?.screamInterval !== undefined && clock >= fish.nextScreamAt) {
+					fish.nextScreamAt = clock + easterEgg.screamInterval;
+					this.scream(owner, fish);
 				}
 
 				// Income is no longer passive: the fish drops a coin the owner has to click (a weak one only farts)
@@ -319,20 +358,49 @@ class FishServiceSingleton implements Lifecycle {
 		if (owner.GetAttribute("CoinBoostRunning") !== running) owner.SetAttribute("CoinBoostRunning", running);
 	}
 
-	private payout(owner: Player, fish: FishEntity) {
+	/**
+	 * The tank's income on its aquarium model (INCOME_ATTRIBUTES), for every player to see: its theoretical income
+	 * (getTankIncomePerMinute, plus the easter egg fish's shares) times what multiplies its coins now (rebirth, Coins
+	 * pass, like boost, quest boost, event), not the owner's test speed nor the UFO mutations of single fish.
+	 */
+	private publishIncome(owner: Player, fishes: ReadonlySet<FishEntity>, frozen: boolean) {
+		const model = AquariumService.getAquarium(owner)?.model;
+		if (!model) return;
+		const data = DataService.getData(owner);
+		const multiplier =
+			getRebirthMultiplier(data?.rebirths ?? 0) *
+			getPassCoinMultiplier(data?.passes ?? []) *
+			LikeService.getCoinMultiplier(owner) *
+			((data?.coinBoostSeconds ?? 0) > 0 ? QUEST_COIN_BOOST_MULTIPLIER : 1) *
+			getEventCoinMultiplier(owner);
+		let shares = 1;
+		for (const fish of fishes) if (fish.alive && fish.config.easterEgg) shares += fish.config.easterEgg.incomeShare;
+		const perSecond = math.floor(((this.getTankIncomePerMinute(owner) * shares) / 60) * multiplier + 0.5);
+		const set = (name: string, value: number | boolean) => {
+			if (model.GetAttribute(name) !== value) model.SetAttribute(name, value);
+		};
+		set(INCOME_ATTRIBUTES.perSecond, perSecond);
+		set(INCOME_ATTRIBUTES.multiplier, multiplier);
+		set(INCOME_ATTRIBUTES.paused, frozen);
+	}
+
+	private payout(owner: Player, fish: FishEntity, plain = false) {
+		// An easter egg without income (the alien fish) drops nothing
+		if (fish.config.easterEgg && fish.config.easterEgg.incomeShare <= 0) return;
 		if (fish.state === HungerState.Weak) this.fart(owner, fish);
-		else this.dropCoin(owner, fish);
+		else this.dropCoin(owner, fish, false, plain);
 	}
 
 	/**
 	 * Coin value follows the fish's growth, times the owner's rebirth multiplier (permanent), the +50% Coins
-	 * pass, the like boost (doubled for a while), the quest coin boost (x2 while it lasts) and the running event's
-	 * bonus (abyssal raid x1.5). One coin out
+	 * pass, the like boost (doubled for a while), the quest coin boost (x2 while it lasts), a UFO's mutation (green x2,
+	 * red x0.5) and the running event's bonus (abyssal raid x1.5). One coin out
 	 * of SPECIAL_COIN_ODDS is special (never a frozen one), one out of 5 for a shiny fish; a ghost
 	 * fish's special coins are ghost coins instead, worth GHOST_COIN_MULTIPLIER special ones.
 	 */
-	private dropCoin(owner: Player, fish: FishEntity, frozen = false) {
-		const special = !frozen && this.rng.NextNumber() * getSpecialCoinOdds(fish.variant) < 1;
+	private dropCoin(owner: Player, fish: FishEntity, frozen = false, plain = false) {
+		// `plain`: never sparkling nor ghost (the alien fish's scream)
+		const special = !frozen && !plain && this.rng.NextNumber() * getSpecialCoinOdds(fish.variant) < 1;
 		const ghost = special && FISH_VARIANTS[fish.variant].ghostCoins;
 		const data = DataService.getData(owner);
 		const multiplier =
@@ -342,6 +410,7 @@ class FishServiceSingleton implements Lifecycle {
 			((data?.coinBoostSeconds ?? 0) > 0 ? QUEST_COIN_BOOST_MULTIPLIER : 1) *
 			getEventCoinMultiplier(owner) *
 			getTestSpeed(DataService.getSave(owner)?.stats) *
+			(fish.effect !== undefined ? FISH_EFFECT_COIN_MULTIPLIER[fish.effect] : 1) *
 			(ghost ? GHOST_COIN_MULTIPLIER : 1);
 		// An easter egg fish's coin (the French Fish's croissant) is worth a share of the tank's income
 		const easterEgg = fish.config.easterEgg;
@@ -381,6 +450,21 @@ class FishServiceSingleton implements Lifecycle {
 		if (clock - (this.fartSfxAt.get(owner) ?? -math.huge) < FART_SFX_COOLDOWN) return;
 		this.fartSfxAt.set(owner, clock);
 		this.playSizedSfx(fish, "WeakBubble");
+	}
+
+	/**
+	 * The alien fish screams (EasterEggConfig.screamInterval): a wave through the tank (the clients draw it) and every
+	 * other fish in the water drops one plain coin (a weak one farts), on top of its own: their timers don't move.
+	 */
+	private scream(owner: Player, alien: FishEntity) {
+		this.send(alien.plot, { kind: "Scream", id: alien.id });
+		this.sfxRemote.FireClient(owner, "AlienScream", 1);
+		const fishes = this.fishByOwner.get(owner);
+		if (!fishes) return;
+		for (const fish of fishes) {
+			if (fish === alien || !fish.alive || fish.away || fish.effect === "Sleep") continue;
+			this.payout(owner, fish, true);
+		}
 	}
 
 	/**
@@ -510,7 +594,8 @@ class FishServiceSingleton implements Lifecycle {
 		if (!fishes) return undefined;
 		let weakest: FishEntity | undefined;
 		for (const fish of fishes) {
-			if (!fish.alive || fish.fishType !== fishType || fish.variant !== variant) continue;
+			if (!fish.alive || fish.away || fish.held || fish.fishType !== fishType || fish.variant !== variant)
+				continue;
 			if (!weakest || this.isLessValuable(fish, weakest)) weakest = fish;
 		}
 		if (!weakest) return undefined;
@@ -591,7 +676,9 @@ class FishServiceSingleton implements Lifecycle {
 		return fish.adultSize.mul(fish.growth[fish.growthStage].size);
 	}
 
-	private startSegment(fish: FishEntity, segment: SwimSegment) {
+	/** `force`: a UFO's beam moving a held fish (its own swim loop's segments are ignored meanwhile). */
+	private startSegment(fish: FishEntity, segment: SwimSegment, force = false) {
+		if (!force && (fish.held || fish.away)) return;
 		fish.segment = segment;
 		this.send(fish.plot, { kind: "Swim", id: fish.id, segment });
 	}
@@ -610,7 +697,8 @@ class FishServiceSingleton implements Lifecycle {
 		let nearestDistance = math.huge;
 		for (const other of fishes) {
 			// Cannibals never eat each other, and only swallow smaller fish
-			if (!other.alive || other.config.cannibal || this.getSize(other).Magnitude >= predatorSize) continue;
+			if (!other.alive || other.away || other.held || other.config.cannibal) continue;
+			if (this.getSize(other).Magnitude >= predatorSize) continue;
 			const distance = this.getPose(other).Position.sub(from).Magnitude;
 			if (distance < nearestDistance) {
 				nearest = other;
@@ -621,7 +709,7 @@ class FishServiceSingleton implements Lifecycle {
 	}
 
 	private wantsToEat(fish: FishEntity): boolean {
-		if (fish.state === HungerState.Satiated) return false;
+		if (fish.state === HungerState.Satiated || fish.held || fish.away || fish.effect === "Sleep") return false;
 		if (FoodService.hasFood(fish.owner)) return true;
 		return this.findPrey(fish) !== undefined;
 	}
@@ -650,6 +738,11 @@ class FishServiceSingleton implements Lifecycle {
 
 	private swimLoop(fish: FishEntity) {
 		while (fish.alive) {
+			// In a UFO's beam, away in a UFO, or asleep: it doesn't swim (nor eat) on its own
+			if (fish.held || fish.away || fish.effect === "Sleep") {
+				task.wait(0.2);
+				continue;
+			}
 			if (fish.state !== HungerState.Satiated) {
 				// The player's food always comes first
 				const food = FoodService.findNearestFood(fish.owner, this.getPose(fish).Position);
@@ -734,21 +827,126 @@ class FishServiceSingleton implements Lifecycle {
 	}
 
 	// ---------------------------------------------------------------------
+	// UFO night (UfoService)
+	// ---------------------------------------------------------------------
+
+	private findById(id: number): FishEntity | undefined {
+		for (const [, fishes] of this.fishByOwner) for (const fish of fishes) if (fish.id === id) return fish;
+		return undefined;
+	}
+
+	/** A living fish's species and the variant a UFO would give it (undefined for a Shiny). */
+	public getFishInfo(id: number): { fishType: FishType; nextVariant?: FishVariant } | undefined {
+		const fish = this.findById(id);
+		if (!fish || !fish.alive) return undefined;
+		return { fishType: fish.fishType, nextVariant: getNextVariant(fish.variant) };
+	}
+
+	/** A fish a UFO can take: in the water, not an easter egg, not already in `taken` (once per event). */
+	public pickKidnapTarget(owner: Player, taken: ReadonlySet<number>): { id: number; position: Vector3 } | undefined {
+		const candidates = new Array<FishEntity>();
+		const fishes = this.fishByOwner.get(owner);
+		if (!fishes) return undefined;
+		for (const fish of fishes) {
+			if (!fish.alive || fish.away || fish.held || fish.config.easterEgg || taken.has(fish.id)) continue;
+			candidates.push(fish);
+		}
+		if (candidates.size() === 0) return undefined;
+		const fish = candidates[this.rng.NextInteger(0, candidates.size() - 1)];
+		return { id: fish.id, position: this.getPose(fish).Position };
+	}
+
+	/** Where a fish is now (undefined if it is gone). */
+	public getFishPosition(id: number): Vector3 | undefined {
+		const fish = this.findById(id);
+		return fish?.alive && !fish.away ? this.getPose(fish).Position : undefined;
+	}
+
+	/**
+	 * The fish rises in a UFO's beam to `to` over `time` (yields), then it is away: gone from the clients and frozen
+	 * until beamDown. Returns false if it was gone meanwhile.
+	 */
+	public beamUp(id: number, to: Vector3, time: number): boolean {
+		const fish = this.findById(id);
+		if (!fish || !fish.alive || fish.away || fish.held) return false;
+		fish.held = true;
+		const from = this.getPose(fish);
+		this.startSegment(fish, { from, target: to, start: now(), turnTime: 0.3, moveTime: time, linear: true }, true);
+		task.wait(time);
+		if (!fish.alive) return false;
+		fish.away = true;
+		this.send(fish.plot, { kind: "Remove", id: fish.id, cause: "Abducted" });
+		return true;
+	}
+
+	/**
+	 * Drops a kidnapped fish back from `from` (the UFO) over `time` (yields), changed by `outcome`. Returns what it
+	 * really got (a Shiny can't get a better variant: green instead), undefined if the fish is gone.
+	 */
+	public beamDown(id: number, from: Vector3, outcome: UfoOutcome, time: number): UfoOutcome | undefined {
+		const fish = this.findById(id);
+		if (!fish || !fish.alive || !fish.away) return undefined;
+		const owner = fish.owner;
+		const better = getNextVariant(fish.variant);
+		const applied = outcome === "Variant" && better === undefined ? "Green" : outcome;
+		if (applied === "Alien") {
+			// It becomes the alien fish: a new fish (an easter egg), the kidnapped one is gone for good
+			fish.alive = false;
+			this.fishByOwner.get(owner)?.delete(fish);
+			DataService.changeFish(owner, fish.fishType, fish.variant, "AlienFish", "Normal");
+			this.spawnFish(owner, "AlienFish", undefined, "Normal", { from, time });
+			task.wait(time);
+			return applied;
+		}
+		if (applied === "Variant") {
+			if (better === undefined) return undefined; // (can't happen: a Shiny gets Green)
+			DataService.changeFish(owner, fish.fishType, fish.variant, fish.fishType, better);
+			fish.variant = better;
+			fish.payoutInterval = fish.config.incomeInterval / FISH_VARIANTS[better].coinRate;
+			FishAssets.require(fish.fishType, fish.variant);
+		} else {
+			fish.effect = applied;
+			fish.effectLeft = FISH_EFFECT_DURATION;
+		}
+		fish.segment = this.getDropSegment(fish, from, time);
+		fish.away = false;
+		this.send(fish.plot, { kind: "Spawn", fish: this.getView(fish) });
+		task.wait(time);
+		fish.held = false;
+		return applied;
+	}
+
+	/** Falls from `from` (a UFO) to a point in the upper half of the water, in `time` seconds. */
+	private getDropSegment(fish: FishEntity, from: Vector3, time: number): SwimSegment {
+		const point = this.randomSwimPoint(fish);
+		const middle = (fish.bounds.min.Y + fish.bounds.max.Y) / 2;
+		const target = new Vector3(point.X, math.max(point.Y, middle), point.Z);
+		return { from: CFrame.lookAt(from, target), target, start: now(), turnTime: 0, moveTime: time, linear: true };
+	}
+
+	// ---------------------------------------------------------------------
 	// Spawning
 	// ---------------------------------------------------------------------
 
 	/**
 	 * Drops a new (baby) fish in the owner's aquarium. Called by EggService when an egg hatches (with
 	 * the variant it drew), and with `saved` to bring back a fish of a saved tank (same size, age,
-	 * hunger and variant).
+	 * hunger and variant). `arrival`: dropped by a UFO from that point (held in its beam for `time`
+	 * seconds) instead of the usual spot.
 	 */
-	public spawnFish(owner: Player, fishType: FishType, saved?: SavedFish, hatchedVariant?: FishVariant) {
-		if (!owner.IsDescendantOf(Players)) return;
+	public spawnFish(
+		owner: Player,
+		fishType: FishType,
+		saved?: SavedFish,
+		hatchedVariant?: FishVariant,
+		arrival?: { from: Vector3; time: number },
+	): FishEntity | undefined {
+		if (!owner.IsDescendantOf(Players)) return undefined;
 
 		const config = FISH_TYPES[fishType];
 		const aquarium = AquariumService.getAquarium(owner);
 		const template = this.templates.get(fishType);
-		if (!aquarium || !template) return;
+		if (!aquarium || !template) return undefined;
 
 		// Random adult size of the Studio template (ServerStorage.Assets.Fish): it starts as a
 		// baby and grows over time (the clients scale their models from growthStage)
@@ -780,6 +978,10 @@ class FishServiceSingleton implements Lifecycle {
 			nextPayoutAt: clock + payoutInterval,
 			paused: !AquariumService.isTending(owner),
 			alive: true,
+			away: false,
+			held: false,
+			effectLeft: 0,
+			nextScreamAt: clock + (config.easterEgg?.screamInterval ?? 0),
 		};
 		if (saved && saved.hunger === HungerState.Weak) {
 			entity.state = HungerState.Weak;
@@ -796,6 +998,11 @@ class FishServiceSingleton implements Lifecycle {
 		const surface = aquarium.waterBounds.max.Y - SWIM_MARGIN - this.getSize(entity).Y / 2;
 		const position = saved ? spawnPoint : new Vector3(spawnPoint.X, surface, spawnPoint.Z);
 		entity.segment = holdSegment(CFrame.lookAt(position, this.randomSwimPoint(entity)), now());
+		if (arrival) {
+			entity.segment = this.getDropSegment(entity, arrival.from, arrival.time);
+			entity.held = true;
+			task.delay(arrival.time, () => (entity.held = false));
+		}
 
 		let fishes = this.fishByOwner.get(owner);
 		if (!fishes) {
@@ -810,6 +1017,7 @@ class FishServiceSingleton implements Lifecycle {
 		task.spawn(() => this.swimLoop(entity));
 		// Also for restored fish: listeners are idempotent (onboarding step after a hatch, quest gauges)
 		for (const callback of this.spawnedCallbacks) task.spawn(callback, owner, fishType);
+		return entity;
 	}
 
 	/** Templates still worn by a fish of some tank stay on the clients, the others go after a while (FishAssets). */

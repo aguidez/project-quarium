@@ -112,6 +112,7 @@ export const DEFAULT_PLAYER_DATA: PlayerData = {
 		BunnyShark: 0,
 		MiniLeviathan: 0,
 		FrenchFish: 0,
+		AlienFish: 0,
 	},
 	fishVariants: {},
 	incubating: {},

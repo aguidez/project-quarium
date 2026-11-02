@@ -3,7 +3,7 @@ import { CollectionService, Players, Workspace } from "@rbxts/services";
 import { t } from "@rbxts/t";
 import { Lifecycle } from "shared/framework";
 import { TAGS } from "shared/tags";
-import { FRONT_GLASS_Z, getAquariumFrame, isInFocusZone } from "shared/types/aquarium";
+import { FRONT_GLASS_Z, getAquariumFrame, INCOME_ATTRIBUTES, isInFocusZone } from "shared/types/aquarium";
 import { AQUARIUM_THEMES, AquariumTheme } from "shared/types/rebirths";
 import { CosmeticId, DECOR_SLOTS, isDecor } from "shared/types/cosmetics";
 import { getDisplayedTheme, isCosmeticShown } from "shared/types/customization";
@@ -383,6 +383,7 @@ class AquariumServiceSingleton implements Lifecycle {
 
 		aquarium.owner = undefined;
 		aquarium.model.SetAttribute("OwnerUserId", undefined);
+		for (const [, name] of pairs(INCOME_ATTRIBUTES)) aquarium.model.SetAttribute(name, undefined);
 		aquarium.ownerPlate.Enabled = false;
 	}
 

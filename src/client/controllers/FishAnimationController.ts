@@ -258,6 +258,7 @@ class FishAnimationControllerSingleton implements Lifecycle {
 			janitor.Add(() => this.puffTargets.delete(model), true);
 			janitor.Add(model.GetAttributeChangedSignal("Hunger").Connect(() => this.refreshVariant(fish)));
 			janitor.Add(model.GetAttributeChangedSignal("Dead").Connect(() => this.refreshVariant(fish)));
+			janitor.Add(model.GetAttributeChangedSignal("Asleep").Connect(() => this.refreshVariant(fish)));
 			janitor.Add(() => this.detach(fish, false), true);
 			janitor.Add(() => this.swaying.delete(fish), true);
 			this.updateLod(); // a fish dropped in the watched tank starts swimming right away
@@ -471,13 +472,14 @@ class FishAnimationControllerSingleton implements Lifecycle {
 		return true;
 	}
 
-	/** Each swaying fish yaws around a point near its head and rolls a little, lazily while weak, not at all dead. */
+	/** Each swaying fish yaws around a point near its head and rolls a little, lazily while weak or asleep, not at all dead. */
 	private updateSways(dt: number) {
 		for (const fish of this.swaying) {
 			const sway = fish.sway!;
 			if (!sway.weld.Parent) continue;
 			const dead = fish.model.GetAttribute("Dead") === true;
-			const weak = fish.model.GetAttribute("Hunger") === HungerState.Weak;
+			const weak =
+				fish.model.GetAttribute("Hunger") === HungerState.Weak || fish.model.GetAttribute("Asleep") === true;
 			const speed = dead ? 0 : weak ? SLOW_SPEED : 1;
 			sway.phase = (sway.phase + dt * TAU * SWIM_FREQUENCY * speed) % TAU;
 			const amount = dead ? 0 : weak ? 0.6 : 1;
@@ -508,13 +510,15 @@ class FishAnimationControllerSingleton implements Lifecycle {
 		this.scheduleRelease(fish.meshId, rig);
 	}
 
-	/** Normal swim, or the lazy one while weak with hunger / leaving the tank. */
+	/** Normal swim, or the lazy one while weak with hunger, asleep (a UFO's mutation) or leaving the tank. */
 	private refreshVariant(fish: TrackedFish) {
 		const rig = fish.rig;
 		if (!rig) return;
 		const swimming = rig.normal[fish.swimIndex % rig.normal.size()];
 		const isLazy = () =>
-			fish.model.GetAttribute("Dead") === true || fish.model.GetAttribute("Hunger") === HungerState.Weak;
+			fish.model.GetAttribute("Dead") === true ||
+			fish.model.GetAttribute("Asleep") === true ||
+			fish.model.GetAttribute("Hunger") === HungerState.Weak;
 		if (!isLazy()) return this.use(fish, swimming);
 		task.spawn(() => {
 			const slow = this.getSlowVariant(fish.meshId, rig);

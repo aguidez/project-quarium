@@ -19,6 +19,7 @@ import { OceanService } from "./services/OceanService";
 import { QuestService } from "./services/QuestService";
 import { RebirthService } from "./services/RebirthService";
 import { StatsService } from "./services/StatsService";
+import { UfoService } from "./services/UfoService";
 
 // Register all server services here
 bootstrap([
@@ -31,6 +32,7 @@ bootstrap([
 	EggService,
 	OnboardingService,
 	AbyssService,
+	UfoService,
 	EventService,
 	CompanionService,
 	QuestService,

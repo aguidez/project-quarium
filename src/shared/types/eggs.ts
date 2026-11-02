@@ -200,7 +200,7 @@ export function getDrawOdds(eggType: EggType): EggOdds[] {
 	let mostCommon = odds[0];
 	for (const entry of odds) if (entry.chance > mostCommon.chance) mostCommon = entry;
 	for (const [fishType, config] of pairs(FISH_TYPES)) {
-		if (!config.easterEgg) continue;
+		if (!config.easterEgg || config.easterEgg.hatchChance <= 0) continue; // the alien fish: UFO event only
 		mostCommon.chance -= config.easterEgg.hatchChance;
 		odds.push({ fishType, chance: config.easterEgg.hatchChance });
 	}

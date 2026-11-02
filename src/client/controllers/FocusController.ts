@@ -47,6 +47,7 @@ const FOCUS_WATER_CLEAR = 0.5; // ... and of the water (0.8 -> 0.9)
 // tank's front: the view makes room for it
 const PERCHED_COMPANIONS = ["Pelican", "WaterHen"];
 const PERCH_HEADROOM = 6; // studs added above the tank's front
+const UFO_HEADROOM = 9; // ... while a UFO of the UFO night hovers over it (UfoService HOVER_HEIGHT)
 const REFRAME_TIME = 0.6;
 
 type FocusState = "Free" | "Entering" | "Focused" | "Exiting";
@@ -303,12 +304,21 @@ class FocusControllerSingleton implements Lifecycle {
 		);
 	}
 
+	/** A UFO of the UFO night over the local player's tank (it flies above the water). */
+	private hasUfo(): boolean {
+		const own = this.ownAquarium;
+		return own !== undefined && CollectionService.GetTagged(TAGS.Ufo).some((model) => model.IsDescendantOf(own));
+	}
+
 	private updateHeadroom() {
-		const headroom = this.hasPerchedCompanion() ? PERCH_HEADROOM : 0;
+		const headroom = this.hasUfo() ? UFO_HEADROOM : this.hasPerchedCompanion() ? PERCH_HEADROOM : 0;
 		if (headroom === this.headroom) return;
 		this.headroom = headroom;
 		const camera = Workspace.CurrentCamera;
-		if (this.state !== "Focused" || !camera) return;
+		if (this.state === "Focused" && camera) this.reframe(camera);
+	}
+
+	private reframe(camera: Camera) {
 		const info = new TweenInfo(REFRAME_TIME, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut);
 		TweenService.Create(camera, info, { CFrame: this.getFocusCFrame(camera) }).Play();
 	}
@@ -433,9 +443,12 @@ class FocusControllerSingleton implements Lifecycle {
 			new TweenInfo(ENTER_TIME, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
 			{ CFrame: this.getFocusCFrame(camera), FieldOfView: FOCUS_FOV },
 		);
+		const framedHeadroom = this.headroom;
 		tween.Completed.Connect((playbackState) => {
 			if (token !== this.transitionToken || playbackState !== Enum.PlaybackState.Completed) return;
 			this.state = "Focused";
+			// The room above the tank changed while the camera flew in (a UFO showed up): frame it again
+			if (this.headroom !== framedHeadroom) this.reframe(camera);
 		});
 		tween.Play();
 	}

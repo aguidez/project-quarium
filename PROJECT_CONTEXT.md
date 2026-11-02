@@ -2,7 +2,7 @@
 
 > Living map of the project. **Read it before exploring the code, and update it in the same change
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
-> Last updated: 2026-11-02 (V0.48: daily boards from rebirth 2, weekly from rebirth 3; Customize button next to My aquarium / Back to lobby; aquarium customization: theme / decor / finishes / title choices, customization.ts, CustomizationService, AquariumPanel, Aquarium side button, THEME_PALETTES; V0.47: the owner's "/speed" test speed (x6: V1 in ~2h30), play statistics, SaveData.stats / playerStats.ts, StatsService (AnalyticsService funnels and events), StatsReportController, tools/player-stats.js (Open Cloud, npm run stats); V0.46, ROADMAP M7: daily / weekly coin boost (PlayerData.coinBoostSeconds, QuestBoostPill, "/boost"), rebirths 3–8 and their eggs x1.45, side lines Hatchery / Collector / Ocean, daily / weekly pools, quest stats CoinsCollected / FishFed / LikesGiven / VariantFound / TotalHatched, Golden Incubator decor, LikeService.onLikeGiven, simulator side lines + hoursPerDay, load test with 18 species in §4; V0.45: swim animation stopgap, rigs planned in triangles + sway; ROADMAP_V1.1.md: the post-V1 animation revamp plan, EditableMesh budget measured in §4;
+> Last updated: 2026-11-02 (V0.49: income plaque on every owned tank (INCOME_ATTRIBUTES, FishService.publishIncome, IncomePlaqueController) replacing the HUD's income / hint line; easter egg Index texts (source / perk); UFO night event (recurring): shared/types/ufo.ts, UfoService, UfoEventController, tag Ufo, Ufo EventFish template, outcomes Sleep / Green / Red / Variant / Alien, FishView.effect, FishMessage Scream, FishRemoval Abducted, AlienFish easter egg (hatchChance 0, screams), DataService.changeFish, FocusController UFO headroom (+ headroom re-framed after the fly-in), "/ufo" dev command, SFX UfoBeam / AlienScream; V0.48: daily boards from rebirth 2, weekly from rebirth 3; Customize button next to My aquarium / Back to lobby; aquarium customization: theme / decor / finishes / title choices, customization.ts, CustomizationService, AquariumPanel, Aquarium side button, THEME_PALETTES; V0.47: the owner's "/speed" test speed (x6: V1 in ~2h30), play statistics, SaveData.stats / playerStats.ts, StatsService (AnalyticsService funnels and events), StatsReportController, tools/player-stats.js (Open Cloud, npm run stats); V0.46, ROADMAP M7: daily / weekly coin boost (PlayerData.coinBoostSeconds, QuestBoostPill, "/boost"), rebirths 3–8 and their eggs x1.45, side lines Hatchery / Collector / Ocean, daily / weekly pools, quest stats CoinsCollected / FishFed / LikesGiven / VariantFound / TotalHatched, Golden Incubator decor, LikeService.onLikeGiven, simulator side lines + hoursPerDay, load test with 18 species in §4; V0.45: swim animation stopgap, rigs planned in triangles + sway; ROADMAP_V1.1.md: the post-V1 animation revamp plan, EditableMesh budget measured in §4;
 > V0.44, ROADMAP M6: rebirths 7–8 → CrystalCaverns / CosmicSanctuary themes, WolfDogfish
 > ("Husky Dogfish") / BunnyShark / MiniLeviathan (Mythic) with Moon / Star / Planet coins, Crystal and Cosmic eggs, Ocean
 > milestones 450,000 (tank 25) and 1,000,000 (OceanGuardian: title + whale statue), Voyage 12–16 (gauge SpeciesFound,
@@ -42,7 +42,8 @@ coins. Around that core loop:
   unlocks milestones (50: the Pelican companion, 100: Snail speed x1.15, 200: a second companion slot, 500: the
   Pelican feeds x1.33 as often, every 7.5 s, 1,500: the tank holds 15 fish, 5,000: a second incubator, 8,000 / 25,000: 17 / 19 fish, 40,000: rare variants x1.5, 70,000: 21 fish, 85,000: the Water Hen, 120,000: the Swordfish, 180,000: 23 fish, 200,000: the Jellyfish, 300,000: Pearl rims, 450,000: 25 fish, 1,000,000: the Ocean Guardian title and a whale statue);
 - events: recurring ones drawn by each server every 5–15 min (the abyssal raid: the world goes dark, a lantern
-  fish steals coins) and admin ones started on every server (the K-pop music event); never during the tutorial;
+  fish steals coins; the UFO night: space backdrop, green searchlights, a UFO beams the fish up one by one and drops
+  them back mutated) and admin ones started on every server (the K-pop music event); never during the tutorial;
 - likes between players: a board beside each tank, a like doubles the owner's coins for 5 min;
 - gamepasses, sold in the Shop panel (BALANCE.md §5.10, never part of the balance): Third Companion Slot, x2 Ocean
   Points (fish released / rebirths), Lucky (rare variants x2) and +50% Coins;
@@ -50,7 +51,8 @@ coins. Around that core loop:
   affordable the Rebirth button pulses and a bubble reminds the player now and then;
 - cosmetics: titles above the head (the best one earned: TitleService), decor in the tank (whale statue, golden
   trophy), Pearl rims;
-- easter eggs: secret fish hidden in every egg (the French Fish, see §3.4), their own Fish Index category.
+- easter eggs: secret fish hidden in every egg (the French Fish, see §3.4) or made by an event (the Alien Fish of the
+  UFO night), their own Fish Index category.
 
 18 species (+ 1 secret), 12 eggs, 8 rebirths (the whole V1 plan, since V0.44). The game is fast at first and slows down strongly after the first hours: **`BALANCE.md`** holds the
 expected progression (rebirth 1 ~28 min, six species ~1 h, rebirth 2 ~1h40, rebirth 3 ~3h01, rebirth 4 ~4h47, rebirth 6
@@ -175,7 +177,8 @@ ProjetQuarium/
    │  ├─ network.ts          Remote contracts + getRemoteEvent(name) (Remotes folder in ReplicatedStorage), FishView / FishMessage
    │  ├─ swim.ts             SwimSegment + getSwimPose: fish movement computed identically by server and clients
    │  ├─ tags.ts             CollectionService tags and the attributes they carry
-   │  ├─ sounds.ts           Music id + SFX ids (played in 2D by AudioController; CoinStolen = the lantern's gulp; WeakBubble = a weak
+   │  ├─ sounds.ts           Music id + SFX ids (played in 2D by AudioController; CoinStolen = the lantern's gulp; UfoBeam = a UFO's
+   │  │                      beam (APM "Space tones"); AlienScream = the alien fish's scream (Pro Sound Effects robot vocal); WeakBubble = a weak
    │  │                      fish's bubble; CoinCollect / CompanionCoin = the coin chime)
    │  └─ types/
    │     ├─ fish.ts          FishType, FishRarity (… Mythic, Secret = easter eggs), CoinType (… Croissant), HungerState
@@ -247,7 +250,10 @@ ProjetQuarium/
    │     │                   getCompanionMultiplier (Snail: speed, Pelican: feeding rate), getVariantLuck (from the claimed list)
    │     ├─ features.ts      Feature ("Ocean" and "Rebirth" by quest), FEATURES (drawn `image` per feature: quest
    │     │                   book, reward popup), MIN_FISH_KEPT
-   │     ├─ events.ts        GameEventType (Kpop, Abyss), GAME_EVENTS: kind "Music" (bpm, beat coins) or "Abyss",
+   │     ├─ ufo.ts           UFO night: UfoOutcome (Sleep 20 / Green 55 / Red 20 / Variant 4.5 / Alien 0.5 %), drawUfoOutcome,
+   │     │                   FishEffect (Sleep / Green / Red) + FISH_EFFECT_DURATION (60 s of play) + FISH_EFFECT_COIN_MULTIPLIER
+   │     │                   (x2 / x0.5), getNextVariant (Normal → Anomaly → Ghost → Shiny), UFO_TIMING / UFO_KIDNAP_TIME, UFO_BEAM_ATTRIBUTE
+   │     ├─ events.ts        GameEventType (Kpop, Abyss, Ufo), GAME_EVENTS: kind "Music" (bpm, beat coins), "Abyss" or "Ufo",
    │     │                   subtitle, optional musicId and coinMultiplier (Abyss x1.5), EVENT_ATTRIBUTES,
    │     │                   LURKING_ATTRIBUTE, TEST_EVENT_ORDER, getActiveEvent, getEventCoinMultiplier(owner); duration,
    │     │                   recurring flag, EventSource, getRecurringEvents, getRecurringChance (minutes 5–15),
@@ -258,7 +264,8 @@ ProjetQuarium/
    │     ├─ likes.ts         Like rules (1 per hour given, x2 coins for 5 min, restarted by each like), board offset, helpers
    │     ├─ onboarding.ts    Onboarding steps + rules (what is allowed / free at each step), ONBOARDING_REWARD,
    │     │                   STORY_QUEST_HINT_DELAY
-   │     └─ aquarium.ts      Tank dimensions, getAquariumFrame, isInFocusZone (front-of-glass zone)
+   │     └─ aquarium.ts      Tank dimensions, getAquariumFrame, isInFocusZone (front-of-glass zone), INCOME_ATTRIBUTES
+   │                         (IncomePerSecond / IncomeMultiplier / IncomePaused on an owned aquarium model)
    ├─ server/
    │  ├─ main.server.ts      Registers services (order matters for onInit)
    │  ├─ templates.ts        loadTemplates(tag, attribute, keys) (Studio templates found by tag), scaleModel
@@ -296,7 +303,12 @@ ProjetQuarium/
    │     │                   findCoinToFetch / collectForOwner(owner, coin, companion) (Snail, Swordfish), clearOwner,
    │     │                   findCoinToSteal / isCoinAlive / stealCoin (lantern fish: no credit, red "-X$" popup)
    │     ├─ FishService      Fish as data only (no server model): swim AI as SwimSegments, hunger (weak, never dies),
-   │     │                   growth, coins / farts, cannibal eating, releases, beat coins, AFK freeze; easter egg fish:
+   │     │                   growth, coins / farts, cannibal eating, releases, beat coins, AFK freeze; publishIncome (every
+   │     │                   second: tank income/s x rebirth / pass / like / quest boost / event on the aquarium's
+   │     │                   INCOME_ATTRIBUTES, cleared by AquariumService when the tank is freed); UFO night: held / away
+   │     │                   fish (no hunger, coins, eating nor release while away), mutations (effect / effectLeft: Sleep freezes
+   │     │                   the fish, Green / Red x2 / x0.5 its coins), the alien fish's scream (every 30 s of play: a
+   │     │                   Scream message, AlienScream SFX and one plain coin from every other awake fish); easter egg fish:
    │     │                   coin from getTankIncomePerMinute, leave after their lifetime (onFishLeft); replication to the
    │     │                   clients that watch each tank ("WatchAquariums" → FishSync messages); the quest coin boost
    │     │                   (runCoinBoost: PlayerData.coinBoostSeconds runs down only while the tank produces, coins
@@ -310,10 +322,15 @@ ProjetQuarium/
    │     ├─ EventService     Events: recurring clock (per server), admin events ("/event <name>" / "/event stop",
    │     │                   admins only; MessagingService topic QuariumAdminEvent + MemoryStore hash QuariumEvents so
    │     │                   new servers join; never from Studio), keeps the players' EventImmune attribute. Music: beats on
-   │     │                   server clock, guest fish per tank. Abyss: hands the LanternFish template to AbyssService.
+   │     │                   server clock, guest fish per tank. Abyss / Ufo: runRaid hands the LanternFish / Ufo template
+   │     │                   to AbyssService / UfoService.
    │     │                   "StartTestEvent" (Studio only: an admin event of that server)
    │     ├─ AbyssService     Abyssal raid: one lantern fish raid per owned tank, passes until the event ends, no cap (emerge
    │     │                   from the back, dart at the most valuable coin, steal it if still there, flee into the dark, despawn)
+   │     ├─ UfoService       UFO night: one UFO per owned tank (clone of the Ufo template, tag Ufo, anchored, moved by PivotTo),
+   │     │                   kidnaps a fish at a time (FishService.pickKidnapTarget / beamUp / beamDown), each once per event,
+   │     │                   4–5 a minute; notifies the owner of the outcome; stop() drops a fish still away at once;
+   │     │                   forceOutcome (Studio "/ufo")
    │     ├─ CompanionService Equip / unequip, spawns equipped companions, Snail AI (3.6 studs/s, goes for the coin it can pick up
    │     │                   soonest: crawl time vs sinking time; picks coins up on the way, never pauses between them),
    │     │                   Ocean upgrades: Snail speed × getCompanionMultiplier (fetch + stroll),
@@ -382,7 +399,8 @@ ProjetQuarium/
    │                         OceanService.credit and RebirthService x it: getTestSpeed); "TestSpeed" Player attribute → a red
    │                         "TEST SPEED x6" chip bottom right (App); the profile is then left out of npm run stats;
    │                         "/passes off|on": the owner plays without their passes (PlayerStats.testNoPasses, saved:
-   │                         GamePassService.setTestNoPasses / refresh grant none), "NO PASSES" on the same chip
+   │                         GamePassService.setTestNoPasses / refresh grant none), "NO PASSES" on the same chip;
+   │                         "/ufo <Outcome>|off": the owner's fish come back from the UFOs with that outcome (session only)
    └─ client/
       ├─ main.client.ts      Registers controllers
       ├─ fishLook.ts         getFishTemplate / cloneFishTemplate (undefined until the server replicated the species),
@@ -399,13 +417,16 @@ ProjetQuarium/
       │  │                   on the ground in the middle of its tank's focus zone, facing the glass, and enters the view;
       │  │                   "clarity" tween in the view: less atmosphere haze, clearer own GlassFront / Water (local only);
       │  │                   6 studs of headroom above the tank while one of the player's companions is perched (Pelican) or floats on
-      │  │                   the surface (Water Hen)
+      │  │                   the surface (Water Hen), 9 while a UFO flies over it (UFO night); a headroom change during the
+      │  │                   fly-in is framed once it lands
       │  ├─ AquariumInteractionController  Clicks in focus view → CollectCoin (coin under cursor) or DropFood
       │  ├─ FishRenderController  Builds / moves the local fish models of the watched tanks (own tank in 2.5D, else
-      │  │                   tanks within 160 studs of the camera) from FishSync segments; growth, weak tint, exits;
+      │  │                   tanks within 160 studs of the camera) from FishSync segments; growth, weak tint, exits (Abducted:
+      │  │                   sucked into the UFO); UFO mutations: green / red tint + sparkles + glow, a "z Z z" bubble and the
+      │  │                   "Asleep" attribute; the alien fish's scream (green ForceField wave + puff);
       │  │                   a fish whose model (or rare variant texture) hasn't arrived waits in `pending` (kept up to
       │  │                   date by Swim / State), built when the asset arrives, in its normal look after 5 s
-      │  ├─ FishIndicatorController  Hunger / AFK badges above fish (from attributes)
+      │  ├─ FishIndicatorController  Hunger / AFK badges above fish (from attributes), none over a fish asleep after a UFO
       │  ├─ StatsReportController  Once a minute sends "ReportClientStats" (platform Touch / Keyboard / Gamepad / VR, average
       │  │                   fps of the minute, Stats.GetTotalMemoryUsageMb, the SwimTriangleBudget attribute) (V0.47)
       │  ├─ ShopKeeperController  The fisherman's shop (tag ShopKeeper): isNearby / onNearbyChanged (opens within 9 studs:
@@ -428,10 +449,17 @@ ProjetQuarium/
       │  ├─ AudioController  Background music, event music crossfade, SFX (PlaySfx remote or UI)
       │  ├─ OnboardingController  3D onboarding hints (floor marker, pointer over the frozen coin)
       │  ├─ CapacityPlaqueController  "n / capacity" plaque on the own tank
+      │  ├─ IncomePlaqueController  Brass plaque on the left of every owned tank's base: "+X$/s  x250" (or "paused"), from the
+      │  │                   aquarium's INCOME_ATTRIBUTES, so every player sees what each tank earns (V0.49; replaced the
+      │  │                   HUD's income / "walk up to the glass" line)
       │  ├─ MusicEventController  Follows the replicated event (any kind): its track if any; for music events, beat
       │  │                   detection, Kpop guest effects, onBeat listeners; getEvent / onEventChanged
       │  ├─ AbyssEventController  Abyssal raid visuals (local): world darkness (Lighting + AbyssGrade, put back after), abyss
       │  │                   backdrop SurfaceGui on every tank, navy water, marine snow + cold light, lantern lure light, red eye-socket glows and fades
+      │  ├─ UfoEventController  UFO night visuals (local): violet night (Lighting + UfoGrade), space backdrop on every tank (sky
+      │  │                   gradient, nebulas, twinkling stars, a ringed planet and two small ones), night-blue water, two green
+      │  │                   searchlights sweeping each tank (SpotLight + visible Beam shaft), green tank light; per UFO (tag Ufo):
+      │  │                   a pink glow and, while "Beaming", a green tractor beam (2 camera-facing Beams), sparkles and light
       │  └─ LikeBoardController  Local SurfaceGui (React LikeBoard) on every like board + local "Like" ProximityPrompt;
       │                   getOwnBoostEndsAt / onOwnBoostChanged (own tank's boost, for the pill)
       └─ ui/                 React components (one FigCraft frame each)
@@ -521,7 +549,8 @@ ProjetQuarium/
     anglerfish mesh tinted near-black (SurfaceAppearance Color), model scale 1.15, root `Body` 4.2×6.4×6.9, head −Z,
     welded parts lit / faded by the client: `Lure` (pale cyan Neon ball on the antenna tip) and per eye an `EyeShell`
     (glossy black ball, R 0.44, hiding the mesh's cartoon eye), a red Neon `Eye` iris and a black slit `Pupil`
-    (SpecialMesh ellipsoids sunk into the shell, facing 20° forward of the side). Eye / Pupil glow with the lure);
+    (SpecialMesh ellipsoids sunk into the shell, facing 20° forward of the side). Eye / Pupil glow with the lure),
+    `Ufo` (Ufo: generated classic silver saucer with a ring of green lights, root `Body` 8 × 4 × 8, welded `Mesh`);
   - `Companions/` (tag `CompanionTemplate`, attr `CompanionType`; root `Body` + welded `Mesh`, head −Z): `Snail`,
     `Pelican` (generated mesh, 3.6×6.4×6 studs), `Jellyfish` (V0.42), `Swordfish` (round blue-silver body, sail fin, short rounded bill,
     4.9×4.1×6.5) and `WaterHen` (round moorhen, red and yellow beak, 3.2×3.9×4.6), both generated (V0.40, texture as
@@ -599,6 +628,9 @@ ProjetQuarium/
   mesh tilted −50° on X so the crescent faces the glass, SurfaceAppearance Color 1/0.86/0.55 so it reads golden, not
   like the pink Shrimp food). Sticker `design/ui/fish/stickers/Icon_FrenchFish_Normal.png`: front three-quarter view
   (yaw 60°), so the scarf reads as a scarf (in pure profile it is a red tube at mouth level, see CLAUDE.md §7).
+- **UFO night content** (2026-11-02): fish `AlienFish` (ServerStorage.Assets.Fish, 3.9 × 4.4 × 4.6 studs, round lime
+  green fish, two antennae with orange balls on top of its head, big blue eyes and a smile on its right side, generated
+  texture, no FishVariants). Sticker `design/ui/fish/stickers/Icon_AlienFish_Normal.png` (yaw −125°, its smiling side).
 - `Workspace.StreamingEnabled = true`. All tanks are within ~130 studs of each other, so streaming does not cull them.
 
 ---
@@ -695,7 +727,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
 | `Reward` | `{title, subtitle, amount, item?: {icon, name, image?}}` | RewardPopup (after any reveal; shows `image` when given) |
 | `MoneyPopup` | `{position, amount, special, ocean?, stolen?, ghost?}` | IncomePopupController |
 | `PlaySfx` | `(SfxName, pitch)` | AudioController |
-| `FishSync` | `FishMessage`: `Tank` (full state of a newly watched tank), `Spawn`, `Swim` (new segment), `State` (hunger, growth, paused), `Remove` (Eaten / Released / Gone) | FishRenderController |
+| `FishSync` | `FishMessage`: `Tank` (full state of a newly watched tank), `Spawn`, `Swim` (new segment), `State` (hunger, growth, paused, UFO effect), `Remove` (Eaten / Released / Gone / Abducted), `Scream` (an alien fish) | FishRenderController |
 
 **Replicated state outside remotes:**
 
@@ -739,6 +771,10 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   pushed back while frozen and saved as age, so offline and paused time don't count): at `lifetime` (1 h) `tick`
   removes it ("Released" exit) and `onFishLeft` lets OceanService credit its Ocean Points (100) with the popup and a
   notice ("went off to join a protest"). Released by hand or at a rebirth like any fish.
+  Each easter egg carries its Fish Index texts (`source`: where it comes from, `perk`: what it does, in place of the
+  eggs and the coin line). The **Alien Fish** has `hatchChance` 0 (never from an egg: getDrawOdds skips it), `incomeShare` 0 (no coin) and no
+  lifetime (it stays until released, 500 Ocean Points); it only comes from the UFO night. Every `screamInterval` (30 s
+  of play, pushed back while frozen) it screams.
 - **Coins.** `FishService.tick` (every 0.25 s) calls `dropCoin`, which uses `CoinService.spawnCoin`; the coin sinks
   and expires 5 s after reaching the sand. A coin is collected by a click (`CollectCoin`) or by the Snail / the Swordfish, and
   `credit()` then adds the money, fires `MoneyPopup` and runs the `onCollected` callbacks (quests, onboarding).
@@ -817,7 +853,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
 - **Event sources.** *Recurring*: each server's clock starts with the server and again when any event ends. From
   minute 5 each new minute draws once, chance (m − 4) / 11 (minute 5: 9 %, 10: 55 %, 15: 100 %), only while at least
   one player isn't immune (otherwise that minute waits for one); it then picks a random event with `recurring: true`
-  (the Abyss). Only that server has it. *Admin*: "/event <name>" (`isAdmin`, checked on the server) starts any event
+  (the Abyss or the UFO night). Only that server has it. *Admin*: "/event <name>" (`isAdmin`, checked on the server) starts any event
   (recurring ones too) with admin behaviour: locally, then MessagingService to every server, and a MemoryStore entry
   (expiring with the event) that servers started later join (if > 5 s left). An admin event replaces whatever runs; a
   recurring event never starts over one (the clock doesn't run during any event). "/event stop" ends the running event
@@ -840,7 +876,19 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   server (Heartbeat, replicated CFrame). Client: AbyssEventController darkens the world and dresses the tanks for the
   event's length (2.5 s fades); the banner glows slowly (cyan ↔ red). Its track (`musicId`) crossfades over the
   background music. While it runs, every coin is worth x1.5 (`coinMultiplier`, read by `FishService.dropCoin`
-  through the shared `getEventCoinMultiplier`; the income line shows it).
+  through the shared `getEventCoinMultiplier`; the tank's income plaque shows it).
+- **UFO night.** `EventService.startEvent("Ufo")` runs `UfoService.run` (recurring, 60 s). Per owned tank a UFO
+  flies in from high up and off to a side, hovers 5 studs above the water over a random fish (not an easter egg, not
+  already taken this event), beams it up (`Beaming` attribute, UfoBeam SFX; `FishService.beamUp`: the fish is `held`
+  on a linear segment up to the UFO, then `away`: Remove "Abducted" to the clients, frozen in tick), flies off
+  (2.2 s), comes back over another spot and beams it down (`beamDown` → Spawn with a falling segment). ~12.2 s a
+  kidnapping: 4–5 a minute; none starts that couldn't end in time. Outcome drawn when it is taken (`drawUfoOutcome`,
+  or the owner's forced one in Studio): **Sleep** (1 min: no swimming, eating, hunger, growth nor coins), **Green**
+  (1 min: coins x2), **Red** (1 min: coins x0.5), **Variant** (the next variant for good: `DataService.changeFish`, a
+  Shiny gets Green), **Alien** (the fish is replaced by an AlienFish: changeFish, hatched counts it for the Fish
+  Index). The minute counts only while the tank produces. The owner gets a notice (warning for Sleep / Red). When
+  the event stops, a fish still away is dropped back at once with its outcome. The alien's scream: every other awake,
+  present fish drops one plain coin (never sparkling nor ghost; a weak one farts) on top of its own, timers untouched.
 - **Rebirth.** The story quest "Saving Up" (Rebirth line, open after Story1) tracks the money held toward the price
   (5,000 $); claiming it unlocks the "Rebirth" feature: a notice, a side button with a "NEW" coach bubble (its tutorial ends when the menu opens) and a "!" badge
   whenever a rebirth is affordable. The menu explains the trade (fish → Ocean Points, run restart, multiplier, new
@@ -874,7 +922,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   once: coin value x1.5 (FishService.dropCoin, every coin incl. the croissant; not the 1 $ bubbles nor IncomeMinutes
   rewards), Ocean Points x2 on fish going to the ocean (OceanService.credit, getRebirthOceanPoints; fixed quest
   rewards are not doubled), variant luck x2 (stacks with Lucky ocean: Shiny 3 %, Ghost 15 %, Anomaly 30 %), +1
-  companion slot (getCompanionSlots). The client shows the same numbers (income line, Ocean rows, Rebirth preview).
+  companion slot (getCompanionSlots). The client shows the same numbers (income plaque, Ocean rows, Rebirth preview).
 
 ---
 
@@ -942,7 +990,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   mouth, read as a cigarette). Rules in CLAUDE.md §7.
 - **Not built yet**: the V1 content is complete since V0.44 (ROADMAP M6) and its side lines and daily / weekly quests
   since V0.46 (M7); left for M7: the calibration with real players. The shelf arrows show since V0.38 (8 eggs). The Pelican's and the Snail's Ocean upgrades have their V1 values since V0.36 (x1.33 /
-  x1.15, ROADMAP M1). Kpop is the only admin event and Abyss the only recurring one (`recurring` in GAME_EVENTS).
+  x1.15, ROADMAP M1). Kpop is the only admin event; Abyss and Ufo are recurring (`recurring` in GAME_EVENTS); the UFO night's track is `musicId` 87373069356270.
 - **Admin events across servers** rely on MessagingService (best effort, a few seconds of delay; a server that misses
   the message still joins through the MemoryStore only when it starts). A server started during an admin event joins
   it for the time left. Add admins by UserId in `server/admins.ts` (the game's owner always is one).

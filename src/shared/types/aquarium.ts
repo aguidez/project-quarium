@@ -4,6 +4,17 @@
 
 export const AQUARIUM_INNER_SIZE = new Vector3(48, 22, 20);
 export const AQUARIUM_BASE_HEIGHT = 2;
+
+/**
+ * What a tank earns, published by the server on its aquarium model (FishService, every second) and shown to every
+ * player on the front of the tank (IncomePlaqueController): coins per second at the multipliers running now, the
+ * total multiplier, and whether the tank is paused (owner away / tutorial).
+ */
+export const INCOME_ATTRIBUTES = {
+	perSecond: "IncomePerSecond",
+	multiplier: "IncomeMultiplier",
+	paused: "IncomePaused",
+} as const;
 export const AQUARIUM_GLASS_THICKNESS = 1;
 
 /** Depth (studs) of the area in front of the glass that triggers the focus view. */

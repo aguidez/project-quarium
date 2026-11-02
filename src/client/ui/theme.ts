@@ -99,6 +99,8 @@ export function verticalGradient(top: Color3, bottom: Color3): ColorSequence {
 
 /** The French Fish (easter egg) has no variant: one sticker, front three-quarter view (its scarf must read as a scarf). */
 const FRENCH_FISH_ICON = "rbxassetid://83659319201974"; // Icon_FrenchFish_Normal.png
+/** The alien fish (UFO night easter egg) has no variant either: one sticker, front three-quarter view (its smiling side). */
+const ALIEN_FISH_ICON = "rbxassetid://140655796951738"; // Icon_AlienFish_Normal.png
 
 /** Fish icons exported from FigCraft at 2x and uploaded to Roblox. */
 /**
@@ -222,6 +224,12 @@ export const FISH_ICONS: Record<FishType, Record<FishVariant, string>> = {
 		Anomaly: FRENCH_FISH_ICON,
 		Ghost: FRENCH_FISH_ICON,
 		Shiny: FRENCH_FISH_ICON,
+	},
+	AlienFish: {
+		Normal: ALIEN_FISH_ICON,
+		Anomaly: ALIEN_FISH_ICON,
+		Ghost: ALIEN_FISH_ICON,
+		Shiny: ALIEN_FISH_ICON,
 	},
 };
 /** Width / height of the sticker icons. */
@@ -396,6 +404,33 @@ export const ABYSS_COLORS = {
 	tankLight: Color3.fromHex("#7FA8FF"),
 };
 
+/** The UFO night (UfoEventController): deep space behind the tank, green alien light. */
+export const UFO_COLORS = {
+	bannerTop: Color3.fromHex("#2B1458"),
+	bannerBottom: Color3.fromHex("#07051A"),
+	subtitle: Color3.fromHex("#B8FFB0"),
+	/** The UFO's green beam and its pink dome lights: the banner glows from one to the other. */
+	beam: Color3.fromHex("#5CFF7A"),
+	dome: Color3.fromHex("#FF7AD9"),
+	backdropTop: Color3.fromHex("#1A0B3D"),
+	backdropMiddle: Color3.fromHex("#0C0827"),
+	backdropBottom: Color3.fromHex("#030212"),
+	nebula: [Color3.fromHex("#7A3CFF"), Color3.fromHex("#FF4FB8"), Color3.fromHex("#2EC5FF")],
+	stars: [Color3.fromHex("#FFFFFF"), Color3.fromHex("#FFF3B0"), Color3.fromHex("#BDE3FF")],
+	planets: [
+		{ top: Color3.fromHex("#FFB35C"), bottom: Color3.fromHex("#C2410C"), ring: Color3.fromHex("#FFE2B0") },
+		{ top: Color3.fromHex("#7CF0C8"), bottom: Color3.fromHex("#127A6B") },
+		{ top: Color3.fromHex("#C9A8FF"), bottom: Color3.fromHex("#5B2AA8") },
+	],
+	water: Color3.fromHex("#0B1530"),
+	tankLight: Color3.fromHex("#6BFF8A"),
+	spot: Color3.fromHex("#4DFF6A"),
+	/** Mutations of the fish it brings back (aura particles and light). */
+	auraGreen: Color3.fromHex("#4DFF6A"),
+	auraRed: Color3.fromHex("#FF3B3B"),
+	sleep: Color3.fromHex("#BFD8FF"),
+};
+
 /** Look of the event banner, per kind of event: music events flash on the beat, the raid glows slowly. */
 export const EVENT_BANNER_STYLES = {
 	Music: {
@@ -409,6 +444,12 @@ export const EVENT_BANNER_STYLES = {
 		bottom: ABYSS_COLORS.bannerBottom,
 		subtitle: ABYSS_COLORS.subtitle,
 		accents: [ABYSS_COLORS.lure, ABYSS_COLORS.eye],
+	},
+	Ufo: {
+		top: UFO_COLORS.bannerTop,
+		bottom: UFO_COLORS.bannerBottom,
+		subtitle: UFO_COLORS.subtitle,
+		accents: [UFO_COLORS.beam, UFO_COLORS.dome],
 	},
 };
 

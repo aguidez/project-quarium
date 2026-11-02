@@ -6,14 +6,14 @@ import { CompanionType } from "shared/types/companions";
 import { EggType } from "shared/types/eggs";
 import { ActiveEvent, GameEventType, TEST_EVENT_ORDER } from "shared/types/events";
 import { Feature } from "shared/types/features";
-import { FishType, FOOD_PRICE, getIncomePerSecond } from "shared/types/fish";
+import { FishType } from "shared/types/fish";
 import { isOnboardingDone, STORY_QUEST_HINT_DELAY } from "shared/types/onboarding";
 import { getCompanionSlots, getPlayerVariantLuck, getTotalFish, PlayerData } from "shared/types/playerData";
-import { GamePass, getPassCoinMultiplier } from "shared/types/gamepasses";
+import { GamePass } from "shared/types/gamepasses";
 import { hasClaimableQuest } from "shared/types/quests";
 import { FishVariant } from "shared/types/variants";
 import { hasClaimableOceanReward, OceanRewardId } from "shared/types/oceanRewards";
-import { AQUARIUM_THEMES, formatMultiplier, getNextRebirth, getRebirthMultiplier } from "shared/types/rebirths";
+import { AQUARIUM_THEMES, formatMultiplier, getNextRebirth } from "shared/types/rebirths";
 import { CompanionPanel } from "./CompanionPanel";
 import { EggReveal } from "./EggReveal";
 import { EventBanner, TestEventButton } from "./EventBanner";
@@ -27,18 +27,16 @@ import { OceanPanel } from "./OceanPanel";
 import { RebirthPanel } from "./RebirthPanel";
 import { OnboardingPanel } from "./OnboardingPanel";
 import { QuestPanel } from "./QuestPanel";
-import { formatNumber } from "./Panel";
 import { RewardPopup } from "./RewardPopup";
 import { ShopPanel } from "./ShopPanel";
 import { BAR_HEIGHT, BAR_WIDTH, ShopBar } from "./ShopBar";
 import { SideButtons } from "./SideButtons";
 import { Button3D, Chip, TextStroke } from "./kit";
-import { COLORS, FONT_BOLD, FONT_TITLE, PALETTES, V2_IMAGES } from "./theme";
+import { FONT_TITLE, PALETTES, V2_IMAGES } from "./theme";
 
 const MIN_SCALE = 0.4;
 const SIDE_MARGIN = 16; // gap kept between the bar and Roblox's topbar buttons
-const HINT_GAP = 6; // between the bar and the hint line below it
-const HINT_HEIGHT = 24;
+const BAR_GAP = 6; // kept under the shop bar (the top of the free screen area)
 const EVENT_BANNER_GAP = 10; // under the top HUD
 const CUSTOMIZE_SIZE = new Vector2(200, 50);
 // "Aquarium full" reminder (opening a ready egg with no room): shown this long, at most once per cooldown,
@@ -116,7 +114,7 @@ function computeBarPlacement(): BarPlacement {
 
 /** Bottom edge of the top HUD (bar + hint), in pixels from the top of the screen. */
 export function getTopHudBottom(): number {
-	return (BAR_HEIGHT + HINT_GAP + HINT_HEIGHT) * computeBarPlacement().scale;
+	return (BAR_HEIGHT + BAR_GAP) * computeBarPlacement().scale;
 }
 
 function useBarPlacement(): BarPlacement {
@@ -153,12 +151,6 @@ export function App(props: AppProps) {
 	const rebirthTutorial = rebirthUnlocked && !data.tutorialsDone.includes("Rebirth");
 	const upcomingRebirth = data !== undefined ? getNextRebirth(data.rebirths) : undefined;
 	const rebirthReady = upcomingRebirth !== undefined && data !== undefined && data.money >= upcomingRebirth.price;
-	// Shown in the income line: rebirths, the coins pass and the running event's bonus (not the like boost: it has
-	// its pill)
-	const coinMultiplier =
-		getRebirthMultiplier(data?.rebirths ?? 0) *
-		getPassCoinMultiplier(data?.passes ?? []) *
-		(props.event?.config.coinMultiplier ?? 1);
 
 	// Story quest hint: only right after an onboarding played in this session (not for a player who
 	// joins with it already done), once the "Tutorial complete!" popup is gone. Ends when the book is opened.
@@ -241,39 +233,18 @@ export function App(props: AppProps) {
 		return () => task.cancel(thread);
 	}, [likeBoostEndsAt]);
 
-	let incomePerSecond = 0;
-	if (props.data) {
-		for (const [fishType, count] of pairs(props.data.fish)) {
-			incomePerSecond += count * getIncomePerSecond(fishType);
-		}
-	}
-	incomePerSecond = math.floor(incomePerSecond * coinMultiplier * 10 + 0.5) / 10;
-	const multiplierText = coinMultiplier > 1 ? ` (${formatMultiplier(coinMultiplier)})` : "";
-
 	return (
 		<>
 			<frame
 				key="TopArea"
 				AnchorPoint={new Vector2(0.5, 0)}
 				Position={UDim2.fromOffset(centerX, 0)}
-				Size={UDim2.fromOffset(BAR_WIDTH, BAR_HEIGHT + HINT_GAP + HINT_HEIGHT)}
+				Size={UDim2.fromOffset(BAR_WIDTH, BAR_HEIGHT)}
 				BackgroundTransparency={1}
 				ZIndex={5} // the eggs' odds tooltips hang over the boost pills below it (the menus' Modal is at 20)
 			>
 				<uiscale Scale={scale} />
 				<ShopBar data={props.data} onBuy={props.onBuy} onOpen={openEgg} />
-				<textlabel
-					key="Hint"
-					Position={UDim2.fromOffset(0, BAR_HEIGHT + HINT_GAP)}
-					Size={new UDim2(1, 0, 0, HINT_HEIGHT)}
-					BackgroundTransparency={1}
-					Font={FONT_BOLD}
-					Text={`Coins: +${incomePerSecond >= 1000 ? formatNumber(incomePerSecond) : incomePerSecond}$/s${multiplierText}   •   Walk up to the glass: click coins to collect them, or the water to feed (${FOOD_PRICE}$)`}
-					TextSize={17}
-					TextColor3={COLORS.white}
-				>
-					<TextStroke thickness={2.5} />
-				</textlabel>
 			</frame>
 			<OnboardingPanel
 				key="Onboarding"

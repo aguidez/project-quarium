@@ -17,7 +17,8 @@ const PAUSED_STYLE = { color: Color3.fromRGB(90, 110, 170), icon: "💤" };
 
 /**
  * Renders the hunger badge above every fish from the "Hunger" and "Paused" attributes set by the server.
- * Client-side so it can pulse smoothly without network traffic.
+ * Client-side so it can pulse smoothly without network traffic. None over a fish asleep after a UFO ("Asleep",
+ * FishRenderController): its hunger is frozen and its "z Z z" bubble says it all.
  */
 class FishIndicatorControllerSingleton implements Lifecycle {
 	private janitors = new Map<Instance, Janitor>();
@@ -107,8 +108,9 @@ class FishIndicatorControllerSingleton implements Lifecycle {
 			const hunger = fish.GetAttribute("Hunger");
 			const dead = fish.GetAttribute("Dead") === true;
 			const paused = fish.GetAttribute("Paused") === true;
+			const asleep = fish.GetAttribute("Asleep") === true;
 			const hungerStyle = typeIs(hunger, "string") ? BADGE_STYLES[hunger as HungerState] : undefined;
-			const style = dead ? undefined : paused ? PAUSED_STYLE : hungerStyle;
+			const style = dead || asleep ? undefined : paused ? PAUSED_STYLE : hungerStyle;
 
 			billboard.Enabled = style !== undefined;
 			if (style) {
@@ -120,7 +122,7 @@ class FishIndicatorControllerSingleton implements Lifecycle {
 			pulse?.Cancel();
 			pulse = undefined;
 			scale.Scale = 1;
-			if (!dead && !paused && hunger === HungerState.Weak) {
+			if (style && !paused && hunger === HungerState.Weak) {
 				pulse = TweenService.Create(
 					scale,
 					new TweenInfo(PULSE_TIME, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
@@ -133,6 +135,7 @@ class FishIndicatorControllerSingleton implements Lifecycle {
 		janitor.Add(fish.GetAttributeChangedSignal("Hunger").Connect(refresh));
 		janitor.Add(fish.GetAttributeChangedSignal("Dead").Connect(refresh));
 		janitor.Add(fish.GetAttributeChangedSignal("Paused").Connect(refresh));
+		janitor.Add(fish.GetAttributeChangedSignal("Asleep").Connect(refresh));
 		refresh();
 	}
 }
