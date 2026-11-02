@@ -10,6 +10,7 @@ import { FishType } from "shared/types/fish";
 import { OnboardingStep } from "shared/types/onboarding";
 import { getTotalFish, MAX_MONEY, PlayerData, syncIncubationSpeed } from "shared/types/playerData";
 import { FishVariant } from "shared/types/variants";
+import { createPlayerStats } from "../playerStats";
 import { SAVE_TEMPLATE, SaveData, sanitizeSave } from "../saveData";
 
 type ActionHandler = (player: Player, payload: unknown) => void;
@@ -132,6 +133,7 @@ class DataServiceController implements Lifecycle {
 		this.resetting.add(player);
 		profile.Data.player = deepCopy(SAVE_TEMPLATE.player);
 		profile.Data.tank = [];
+		profile.Data.stats = createPlayerStats();
 		player.Kick(kickMessage);
 		return true;
 	}

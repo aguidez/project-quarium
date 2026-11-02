@@ -9,6 +9,7 @@ import { FISH_VARIANTS, FishVariant, getOceanPoints } from "shared/types/variant
 import { COMPANION_TYPES } from "shared/types/companions";
 import { getOceanMilestone } from "shared/types/oceanRewards";
 import { CompanionService } from "./CompanionService";
+import { getTestSpeed } from "../playerStats";
 import { DataService } from "./DataService";
 import { FishService } from "./FishService";
 import { QuestService } from "./QuestService";
@@ -64,7 +65,10 @@ class OceanServiceSingleton implements Lifecycle {
 
 	/** Ocean Points of a fish gone to the ocean (x2 with the pass), with their popup where it was. */
 	private credit(player: Player, basePoints: number, position: Vector3) {
-		const points = basePoints * getPassOceanMultiplier(DataService.getData(player)?.passes ?? []);
+		const points =
+			basePoints *
+			getPassOceanMultiplier(DataService.getData(player)?.passes ?? []) *
+			getTestSpeed(DataService.getSave(player)?.stats);
 		DataService.addOceanPoints(player, points);
 		QuestService.addProgress(player, "OceanPoints", points);
 		const popup: MoneyPopup = { position, amount: points, special: false, ocean: true };

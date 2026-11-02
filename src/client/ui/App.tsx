@@ -29,8 +29,8 @@ import { RewardPopup } from "./RewardPopup";
 import { ShopPanel } from "./ShopPanel";
 import { BAR_HEIGHT, BAR_WIDTH, ShopBar } from "./ShopBar";
 import { SideButtons } from "./SideButtons";
-import { TextStroke } from "./kit";
-import { COLORS, FONT_BOLD } from "./theme";
+import { Chip, TextStroke } from "./kit";
+import { COLORS, FONT_BOLD, PALETTES } from "./theme";
 
 const MIN_SCALE = 0.4;
 const SIDE_MARGIN = 16; // gap kept between the bar and Roblox's topbar buttons
@@ -64,6 +64,8 @@ export interface AppProps {
 	likeBoostEndsAt: number;
 	/** The player has quest coin boost left (daily / weekly rewards): its pill shows, under the like pill. */
 	questBoosted: boolean;
+	/** The owner's test modes ("/speed", "/passes off" in Studio), shown so they are never forgotten; undefined for everyone else. */
+	testMode?: string;
 	/** Starts a test event; only given in Studio (the server ignores it elsewhere). */
 	onTestEvent?: (eventType: GameEventType) => void;
 	onClaimQuest: (questId: string) => void;
@@ -248,6 +250,7 @@ export function App(props: AppProps) {
 				Position={UDim2.fromOffset(centerX, 0)}
 				Size={UDim2.fromOffset(BAR_WIDTH, BAR_HEIGHT + HINT_GAP + HINT_HEIGHT)}
 				BackgroundTransparency={1}
+				ZIndex={5} // the eggs' odds tooltips hang over the boost pills below it (the menus' Modal is at 20)
 			>
 				<uiscale Scale={scale} />
 				<ShopBar data={props.data} onBuy={props.onBuy} onOpen={openEgg} />
@@ -294,6 +297,18 @@ export function App(props: AppProps) {
 					endsAt={likeBoostEndsAt}
 					top={getTopHudBottom() + EVENT_BANNER_GAP}
 					scale={scale}
+				/>
+			)}
+			{props.testMode !== undefined && (
+				<Chip
+					key="TestSpeed"
+					text={props.testMode}
+					color={PALETTES.red.base}
+					textColor={new Color3(1, 1, 1)}
+					textStroke={PALETTES.red.shadow}
+					height={30}
+					anchorPoint={new Vector2(1, 1)}
+					position={new UDim2(1, -12, 1, -12)}
 				/>
 			)}
 			{props.questBoosted && menusVisible && (

@@ -15,6 +15,7 @@ import { OnboardingController } from "./controllers/OnboardingController";
 import { PelicanChargesController } from "./controllers/PelicanChargesController";
 import { CompanionAnimationController } from "./controllers/CompanionAnimationController";
 import { ShopKeeperController } from "./controllers/ShopKeeperController";
+import { StatsReportController } from "./controllers/StatsReportController";
 import { UiController } from "./controllers/UiController";
 
 // Register all client controllers here
@@ -36,4 +37,5 @@ bootstrap([
 	PelicanChargesController,
 	CompanionAnimationController,
 	ShopKeeperController,
+	StatsReportController,
 ]);

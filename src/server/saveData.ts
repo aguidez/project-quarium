@@ -26,6 +26,7 @@ import {
 	STORY_LINES,
 } from "shared/types/quests";
 import { REBIRTHS } from "shared/types/rebirths";
+import { createPlayerStats, PlayerStats, sanitizePlayerStats } from "./playerStats";
 import { FISH_VARIANTS, FishVariant, isFishVariant } from "shared/types/variants";
 
 /** A fish of the tank as saved: what makes it worth more than a newborn one. */
@@ -41,17 +42,20 @@ export interface SavedFish {
 /**
  * What a player's DataStore profile holds. `player` is the PlayerData synced to the client;
  * `tank` is written by FishService right before each save (PlayerData.fish stays the authority
- * on how many fish there are: the tank only tells how grown / hungry they were).
+ * on how many fish there are: the tank only tells how grown / hungry they were). `stats` are the play statistics
+ * (server only, never synced: StatsService, tools/player-stats.js).
  */
 export interface SaveData {
 	player: PlayerData;
 	tank: SavedFish[];
+	stats: PlayerStats;
 }
 
 /** Template of new profiles; ProfileStore copies it and Reconcile() fills fields added since. */
 export const SAVE_TEMPLATE: SaveData = {
 	player: DEFAULT_PLAYER_DATA,
 	tank: [],
+	stats: createPlayerStats(),
 };
 
 function isFishType(value: unknown): value is FishType {
@@ -147,6 +151,7 @@ function sanitizeStoryLines(quests: QuestsData, companions: readonly CompanionTy
  * fixes values a new version may break, and keeps the invariants the services rely on.
  */
 export function sanitizeSave(save: SaveData) {
+	save.stats = sanitizePlayerStats(save.stats);
 	const data = save.player;
 
 	const fish = { ...DEFAULT_PLAYER_DATA.fish };

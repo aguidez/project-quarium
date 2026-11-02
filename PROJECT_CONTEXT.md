@@ -2,7 +2,7 @@
 
 > Living map of the project. **Read it before exploring the code, and update it in the same change
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
-> Last updated: 2026-11-01 (V0.46, ROADMAP M7: daily / weekly coin boost (PlayerData.coinBoostSeconds, QuestBoostPill, "/boost"), rebirths 3–8 and their eggs x1.45, side lines Hatchery / Collector / Ocean, daily / weekly pools, quest stats CoinsCollected / FishFed / LikesGiven / VariantFound / TotalHatched, Golden Incubator decor, LikeService.onLikeGiven, simulator side lines + hoursPerDay, load test with 18 species in §4; V0.45: swim animation stopgap, rigs planned in triangles + sway; ROADMAP_V1.1.md: the post-V1 animation revamp plan, EditableMesh budget measured in §4;
+> Last updated: 2026-11-01 (V0.47: the owner's "/speed" test speed (x6: V1 in ~2h30), play statistics, SaveData.stats / playerStats.ts, StatsService (AnalyticsService funnels and events), StatsReportController, tools/player-stats.js (Open Cloud, npm run stats); V0.46, ROADMAP M7: daily / weekly coin boost (PlayerData.coinBoostSeconds, QuestBoostPill, "/boost"), rebirths 3–8 and their eggs x1.45, side lines Hatchery / Collector / Ocean, daily / weekly pools, quest stats CoinsCollected / FishFed / LikesGiven / VariantFound / TotalHatched, Golden Incubator decor, LikeService.onLikeGiven, simulator side lines + hoursPerDay, load test with 18 species in §4; V0.45: swim animation stopgap, rigs planned in triangles + sway; ROADMAP_V1.1.md: the post-V1 animation revamp plan, EditableMesh budget measured in §4;
 > V0.44, ROADMAP M6: rebirths 7–8 → CrystalCaverns / CosmicSanctuary themes, WolfDogfish
 > ("Husky Dogfish") / BunnyShark / MiniLeviathan (Mythic) with Moon / Star / Planet coins, Crystal and Cosmic eggs, Ocean
 > milestones 450,000 (tank 25) and 1,000,000 (OceanGuardian: title + whale statue), Voyage 12–16 (gauge SpeciesFound,
@@ -145,6 +145,11 @@ ProjetQuarium/
 ├─ tools/balance-v1-plan.js  The V1 plan played by the simulators (BALANCE.md §5): 18 species, 12 eggs, 8 rebirths,
 │                            Ocean milestones to 25 fish, second incubator, Water Hen, story quest bonuses, Pelican x1.33,
 │                            Snail x1.15, Jellyfish and Swordfish stages. Not in the game: becomes the config when V1 is built
+├─ tools/player-stats.js     Real players vs the simulator (node, `npm run stats`, V0.47): lists and reads every profile of
+│                            PlayerData_v1 through Open Cloud (robloxOpenCloudKey, read-only key; universe 10773319506),
+│                            prints attendance, play time at each milestone (median / p10–p90 vs REFERENCE = BALANCE.md
+│                            §2), coin pickup share (vs the simulator's 50 %), daily quests, devices; `--file dump.json`
+│                            to test without the API, `--out` to keep a snapshot
 ├─ tools/companion-sim.js    AFK simulator (node): share of fish-time weak with a feeder (Pelican, planned Jellyfish) per
 │                            tank size (mirrors CompanionService, FishService hunger, FoodService), share of coins a
 │                            collector picks up per coin rate (Snail on the sand, Swordfish in the water: its live stages; the Jellyfish's live
@@ -257,7 +262,13 @@ ProjetQuarium/
    │  │                      ReplicatedStorage.Assets.Fish / FishVariants before a fish's Spawn message, sweep(inUse)
    │  │                      (FishService, every 10 s) removes copies no tank used for 60 s
    │  ├─ admins.ts           isGameOwner / isAdmin (owner of the place or its group + ADMIN_USER_IDS), checked server-side
-   │  ├─ saveData.ts         SaveData (profile: PlayerData + saved tank), SavedFish, SAVE_TEMPLATE, sanitizeSave
+   │  ├─ saveData.ts         SaveData (profile: PlayerData + saved tank + stats), SavedFish, SAVE_TEMPLATE, sanitizeSave
+   │  ├─ playerStats.ts      PlayerStats (V0.47, server only, never synced): sessions, days, play / tending seconds,
+   │  │                      milestones {tending, play, days, at} ("Onboarding:<step>", "Rebirth<n>", "Species:<type>",
+   │  │                      "AllSpecies", "Ocean:<id>", "Quest:<id>"; tending -1 = reached before the stats: `legacy`),
+   │  │                      coins dropped / clicked / by a companion (count + value), meals by hand, quests claimed,
+   │  │                      boost minutes earned, likes given, platforms, per-device fps / memory / swim budget,
+   │  │                      testSpeed / testSpeedUsed ("/speed"), testNoPasses ("/passes off"); createPlayerStats, sanitizePlayerStats, getTestSpeed
    │  └─ services/
    │     ├─ DataService      ProfileStore sessions (load, auto-save, final save, onLoaded / onSave hooks), sync(),
    │     │                   notify(), registerAction() (sync() also runs syncIncubationSpeed), money/fish helpers, resetSave (wipe + kick, see DevCommandService)
@@ -330,6 +341,17 @@ ProjetQuarium/
    │     │                   fish that leaves on its own (points, popup, its leaveMessage)
    │     ├─ RebirthService   "Rebirth" intent (needs the "Rebirth" feature, quest "Saving Up"): fish to the ocean,
    │     │                   run reset, rebirths + 1, reward popup
+   │     ├─ StatsService     Play statistics (V0.47, ROADMAP M7 calibration): every 1 s counts play / tending time (tending =
+   │     │                   AquariumService.isTending + onboarding done: the simulator's play time) and stamps the
+   │     │                   milestones reached; counts coins (CoinService.onSpawned / onCollected), meals (onFishFed),
+   │     │                   quests (QuestService.onQuestClaimed), likes (onLikeGiven); "ReportClientStats" action (once a
+   │     │                   minute: platform, fps, memory, swim budget; validated, ≥ 45 s apart). Creator Dashboard
+   │     │                   (AnalyticsService, all in pcall): onboarding funnel, one-time "Progression" funnel
+   │     │                   (Onboarding:Done, Rebirth1–8, AllSpecies), custom events MilestoneMinutes (field 1 = milestone,
+   │     │                   2 = days), SessionMinutes / SessionMinutesInGame (platform), CoinPickupPercent (rebirth level),
+   │     │                   DailyQuestClaimed / WeeklyQuestClaimed (quest id); legacy saves stay out of the funnels, and
+   │     │                   the owner's test profiles (testSpeedUsed / testNoPasses) send nothing (the dashboard can't
+   │     │                   delete an event; Studio playtests never send any anyway)
    │     ├─ TitleService     Polls every 1 s: a BillboardGui "PlayerTitle" on each character's Head with their best title
    │     │                   (getBestTitle; gold LuckiestGuy text, 4.2 × 0.65 studs, MaxDistance 120), removed without one
    │     ├─ GamePassService  The only writer of PlayerData.passes: at join (onLoaded) asks Roblox for each pass on sale
@@ -345,7 +367,13 @@ ProjetQuarium/
    │                         "/nextfrench": the next egg opened hatches a French Fish (EggService.forceNextHatch);
    │                         "/incubators <n>": incubators per egg type (1–4, saved: "/incubators 1" puts it back);
    │                         "/pass <GamePass>": gives / takes a pass for the session (the next join asks Roblox again);
-   │                         "/boost <minutes>": sets the quest coin boost (saved: "/boost 0" clears it)
+   │                         "/boost <minutes>": sets the quest coin boost (saved: "/boost 0" clears it);
+   │                         "/speed <x>": the owner's test speed (1–10, PlayerStats.testSpeed, saved so it also applies on
+   │                         the published game; coins in FishService.dropCoin, hatch time in EggService, Ocean Points in
+   │                         OceanService.credit and RebirthService x it: getTestSpeed); "TestSpeed" Player attribute → a red
+   │                         "TEST SPEED x6" chip bottom right (App); the profile is then left out of npm run stats;
+   │                         "/passes off|on": the owner plays without their passes (PlayerStats.testNoPasses, saved:
+   │                         GamePassService.setTestNoPasses / refresh grant none), "NO PASSES" on the same chip
    └─ client/
       ├─ main.client.ts      Registers controllers
       ├─ fishLook.ts         getFishTemplate / cloneFishTemplate (undefined until the server replicated the species),
@@ -369,6 +397,8 @@ ProjetQuarium/
       │  │                   a fish whose model (or rare variant texture) hasn't arrived waits in `pending` (kept up to
       │  │                   date by Swim / State), built when the asset arrives, in its normal look after 5 s
       │  ├─ FishIndicatorController  Hunger / AFK badges above fish (from attributes)
+      │  ├─ StatsReportController  Once a minute sends "ReportClientStats" (platform Touch / Keyboard / Gamepad / VR, average
+      │  │                   fps of the minute, Stats.GetTotalMemoryUsageMb, the SwimTriangleBudget attribute) (V0.47)
       │  ├─ ShopKeeperController  The fisherman's shop (tag ShopKeeper): isNearby / onNearbyChanged (opens within 9 studs:
       │  │                   at the counter, not at the spawn ~13 studs away; closes beyond 12; the nearest of the huts), read by UiController → App `shopNearby` (opens / closes the Shop panel;
       │  │                   closed by hand it stays closed until the player comes back); turns him toward a player
@@ -425,7 +455,8 @@ ProjetQuarium/
          │                   the Ocean's own "NEW" bubble is up or a panel is open
          ├─ Panel            Shared modal (backdrop closes): navy window with a bevel, ribbon title (`banner` palette)
          │                   over its top edge, round close button on its corner, `headerExtra` centred under the ribbon
-         ├─ QuestPanel / CompanionPanel / FishIndexPanel / OceanPanel   The four menus (Fish Index: a scrolling
+         ├─ QuestPanel / CompanionPanel / FishIndexPanel / OceanPanel   The four menus (Quests: the card list grows up to 470 px,
+         │                   then scrolls (V0.47); Fish Index: a scrolling
          │                   table, one row per species, one cell per variant (its sticker icon once found, else the species' dark silhouette + "?"; no count);
          │                   then the "EASTER EGGS" category: only the easter egg fish already hatched (nothing at all
          │                   before), Normal cell only, out of the "Discovered" count; hovering a column header or a cell
@@ -562,7 +593,8 @@ ProjetQuarium/
 
 - **Saving (ProfileStore).** `DataService` opens one profile per player (store `PlayerData_v1`, key
   `Player_<UserId>`), holding a `SaveData` (`server/saveData.ts`): `player` (the PlayerData below, synced to the
-  client) and `tank` (the fish: type, adult scale, age, hunger, variant — undefined = Normal in older saves). On load: `Reconcile()` (fields added to
+  client), `tank` (the fish: type, adult scale, age, hunger, variant — undefined = Normal in older saves) and `stats`
+  (V0.47: the play statistics, `server/playerStats.ts`, never synced; read offline by `npm run stats`). On load: `Reconcile()` (fields added to
   `DEFAULT_PLAYER_DATA` since), then `sanitizeSave` (drops ids removed from the config, restarts the story where it
   was). A failed load kicks the player (never play on unsaved default data). `getData` is undefined until loaded:
   actions sent before are ignored.
@@ -621,6 +653,7 @@ ProjetQuarium/
 | | `SetFocus` (boolean) | AquariumService |
 | | `RequestSync` | DataService |
 | | `ClaimQuest` (quest id) | QuestService |
+| | `ReportClientStats` ({platform, fps, memoryMb, swimBudget}, once a minute) | StatsService (statistics only) |
 | | `EquipCompanion` / `UnequipCompanion` (CompanionType) | CompanionService |
 | | `ReleaseFish` ({fishType, variant}), `FinishTutorial` (Feature), `ClaimOceanReward` (milestone id) | OceanService |
 | | `StartTestEvent` (GameEventType, **Studio only**) | EventService |

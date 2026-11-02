@@ -161,6 +161,7 @@ class CoinServiceSingleton implements Lifecycle {
 	private coinsByOwner = new Map<Player, Set<Coin>>();
 	private templates = new Map<CoinType, Model>();
 	private collectedCallbacks = new Array<CoinCollectedCallback>();
+	private spawnedCallbacks = new Array<(owner: Player, value: number) => void>();
 	/** The coin chime's combo per player (see playCoinSfx), and when a companion's pickup last chimed. */
 	private coinCombos = new Map<Player, { step: number; at: number }>();
 	private companionChimeAt = new Map<Player, number>();
@@ -216,6 +217,7 @@ class CoinServiceSingleton implements Lifecycle {
 		if (!aquarium || !template) return;
 		const coins = this.getCoins(owner);
 		if (coins.size() >= MAX_COINS_PER_PLAYER) return;
+		if (!frozen) for (const callback of this.spawnedCallbacks) task.spawn(callback, owner, value);
 
 		// Clone the Studio-made coin (ServerStorage.Assets.Coins)
 		const model = template.Clone();
@@ -579,6 +581,11 @@ class CoinServiceSingleton implements Lifecycle {
 	/** Registers a callback fired after a player collects one of their coins. */
 	public onCollected(callback: CoinCollectedCallback) {
 		this.collectedCallbacks.push(callback);
+	}
+
+	/** Registers a callback fired for each coin dropped in a tank (not the onboarding's frozen one): StatsService. */
+	public onSpawned(callback: (owner: Player, value: number) => void) {
+		this.spawnedCallbacks.push(callback);
 	}
 }
 

@@ -47,10 +47,20 @@ cp workspace.local.example.json workspace.local.json      # Windows PowerShell: 
 | `wgpuBackend` | FigCraft crashes at startup ("Shader translation error") | `"vulkan"` (the old Windows PC needed it), `"dx12"`, `"metal"`... or remove the key |
 | `robloxStudioMcp` | the Studio MCP server isn't found automatically | path of `StudioMCP` (macOS) or `mcp.bat` / `StudioMCP.exe` (Windows) |
 | `robloxFontsDir` | the Roblox fonts aren't found (FigCraft V2 build script) | Studio's `content/fonts` folder |
+| `robloxOpenCloudKey` | you read the real players' statistics (`npm run stats`) | an Open Cloud API key, see below. **Secret**: only in this file, never in git |
+| `robloxUniverseId` | another experience than Projet Quarium's (10773319506) | its universe id (`game.GameId`) |
 
-Each key can also be given as an environment variable (`FIGCRAFT_DIR`, `ROBLOX_STUDIO_MCP`, `ROBLOX_FONTS_DIR`...).
+Each key can also be given as an environment variable (`FIGCRAFT_DIR`, `ROBLOX_STUDIO_MCP`, `ROBLOX_FONTS_DIR`,
+`ROBLOX_OPEN_CLOUD_KEY`...).
 Default locations searched without config: Studio MCP in `%LOCALAPPDATA%\Roblox\mcp.bat` (Windows) or
 `/Applications/RobloxStudio.app/Contents/MacOS/StudioMCP` (macOS); fonts in the newest Studio version folder.
+
+**Open Cloud key (players' statistics, optional).** `npm run stats` (`tools/player-stats.js`) reads every player
+profile of the live DataStore to compare the real players with the balance simulator (ROADMAP M7). On the Creator
+Dashboard: *Open Cloud → API Keys → Create API Key*; name it (e.g. "Quarium stats"), add the API system **Data
+Stores**, pick the experience **Projet Quarium** and only the operations **List entry keys** and **Read entry**
+(`universe-datastores.objects:list` / `:read`: the tool never writes); accepted IP addresses: your own, or
+`0.0.0.0/0`; an expiration date is wise. Copy the key into `robloxOpenCloudKey`. Each machine can have its own key.
 
 ## 4. Roblox Studio
 
@@ -79,6 +89,7 @@ Default locations searched without config: Studio MCP in `%LOCALAPPDATA%\Roblox\
 npm run doctor        # Node, packages, Rojo version, Studio MCP, fonts, FigCraft
 npx rbxtsc            # zero errors
 npm run sim           # economy simulator (BALANCE.md)
+npm run stats         # real players' statistics vs the simulator (needs robloxOpenCloudKey)
 ```
 
 ## What is shared, what stays on each machine

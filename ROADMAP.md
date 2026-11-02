@@ -149,8 +149,13 @@ Themes already built (`PirateWreck`, `Atlantis` in ServerStorage.Assets.Aquarium
 - [x] Swim animation stopgap (`ROADMAP_V1.1.md` A0; the EditableMesh budget is ~81k triangles on the owner's PC, the
       6 heaviest species alone need ~83k): rigs planned in triangles, budget adapted to the device, the other visible
       fish sway. Decided by the owner and shipped in V0.45.
-- [ ] Calibration with real players: compare the playtime of the first players to the plan (rebirth 3 at ~3h00,
-      end at ~12h15), adjust with the simulator (BALANCE.md §5.1 levers).
+- [x] Measuring tools (V0.47): play statistics in each save (SaveData.stats: time, days, milestones, coins picked up,
+      quests, devices), Creator Dashboard funnels and events (AnalyticsService), `npm run stats` (Open Cloud) to put the
+      real players next to the simulator.
+- [ ] **Owner**: create the read-only Open Cloud key (SETUP.md §3) and put it in `workspace.local.json`.
+- [ ] Calibration with real players: after ~2 weeks of testers, `npm run stats`: play time at each rebirth vs the
+      simulator (1 h a day: rebirth 3 ~2h37, end ~12h13), share of the coins picked up (simulator 50 %), dailies done a
+      day (simulator 3); set the simulator's assumptions to what players really do, then re-tune (BALANCE.md §5.1 levers).
 
 ---
 

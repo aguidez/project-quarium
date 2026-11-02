@@ -83,6 +83,8 @@ class UiControllerSingleton implements Lifecycle {
 		});
 		MusicEventController.onEventChanged(() => this.render());
 		LikeBoardController.onOwnBoostChanged(() => this.render());
+		Players.LocalPlayer.GetAttributeChangedSignal("TestSpeed").Connect(() => this.render());
+		Players.LocalPlayer.GetAttributeChangedSignal("TestNoPasses").Connect(() => this.render());
 		// The quest boost pill shows / hides as the boost starts or ends (it counts down by itself)
 		Players.LocalPlayer.GetAttributeChangedSignal(BOOST_SECONDS_ATTRIBUTE).Connect(() => {
 			if (this.isQuestBoosted() !== this.questBoosted) this.render();
@@ -120,6 +122,15 @@ class UiControllerSingleton implements Lifecycle {
 		});
 	}
 
+	/** "TEST SPEED x6 · NO PASSES": the owner's test modes, from the server's attributes (DevCommandService). */
+	private getTestMode(): string | undefined {
+		const parts = new Array<string>();
+		const speed = Players.LocalPlayer.GetAttribute("TestSpeed");
+		if (typeIs(speed, "number")) parts.push(`TEST SPEED x${speed}`);
+		if (Players.LocalPlayer.GetAttribute("TestNoPasses") === true) parts.push("NO PASSES");
+		return parts.size() > 0 ? parts.join(" · ") : undefined;
+	}
+
 	private isQuestBoosted(): boolean {
 		const seconds = Players.LocalPlayer.GetAttribute(BOOST_SECONDS_ATTRIBUTE);
 		return typeIs(seconds, "number") && seconds > 0;
@@ -148,6 +159,7 @@ class UiControllerSingleton implements Lifecycle {
 				event: MusicEventController.getEvent(),
 				likeBoostEndsAt: LikeBoardController.getOwnBoostEndsAt(),
 				questBoosted: this.questBoosted,
+				testMode: this.getTestMode(),
 				shopNearby: ShopKeeperController.isNearby(),
 				subscribeBeat: (listener) => MusicEventController.onBeat(listener),
 				// Intents only: the server checks the quest is complete / the companion is owned and a slot is free

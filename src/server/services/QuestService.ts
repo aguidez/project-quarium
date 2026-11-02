@@ -61,6 +61,12 @@ const BOARDS: Record<QuestBoardCategory, { pool: readonly string[]; count: numbe
  */
 class QuestServiceSingleton implements Lifecycle {
 	private rewardRemote = getRemoteEvent("Reward");
+	private claimedCallbacks = new Array<(player: Player, questId: string, config: QuestConfig) => void>();
+
+	/** Registers a callback fired after a quest's rewards are granted (StatsService). */
+	public onQuestClaimed(callback: (player: Player, questId: string, config: QuestConfig) => void) {
+		this.claimedCallbacks.push(callback);
+	}
 
 	public onInit() {
 		DataService.registerAction("ClaimQuest", t.string, (player, questId) => this.claim(player, questId));
@@ -258,6 +264,7 @@ class QuestServiceSingleton implements Lifecycle {
 		}
 		DataService.sync(player);
 		for (const reward of config.rewards) this.grant(player, reward);
+		for (const callback of this.claimedCallbacks) task.spawn(callback, player, questId, config);
 		// A gauge quest that just started may already be done (e.g. the tank is already full)
 		this.reportGauges(player);
 	}

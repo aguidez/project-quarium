@@ -7,6 +7,7 @@ import { EggService } from "./EggService";
 import { FishService } from "./FishService";
 import { GamePassService } from "./GamePassService";
 import { GAME_PASSES, isGamePass } from "shared/types/gamepasses";
+import { MAX_TEST_SPEED } from "../playerStats";
 
 const RESET_COMMAND = "/datareset";
 const CONFIRM_WORD = "confirm";
@@ -16,6 +17,8 @@ const NEXT_FRENCH_COMMAND = "/nextfrench";
 const INCUBATORS_COMMAND = "/incubators";
 const PASS_COMMAND = "/pass";
 const BOOST_COMMAND = "/boost";
+const SPEED_COMMAND = "/speed";
+const PASSES_COMMAND = "/passes";
 /** The most incubators the test command gives (the V1 plan stops at 2). */
 const MAX_TEST_INCUBATORS = 4;
 
@@ -32,6 +35,10 @@ const MAX_TEST_INCUBATORS = 4;
  *  /pass <Pass>         gives or takes a gamepass (e.g. "/pass Coins"), for this session only: the next join
  *                       asks Roblox again
  *  /boost <minutes>     sets the player's quest coin boost to that many minutes (saved: "/boost 0" clears it)
+ *  /speed <x>           the owner's test speed: coins, hatching and Ocean Points x it (1–10), saved, so it also
+ *                       applies when the owner plays the published game ("/speed 1" puts it back); the profile is
+ *                       then left out of the players' statistics
+ *  /passes off|on       the owner plays without their gamepasses (saved, also on the published game) or with them again
  */
 class DevCommandServiceSingleton implements Lifecycle {
 	private resetAskedAt = new Map<Player, number>();
@@ -83,13 +90,31 @@ class DevCommandServiceSingleton implements Lifecycle {
 			if (player) this.onBoost(player, text);
 		});
 		boost.Parent = TextChatService;
+
+		const speed = new Instance("TextChatCommand");
+		speed.Name = "DevSpeed";
+		speed.PrimaryAlias = SPEED_COMMAND;
+		speed.Triggered.Connect((source, text) => {
+			const player = Players.GetPlayerByUserId(source.UserId);
+			if (player) this.onSpeed(player, text);
+		});
+		speed.Parent = TextChatService;
+
+		const passes = new Instance("TextChatCommand");
+		passes.Name = "DevPasses";
+		passes.PrimaryAlias = PASSES_COMMAND;
+		passes.Triggered.Connect((source, text) => {
+			const player = Players.GetPlayerByUserId(source.UserId);
+			if (player) this.onPasses(player, text);
+		});
+		passes.Parent = TextChatService;
 		Players.PlayerRemoving.Connect((player) => this.resetAskedAt.delete(player));
 	}
 
 	public onStart() {
 		if (RunService.IsStudio())
 			print(
-				`[Server] DevCommandService: ${RESET_COMMAND}, ${NEXT_FRENCH_COMMAND}, ${INCUBATORS_COMMAND}, ${PASS_COMMAND}, ${BOOST_COMMAND} available (Studio, place owner only).`,
+				`[Server] DevCommandService: ${RESET_COMMAND}, ${NEXT_FRENCH_COMMAND}, ${INCUBATORS_COMMAND}, ${PASS_COMMAND}, ${BOOST_COMMAND}, ${SPEED_COMMAND}, ${PASSES_COMMAND} available (Studio, place owner only).`,
 			);
 	}
 
@@ -118,6 +143,46 @@ class DevCommandServiceSingleton implements Lifecycle {
 		data.incubators = math.clamp(math.floor(count), 1, MAX_TEST_INCUBATORS);
 		DataService.sync(player);
 		DataService.notify(player, `Incubators per egg type: ${data.incubators}.`, "info");
+	}
+
+	private onPasses(player: Player, text: string) {
+		if (!this.isAllowed(player)) {
+			warn(`[Server] ${player.Name} tried ${PASSES_COMMAND}: refused (not the place's owner).`);
+			return;
+		}
+		const word = text.split(" ")[1]?.lower();
+		if (word !== "off" && word !== "on") {
+			DataService.notify(player, `Usage: ${PASSES_COMMAND} off | on`, "info");
+			return;
+		}
+		GamePassService.setTestNoPasses(player, word === "off");
+		DataService.notify(
+			player,
+			word === "off"
+				? `Playing without gamepasses. "${PASSES_COMMAND} on" to get them back.`
+				: "Gamepasses back.",
+			"info",
+		);
+	}
+
+	private onSpeed(player: Player, text: string) {
+		const stats = DataService.getSave(player)?.stats;
+		if (!this.isAllowed(player) || !stats) {
+			warn(`[Server] ${player.Name} tried ${SPEED_COMMAND}: refused (not the place's owner).`);
+			return;
+		}
+		const speed = tonumber(text.split(" ")[1]);
+		if (speed === undefined) return;
+		stats.testSpeed = math.clamp(math.floor(speed), 1, MAX_TEST_SPEED);
+		if (stats.testSpeed > 1) stats.testSpeedUsed = true;
+		player.SetAttribute("TestSpeed", stats.testSpeed > 1 ? stats.testSpeed : undefined);
+		DataService.notify(
+			player,
+			stats.testSpeed > 1
+				? `Test speed x${stats.testSpeed}: coins, hatching and Ocean Points. "${SPEED_COMMAND} 1" to stop.`
+				: "Test speed off.",
+			"info",
+		);
 	}
 
 	private onBoost(player: Player, text: string) {

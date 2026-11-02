@@ -32,6 +32,7 @@ import { getSatietyBonus } from "shared/types/perks";
 import { getRebirthMultiplier } from "shared/types/rebirths";
 import { getPassCoinMultiplier } from "shared/types/gamepasses";
 import { QUEST_COIN_BOOST_MULTIPLIER } from "shared/types/quests";
+import { getTestSpeed } from "../playerStats";
 import { SavedFish, SaveData } from "../saveData";
 import { FishAssets } from "../fishAssets";
 import { loadTemplates } from "../templates";
@@ -340,6 +341,7 @@ class FishServiceSingleton implements Lifecycle {
 			LikeService.getCoinMultiplier(owner) *
 			((data?.coinBoostSeconds ?? 0) > 0 ? QUEST_COIN_BOOST_MULTIPLIER : 1) *
 			getEventCoinMultiplier(owner) *
+			getTestSpeed(DataService.getSave(owner)?.stats) *
 			(ghost ? GHOST_COIN_MULTIPLIER : 1);
 		// An easter egg fish's coin (the French Fish's croissant) is worth a share of the tank's income
 		const easterEgg = fish.config.easterEgg;

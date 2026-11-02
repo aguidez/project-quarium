@@ -7,6 +7,7 @@ import { isOnboardingDone } from "shared/types/onboarding";
 import { DEFAULT_PLAYER_DATA } from "shared/types/playerData";
 import { AQUARIUM_THEMES, formatMultiplier, getNextRebirth, getRebirthOceanPoints } from "shared/types/rebirths";
 import { CoinService } from "./CoinService";
+import { getTestSpeed } from "../playerStats";
 import { DataService } from "./DataService";
 import { EggService } from "./EggService";
 import { FishService } from "./FishService";
@@ -45,7 +46,7 @@ class RebirthServiceSingleton implements Lifecycle {
 		}
 
 		// Every fish goes back to the ocean (counted from the data, the authority on the tank)
-		const points = getRebirthOceanPoints(data);
+		const points = getRebirthOceanPoints(data) * getTestSpeed(DataService.getSave(player)?.stats);
 		FishService.releaseAll(player);
 		CoinService.clearOwner(player);
 

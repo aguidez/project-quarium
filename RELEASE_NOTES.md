@@ -10,6 +10,22 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.47 — 2026-11-01
+
+**New**
+- Behind the scenes, the game now keeps play statistics with each save (time played, days, when each rebirth and
+  species is reached, coins picked up, daily quests done, kind of device and frame rate), and sends a summary to the
+  Creator Dashboard. They help tune the game to how players really play. Nothing changes in the game itself.
+- Studio test tool for the owner: "/speed 6" makes coins, hatching and Ocean Points 6 times faster (V1 in ~2h30), with
+  a red "TEST SPEED" chip on screen; "/speed 1" stops it. "/passes off" plays without the owner's gamepasses
+  ("/passes on" gives them back). Players never get them.
+
+**Fixes**
+- The quest boost pill no longer hides the eggs' odds when hovering an egg.
+- The quest book scrolls when it holds many quests, instead of going past the bottom of the screen.
+
+---
+
 ## V0.46 — 2026-11-01
 
 **New**

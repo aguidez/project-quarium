@@ -75,8 +75,25 @@ class GamePassServiceSingleton implements Lifecycle {
 		DataService.sync(player);
 	}
 
+	/**
+	 * The owner's test without passes ("/passes off" in Studio, saved in PlayerStats.testNoPasses): all passes are taken
+	 * now and at each join; "/passes on" asks Roblox again. "/pass" still gives one for the session.
+	 */
+	public setTestNoPasses(player: Player, noPasses: boolean) {
+		const stats = DataService.getSave(player)?.stats;
+		if (!stats) return;
+		stats.testNoPasses = noPasses;
+		player.SetAttribute("TestNoPasses", noPasses ? true : undefined);
+		task.spawn(() => this.refresh(player));
+	}
+
 	/** Asks Roblox again for every pass on sale; passes not on sale (id 0) only live through a Studio test. */
 	private refresh(player: Player) {
+		if (DataService.getSave(player)?.stats.testNoPasses) {
+			player.SetAttribute("TestNoPasses", true);
+			for (const [pass] of pairs(GAME_PASSES)) this.revoke(player, pass);
+			return;
+		}
 		for (const [pass, config] of pairs(GAME_PASSES)) {
 			if (config.id <= 0) {
 				this.revoke(player, pass);

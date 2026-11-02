@@ -153,18 +153,19 @@ const QUEST_REWARDS = Object.assign({ discover: {}, rebirth: {} }, plan.QUEST_RE
 // Collector (opens with "Full House"): its quests in order, a variant found or a number of Fish Index cells
 // (species x variant), each worth Ocean Points or minutes of income. Ocean (after "Full House"): minutes of income at `releases` fish
 // released to make room (a rebirth's release doesn't count). Titles and decor are not modelled.
-const SIDE_QUESTS = overrides.SIDE_QUESTS || plan.SIDE_QUESTS || {
-	hatchery: { at: [100, 300, 600, 900, 1200], minutes: 2 },
-	collector: [
-		{ variant: "Anomaly", minutes: 2 },
-		{ cells: 10, minutes: 2 },
-		{ variant: "Ghost", minutes: 3 },
-		{ cells: 25, ocean: 2500 },
-		{ variant: "Shiny", ocean: 2500 },
-		{ cells: 50, ocean: 0 },
-	],
-	ocean: { releases: 50, minutes: 3 },
-};
+const SIDE_QUESTS = overrides.SIDE_QUESTS ||
+	plan.SIDE_QUESTS || {
+		hatchery: { at: [100, 300, 600, 900, 1200], minutes: 2 },
+		collector: [
+			{ variant: "Anomaly", minutes: 2 },
+			{ cells: 10, minutes: 2 },
+			{ variant: "Ghost", minutes: 3 },
+			{ cells: 25, ocean: 2500 },
+			{ variant: "Shiny", ocean: 2500 },
+			{ cells: 50, ocean: 0 },
+		],
+		ocean: { releases: 50, minutes: 3 },
+	};
 const P = Object.assign(
 	{
 		collect: 0.5, // share of coin value the player collects (0.5 = average player, calibrated)
@@ -180,6 +181,7 @@ const P = Object.assign(
 		coinBoost: 1, // a coin multiplier on top of everything (gamepass estimate only)
 		hatchMult: null, // hatch-time multiplier once the Hen is owned, replacing HATCH's (paid Hen quests estimate only)
 		oceanBoost: 1, // an Ocean Points multiplier (gamepass estimate only)
+		hatchScale: 1, // hatch times x this (the owner's test speed, "/speed" in Studio: 1 / speed)
 		// Daily / weekly quests (quests.ts pools, V0.46): the reference player plays hoursPerDay each day (BALANCE.md:
 		// the timeline is for 1 h a day) and claims, mid-session, the 3 dailies (dailyBoostMinutes of coin boost in
 		// all) and, mid-week, the 3 weeklies (weeklyBoostMinutes). The boost multiplies the coins by boostMult and
@@ -406,7 +408,7 @@ function simulate() {
 			if (!worth || money - price < (isTarget ? 0 : Math.min(reserve, money) * 0.5)) continue;
 			if (money >= price) {
 				money -= price;
-				(incubating[egg.name] ??= []).push(t + egg.hatch * hatchMult);
+				(incubating[egg.name] ??= []).push(t + egg.hatch * hatchMult * P.hatchScale);
 				const nextEgg = EGGS[EGGS.indexOf(egg) + 1];
 				if (nextEgg) unlocked.add(nextEgg.name);
 			}

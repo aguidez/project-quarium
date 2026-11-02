@@ -17,6 +17,7 @@ import {
 } from "shared/types/playerData";
 import { FishType, isEasterEgg } from "shared/types/fish";
 import { FishVariant, rollVariant } from "shared/types/variants";
+import { getTestSpeed } from "../playerStats";
 import { DataService } from "./DataService";
 import { FishService } from "./FishService";
 import { QuestService } from "./QuestService";
@@ -90,7 +91,9 @@ class EggServiceSingleton implements Lifecycle {
 		// new egg is too, and later changes rescale them all (syncIncubationSpeed)
 		const now = Workspace.GetServerTimeNow();
 		syncIncubationSpeed(data, now);
-		const hatchTime = EGG_TYPES[eggType].hatchTime * data.incubationMultiplier;
+		const hatchTime =
+			(EGG_TYPES[eggType].hatchTime * data.incubationMultiplier) /
+			getTestSpeed(DataService.getSave(player)?.stats);
 		DataService.startIncubation(player, eggType, now + hatchTime);
 		if (data.onboarding === "BuyEgg") DataService.setOnboardingStep(player, "Hatching");
 	}

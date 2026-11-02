@@ -6,5 +6,7 @@
 	"wgpuBackend": "vulkan",
 
 	"robloxStudioMcp": null,
-	"robloxFontsDir": null
+	"robloxFontsDir": null,
+
+	"robloxOpenCloudKey": null
 }

@@ -40,6 +40,10 @@ Options: `--players 300` (faster, noisier), a JSON of overrides (`'{"P":{"coinBo
 - **Plays 1 h a day** (since V0.46, the owner's reference) and does its daily quests every day (coins x2 for 15 min in
   all, claimed mid-session) and its weekly quests every week (x2 for 45 min, mid-week). The boost runs only while
   it plays. `P.hoursPerDay` (0 = one long session, no daily quest).
+- **The owner's test speed** ("/speed" in Studio, never for players): coins, hatching and Ocean Points x the speed;
+  simulated with `{"P":{"coinBoost":6,"oceanBoost":6,"hatchScale":0.1667,"hoursPerDay":0}}`: at x6 all eighteen
+  species in **~2h29** (2h13–2h43), x5 ~3h00. Coins x6 alone are not enough (~3h50): hatching and the Ocean milestones
+  then hold the game back.
 - **Not modelled**: AFK time (coins and hunger stop while away), companions' extra pick-ups, the like boost (x2),
   events (Abyss x1.5, K-pop beat coins). The story quests' money and points are modelled (Voyage, Hatchery, Collector, Ocean lines). They all make real
   players a bit faster than the simulator; the spread between players (p10–p90 below) is wider than these effects.

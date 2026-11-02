@@ -17,6 +17,7 @@ import { OnboardingService } from "./services/OnboardingService";
 import { OceanService } from "./services/OceanService";
 import { QuestService } from "./services/QuestService";
 import { RebirthService } from "./services/RebirthService";
+import { StatsService } from "./services/StatsService";
 
 // Register all server services here
 bootstrap([
@@ -37,5 +38,6 @@ bootstrap([
 	RebirthService,
 	GamePassService,
 	TitleService,
+	StatsService,
 	DevCommandService,
 ]);

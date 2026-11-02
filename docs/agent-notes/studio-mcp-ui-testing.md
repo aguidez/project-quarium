@@ -35,7 +35,7 @@ Playtesting UI through the Roblox Studio MCP:
 
 - **UI V2 instance paths** (2026-10-30): a kit Button3D's clickable part is its `Face` child: side buttons "…ReactUi.SideButtons.Quests.Button.Face", panel close "…ReactUi.Modal.Panel.Window.Close.Face".
 - **Preview a component with fake data** (states the test account can't reach: quest cards, rewards): in a Client execute_luau, `require(ReplicatedStorage.rbxts_include.node_modules["@rbxts"].react)` and `["react-roblox"]` (the ModuleScript itself, not `.src`), require `LocalPlayer.PlayerScripts.TS.ui.<File>`, `createRoot` on a temporary ScreenGui (DisplayOrder 50) and render it with fake props; destroy it after the capture. Display only, nothing reaches the server. Set the preview ScreenGui's `ZIndexBehavior = Sibling` like ReactUi (the default Global hides titles, icons and bars under the card faces). To preview config that doesn't exist yet (new quest kinds), mutate the plugin's own copy of the shared module (e.g. `QUESTS`, `STORY_LINES`) before requiring the panel: the game never sees it.
-- **Dev chat commands** (Studio, owner only): send them from a Client execute_luau with `TextChatService.TextChannels.RBXGeneral:SendAsync("/incubators 2")` inside `task.spawn` (a direct call can time the request out).
+- **Dev chat commands** (Studio, owner only; /datareset, /nextfrench, /incubators, /pass, /boost <min>, /speed <x>, /passes off|on): send them from a Client execute_luau with `TextChatService.TextChannels.RBXGeneral:SendAsync("/incubators 2")` inside `task.spawn` (a direct call can time the request out).
 
 Related: [[lobby-decor-constraints]]
 

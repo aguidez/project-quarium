@@ -92,5 +92,9 @@ const figCli = config.get("figcraftCli", figDir && path.join(figDir, `figcraft-c
 if (figCli && fs.existsSync(figCli)) report(true, `FigCraft CLI (${figCli})`);
 else warn("FigCraft not configured (optional, UI design only)", "set figcraftDir in workspace.local.json");
 
+// Open Cloud key (optional: the real players' statistics, npm run stats)
+if (config.get("robloxOpenCloudKey")) report(true, "Open Cloud key set (npm run stats)");
+else warn("Open Cloud key not set (optional, players' statistics only)", "set robloxOpenCloudKey in workspace.local.json");
+
 console.log(failures === 0 ? "\nReady." : `\n${failures} problem(s) to fix, see SETUP.md.`);
 process.exit(failures === 0 ? 0 : 1);
