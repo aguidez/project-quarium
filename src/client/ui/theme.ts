@@ -1,6 +1,7 @@
 // Shared UI tokens, taken from the FigCraft design (design/ui/shopbar.figcraft).
 
 import { EggType } from "shared/types/eggs";
+import type { AquariumTheme } from "shared/types/rebirths";
 import { FishRarity, FishType, FISH_TYPES } from "shared/types/fish";
 import { FishVariant } from "shared/types/variants";
 
@@ -73,6 +74,7 @@ export const V2_IMAGES = {
 	iconOcean: "rbxassetid://86767682222210",
 	iconRebirth: "rbxassetid://123446163856086",
 	iconShop: "rbxassetid://128028502564290", // design/ui/passes/Pass_Shop.png (tools/pass-icons.js)
+	iconAquarium: "rbxassetid://102450232903984", // design/ui/passes/Pass_Aquarium.png (tools/pass-icons.js)
 	ribbonTailLeft: "rbxassetid://132217540092284", // white tail + grey fold, 64x56 design px
 	ribbonTailRight: "rbxassetid://119721448521037",
 	sparkle: "rbxassetid://84841007993115", // white 4-point star
@@ -226,6 +228,19 @@ export const FISH_ICONS: Record<FishType, Record<FishVariant, string>> = {
 export const FISH_ICON_ASPECT = 256 / 160;
 
 /** Face colours of a found variant's slot (FigCraft: ItemSlot_<Variant>). */
+/** A colour per aquarium theme (AquariumPanel's theme cards): its water / mood, light to dark. */
+export const THEME_PALETTES: Record<AquariumTheme, Palette> = {
+	Basic: palette("#9BD7FF", "#3EA0F0", "#2A78C0", "#14406E"),
+	Lagoon: palette("#8AF7F9", "#00C2CB", "#00939C", "#005A61"),
+	NeonCoral: palette("#FFB3D1", "#FF5C9A", "#D93A78", "#7A1240"),
+	PirateWreck: palette("#E8C08A", "#B07A3C", "#8A5A2B", "#4A2E12"),
+	Atlantis: palette("#B8F5E8", "#3FBFA8", "#2A9480", "#0F5246"),
+	MarianaTrench: palette("#5A7FB8", "#25467A", "#162C52", "#060F24"),
+	VolcanicTemple: palette("#FFA27A", "#E0502A", "#B0361A", "#5E1608"),
+	CrystalCaverns: palette("#E2C4FF", "#A87CF0", "#7E55C8", "#3E2470"),
+	CosmicSanctuary: palette("#9A7CFF", "#5A3CC8", "#3A2490", "#140A40"),
+};
+
 export const VARIANT_PALETTES: Record<FishVariant, Palette> = {
 	Normal: PALETTES.blue,
 	Anomaly: PALETTES.purple,

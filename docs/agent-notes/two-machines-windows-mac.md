@@ -21,4 +21,6 @@ The owner develops on **both** a Windows PC (where the project and SETUP.md were
   build, reported as "the shop no longer opens"). Symptoms in the output: `Template "...<recent species/theme>"
   ignored: needs a PrimaryPart and a valid ...`, and recent services / controllers missing from the "started"
   lines. Before chasing a "regression" after a machine switch, check `out/` dates and rebuild.
+- **Missing dev packages after switching** (2026-11-02): `Cannot find module '@resvg/resvg-js'` on the PC: added on
+  the Mac, never installed here. `npm install` after a pull that touched package.json.
 - On the Mac, Node comes from Homebrew (`/opt/homebrew/bin`, may need adding to the PATH in shell commands).

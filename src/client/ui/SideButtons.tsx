@@ -228,7 +228,7 @@ function SideButton(props: {
 	);
 }
 
-/** Left-edge menu buttons (FigCraft redesign-v2: SideButtons): quests, companions, fish index, Ocean, rebirth (the shop is the fisherman's hut on the beach). */
+/** Left-edge menu buttons (FigCraft redesign-v2: SideButtons): quests, companions, fish index, Ocean, rebirth (the shop is the fisherman's hut on the beach; the aquarium's customization is in the tank view). */
 export function SideButtons(props: SideButtonsProps) {
 	const viewport = Workspace.CurrentCamera?.ViewportSize;
 	const scale = viewport ? math.clamp(viewport.Y / REFERENCE_HEIGHT, 0.7, 1.3) : 1;

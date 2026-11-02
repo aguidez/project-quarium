@@ -116,6 +116,27 @@ const ICONS = {
 		<path d="M357 195 L357 335 M287 265 L427 265" stroke="#FFFFFF" stroke-width="${STROKE * 2.8}" stroke-linecap="round"/>
 		${sparkle(470, 110, 34)}`,
 
+	// Aquarium side button (customization, V0.48): a small tank with water, sand, seaweed, a fish and a sparkle
+	Aquarium: () => `
+		<defs>${grad("w", PAL.lagoon)}${grad("f", ["#FFC27A", "#FF8A3D"])}${grad("sd", PAL.gold)}</defs>
+		<rect x="58" y="128" width="396" height="320" rx="46" fill="${PAL.lagoon[3]}" ${line} transform="translate(0 16)"/>
+		<rect x="58" y="128" width="396" height="320" rx="46" fill="url(#w)" ${line}/>
+		<path d="M64 372 C140 346 200 392 270 368 C340 344 390 380 448 360 L448 402 C448 428 428 448 402 448 L110 448 C84 448 64 428 64 402 Z" fill="url(#sd)" stroke="${OUTLINE}" stroke-width="${STROKE * 0.8}" stroke-linejoin="round"/>
+		<path d="M118 372 C100 320 132 286 112 236" fill="none" stroke="${OUTLINE}" stroke-width="${STROKE * 2.6}" stroke-linecap="round"/>
+		<path d="M118 372 C100 320 132 286 112 236" fill="none" stroke="${PAL.green[1]}" stroke-width="${STROKE * 1.2}" stroke-linecap="round"/>
+		<path d="M160 376 C176 336 150 312 168 280" fill="none" stroke="${OUTLINE}" stroke-width="${STROKE * 2.4}" stroke-linecap="round"/>
+		<path d="M160 376 C176 336 150 312 168 280" fill="none" stroke="${PAL.green[0]}" stroke-width="${STROKE * 1.1}" stroke-linecap="round"/>
+		<path d="M392 262 L452 222 L446 302 Z" fill="url(#f)" ${line}/>
+		<ellipse cx="318" cy="262" rx="92" ry="62" fill="url(#f)" ${line}/>
+		<path d="M300 210 C318 186 350 186 366 206" fill="#FF8A3D" ${line}/>
+		<circle cx="270" cy="250" r="20" fill="#FFFFFF" stroke="${OUTLINE}" stroke-width="${STROKE * 0.7}"/>
+		<circle cx="265" cy="252" r="9" fill="${OUTLINE}"/>
+		<path d="M300 236 C318 226 340 226 356 236" fill="none" stroke="#FFFFFF" stroke-opacity="0.75" stroke-width="${STROKE * 0.9}" stroke-linecap="round"/>
+		<circle cx="404" cy="176" r="16" fill="#FFFFFF" fill-opacity="0.9" stroke="${OUTLINE}" stroke-width="${STROKE * 0.6}"/>
+		<circle cx="380" cy="146" r="10" fill="#FFFFFF" fill-opacity="0.9" stroke="${OUTLINE}" stroke-width="${STROKE * 0.5}"/>
+		<path d="M96 168 L96 300" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="${STROKE * 1.4}" stroke-linecap="round"/>
+		${sparkle(452, 96, 44)}`,
+
 	// Shop side button: a pink shopping bag with a gold star
 	Shop: () => `
 		<defs>${grad("b", PAL.pink)}${grad("st", PAL.gold)}</defs>

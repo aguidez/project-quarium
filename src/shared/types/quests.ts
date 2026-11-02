@@ -824,6 +824,16 @@ export const WEEKLY_QUEST_POOL: readonly string[] = [
 	"WeeklyRelease",
 	"WeeklyLikes",
 ];
+/**
+ * Rebirths a player needs before their daily / weekly boards open (decided by the owner, V0.48): the first hours stay
+ * on the story quests; dailies come with the second aquarium, weeklies with the third.
+ */
+export const BOARD_UNLOCK_REBIRTHS: Record<QuestBoardCategory, number> = { Daily: 2, Weekly: 3 };
+
+export function isBoardUnlocked(category: QuestBoardCategory, rebirths: number): boolean {
+	return rebirths >= BOARD_UNLOCK_REBIRTHS[category];
+}
+
 /** Quests per board, fewer if the pool is smaller. */
 export const DAILY_QUEST_COUNT = 3;
 export const WEEKLY_QUEST_COUNT = 3;

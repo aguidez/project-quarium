@@ -10,6 +10,27 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.48 — 2026-11-02
+
+**New**
+- **Customize your aquarium**: a **Customize** button next to "My aquarium" / "Back to lobby" (once you've done your
+  first rebirth or earned a first cosmetic) opens a menu where you choose:
+  - the **theme** of your tank among every aquarium you've reached (keep the Atlantis Ruins after reaching the
+    Mariana Trench...). "Automatic", the default, always wears your newest one;
+  - which **decor** (whale statue, golden trophy, golden incubator) and **finishes** (Pearl Rims) show in your tank;
+  - the **title** above your head: your best one, any title you've earned, or none.
+
+**Changes**
+- The **daily quests** now open with your second aquarium (rebirth 2) and the **weekly quests** with the third
+  (rebirth 3): your first hours are for the story quests. The quest book tells when they open.
+- The "My aquarium" / "Back to lobby" button grows a little under the mouse, like the other buttons.
+
+**Balance**
+- Without the early quest boosts, the average player of 1 h a day sees all eighteen species at ~12h30 of play instead
+  of ~12h15 (still about 13 days). Details in BALANCE.md.
+
+---
+
 ## V0.47 — 2026-11-01
 
 **New**

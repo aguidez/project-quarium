@@ -111,7 +111,8 @@ npm run stats         # real players' statistics vs the simulator (needs robloxO
 
 ## Switching machines (every time)
 
-After `git pull` on the other machine, **rebuild before opening a playtest**: `npx rbxtsc` (or keep `npm run watch`
-running). `out/` is git-ignored, so without a build Rojo keeps syncing that machine's last build into Studio: the
+After `git pull` on the other machine, run `npm install` if `package.json` changed (a dev tool added on the other
+machine, e.g. `@resvg/resvg-js`, is missing until then), and **rebuild before opening a playtest**: `npx rbxtsc` (or
+keep `npm run watch` running). `out/` is git-ignored, so without a build Rojo keeps syncing that machine's last build into Studio: the
 game then runs old code (e.g. V0.44 content pulled, a V0.40 build played: no shop at the huts, the new species'
 templates "ignored").

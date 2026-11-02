@@ -2,7 +2,7 @@
 
 > Living map of the project. **Read it before exploring the code, and update it in the same change
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
-> Last updated: 2026-11-01 (V0.47: the owner's "/speed" test speed (x6: V1 in ~2h30), play statistics, SaveData.stats / playerStats.ts, StatsService (AnalyticsService funnels and events), StatsReportController, tools/player-stats.js (Open Cloud, npm run stats); V0.46, ROADMAP M7: daily / weekly coin boost (PlayerData.coinBoostSeconds, QuestBoostPill, "/boost"), rebirths 3–8 and their eggs x1.45, side lines Hatchery / Collector / Ocean, daily / weekly pools, quest stats CoinsCollected / FishFed / LikesGiven / VariantFound / TotalHatched, Golden Incubator decor, LikeService.onLikeGiven, simulator side lines + hoursPerDay, load test with 18 species in §4; V0.45: swim animation stopgap, rigs planned in triangles + sway; ROADMAP_V1.1.md: the post-V1 animation revamp plan, EditableMesh budget measured in §4;
+> Last updated: 2026-11-02 (V0.48: daily boards from rebirth 2, weekly from rebirth 3; Customize button next to My aquarium / Back to lobby; aquarium customization: theme / decor / finishes / title choices, customization.ts, CustomizationService, AquariumPanel, Aquarium side button, THEME_PALETTES; V0.47: the owner's "/speed" test speed (x6: V1 in ~2h30), play statistics, SaveData.stats / playerStats.ts, StatsService (AnalyticsService funnels and events), StatsReportController, tools/player-stats.js (Open Cloud, npm run stats); V0.46, ROADMAP M7: daily / weekly coin boost (PlayerData.coinBoostSeconds, QuestBoostPill, "/boost"), rebirths 3–8 and their eggs x1.45, side lines Hatchery / Collector / Ocean, daily / weekly pools, quest stats CoinsCollected / FishFed / LikesGiven / VariantFound / TotalHatched, Golden Incubator decor, LikeService.onLikeGiven, simulator side lines + hoursPerDay, load test with 18 species in §4; V0.45: swim animation stopgap, rigs planned in triangles + sway; ROADMAP_V1.1.md: the post-V1 animation revamp plan, EditableMesh budget measured in §4;
 > V0.44, ROADMAP M6: rebirths 7–8 → CrystalCaverns / CosmicSanctuary themes, WolfDogfish
 > ("Husky Dogfish") / BunnyShark / MiniLeviathan (Mythic) with Moon / Star / Planet coins, Crystal and Cosmic eggs, Ocean
 > milestones 450,000 (tank 25) and 1,000,000 (OceanGuardian: title + whale statue), Voyage 12–16 (gauge SpeciesFound,
@@ -158,7 +158,7 @@ ProjetQuarium/
 ├─ tools/fish-variant-recolor.js  Hue rotation of a species' texture + icon into its Anomaly / Shiny looks (pipeline in its header);
 │                                optional tint [hue, saturation] for grey fish (Silver Angelfish); species without a flat
 │                                icon get the texture only (their icons are the stickers)
-├─ tools/pass-icons.js       Gamepass + Shop icons drawn as SVG in the V2 style, rendered to PNG with @resvg/resvg-js
+├─ tools/pass-icons.js       Gamepass, Shop and Aquarium (side button) icons drawn as SVG in the V2 style, rendered to PNG with @resvg/resvg-js
 │                            (no FigCraft needed) → design/ui/passes, plus a review sheet
 ├─ tools/fish-sticker-icons.js    Sticker icons from black / white Studio captures of a fish sheet (difference matting,
 │                                outline, rim, shadow, shiny sparkles; pipeline in its header)
@@ -200,6 +200,10 @@ ProjetQuarium/
    │     ├─ companionStats.ts getCompanionStats(companion, data): what a companion does now with its own bonuses
    │     │                   (Ocean upgrades, its perks), the line under its ability on the companion card; player-wide
    │     │                   perks of its quest line (lasting / bouncy coins, Hearty meals) work without it: not shown
+   │     ├─ customization.ts The player's aquarium choices (V0.48): ThemeChoice (a reached theme or "Auto"), TitleChoice
+   │     │                   (a title earned, "Auto" = the best, "None"); getUnlockedThemes / getThemeOrder, getDisplayedTheme
+   │     │                   (the chosen one if reached, else the newest), isHideable (Decor / Finish), isCosmeticShown (earned and
+   │     │                   not in hiddenCosmetics), getDisplayedTitle
    │     ├─ cosmetics.ts     CosmeticId / COSMETICS (kind Title / Decor / Finish): the V1 titles, decor and Pearl rims;
    │     │                   PlayerData.cosmetics. Pearl rims shown since V0.42 (AquariumService); titles (TITLE_ORDER, getBestTitle:
    │     │                   TitleService) and decor (DECOR_SLOTS: tank-local position per decor id, isDecor: AquariumService) since V0.44
@@ -221,6 +225,7 @@ ProjetQuarium/
    │     │                   food the player dropped), LikesGiven, OceanPoints, EggsOpened,
    │     │                   VariantHatched {variant}, FishReleased, CompanionStat {companion} (Snail / Swordfish coins, Pelican / Jellyfish feeds,
    │     │                   eggs opened with the Water Hen equipped),
+   │     │                   BOARD_UNLOCK_REBIRTHS / isBoardUnlocked (V0.48: dailies from rebirth 2, weeklies from 3);
    │     │                   gauges (GAUGE_STATS) FishInTank, MoneyHeld, SpeciesHatched {fishType}, Rebirths, IndexCells, SpeciesFound,
    │     │                   VariantFound {variant} (species found in it), TotalHatched (every fish ever hatched)
    │     │                   (species hatched at least once, easter eggs excluded: Master Aquarist);
@@ -335,7 +340,8 @@ ProjetQuarium/
    │     │                   reportGauges reads every gauge from PlayerData), claims, rewards (money / companion / feature /
    │     │                   perk / CoinBoost (adds to PlayerData.coinBoostSeconds) / IncomeMinutes: minutes × FishService.getTankIncomePerMinute (at least one fish of the best
    │     │                   species hatched) × rebirth multiplier / Ocean Points / title / decor), daily / weekly boards;
-   │     │                   quests of a line whose pass isn't owned are skipped; an empty board of the current period is
+   │     │                   quests of a line whose pass isn't owned are skipped; a board not unlocked yet (isBoardUnlocked)
+   │     │                   stays empty (the Daily / Weekly tab says at which rebirth it opens); an empty board of the current period is
    │     │                   drawn again (boards drawn before the pools were filled, V0.46)
    │     ├─ OceanService     ReleaseFish (+ Ocean Points), FinishTutorial (any feature's tutorial), credits an easter egg
    │     │                   fish that leaves on its own (points, popup, its leaveMessage)
@@ -352,7 +358,10 @@ ProjetQuarium/
    │     │                   DailyQuestClaimed / WeeklyQuestClaimed (quest id); legacy saves stay out of the funnels, and
    │     │                   the owner's test profiles (testSpeedUsed / testNoPasses) send nothing (the dashboard can't
    │     │                   delete an event; Studio playtests never send any anyway)
-   │     ├─ TitleService     Polls every 1 s: a BillboardGui "PlayerTitle" on each character's Head with their best title
+   │     ├─ CustomizationService  "SetAquariumTheme" (a reached theme or "Auto"), "SetCosmeticShown" ({id, shown}: an earned
+   │     │                   decor / finish), "SetTitle" (an earned title, "Auto" or "None"): checks, then PlayerData's choices
+   │     │                   (V0.48); AquariumService (getDisplayedTheme, isCosmeticShown) and TitleService apply them
+   │     ├─ TitleService     Polls every 1 s: a BillboardGui "PlayerTitle" on each character's Head with their title (getDisplayedTitle: the one picked, else the best)
    │     │                   (getBestTitle; gold LuckiestGuy text, 4.2 × 0.65 studs, MaxDistance 120), removed without one
    │     ├─ GamePassService  The only writer of PlayerData.passes: at join (onLoaded) asks Roblox for each pass on sale
    │     │                   (UserOwnsGamePassAsync, 3 tries; no answer keeps the saved state; passes without an id are
@@ -445,7 +454,7 @@ ProjetQuarium/
          ├─ RewardPopup      Reward celebration (money / companion / feature)
          ├─ EventBanner      Running event banner (style per event kind: beat flashes / slow glow; FigCraft EventBanner,
          │                   EventBannerAbyss) + one Studio test button per event (TEST_EVENT_ORDER)
-         ├─ SideButtons      Left menu (3D squares, icon + label inside the face): Quests, Companions (once one is owned), Fish Index, Ocean (once unlocked), Rebirth (no Shop since V0.41: the shop is the fisherman's hut)
+         ├─ SideButtons      Left menu (3D squares, icon + label inside the face): Quests, Companions (once one is owned), Fish Index, Ocean (once unlocked), Rebirth (no Shop since V0.41: the shop is the fisherman's hut; the aquarium's customization is the Customize button next to "My aquarium" / "Back to lobby")
          │                   (gold halo pulsing + "!" while affordable, "REBIRTH READY!" bubble driven by App: when it
          │                   becomes affordable, then every 4 min while it stays so, 8 s each) + coach bubbles
          │                   (Quests: story quest hint after the onboarding; Ocean: just unlocked) and the "AQUARIUM FULL"
@@ -473,6 +482,13 @@ ProjetQuarium/
          │                   Opened by walking up to the fisherman's hut (App `shopNearby`, ShopKeeperController)
          ├─ LikeBoard        Face of a like board (likes, "a like = x2" hint or boost countdown), mounted by LikeBoardController
          ├─ RebirthPanel     Rebirth menu: multiplier hero, what is lost / earned (Ocean Points preview), progress, 2-click confirm
+         ├─ Customize button  (App, V0.48) Pink Button3D with V2_IMAGES.iconAquarium right of FocusController's "Back to lobby" /
+         │                   "My aquarium" (same baseline), in the lobby and the tank view, once a first rebirth or cosmetic is
+         │                   earned: opens AquariumPanel
+         ├─ AquariumPanel    Aquarium customization (V0.48, V2 kit): THEME cards (Automatic, then every theme in rebirth order:
+         │                   THEME_PALETTES colour, the ones not reached locked with their rebirth; white ring = chosen),
+         │                   DECOR & FINISHES cards with a SHOWN / HIDDEN switch, TITLE buttons (best / each earned / none, once
+         │                   a title is earned); grows up to 470 px then scrolls
          ├─ LikeBoostPill    The owner's own boost ("Liked! Coins x2 4:32"), under the top HUD
          ├─ QuestBoostPill   The quest coin boost left ("QUEST BOOST x2 4:32", "PAUSED" when the tank doesn't produce), from
          │                   the CoinBoostSeconds / CoinBoostRunning attributes, under the like pill (V0.46)
@@ -639,6 +655,7 @@ ProjetQuarium/
   | `oceanRewardsClaimed` | Ocean milestones claimed (kept through rebirths) |
   | `features`, `tutorialsDone` | Unlocked features, and those whose tutorial was seen |
   | `likesReceived`, `lastLikeGivenAt` | Likes received, last like given (cooldown, server time). The boost itself is not saved |
+  | `themeChoice`, `hiddenCosmetics`, `titleChoice` | The aquarium choices (V0.48, shared/types/customization): theme worn ("Auto" = the newest reached), earned decor / finishes hidden (everything earned shows by default), title shown ("Auto" = the best, "None") |
   | `coinBoostSeconds` | Quest coin boost left (daily / weekly rewards, V0.46): adds up, runs down only while the tank produces (FishService.runCoinBoost), kept through rebirths |
   | `rebirths` | Rebirths done: coin multiplier and aquarium theme |
   | `perks` | Permanent quest bonuses (shared/types/perks), kept through rebirths |
@@ -654,6 +671,7 @@ ProjetQuarium/
 | | `RequestSync` | DataService |
 | | `ClaimQuest` (quest id) | QuestService |
 | | `ReportClientStats` ({platform, fps, memoryMb, swimBudget}, once a minute) | StatsService (statistics only) |
+| | `SetAquariumTheme` (theme or "Auto"), `SetCosmeticShown` ({id, shown}), `SetTitle` (title, "Auto" or "None") | CustomizationService |
 | | `EquipCompanion` / `UnequipCompanion` (CompanionType) | CompanionService |
 | | `ReleaseFish` ({fishType, variant}), `FinishTutorial` (Feature), `ClaimOceanReward` (milestone id) | OceanService |
 | | `StartTestEvent` (GameEventType, **Studio only**) | EventService |

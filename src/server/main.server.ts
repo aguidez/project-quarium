@@ -3,6 +3,7 @@ import { AbyssService } from "./services/AbyssService";
 import { AquariumService } from "./services/AquariumService";
 import { CoinService } from "./services/CoinService";
 import { CompanionService } from "./services/CompanionService";
+import { CustomizationService } from "./services/CustomizationService";
 import { DataService } from "./services/DataService";
 import { DevCommandService } from "./services/DevCommandService";
 import { EggService } from "./services/EggService";
@@ -38,6 +39,7 @@ bootstrap([
 	RebirthService,
 	GamePassService,
 	TitleService,
+	CustomizationService,
 	StatsService,
 	DevCommandService,
 ]);

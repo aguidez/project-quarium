@@ -1,5 +1,6 @@
 import { CompanionType, DEFAULT_COMPANION_SLOTS, WATER_HEN_HATCH_MULTIPLIER } from "./companions";
 import { CosmeticId } from "./cosmetics";
+import type { ThemeChoice, TitleChoice } from "./customization";
 import { EGG_TYPES, EggType } from "./eggs";
 import { Feature } from "./features";
 import { DEFAULT_FISH_CAPACITY, FishType } from "./fish";
@@ -78,6 +79,10 @@ export interface PlayerData {
 	rebirths: number;
 	/** Titles, decor and finishes earned (shared/types/cosmetics), kept forever. */
 	cosmetics: CosmeticId[];
+	/** The player's aquarium choices (shared/types/customization): theme worn, decor / finishes hidden, title shown. */
+	themeChoice: ThemeChoice;
+	hiddenCosmetics: CosmeticId[];
+	titleChoice: TitleChoice;
 	/**
 	 * Gamepasses owned (shared/types/gamepasses): written by the server from Roblox at join (GamePassService,
 	 * ROADMAP M3), never from the client. Empty until then.
@@ -131,6 +136,9 @@ export const DEFAULT_PLAYER_DATA: PlayerData = {
 	coinBoostSeconds: 0,
 	rebirths: 0,
 	cosmetics: [],
+	themeChoice: "Auto",
+	hiddenCosmetics: [],
+	titleChoice: "Auto",
 	passes: [],
 };
 

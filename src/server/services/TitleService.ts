@@ -1,6 +1,7 @@
 import { Players } from "@rbxts/services";
 import { Lifecycle } from "shared/framework";
-import { COSMETICS, CosmeticId, getBestTitle } from "shared/types/cosmetics";
+import { COSMETICS, CosmeticId } from "shared/types/cosmetics";
+import { getDisplayedTitle } from "shared/types/customization";
 import { DataService } from "./DataService";
 
 /** Titles are checked this often (earned from a quest or an Ocean milestone, or a new character). */
@@ -33,7 +34,7 @@ class TitleServiceSingleton implements Lifecycle {
 		const head = player.Character?.FindFirstChild("Head");
 		if (!head?.IsA("BasePart")) return;
 		const data = DataService.getData(player);
-		const title = data ? getBestTitle(data.cosmetics) : undefined;
+		const title = data ? getDisplayedTitle(data) : undefined; // the player's pick, else the best one
 		const existing = head.FindFirstChild(BILLBOARD_NAME);
 		const key = title ?? "";
 		// A new character has no billboard yet: rebuild it even if the title didn't change

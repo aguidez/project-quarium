@@ -18,6 +18,9 @@ import { CompanionPanel } from "./CompanionPanel";
 import { EggReveal } from "./EggReveal";
 import { EventBanner, TestEventButton } from "./EventBanner";
 import { FishIndexPanel } from "./FishIndexPanel";
+import { AquariumPanel } from "./AquariumPanel";
+import { CosmeticId } from "shared/types/cosmetics";
+import { ThemeChoice, TitleChoice } from "shared/types/customization";
 import { LikeBoostPill, PILL_HEIGHT } from "./LikeBoostPill";
 import { QuestBoostPill } from "./QuestBoostPill";
 import { OceanPanel } from "./OceanPanel";
@@ -29,14 +32,15 @@ import { RewardPopup } from "./RewardPopup";
 import { ShopPanel } from "./ShopPanel";
 import { BAR_HEIGHT, BAR_WIDTH, ShopBar } from "./ShopBar";
 import { SideButtons } from "./SideButtons";
-import { Chip, TextStroke } from "./kit";
-import { COLORS, FONT_BOLD, PALETTES } from "./theme";
+import { Button3D, Chip, TextStroke } from "./kit";
+import { COLORS, FONT_BOLD, FONT_TITLE, PALETTES, V2_IMAGES } from "./theme";
 
 const MIN_SCALE = 0.4;
 const SIDE_MARGIN = 16; // gap kept between the bar and Roblox's topbar buttons
 const HINT_GAP = 6; // between the bar and the hint line below it
 const HINT_HEIGHT = 24;
 const EVENT_BANNER_GAP = 10; // under the top HUD
+const CUSTOMIZE_SIZE = new Vector2(200, 50);
 // "Aquarium full" reminder (opening a ready egg with no room): shown this long, at most once per cooldown,
 // and never again in the session once the player has released a fish (they know the way)
 const FULL_REMINDER_TIME = 8;
@@ -64,6 +68,10 @@ export interface AppProps {
 	likeBoostEndsAt: number;
 	/** The player has quest coin boost left (daily / weekly rewards): its pill shows, under the like pill. */
 	questBoosted: boolean;
+	/** Aquarium customization intents (CustomizationService checks them). */
+	onSetTheme: (theme: ThemeChoice) => void;
+	onSetCosmeticShown: (id: CosmeticId, shown: boolean) => void;
+	onSetTitle: (title: TitleChoice) => void;
 	/** The owner's test modes ("/speed", "/passes off" in Studio), shown so they are never forgotten; undefined for everyone else. */
 	testMode?: string;
 	/** Starts a test event; only given in Studio (the server ignores it elsewhere). */
@@ -80,7 +88,7 @@ export interface AppProps {
 	shopNearby: boolean;
 }
 
-type MenuPanel = "Quests" | "Companions" | "FishIndex" | "Ocean" | "Rebirth" | "Shop";
+type MenuPanel = "Quests" | "Companions" | "FishIndex" | "Ocean" | "Rebirth" | "Shop" | "Aquarium";
 
 interface BarPlacement {
 	centerX: number;
@@ -363,11 +371,63 @@ export function App(props: AppProps) {
 					fullReminder={openPanel === undefined ? fullReminder : undefined}
 				/>
 			)}
+			{menusVisible && (data.rebirths > 0 || data.cosmetics.size() > 0) && (
+				// Next to FocusController's "Back to lobby" / "My aquarium" (220 x 50 face at 16 px from the bottom-left corner,
+				// its 6 px bevel below): the same baseline, in the lobby and in the tank view
+				<Button3D
+					key="Customize"
+					palette={PALETTES.pink}
+					size={UDim2.fromOffset(CUSTOMIZE_SIZE.X, CUSTOMIZE_SIZE.Y)}
+					anchorPoint={new Vector2(0, 1)}
+					position={new UDim2(0, 16 + 220 + 12, 1, -16)}
+					depth={6}
+					radius={14}
+					onClick={() => setOpenPanel(openPanel === "Aquarium" ? undefined : "Aquarium")}
+				>
+					<imagelabel
+						key="Icon"
+						AnchorPoint={new Vector2(0, 0.5)}
+						Position={new UDim2(0, 8, 0.5, 0)}
+						Size={UDim2.fromOffset(40, 40)}
+						BackgroundTransparency={1}
+						Image={V2_IMAGES.iconAquarium}
+						ZIndex={3}
+					/>
+					<textlabel
+						key="Label"
+						Position={UDim2.fromOffset(52, 1)}
+						Size={new UDim2(1, -60, 1, 0)}
+						BackgroundTransparency={1}
+						Font={FONT_TITLE}
+						Text="CUSTOMIZE"
+						TextSize={22}
+						TextColor3={new Color3(1, 1, 1)}
+						ZIndex={4}
+					>
+						<TextStroke color={PALETTES.pink.shadow} thickness={2.5} />
+					</textlabel>
+				</Button3D>
+			)}
+			{menusVisible && openPanel === "Aquarium" && (
+				<AquariumPanel
+					key="AquariumPanel"
+					rebirths={data.rebirths}
+					cosmetics={data.cosmetics}
+					themeChoice={data.themeChoice}
+					hiddenCosmetics={data.hiddenCosmetics}
+					titleChoice={data.titleChoice}
+					onSetTheme={props.onSetTheme}
+					onSetShown={props.onSetCosmeticShown}
+					onSetTitle={props.onSetTitle}
+					onClose={() => setOpenPanel(undefined)}
+				/>
+			)}
 			{menusVisible && openPanel === "Quests" && (
 				<QuestPanel
 					key="QuestPanel"
 					quests={data.quests}
 					passes={data.passes}
+					rebirths={data.rebirths}
 					onClaim={props.onClaimQuest}
 					onBuyPass={props.onBuyPass}
 					onClose={() => setOpenPanel(undefined)}

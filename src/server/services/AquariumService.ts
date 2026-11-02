@@ -4,8 +4,9 @@ import { t } from "@rbxts/t";
 import { Lifecycle } from "shared/framework";
 import { TAGS } from "shared/tags";
 import { FRONT_GLASS_Z, getAquariumFrame, isInFocusZone } from "shared/types/aquarium";
-import { AQUARIUM_THEMES, AquariumTheme, getAquariumTheme } from "shared/types/rebirths";
+import { AQUARIUM_THEMES, AquariumTheme } from "shared/types/rebirths";
 import { CosmeticId, DECOR_SLOTS, isDecor } from "shared/types/cosmetics";
+import { getDisplayedTheme, isCosmeticShown } from "shared/types/customization";
 import { loadTemplates } from "../templates";
 import { DataService } from "./DataService";
 
@@ -123,14 +124,17 @@ class AquariumServiceSingleton implements Lifecycle {
 	public onStart() {
 		print(`[Server] AquariumService started with ${this.aquariums.size()} aquariums.`);
 
-		// Each tank wears its owner's theme (rebirth level), free tanks the basic one. Owners come
-		// and go, their data loads later and rebirths change it: kept in line by polling
+		// Each tank wears its owner's theme (their choice among the reached ones, else the newest: getDisplayedTheme),
+		// free tanks the basic one, with the decor and finishes they show. Owners come and go, their data loads later,
+		// rebirths and choices change it: kept in line by polling
 		while (true) {
 			for (const aquarium of this.aquariums) {
 				const data = aquarium.owner ? DataService.getData(aquarium.owner) : undefined;
-				const pearlRims = data?.cosmetics.includes("FinishPearlRims") ?? false;
-				const decor = (data?.cosmetics ?? []).filter((cosmetic) => isDecor(cosmetic));
-				this.applyTheme(aquarium, getAquariumTheme(data?.rebirths ?? 0), pearlRims, decor);
+				const pearlRims = data ? isCosmeticShown(data, "FinishPearlRims") : false;
+				const decor = data
+					? data.cosmetics.filter((cosmetic) => isDecor(cosmetic) && isCosmeticShown(data, cosmetic))
+					: [];
+				this.applyTheme(aquarium, data ? getDisplayedTheme(data) : "Basic", pearlRims, decor);
 			}
 			task.wait(THEME_CHECK_INTERVAL);
 		}

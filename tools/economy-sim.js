@@ -189,6 +189,8 @@ const P = Object.assign(
 		hoursPerDay: 1,
 		dailyBoostMinutes: 15,
 		weeklyBoostMinutes: 45,
+		dailyFromRebirth: 2, // the boards open at rebirth 2 (dailies) and 3 (weeklies): quests.ts BOARD_UNLOCK_REBIRTHS
+		weeklyFromRebirth: 3,
 		boostMult: 2,
 		checkpoints: [15, 30, 60, 90, 120, 150, 180, 240, 300, 360],
 		horizon: 15 * 3600, // V1 ends at ~12h15 (all 18 species); room for the slowest players
@@ -322,8 +324,9 @@ function simulate() {
 		}
 		// daily / weekly quests, mid-session (see P.hoursPerDay)
 		if (dayLength > 0 && t % dayLength === Math.floor(dayLength / 2)) {
-			boostLeft += P.dailyBoostMinutes * 60;
-			if (Math.floor(t / dayLength) % 7 === 3) boostLeft += P.weeklyBoostMinutes * 60;
+			if (rebirthAt.length >= P.dailyFromRebirth) boostLeft += P.dailyBoostMinutes * 60;
+			if (rebirthAt.length >= P.weeklyFromRebirth && Math.floor(t / dayLength) % 7 === 3)
+				boostLeft += P.weeklyBoostMinutes * 60;
 		}
 		if (CHECKPOINTS.includes(t)) {
 			income[t] = earned;

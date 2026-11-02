@@ -33,6 +33,7 @@ const FRAME_GAP = 8; // pixels kept between the tank and the UI / screen edges
 const BACK_BUTTON_MARGIN = 16;
 const BACK_BUTTON_SIZE = new Vector2(220, 50);
 const BACK_BUTTON_DEPTH = 6;
+const BACK_BUTTON_HOVER_SCALE = 1.04; // kit.tsx HOVER_SCALE
 const OCCLUDER_HALF_WIDTH = AQUARIUM_INNER_SIZE.X / 2 + 15; // characters in this corridor get hidden
 const EXIT_CAMERA_OFFSET = new Vector3(0, 5, 12); // behind the character, relative to the tank front
 const EXIT_ACTION = "ExitAquariumFocus";
@@ -251,7 +252,14 @@ class FocusControllerSingleton implements Lifecycle {
 		button.MouseButton1Down.Connect(() => (button.Position = rest.add(UDim2.fromOffset(0, BACK_BUTTON_DEPTH - 2))));
 		const release = () => (button.Position = rest);
 		button.MouseButton1Up.Connect(release);
-		button.MouseLeave.Connect(release);
+		// Hovered: grows a little, like the kit's Button3D (the Customize button next to it)
+		const scale = new Instance("UIScale");
+		scale.Parent = button;
+		button.MouseEnter.Connect(() => (scale.Scale = BACK_BUTTON_HOVER_SCALE));
+		button.MouseLeave.Connect(() => {
+			release();
+			scale.Scale = 1;
+		});
 		button.Activated.Connect(onActivated);
 		return button;
 	}

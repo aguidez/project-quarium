@@ -159,6 +159,10 @@ class UiControllerSingleton implements Lifecycle {
 				event: MusicEventController.getEvent(),
 				likeBoostEndsAt: LikeBoardController.getOwnBoostEndsAt(),
 				questBoosted: this.questBoosted,
+				// Intents only: the server checks the theme is reached and the cosmetic earned
+				onSetTheme: (theme) => this.actionRemote.FireServer("SetAquariumTheme", theme),
+				onSetCosmeticShown: (id, shown) => this.actionRemote.FireServer("SetCosmeticShown", { id, shown }),
+				onSetTitle: (title) => this.actionRemote.FireServer("SetTitle", title),
 				testMode: this.getTestMode(),
 				shopNearby: ShopKeeperController.isNearby(),
 				subscribeBeat: (listener) => MusicEventController.onBeat(listener),

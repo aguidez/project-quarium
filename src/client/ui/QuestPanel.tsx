@@ -6,7 +6,9 @@ import { FEATURES } from "shared/types/features";
 import { GAME_PASSES, GamePass } from "shared/types/gamepasses";
 import { PERKS } from "shared/types/perks";
 import {
+	BOARD_UNLOCK_REBIRTHS,
 	getQuestConfig,
+	isBoardUnlocked,
 	isQuestLocked,
 	QuestConfig,
 	getQuestPeriod,
@@ -70,6 +72,8 @@ export interface QuestPanelProps {
 	/** A locked quest's Buy button: asks the server for the pass's purchase prompt. */
 	onBuyPass: (pass: GamePass) => void;
 	onClose: () => void;
+	/** Rebirths done: the daily / weekly boards open at BOARD_UNLOCK_REBIRTHS. */
+	rebirths: number;
 }
 
 function getTabQuests(quests: QuestsData, category: QuestCategory): QuestProgress[] {
@@ -461,6 +465,16 @@ export function QuestPanel(props: QuestPanelProps) {
 		));
 	} else if (tab === "Story") {
 		content = [<EmptyState key="Empty" title="You finished every story quest! More are coming soon." order={0} />];
+	} else if (!isBoardUnlocked(tab, props.rebirths)) {
+		// The first hours stay on the story quests
+		const name = tab === "Daily" ? "Daily" : "Weekly";
+		content = [
+			<EmptyState
+				key="Empty"
+				title={`${name} quests unlock at rebirth ${BOARD_UNLOCK_REBIRTHS[tab]}.`}
+				order={0}
+			/>,
+		];
 	} else {
 		const name = tab === "Daily" ? "daily" : "weekly";
 		content = [

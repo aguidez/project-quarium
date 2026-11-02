@@ -16,6 +16,7 @@ import {
 	DAILY_QUEST_POOL,
 	GAUGE_STATS,
 	getQuestConfig,
+	isBoardUnlocked,
 	isQuestLocked,
 	QuestConfig,
 	getQuestPeriod,
@@ -110,6 +111,14 @@ class QuestServiceSingleton implements Lifecycle {
 			["Daily", data.quests.daily],
 			["Weekly", data.quests.weekly],
 		] as [QuestBoardCategory, QuestBoard][]) {
+			// Not before rebirth 2 (dailies) / 3 (weeklies): an empty board, drawn the moment it opens
+			if (!isBoardUnlocked(category, data.rebirths)) {
+				if (board.quests.size() > 0) {
+					board.quests = [];
+					changed = true;
+				}
+				continue;
+			}
 			const period = getQuestPeriod(category, now);
 			// An empty board of the current period was drawn while its pool was empty (before V0.46): drawn again
 			if (board.period === period && (board.quests.size() > 0 || BOARDS[category].pool.size() === 0)) continue;

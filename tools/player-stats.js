@@ -18,27 +18,27 @@ const flag = (name) => {
 const STORE = flag("--store") || "PlayerData_v1"; // DataService STORE_NAME
 const LIMIT = Number(flag("--limit") || Infinity);
 
-// What the simulator predicts for the reference player (BALANCE.md §2: 1 h a day with the dailies), in minutes of
+// What the simulator predicts for the reference player (BALANCE.md §2, V0.48: 1 h a day with the dailies), in minutes of
 // play in front of the tank. Keep in line with BALANCE.md when the balance changes.
 const REFERENCE = {
 	Rebirth1: 25,
-	Rebirth2: 81,
-	Rebirth3: 157,
-	Rebirth4: 256,
-	Rebirth5: 341,
-	Rebirth6: 471,
-	Rebirth7: 584,
-	Rebirth8: 653,
-	"Species:FlameGourami": 44,
-	"Species:ImperialDiscus": 118,
-	"Species:Catfish": 210,
-	"Species:BabySunfish": 311,
-	"Species:Lanternfish": 400,
-	"Species:Dragonfish": 538,
-	"Species:WolfDogfish": 672,
-	"Species:BunnyShark": 714,
-	"Species:MiniLeviathan": 731,
-	AllSpecies: 733,
+	Rebirth2: 92,
+	Rebirth3: 167,
+	Rebirth4: 264,
+	Rebirth5: 354,
+	Rebirth6: 487,
+	Rebirth7: 603,
+	Rebirth8: 665,
+	"Species:FlameGourami": 54,
+	"Species:ImperialDiscus": 135,
+	"Species:Catfish": 219,
+	"Species:BabySunfish": 324,
+	"Species:Lanternfish": 410,
+	"Species:Dragonfish": 557,
+	"Species:WolfDogfish": 679,
+	"Species:BunnyShark": 733,
+	"Species:MiniLeviathan": 748,
+	AllSpecies: 751,
 };
 const REFERENCE_PICKUP = 0.5; // the simulator's P.collect: share of the coins' value picked up (clicks + companions)
 const MILESTONE_ORDER = [

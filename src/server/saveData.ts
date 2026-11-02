@@ -1,6 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import { COMPANION_TYPES, CompanionType } from "shared/types/companions";
 import { isCosmeticId } from "shared/types/cosmetics";
+import { isThemeChoice } from "shared/types/customization";
 import { EGG_TYPES, EggType } from "shared/types/eggs";
 import { FEATURES } from "shared/types/features";
 import { FISH_TYPES, FishType, HungerState } from "shared/types/fish";
@@ -210,6 +211,13 @@ export function sanitizeSave(save: SaveData) {
 	syncIncubationSpeed(data, Workspace.GetServerTimeNow());
 	data.features = data.features.filter((f) => FEATURES[f] !== undefined);
 	data.cosmetics = data.cosmetics.filter((c, i) => isCosmeticId(c) && data.cosmetics.indexOf(c) === i);
+	// The aquarium choices: an unknown value falls back to the default (everything earned shows)
+	if (!isThemeChoice(data.themeChoice)) data.themeChoice = "Auto";
+	data.hiddenCosmetics = (typeIs(data.hiddenCosmetics, "table") ? data.hiddenCosmetics : []).filter(
+		(c, i) => isCosmeticId(c) && data.hiddenCosmetics.indexOf(c) === i,
+	);
+	if (data.titleChoice !== "Auto" && data.titleChoice !== "None" && !isCosmeticId(data.titleChoice))
+		data.titleChoice = "Auto";
 	data.tutorialsDone = data.tutorialsDone.filter((f) => FEATURES[f] !== undefined);
 
 	save.tank = save.tank.filter(
