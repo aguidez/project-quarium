@@ -72,3 +72,18 @@ odds, `requires` = previous egg), shop order, `EGG_SPRITES` in theme.ts.
    the trip goes low across the belly with the instrument tipped flat (CLAUDE.md §7). Weld the parts (WeldConstraint)
    to Hips / the sway root only once everything is in place. The place must then be saved in Studio: ServerStorage
    is not synced by Rojo.
+
+## A new event run by its own service (raid, UFO night, starfall)
+
+1. `events.ts`: a `GameEventType`, a config interface with its own `kind`, the `GAME_EVENTS` entry, `ADMIN_EVENT_ORDER`;
+   `EVENT_BANNER_STYLES` + its colours in `theme.ts`, its badge text in AdminPanel `BADGE_TEXT` (no emoji).
+2. A server service with `run(config, startsAt, endsAt)` (yields until the end, one loop per owned tank, players
+   joining late included, `isEventImmune` skipped) and `stop()` (called by `EventService.clearEvent`); branch it in
+   `EventService.startEvent` (`runRaid` with a Studio template, `runUntilEnd` without one, and leave a model-less
+   kind out of `loadTemplates` or it warns at start).
+3. A client controller following `MusicEventController.onEventChanged` for the world look (save / restore Lighting,
+   dress the tanks' backdrops). Clickable things in a tank: an invisible tagged ball in the tank's Coins folder, drawn
+   by the clients (the starfall's stars are a ★ glyph on a BillboardGui: nothing uploaded), a new `InteractionKind`
+   checked before coins in AquariumInteractionController.
+4. Its value in BALANCE.md §3 (with a small simulator in `tools/` when it has its own numbers, like
+   `starfall-sim.js`), and the other recurring events' frequency (one event every ~12 min is shared among them).

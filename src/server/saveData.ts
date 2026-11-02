@@ -27,6 +27,7 @@ import {
 	STORY_LINES,
 } from "shared/types/quests";
 import { REBIRTHS } from "shared/types/rebirths";
+import { STAR_MAX_BARS } from "shared/types/stars";
 import { createPlayerStats, PlayerStats, sanitizePlayerStats } from "./playerStats";
 import { FISH_VARIANTS, FishVariant, isFishVariant } from "shared/types/variants";
 
@@ -185,6 +186,11 @@ export function sanitizeSave(save: SaveData) {
 	if (!isCount(data.likesReceived)) data.likesReceived = 0;
 	if (!isCount(data.lastLikeGivenAt)) data.lastLikeGivenAt = 0;
 	if (!isCount(data.coinBoostSeconds)) data.coinBoostSeconds = 0;
+	// A starfall left before its end (another server, a crash): its gauge so far becomes the star power, if better
+	if (!isCount(data.starPower)) data.starPower = 0;
+	if (!isCount(data.starCharge)) data.starCharge = 0;
+	data.starPower = math.min(math.max(data.starPower, data.starCharge), STAR_MAX_BARS);
+	data.starCharge = 0;
 	data.rebirths = isCount(data.rebirths) ? math.min(math.floor(data.rebirths), REBIRTHS.size()) : 0;
 	sanitizeStoryLines(data.quests, data.companions);
 	// Rebirth unlocked before its quest existed (it came with the first affordable rebirth): line done

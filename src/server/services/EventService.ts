@@ -33,6 +33,7 @@ import { AbyssService } from "./AbyssService";
 import { Aquarium, AquariumService } from "./AquariumService";
 import { DataService } from "./DataService";
 import { FishService } from "./FishService";
+import { StarfallService } from "./StarfallService";
 import { UfoService } from "./UfoService";
 
 const isEventType = t.keyOf(GAME_EVENTS);
@@ -104,7 +105,7 @@ function utcNow(): number {
  * Players still in the tutorial are event immune (EVENT_IMMUNE_ATTRIBUTE, kept up to date here): no guest,
  * thief or bonus in their tank, and their client shows nothing of the event.
  *
- * The abyssal raid is run by AbyssService, the UFO night by UfoService. A music event replaces the background music, sends its star
+ * The abyssal raid is run by AbyssService, the UFO night by UfoService, the starfall by StarfallService. A music event replaces the background music, sends its star
  * fish to swim in every owned aquarium and, on each beat of the track, lets every fish drop its coin with
  * the event's chance. The beats are timed on the server clock from the replicated start time, which the
  * clients also use to sync the track and the dance effects.
@@ -122,7 +123,8 @@ class EventServiceSingleton implements Lifecycle {
 
 	public onInit() {
 		const eventTypes = new Array<GameEventType>();
-		for (const [eventType] of pairs(GAME_EVENTS)) eventTypes.push(eventType);
+		// The starfall has no model: its stars are drawn by the clients
+		for (const [eventType, config] of pairs(GAME_EVENTS)) if (config.kind !== "Starfall") eventTypes.push(eventType);
 		this.templates = loadTemplates(TAGS.EventFishTemplate, "EventType", eventTypes);
 
 		// Immune until loaded and done with the tutorial
@@ -344,9 +346,13 @@ class EventServiceSingleton implements Lifecycle {
 		} else if (config.kind === "Abyss") {
 			const run = (template: Model) => AbyssService.run(template, config, startsAt, endsAt);
 			task.spawn(() => this.runRaid(token, eventType, endsAt, run));
-		} else {
+		} else if (config.kind === "Ufo") {
 			const run = (template: Model) => UfoService.run(template, config, startsAt, endsAt);
 			task.spawn(() => this.runRaid(token, eventType, endsAt, run));
+		} else {
+			// The stars are drawn by the clients around invisible balls: no template
+			const run = () => StarfallService.run(config, startsAt, endsAt);
+			task.spawn(() => this.runUntilEnd(token, eventType, endsAt, run));
 		}
 	}
 
@@ -366,13 +372,21 @@ class EventServiceSingleton implements Lifecycle {
 		for (const [, guest] of this.guests) this.removeGuest(guest);
 		AbyssService.stop(); // its lantern fish flee
 		UfoService.stop(); // its UFOs give their fish back and leave
+		StarfallService.stop(); // its gauges become star power, the stars left fade out
 	}
 
 	/** An event run by its own service (the abyssal raid, the UFO night) with the event's model as `template`. */
 	private runRaid(token: number, eventType: GameEventType, endsAt: number, run: (template: Model) => void) {
 		const template = this.templates.get(eventType);
-		if (template) run(template);
 		// Without its template there is no thief / UFO, but the world still goes dark until the end
+		this.runUntilEnd(token, eventType, endsAt, () => {
+			if (template) run(template);
+		});
+	}
+
+	/** An event run by its own service (`run` yields while it lasts), then ended here when its time is up. */
+	private runUntilEnd(token: number, eventType: GameEventType, endsAt: number, run: () => void) {
+		run();
 		while (token === this.token && Workspace.GetServerTimeNow() < endsAt) task.wait(MAX_LOOP_WAIT);
 		if (token === this.token) {
 			print(`[Server] Event ${eventType} ended.`);

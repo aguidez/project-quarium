@@ -36,6 +36,8 @@ export const SFX = {
 	UfoBeam: { id: "rbxassetid://1841186034", volume: 0.12 },
 	/** The alien fish screams: the whole tank drops a coin ("Robot Vocals Phasey Scrambled Speech 17" by Pro Sound Effects). */
 	AlienScream: { id: "rbxassetid://9118515692", volume: 0.8 },
+	/** A falling star of the starfall is caught ("bling_diamond_pickup_2"): pitched up as the star gauge fills. */
+	StarCatch: { id: "rbxassetid://4612374393", volume: 0.5 },
 	/** A new onboarding instruction shows up ("Mouth Pop" by Daily Sounds). */
 	OnboardingStep: { id: "rbxassetid://131626394188859", volume: 0.6 },
 } as const;

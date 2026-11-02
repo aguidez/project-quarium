@@ -40,6 +40,8 @@ export interface EggRevealProps {
 	variant: FishVariant;
 	/** First fish of this type and variant: it just joined the fish index. */
 	firstTime: boolean;
+	/** Its variant came from the player's star power (a starfall): shown instead of the usual chance. */
+	starPowered: boolean;
 	/** The player's variant luck: the chance shown is the one they hatched with. */
 	luck: number;
 	playSfx: (name: SfxName, playbackSpeed?: number) => void;
@@ -362,7 +364,8 @@ export function EggReveal(props: EggRevealProps) {
 							Size={new UDim2(1, 0, 0, 26)}
 							BackgroundTransparency={1}
 							Font={FONT_TITLE}
-							Text={`${variant.displayName.upper()}  •  ${formatVariantChance(props.variant, props.luck)}`}
+							// Drawn with star power (a starfall), not with the usual chance
+							Text={`${variant.displayName.upper()}  •  ${props.starPowered ? "STAR POWER" : formatVariantChance(props.variant, props.luck)}`}
 							TextSize={24}
 							TextColor3={variantStyle.color}
 							{...captionText()}

@@ -43,8 +43,8 @@ export interface ClientToServerEvents {
 	Interact: (kind: InteractionKind, payload: unknown) => void;
 }
 
-/** In-world interactions. Payloads: DropFood -> Vector3, CollectCoin -> the coin BasePart. */
-export type InteractionKind = "DropFood" | "CollectCoin";
+/** In-world interactions. Payloads: DropFood -> Vector3, CollectCoin -> the coin BasePart, CatchStar -> the star's. */
+export type InteractionKind = "DropFood" | "CollectCoin" | "CatchStar";
 
 export type NotifyKind = "info" | "warning";
 
@@ -109,6 +109,8 @@ export interface EggHatch {
 	variant: FishVariant;
 	/** First fish of this type and variant the player hatches (a new fish index entry). */
 	firstTime: boolean;
+	/** Its variant was drawn with the player's star power (a starfall), spent by this egg. */
+	starPowered: boolean;
 }
 
 function getOrCreateRemoteFolder(): Folder {

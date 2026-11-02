@@ -8,7 +8,7 @@ import { ReplicatedStorage, Workspace } from "@rbxts/services";
  *   recurring event running, and no recurring event can start while it runs.
  * Players still in the tutorial are "event immune": events don't touch them (see isEventImmune).
  */
-export type GameEventType = "Kpop" | "Island" | "Abyss" | "Ufo";
+export type GameEventType = "Kpop" | "Island" | "Abyss" | "Ufo" | "Starfall";
 
 /** How the running event was started (replicated for information). */
 export type EventSource = "Recurring" | "Admin";
@@ -92,7 +92,15 @@ export interface UfoEventConfig extends BaseEventConfig {
 	kind: "Ufo";
 }
 
-export type GameEventConfig = MusicEventConfig | AbyssEventConfig | UfoEventConfig;
+/**
+ * Starfall: a starry night falls, shooting stars streak across the sky and fall into every owned aquarium. Clicked like
+ * coins, they fill the owner's star gauge: their next egg hatches a rarer variant (StarfallService, shared/types/stars).
+ */
+export interface StarfallEventConfig extends BaseEventConfig {
+	kind: "Starfall";
+}
+
+export type GameEventConfig = MusicEventConfig | AbyssEventConfig | UfoEventConfig | StarfallEventConfig;
 
 export const GAME_EVENTS: Record<GameEventType, GameEventConfig> = {
 	Kpop: {
@@ -147,10 +155,20 @@ export const GAME_EVENTS: Record<GameEventType, GameEventConfig> = {
 		duration: 60, // 4 to 5 kidnappings per tank (UfoService)
 		recurring: true,
 	},
+	Starfall: {
+		kind: "Starfall",
+		displayName: "STARFALL",
+		icon: "★", // drawn as text in the banner's badge (no emoji)
+		subtitle: "Catch the falling stars: your next egg hatches a rare variant!",
+		musicId: "rbxassetid://88076339607645", // the owner's choice
+		musicVolume: 0.5,
+		duration: 60, // 16 to 20 stars per tank (shared/types/stars STARFALL)
+		recurring: true,
+	},
 };
 
 /** Display order of the events in the admin panel. */
-export const ADMIN_EVENT_ORDER: GameEventType[] = ["Kpop", "Island", "Abyss", "Ufo"];
+export const ADMIN_EVENT_ORDER: GameEventType[] = ["Kpop", "Island", "Abyss", "Ufo", "Starfall"];
 
 /** The events the recurring clock draws from. */
 export function getRecurringEvents(): GameEventType[] {

@@ -32,6 +32,8 @@ import { RewardPopup } from "./RewardPopup";
 import { ShopPanel } from "./ShopPanel";
 import { BAR_HEIGHT, BAR_WIDTH, ShopBar } from "./ShopBar";
 import { SideButtons } from "./SideButtons";
+import { StarGauge } from "./StarGauge";
+import { StarPowerPill } from "./StarPowerPill";
 import { Button3D, Chip, TextStroke } from "./kit";
 import { FONT_TITLE, PALETTES, V2_IMAGES } from "./theme";
 
@@ -227,6 +229,10 @@ export function App(props: AppProps) {
 		return () => task.cancel(thread);
 	}, [remindRebirth]);
 
+	// Star gauge during a starfall; afterwards, the star power it left is a pill under the egg shop until an egg spends it
+	const starfall = props.event?.config.kind === "Starfall";
+	const starPower = data?.starPower ?? 0;
+
 	// Like boost pill: shown until the boost ends (re-rendered then, nothing else changes at that moment)
 	const likeBoostEndsAt = props.likeBoostEndsAt;
 	const [likeBoosted, setLikeBoosted] = useState(false);
@@ -302,6 +308,27 @@ export function App(props: AppProps) {
 				<QuestBoostPill
 					key="QuestBoost"
 					top={getTopHudBottom() + EVENT_BANNER_GAP + (likeBoosted ? (PILL_HEIGHT + 8) * scale : 0)}
+					scale={scale}
+				/>
+			)}
+			{menusVisible && starfall && (
+				<StarGauge
+					key="StarGauge"
+					bars={data.starCharge}
+					saved={starPower}
+					luck={getPlayerVariantLuck(data)}
+					scale={scale}
+				/>
+			)}
+			{menusVisible && !starfall && starPower > 0 && (
+				<StarPowerPill
+					key="StarPower"
+					power={starPower}
+					top={
+						getTopHudBottom() +
+						EVENT_BANNER_GAP +
+						((likeBoosted ? 1 : 0) + (props.questBoosted ? 1 : 0)) * (PILL_HEIGHT + 8) * scale
+					}
 					scale={scale}
 				/>
 			)}
@@ -499,6 +526,7 @@ export function App(props: AppProps) {
 					fishType={props.reveal.fishType}
 					variant={props.reveal.variant}
 					firstTime={props.reveal.firstTime}
+					starPowered={props.reveal.starPowered}
 					luck={data ? getPlayerVariantLuck(data) : 1}
 					playSfx={props.playSfx}
 					onEnd={props.onRevealEnd}

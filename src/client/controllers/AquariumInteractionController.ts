@@ -11,7 +11,7 @@ const COIN_PICK_RADIUS = 0.6 * COIN_HITBOX_SCALE;
 
 /**
  * In focus view, turns clicks/taps into interaction intents:
- * a coin under the cursor is collected first, otherwise food is dropped in the water.
+ * a falling star under the cursor (starfall) is caught first, then a coin is collected, otherwise food is dropped in the water.
  * The server rate-limits and validates every intent.
  */
 class AquariumInteractionControllerSingleton implements Lifecycle {
@@ -43,7 +43,13 @@ class AquariumInteractionControllerSingleton implements Lifecycle {
 		if (!camera) return;
 		const ray = camera.ScreenPointToRay(screenX, screenY);
 
-		const coin = this.getClickedCoin(ray);
+		const star = this.getClickedPart(ray, TAGS.Star);
+		if (star) {
+			this.interact("CatchStar", star);
+			return;
+		}
+
+		const coin = this.getClickedPart(ray, TAGS.Coin);
 		if (coin) {
 			this.interact("CollectCoin", coin);
 			return;
@@ -53,16 +59,17 @@ class AquariumInteractionControllerSingleton implements Lifecycle {
 		if (position) this.interact("DropFood", position);
 	}
 
-	private getClickedCoin(ray: Ray): BasePart | undefined {
+	/** The own tank's hitbox with this tag (a coin, a star) under the cursor, with a forgiving radius. */
+	private getClickedPart(ray: Ray, tag: string): BasePart | undefined {
 		const aquarium = FocusController.getOwnAquarium();
 		if (!aquarium) return undefined;
 
-		const coins = CollectionService.GetTagged(TAGS.Coin).filter((coin) => coin.IsDescendantOf(aquarium));
-		if (coins.size() === 0) return undefined;
+		const parts = CollectionService.GetTagged(tag).filter((part) => part.IsDescendantOf(aquarium));
+		if (parts.size() === 0) return undefined;
 
 		const params = new RaycastParams();
 		params.FilterType = Enum.RaycastFilterType.Include;
-		params.FilterDescendantsInstances = coins;
+		params.FilterDescendantsInstances = parts;
 
 		const hit = Workspace.Spherecast(ray.Origin, COIN_PICK_RADIUS, ray.Direction.mul(MAX_RAY_DISTANCE), params);
 		return hit?.Instance;

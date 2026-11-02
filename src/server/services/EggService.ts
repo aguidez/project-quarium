@@ -16,6 +16,7 @@ import {
 	syncIncubationSpeed,
 } from "shared/types/playerData";
 import { FishType, isEasterEgg } from "shared/types/fish";
+import { rollStarVariant } from "shared/types/stars";
 import { FishVariant, rollVariant } from "shared/types/variants";
 import { getTestSpeed } from "../playerStats";
 import { DataService } from "./DataService";
@@ -118,12 +119,22 @@ class EggServiceSingleton implements Lifecycle {
 		const forced = onboardingEgg ? undefined : this.forcedHatch.get(player);
 		const fishType = onboardingEgg ? ONBOARDING_FISH : (forced ?? rollEgg(eggType, this.rng));
 		// Then its variant (the tutorial's fish is always a normal one, so it looks like the tutorial says;
-		// an easter egg fish has none)
+		// an easter egg fish has none, and leaves the star power for the next egg)
 		const luck = getPlayerVariantLuck(data);
-		const variant: FishVariant = onboardingEgg || isEasterEgg(fishType) ? "Normal" : rollVariant(this.rng, luck);
+		const plain = onboardingEgg || isEasterEgg(fishType);
+		const starPowered = !plain && data.starPower > 0;
+		const variant: FishVariant = plain
+			? "Normal"
+			: starPowered
+				? rollStarVariant(this.rng, data.starPower, luck)
+				: rollVariant(this.rng, luck);
 		const firstTime = getHatchedVariant(data, fishType, variant) === 0;
 		if (!DataService.hatchEgg(player, eggType, fishType, variant)) return;
 		this.forcedHatch.delete(player);
+		if (starPowered) {
+			data.starPower = 0; // spent (a starfall running now still fills its own gauge)
+			DataService.sync(player);
+		}
 		QuestService.addProgress(player, "EggsOpened", 1, { fishType, variant });
 		QuestService.addProgress(player, "VariantHatched", 1, { fishType, variant });
 		// The Water Hen's line counts the eggs opened with it equipped
@@ -135,7 +146,7 @@ class EggServiceSingleton implements Lifecycle {
 		const revealEnd = math.max(now, this.revealsEndAt.get(player) ?? 0) + HATCH_REVEAL_TIME;
 		this.revealsEndAt.set(player, revealEnd);
 
-		const hatch: EggHatch = { eggType, fishType, variant, firstTime };
+		const hatch: EggHatch = { eggType, fishType, variant, firstTime, starPowered };
 		this.hatchRemote.FireClient(player, hatch);
 		task.delay(revealEnd - now, () => FishService.spawnFish(player, fishType, undefined, variant));
 	}

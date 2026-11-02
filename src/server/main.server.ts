@@ -19,6 +19,7 @@ import { OnboardingService } from "./services/OnboardingService";
 import { OceanService } from "./services/OceanService";
 import { QuestService } from "./services/QuestService";
 import { RebirthService } from "./services/RebirthService";
+import { StarfallService } from "./services/StarfallService";
 import { StatsService } from "./services/StatsService";
 import { UfoService } from "./services/UfoService";
 
@@ -34,6 +35,7 @@ bootstrap([
 	OnboardingService,
 	AbyssService,
 	UfoService,
+	StarfallService,
 	EventService,
 	AdminService,
 	CompanionService,

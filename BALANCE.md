@@ -3,7 +3,7 @@
 > The game's balance: what an average player reaches after how long, and why. **Update it in the same task whenever a
 > number of the economy changes** (fish income, eggs, odds, rebirths, Ocean milestones, variants, food, capacity,
 > companions…): run the simulators, copy their results here, add a line to the history (§6).
-> Last updated: 2026-11-02 (V0.51: Island Breeze, a recurring music event paced on each fish's income; V0.50: the V1 plan's tables folded into §4 / §5).
+> Last updated: 2026-11-02 (V0.52: the starfall, a recurring event whose star gauge chooses the next egg's variant).
 
 
 **Where the numbers live**: `src/shared/types/fish.ts` (species), `eggs.ts` (eggs), `rebirths.ts` (rebirths),
@@ -14,6 +14,7 @@
 |---|---|
 | `node tools/economy-sim.js` | The live economy (mirrors the config: keep it in sync), 2,000 average players second by second |
 | `node tools/companion-sim.js` | AFK farming: how many fish the Pelican keeps fed, the share of the coins the Snail and the Swordfish pick up, the Jellyfish |
+| `node tools/starfall-sim.js` | The starfall's star gauge (mirrors `stars.ts`): bars filled per share of stars caught, the next egg's variant, what a 12 h run gets |
 
 How to add content (species, theme, companion, egg): `docs/agent-notes/content-recipes.md`.
 
@@ -41,7 +42,8 @@ Options: `--players 300` (faster, noisier), a JSON of overrides (`'{"P":{"coinBo
   species in **~2h29** (2h13–2h43), x5 ~3h00. Coins x6 alone are not enough (~3h50): hatching and the Ocean milestones
   then hold the game back.
 - **Not modelled**: AFK time (coins and hunger stop while away), companions' extra pick-ups, the like boost (x2),
-  events (Island Breeze x2 coins, Abyss x1.5, K-pop beat coins, the UFO night's mutations and Alien Fish: §3 Easter eggs). The story quests' money and points are modelled (Voyage, Hatchery, Collector, Ocean lines). They all make real
+  events (Island Breeze x2 coins, Abyss x1.5, K-pop beat coins, the UFO night's mutations and Alien Fish, the starfall's
+  star power: §3 Easter eggs, §3 Starfall). The story quests' money and points are modelled (Voyage, Hatchery, Collector, Ocean lines). They all make real
   players a bit faster than the simulator; the spread between players (p10–p90 below) is wider than these effects.
 - **Gamepasses are never part of the model** (§5.10).
 
@@ -153,9 +155,9 @@ simulator's medians move by less than the noise). Neither is one of the 18 speci
 **The UFO night** (V0.49, recurring with the Abyss, one minute; not in the simulator): 4–5 kidnappings per tank, each
 fish once. Per kidnapping the expected effect is tiny: green (55 %) +1 fish-minute of coins, red (20 %) −0.5, asleep
 (20 %) −1, so **+0.25 fish-minute** on average, ~+1 fish-minute per night: noise. A recurring event every ~12 min
-(~11 min of clock + the minute itself) picks one of the three recurring events, so a UFO night every ~36 min of a
-server's life, ~1.7 an hour: over a 12 h run ~20 nights, ~90 kidnappings, **~4 better variants** (mostly Normal →
-Anomaly on fish soon replaced) and **~0.45 Alien Fish** (about one player in two or three meets one). The Alien Fish takes one slot (−1/25 of a full tank) but its
+(~11 min of clock + the minute itself) picks one of the four recurring events, so a UFO night every ~48 min of a
+server's life, ~1.25 an hour: over a 12 h run ~15 nights, ~70 kidnappings, **~3 better variants** (mostly Normal →
+Anomaly on fish soon replaced) and **~0.35 Alien Fish** (about one player in three meets one). The Alien Fish takes one slot (−1/25 of a full tank) but its
 scream adds one coin of every fish every 30 s: + interval / 30 of the tank's income, **+17 % to +100 %** (4–5 s fish to
 30 s ones), more for a late-game tank (Mythics drop every 15–30 s). A lucky bonus, like the French Fish, that a player
 keeps; it is rare enough not to be part of the reference curve.
@@ -169,9 +171,44 @@ each fish's own interval: on every other beat (the track's accented backbeat, ev
 with chance boost x 0.97 s / its payout interval (variant included), the boost growing 0.5 → 1.5 over the minute
 (average 1), so **coins x2 on average (x1.5 at the start, x2.5 at the end) for every fish at every stage: +1 min of
 income**. The finale (~57 s) drops every fish's coin at once: + one interval of income, +4 s (Guppy) to +30 s (Mythic).
-Total **+1.1 to +1.5 min of income per event**; at ~1.7 an hour, +2 to +2.5 min an hour (**+3 to +4 %** while
-playing), less than the p10–p90 spread of the reference run. Studio check (V0.51, an 11-fish rebirth-5 tank): ~37 coins
+Total **+1.1 to +1.5 min of income per event**; at ~1.25 an hour (four recurring events), +1.4 to +1.9 min an hour
+(**+2.5 to +3 %** while playing), less than the p10–p90 spread of the reference run. Studio check (V0.51, an 11-fish rebirth-5 tank): ~37 coins
 per 20 s before, 62 / 68 / 91 in the event's three 20 s thirds (x2.0 on the minute), finale 10 coins on one beat.
+
+### Starfall (`stars.ts`, `node tools/starfall-sim.js`)
+
+A recurring event (V0.52, one minute, ~1.25 an hour with the four recurring events; not in the economy simulator). 16–20
+stars fall into each owned tank (one per slot of equal length, from 2 s after the start to 8 s before the end); the
+owner clicks them. Each one fills the star gauge by a random amount; at the end the gauge is at least **1.5 bars x the
+share of the stars caught** (catching them all never gives less than 1.5 bars, whatever the sizes). The gauge becomes
+the star power if it beats the one kept; the next egg opened spends it.
+
+| Star | Share | Bars filled | Size |
+|---|---|---|---|
+| Small | 56 % | 0.05–0.09 | 1.3 studs |
+| Medium | 30 % | 0.11–0.18 | 1.8 |
+| Big | 11 % | 0.25–0.40 | 2.5 |
+| Huge | 3 % | 0.60–0.90 | 3.4 |
+
+| Star power | Next egg's variant (the player's luck multiplies the chances of the better ones) |
+|---|---|
+| Under 1 bar (p filled) | The usual chances x (1 + 2p): up to x3 just under one bar |
+| 1 bar + p | **Anomaly** at least; Ghost 10 → 40 %, Shiny 2 → 6 % as the second bar fills |
+| 2 bars + p | **Ghost** at least; Shiny 5 → 40 % |
+| 3 bars | **Shiny** |
+
+| Stars caught | Bars (p10 / median / p90) | 1 / 2 / 3 bars reached | Next egg: Anomaly / Ghost / Shiny | A 12 h run (15 starfalls) |
+|---|---|---|---|---|
+| 40 % | 0.49 / 0.94 / 1.66 | 45 / 4 / 0 % | 44 / 18 / 3.5 % (Normal 34 %) | 6.6 Anomaly, 2.7 Ghost, 0.5 Shiny |
+| 60 % | 0.90 / 1.44 / 2.27 | 84 / 18 / 1 % | 52 / 32 / 7 % | 7.7, 4.7, 1.1 |
+| 75 % | 1.23 / 1.83 / 2.70 | 98 / 38 / 5 % | 42 / 44 / 13 % | 6.2, 6.6, 2.0 |
+| 100 % | 1.82 / 2.46 / 3.00 | 100 / 81 / 21 % | 12 / 53 / 35 % | 1.8, 8.0, 5.3 |
+
+**Why it doesn't break the curve**: a 12 h run opens ~900 eggs, which already give ~90 Anomalies, ~45 Ghosts and ~9
+Shinies; a player catching three stars out of four adds ~6, ~7 and ~2. A variant earns +20 to +35 % on one fish out of
+up to 25 (+1 % of the tank), so the coins don't move; what moves is collection: the first Shiny (Collector line,
+2,500 Ocean Points, median 3h27 in the simulator) comes earlier for a lucky or skilled player, and Shiny Fish Index
+cells fill faster. The power waits for an egg (no hurry), the best of two starfalls is kept (no stacking past 3 bars).
 
 ### Eggs (`eggs.ts`)
 
@@ -577,3 +614,4 @@ content (species, eggs, aquariums, capacity, companions themselves) away from fr
 | V0.48 | Daily quests from rebirth 2, weekly ones from rebirth 3 (the owner's choice: the first hours on the story quests); not re-tuned. Simulator `P.dailyFromRebirth` / `weeklyFromRebirth` | 1 h a day: rebirth 2 ~1h21 → ~1h32, rebirth 3 ~2h37 → ~2h47, rebirth 8 ~10h53 → ~11h05, all eighteen species **~12h13 → ~12h31** (11h39–13h12), still day 13 |
 | V0.49 | UFO night (recurring event, not modelled): mutations x2 / x0.5 / asleep for a minute (+0.25 fish-minute per kidnapping on average), 4.5 % a better variant, 0.5 % the Alien Fish (no coin, its scream: one coin from every other fish every 30 s, 500 points, stays) | Unchanged (events are not in the simulator); expected ~6.5 better variants and ~0.7 Alien Fish per 12 h run, the alien worth +17 % to +100 % of the tank's income while it stays |
 | V0.51 | Island Breeze (recurring music event, not modelled): 124 BPM, coins on every other beat with chance boost x 0.97 s / the fish's payout interval, boost 0.5 → 1.5, finale (every fish's coin once, ~57 s) | Unchanged (events are not in the simulator): x2 coins for the minute at every stage, +1.1 to +1.5 min of income per event, +3 to +4 % while playing. Three recurring events instead of two: UFO nights ~2.7 → ~1.7 an hour (~4 better variants, ~0.45 Alien Fish per 12 h run) |
+| V0.52 | Starfall (recurring event, not in the economy simulator; `tools/starfall-sim.js`): 16–20 stars per tank, 4 sizes (0.05–0.09 / 0.11–0.18 / 0.25–0.4 / 0.6–0.9 bars, 56 / 30 / 11 / 3 %), floor 1.5 bars x the share caught; star power for the next egg: 1 bar Anomaly+, 2 bars Ghost+, 3 bars Shiny | Coins unchanged. 75 % of the stars caught: 1.8 bars at the median, ~6 Anomalies, ~7 Ghosts, ~2 Shinies per 12 h run on top of ~90 / 45 / 9 from the eggs; all caught: 2.5 bars, 3 bars one time in five. Four recurring events: Island Breeze and UFO nights ~1.7 → ~1.25 an hour (Island +2.5 to +3 % while playing, ~3 better variants and ~0.35 Alien Fish per run from the UFO) |

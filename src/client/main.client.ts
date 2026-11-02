@@ -1,6 +1,7 @@
 import { bootstrap } from "shared/framework";
 import { AbyssEventController } from "./controllers/AbyssEventController";
 import { UfoEventController } from "./controllers/UfoEventController";
+import { StarfallEventController } from "./controllers/StarfallEventController";
 import { AquariumInteractionController } from "./controllers/AquariumInteractionController";
 import { AudioController } from "./controllers/AudioController";
 import { CapacityPlaqueController } from "./controllers/CapacityPlaqueController";
@@ -37,6 +38,7 @@ bootstrap([
 	MusicEventController,
 	AbyssEventController,
 	UfoEventController,
+	StarfallEventController,
 	LikeBoardController,
 	PelicanChargesController,
 	CompanionAnimationController,

@@ -13,7 +13,7 @@ const BUTTON_SIZE = new Vector2(132, 50);
 const BADGE_SIZE = 52;
 const WHITE = new Color3(1, 1, 1);
 /** Text drawn in an event's badge (no emoji: the K-pop's own icon is one). */
-const BADGE_TEXT: Partial<Record<GameEventType, string>> = { Kpop: "♪", Island: "♫", Ufo: "UFO" };
+const BADGE_TEXT: Partial<Record<GameEventType, string>> = { Kpop: "♪", Island: "♫", Ufo: "UFO", Starfall: "★" };
 
 export interface AdminPanelProps {
 	/** The event running on this server, if any. */

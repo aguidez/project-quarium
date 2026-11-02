@@ -10,6 +10,33 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.52 — 2026-11-02
+
+**New**
+- **Starfall**, a new event that comes back regularly (one minute), with its own music: a clear blue night falls, shooting stars streak
+  across the sky and across a starry backdrop in every aquarium, and golden stars of four sizes fall into your tank.
+  Click them like coins (they sink slowly, then wait a few seconds on the sand): each one fills your **star gauge**
+  on the right of the screen (shown only during the event), the bigger the star the more, with a part of luck. The gauge has three bars:
+  - one bar: your next egg hatches at least an **Anomaly**, with better chances of a Ghost or a Shiny;
+  - two bars: at least a **Ghost**, with a better chance of a Shiny;
+  - three bars: a **Shiny** for sure.
+  Catching every star always fills at least one bar and a half. When the event ends the gauge becomes your star
+  power, and a pill under the egg shop tells what your next egg will be at least ("NEXT EGG: AT LEAST A GHOST")
+  until you open one (any egg, even after leaving the game or a rebirth); a new starfall only replaces it if it
+  fills more. The hatch reveal shows "STAR POWER" instead of the variant's chance.
+
+**Changes**
+- With four events in the draw instead of three, Island Breeze, the abyssal raid and the UFO night come a little less
+  often.
+- The admin panel lists the starfall.
+
+**Balance**
+- Starfall: about 18 stars per aquarium. Catching three stars out of four gives 1.8 bars at the median; catching
+  them all, 2.5 bars, and three bars one time in five. Over a 12-hour run that is about 6 extra Anomalies, 7 Ghosts
+  and 2 Shinies for a player who catches most stars: rare fish, not more money.
+
+---
+
 ## V0.51 — 2026-11-02
 
 **New**

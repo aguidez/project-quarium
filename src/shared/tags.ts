@@ -49,6 +49,11 @@ export const TAGS = {
 	 * EventFish: never animated as a fish). Attribute "Beaming" (shared/types/ufo UFO_BEAM_ATTRIBUTE).
 	 */
 	Ufo: "Ufo",
+	/**
+	 * The clickable hitbox of a falling star of the starfall (StarfallService): an invisible ball the clients draw a
+	 * star around (StarfallEventController). Attributes: "StarSize" (StarSize), "Caught" (being burst, no longer clickable).
+	 */
+	Star: "Star",
 	/** An equipped companion in its owner's aquarium. Attributes: "Owner" (UserId), "CompanionType". */
 	Companion: "Companion",
 	/** Studio-made companion model in ServerStorage.Assets, laid out like a FishTemplate. Attribute "CompanionType". */

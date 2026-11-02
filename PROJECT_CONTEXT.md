@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-02 (V0.51: Island Breeze, a recurring music event with paced beat coins; the admin panel).
+> Last updated: 2026-11-02 (V0.52: the starfall, a recurring event whose star gauge chooses the next egg's variant).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -22,7 +22,8 @@ coins. Around that core loop:
   unlocks milestones (companions, upgrades, tank size 10 → 25, a second incubator, variant luck, cosmetics);
 - events: recurring ones drawn by each server every 5–15 min (Island Breeze: a sunny music event, coins fall on the
   beat; the abyssal raid: the world goes dark, a lantern fish steals coins; the UFO night: a UFO beams the fish up one
-  by one and drops them back mutated) and admin ones started on every server (the K-pop music event, too generous to
+  by one and drops them back mutated; the starfall: stars fall into the tanks, clicked they fill a star gauge that
+  guarantees the next egg a rarer variant) and admin ones started on every server (the K-pop music event, too generous to
   recur); never during the tutorial;
 - likes between players: a board beside each tank, a like doubles the owner's coins for 5 min;
 - gamepasses, sold by the fisherman's shop in the lobby (never part of the balance): Third Companion Slot, x2 Ocean
@@ -77,8 +78,12 @@ ProjetQuarium/
 │                            testing, lobby decor, moderation, player stats), index in its README
 ├─ design/previews/          Images shown to the owner (Studio captures, mock-ups): crab-sax-preview.jpg (mock-
 │                            up), crab-sax-carry-1-right / -2-middle / -3-left.jpg (Island Breeze's guest dancing),
-│                            admin-panel-mockup.png / admin-panel-ingame.jpg (the admin panel)
+│                            admin-panel-mockup.png / admin-panel-ingame.jpg (the admin panel), star-gauge-mockup.png
+│                            (the starfall's gauge and the star power pill), star-power-pill-ingame.jpg
 ├─ design/ui/
+│  ├─ starfall.figcraft      The starfall's star gauge (StarGauge_Mockup: in the tank view, its states, the star power
+│  │                         pills), built by
+│  │                         starfall.build.js (figcraft-cli; exports design/previews/star-gauge-mockup.png)
 │  ├─ admin-panel.figcraft   The admin panel (AdminPanel_Mockup), built by admin-panel.build.js (run through
 │  │                         figcraft-cli; it also exports design/previews/admin-panel-mockup.png)
 │  ├─ shopbar.figcraft       FigCraft source of the older UI frames: OnboardingCard, RewardPopup, CapacityPlaque,
@@ -117,6 +122,8 @@ ProjetQuarium/
 ├─ tools/companion-sim.js    AFK simulator: share of fish-time weak with a feeder (Pelican, Jellyfish) per tank size,
 │                            share of coins a collector (Snail, Swordfish) picks up per coin rate; mirrors CompanionService,
 │                            FishService hunger, FoodService, CoinService
+├─ tools/starfall-sim.js     The starfall's star gauge (mirrors shared/types/stars): bars per share of stars caught, the
+│                            next egg's variant, what a 12 h run gets (`--luck`, `--perHour`); results in BALANCE.md §3
 ├─ tools/player-stats.js     Real players vs the simulator (`npm run stats`): reads every profile of PlayerData_v1 through
 │                            Open Cloud (read-only key in workspace.local.json; universe 10773319506), prints attendance,
 │                            play time at each milestone (vs BALANCE.md §2), coin pickup share, dailies, devices;
@@ -139,7 +146,7 @@ ProjetQuarium/
    │  ├─ network.ts          Remote contracts + getRemoteEvent(name) (Remotes folder in ReplicatedStorage), FishView / FishMessage
    │  ├─ swim.ts             SwimSegment + getSwimPose: fish movement computed identically by server and clients
    │  ├─ tags.ts             CollectionService tags and the attributes they carry
-   │  ├─ sounds.ts           Music id + SFX ids, played in 2D by AudioController (CoinStolen = the lantern's gulp, UfoBeam,
+   │  ├─ sounds.ts           Music id + SFX ids, played in 2D by AudioController (CoinStolen = the lantern's gulp, StarCatch, UfoBeam,
    │  │                      AlienScream, WeakBubble = a weak fish's bubble, CoinCollect / CompanionCoin = the coin chime)
    │  └─ types/
    │     ├─ fish.ts          FishType, FishRarity (Common … Mythic, Secret = easter eggs), CoinType, HungerState
@@ -157,7 +164,7 @@ ProjetQuarium/
    │     │                   getHatchedVariant, getLivingVariant, getIncubating, hasFreeIncubator…), MAX_MONEY (1e15),
    │     │                   DEFAULT_INCUBATORS (1), getCompanionSlots (Ocean slots + the slot pass: use it, never
    │     │                   companionSlots alone), getHatchMultiplier (Water Hen equipped: 0.85, or its perk's),
-   │     │                   getPlayerVariantLuck (Lucky ocean x the Lucky pass: EggService's draw and the chances the UI
+   │     │                   starPower / starCharge (the starfall), getPlayerVariantLuck (Lucky ocean x the Lucky pass: EggService's draw and the chances the UI
    │     │                   shows), syncIncubationSpeed (rescales the incubating timers to a new hatch speed, progress
    │     │                   kept; run by DataService.sync, buyEgg and sanitizeSave)
    │     ├─ companionStats.ts getCompanionStats(companion, data): what a companion does now with its bonuses (Ocean
@@ -203,9 +210,13 @@ ProjetQuarium/
    │     ├─ ufo.ts           UfoOutcome (Sleep / Green / Red / Variant / Alien), UFO_OUTCOME_ODDS, drawUfoOutcome, FishEffect
    │     │                   (Sleep / Green / Red) + FISH_EFFECT_DURATION + FISH_EFFECT_COIN_MULTIPLIER, getNextVariant,
    │     │                   UFO_TIMING / UFO_KIDNAP_TIME, UFO_BEAM_ATTRIBUTE
-   │     ├─ events.ts        GameEventType (Kpop, Island, Abyss, Ufo), GAME_EVENTS: kind "Music" (bpm, beatOffset,
-   │     │                   beatCoins Flat (K-pop) or Paced (Island: income-paced, growing boost, finale)), "Abyss" or
-   │     │                   "Ufo", subtitle, optional musicId and coinMultiplier, duration, recurring flag;
+   │     ├─ stars.ts         The starfall: StarSize / STAR_SIZES (weight, power range, studs), STARFALL (stars per tank,
+   │     │                   timing, floor), STAR_BARS (variant guaranteed per bar, better chances), STAR_MAX_BARS,
+   │     │                   drawStarSize, getFinalStarCharge, getStarVariantOdds / rollStarVariant, getGuaranteedVariant,
+   │     │                   the StarSize / Caught / Fading attributes of a star hitbox
+   │     ├─ events.ts        GameEventType (Kpop, Island, Abyss, Ufo, Starfall), GAME_EVENTS: kind "Music" (bpm,
+   │     │                   beatOffset, beatCoins Flat (K-pop) or Paced (Island: income-paced, growing boost, finale)),
+   │     │                   "Abyss", "Ufo" or "Starfall", subtitle, optional musicId and coinMultiplier, duration, recurring flag;
    │     │                   guestMove (Swim / Walk), GUEST_DANCE_JOINTS (Dance / Sway Motor6Ds);
    │     │                   EVENT_ATTRIBUTES, LURKING_ATTRIBUTE, ADMIN_EVENT_ORDER, getActiveEvent,
    │     │                   getEventCoinMultiplier(owner), EventSource, getRecurringEvents, getRecurringChance,
@@ -237,7 +248,7 @@ ProjetQuarium/
    │     ├─ DataService      ProfileStore sessions (load, auto-save, final save, onLoaded / onSave hooks), sync() (also runs
    │     │                   syncIncubationSpeed), notify(), registerAction(), money / fish helpers, changeFish (UFO
    │     │                   mutations), resetSave (wipe + kick, see DevCommandService)
-   │     ├─ InteractionService  "Interact" remote: token bucket (10/s) shared by DropFood / CollectCoin
+   │     ├─ InteractionService  "Interact" remote: token bucket (10/s) shared by DropFood / CollectCoin / CatchStar
    │     ├─ AquariumService  Registers Studio tanks, assigns one per player, owner nameplate (OwnerPlate SurfaceGui on the
    │     │                   Base), runtime folders (Fish/Food/Coins/Companions), focus reports ("SetFocus") + isTending /
    │     │                   isAtOwnAquarium; dresses each tank in its owner's displayed theme (polled every second; free
@@ -268,7 +279,8 @@ ProjetQuarium/
    │     │                   PlayerData.coinBoostSeconds runs down only while the tank produces, coins x
    │     │                   QUEST_COIN_BOOST_MULTIPLIER in dropCoin; Player attributes CoinBoostSeconds / CoinBoostRunning)
    │     ├─ EggService       BuyEgg / OpenEgg: price, gating, incubation (up to PlayerData.incubators eggs per type, the
-   │     │                   soonest opens first), draw (or forceNextHatch, Studio tests), variant with the player's luck,
+   │     │                   soonest opens first), draw (or forceNextHatch, Studio tests), variant with the player's luck
+   │     │                   (or the star power, then spent: EggHatch.starPowered),
    │     │                   quest stats EggsOpened / VariantHatched (+ CompanionStat WaterHen when it is equipped), hatch
    │     │                   time x PlayerData.incubationMultiplier, reveal timing, then FishService.spawnFish; isRevealing
    │     ├─ OnboardingService  Drives onboarding steps from server facts; scripted first coin / first hunger; reward
@@ -276,7 +288,7 @@ ProjetQuarium/
    │     │                   only; MessagingService topic QuariumAdminEvent + MemoryStore hash QuariumEvents so new servers
    │     │                   join; never from Studio), keeps the players' EventImmune attribute. Music: beats on server
    │     │                   clock, guest fish per tank. Abyss / Ufo: runRaid hands the LanternFish / Ufo template to
-   │     │                   AbyssService / UfoService. startAdminEvent / stopRunningEvent (the "/event" command and the admin
+   │     │                   AbyssService / UfoService; Starfall: runUntilEnd runs StarfallService (no template). startAdminEvent / stopRunningEvent (the "/event" command and the admin
    │     │                   panel; in Studio: the playtest server only)
    │     ├─ AdminService     Admin panel's server side: sets each player's AdminPanel attribute (canUseAdminPanel) and
    │     │                   runs its actions, checking the right again: "AdminStartEvent", "AdminStopEvent"
@@ -284,6 +296,9 @@ ProjetQuarium/
    │     ├─ UfoService       UFO night: one UFO per owned tank (clone of the Ufo template, tag Ufo, anchored, moved by
    │     │                   PivotTo), kidnaps one fish at a time (each once per event), notifies the owner of the outcome;
    │     │                   stop() drops a fish still away at once; forceOutcome (Studio "/ufo")
+   │     ├─ StarfallService  The starfall (§3.4): per owned tank a steady rain of invisible star balls (tag Star), caught
+   │     │                   through the "CatchStar" interaction → PlayerData.starCharge; stop() turns each gauge into the
+   │     │                   star power (best of the two) with a notice
    │     ├─ CompanionService Equip / unequip, spawns equipped companions and runs their AI (§3.4 Companions); grant (quest /
    │     │                   Ocean rewards); publishes the feeders' charges on their model (attributes Charges,
    │     │                   MaxCharges, NextChargeAt (server time, absent when full), ChargeInterval)
@@ -340,7 +355,8 @@ ProjetQuarium/
       │  │                   (less haze, clearer own GlassFront / Water, local); headroom above the tank: 6 studs while a
       │  │                   companion is perched / floating (Pelican, Water Hen), 9 while a UFO flies over it (re-framed
       │  │                   once the fly-in lands)
-      │  ├─ AquariumInteractionController  Clicks in focus view → CollectCoin (coin under cursor) or DropFood
+      │  ├─ AquariumInteractionController  Clicks in focus view → CatchStar (a star under the cursor), CollectCoin (a
+      │  │                   coin) or DropFood
       │  ├─ FishRenderController  Builds / moves the local fish models of the watched tanks (own tank in 2.5D, else tanks
       │  │                   within 160 studs of the camera) from FishSync segments; growth, weak tint, exits (Abducted:
       │  │                   sucked into the UFO); UFO mutations (green / red tint + sparkles + glow, a "z Z z" bubble and
@@ -373,6 +389,10 @@ ProjetQuarium/
       │  ├─ UfoEventController  UFO night visuals (local): violet night (Lighting + UfoGrade), space backdrop on every tank,
       │  │                   night-blue water, two green searchlights sweeping each tank; per UFO (tag Ufo) a pink glow and,
       │  │                   while "Beaming", a green tractor beam, sparkles and light
+      │  ├─ StarfallEventController  Starfall visuals (local): blue night (Lighting + StarfallGrade), starry backdrop with
+      │  │                   shooting streaks on every tank, night-blue water, golden tank light, shooting stars in the sky
+      │  │                   around the camera; draws each Star hitbox (★ glyph billboard with halo, light, trail,
+      │  │                   sparkles), bursts it when "Caught", blinks it while "Fading"
       │  └─ LikeBoardController  Local SurfaceGui (React LikeBoard) on every like board + local "Like" ProximityPrompt;
       │                      getOwnBoostEndsAt / onOwnBoostChanged (own tank's boost, for the pill)
       └─ ui/                 React components
@@ -389,7 +409,14 @@ ProjetQuarium/
          │                   red "!" when a ready egg is out of view); it follows the best unlocked egg + the next gated
          │                   one until moved. Several incubators: a slot shows its soonest egg, a "n/N" chip and a gold
          │                   "+" that buys one more
-         ├─ EggReveal        Hatch animation (rarity, odds (never an easter egg's: "SECRET"), "NEW!" first discovery)
+         ├─ EggReveal        Hatch animation (rarity, odds (never an easter egg's: "SECRET"; "STAR POWER" for a variant
+         │                   drawn with star power), "NEW!" first discovery)
+         ├─ StarGauge        The starfall's star gauge (FigCraft starfall.figcraft), right edge: navy plate, ★ badge, tube
+         │                   of 3 bars filling with gold, a chip per bar (ANOMALY / GHOST / SHINY: SURE!, dimmed, or its
+         │                   chance with the player's luck), the kept power marked, "CATCH THE STARS!" / "SHINY SURE!";
+         │                   only while the starfall runs
+         ├─ StarPowerPill    The star power kept (starPower > 0, no starfall running): a pill under the egg shop, stacked
+         │                   under the boost pills, in the guaranteed variant's colour ("NEXT EGG: AT LEAST A GHOST")
          ├─ OnboardingPanel  Onboarding instruction card
          ├─ RewardPopup      Reward celebration (money / companion / feature, optional image)
          ├─ EventBanner      Running event banner (style per event, EVENT_BANNER_STYLES: beat flashes / slow glow), formatTime
@@ -531,6 +558,8 @@ ProjetQuarium/
   | `likesReceived`, `lastLikeGivenAt` | Likes received, last like given (cooldown, server time). The boost itself is not saved |
   | `themeChoice`, `hiddenCosmetics`, `titleChoice` | The aquarium choices (customization.ts): theme worn ("Auto" = the newest reached), earned decor / finishes hidden (everything earned shows by default), title shown ("Auto" = the best, "None") |
   | `coinBoostSeconds` | Quest coin boost left (daily / weekly rewards): adds up, runs down only while the tank produces, kept through rebirths |
+  | `starPower` | Star power kept from a starfall (0–3 bars): the next opened egg draws its variant from getStarVariantOdds and spends it; kept through rebirths |
+  | `starCharge` | The star gauge of the starfall running now (0 otherwise): banked into starPower at the event's end, or by sanitizeSave if the player left mid-event (without the floor) |
   | `rebirths` | Rebirths done: coin multiplier and aquarium theme |
   | `perks` | Permanent quest bonuses (shared/types/perks), kept through rebirths |
   | `cosmetics` | Titles, decor and finishes earned (shared/types/cosmetics), kept forever |
@@ -555,6 +584,7 @@ ProjetQuarium/
 | | `BuyGamePass` (GamePass): shows Roblox's prompt; the pass itself comes from Roblox | GamePassService |
 | `Interact` (rate-limited) | `DropFood` (Vector3) | FoodService |
 | | `CollectCoin` (coin hitbox) | CoinService (must stand at own tank) |
+| | `CatchStar` (star hitbox) | StarfallService (own star, must stand at own tank) |
 
 New actions: `DataService.registerAction(name, tCheck, handler)` on the server, then a callback in `AppProps` →
 `UiController` that fires `RequestAction`. Document them in `network.ts`.
@@ -565,7 +595,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
 |---|---|---|
 | `SyncPlayerData` | Full PlayerData | UiController (+ CapacityPlaque…) |
 | `Notify` | `(message, "info"\|"warning")` | HudController toast |
-| `EggHatched` | `{eggType, fishType, variant, firstTime}` (first of that type *and* variant) | UiController → EggReveal (the server drops the fish after `HATCH_REVEAL_TIME`) |
+| `EggHatched` | `{eggType, fishType, variant, firstTime, starPowered}` (first of that type *and* variant) | UiController → EggReveal (the server drops the fish after `HATCH_REVEAL_TIME`) |
 | `Reward` | `{title, subtitle, amount, item?: {icon, name, image?}}` | RewardPopup (after any reveal) |
 | `MoneyPopup` | `{position, amount, special, ocean?, stolen?, ghost?}` | IncomePopupController |
 | `PlaySfx` | `(SfxName, pitch)` | AudioController |
@@ -575,7 +605,8 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
 
 - **Tag / attribute replication:** `Coin` hitboxes carry `Special`, `Frozen`, `Bubble` and `Ghost`. `Companion` models
   carry `Owner` and `CompanionType` (feeders also their charge attributes). `EventFish` models carry `EventType` (the
-  lantern fish also `Lurking`; a UFO `Beaming`). Tanks carry `OwnerUserId`, `Likes`, `LikeBoostEndsAt`, `Theme` and the
+  lantern fish also `Lurking`; a UFO `Beaming`). `Star` hitboxes (starfall) carry `StarSize`, then `Fading` or
+  `Caught`. Tanks carry `OwnerUserId`, `Likes`, `LikeBoostEndsAt`, `Theme` and the
   `INCOME_ATTRIBUTES`. `LikeBoard` models carry `PlotIndex`. Players carry `EventImmune`, `CoinBoostSeconds` /
   `CoinBoostRunning`, `TestSpeed` (the owner's test chip) and `AdminPanel` (may open the admin panel).
 - **Events:** ReplicatedStorage attributes `EventType`, `EventStartsAt`, `EventEndsAt` and `EventSource`
@@ -657,12 +688,12 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   claimable.
 - **Event sources.** *Recurring*: each server's clock starts with the server and again when any event ends. From
   minute 5 each new minute draws once, chance (m − 4) / 11 (minute 15: 100 %), only while at least one player isn't
-  immune; it then picks a random event with `recurring: true` (Island, Abyss or Ufo). *Admin*: "/event <name>" (`isAdmin`)
+  immune; it then picks a random event with `recurring: true` (Island, Abyss, Ufo or Starfall). *Admin*: "/event <name>" (`isAdmin`)
   starts any event with admin behaviour: locally, then MessagingService to every server, and a MemoryStore entry
   (expiring with the event) that servers started later join (if > 5 s left). An admin event replaces whatever runs; a
   recurring event never starts over one. "/event stop" ends the running event (everywhere if admin). In Studio the
   command and the admin panel only touch the playtest server. *Immunity*: EventService sets `EventImmune` every
-  second (not loaded or onboarding not Done); immune owners get no guest, no raid, no UFO and no coin bonus, and
+  second (not loaded or onboarding not Done); immune owners get no guest, no raid, no UFO, no star and no coin bonus, and
   MusicEventController hides the event from them; when the tutorial ends mid-event, the event joins them.
 - **Music event.** `EventService.startEvent` sets the attributes; the server beat loop drops the beat coins. *Flat*
   (K-pop, admin): `FishService.dropBeatCoins(chance)` on every beat, the same chance for every fish. *Paced* (Island
@@ -696,6 +727,17 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   forced one in Studio): **Sleep** (1 min frozen), **Green** / **Red** (1 min of coins x2 / x0.5), **Variant** (the next
   variant for good: `DataService.changeFish`; a Shiny gets Green), **Alien** (replaced by an AlienFish; hatched counts
   it). The minute counts only while the tank produces. The owner gets a notice (warning for Sleep / Red).
+- **Starfall.** `StarfallService.run` (recurring, 60 s, no template). Per owned tank (not immune; a tank joining late
+  gets its share for the time left) 16–20 stars, one per slot of equal length from 2 s after the start to 8 s before
+  the end, size drawn by weight. A star is an invisible anchored ball (tag `Star`, attribute `StarSize`) in the tank's
+  Coins folder: it streaks in on a slant from 38 studs above and 20 to a side (30 studs/s), sinks slowly (2.4 studs/s),
+  lies 6 s on the sand (`Fading` for the last 1.5 s), then vanishes. `CatchStar` (the owner, at the tank) adds its
+  power (random in its size's range) to `starCharge`, sets `Caught` (the clients burst it) and plays StarCatch higher
+  as the gauge fills. `stop()` (the end, an admin stop or replacement) turns each gauge into
+  `getFinalStarCharge` (at least 1.5 x the share caught) and keeps the better of it and `starPower`, with a notice.
+  `EggService.openEgg`: with `starPower` > 0 (not the onboarding egg, not an easter egg), the variant comes from
+  `rollStarVariant(power, luck)` and the power is spent. Client: StarfallEventController, StarGauge (during the
+  event), StarPowerPill (after it), banner.
 - **Rebirth.** Claiming "Saving Up" unlocks the "Rebirth" feature: a notice, the side button with a "NEW" coach
   bubble (its tutorial ends when the menu opens) and a "!" badge whenever a rebirth is affordable. "Rebirth" needs a
   second click. Server: refused during a hatch reveal; Ocean Points from `getRebirthOceanPoints` (variants included),
@@ -757,6 +799,9 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
 - **Left before V1** (the owner's): gamepass prices at the alpha release, then the calibration with real players
   (`npm run stats` vs BALANCE.md §2). Kpop is the only admin-only
   event (its flat beat coins give a 30 s fish x14 for a minute); the UFO night's track is `musicId` 87373069356270.
+- **Starfall**: its track is `musicId` 88076339607645 (the owner's choice). The stars are a ★ text glyph on a billboard
+  (no uploaded image). The sky shooting stars over the lobby were only seen in the 2.5D view in Studio (the playtest
+  camera stays on the tank).
 - **Admin events across servers** rely on MessagingService (best effort, a few seconds of delay; a server that misses
   the message joins through the MemoryStore only when it starts). Add admins by UserId in `server/admins.ts` (the
   game's owner always is one).

@@ -75,6 +75,13 @@ export interface PlayerData {
 	 * run down while the tank produces (FishService: not AFK, not paused, onboarding done), through rebirths.
 	 */
 	coinBoostSeconds: number;
+	/**
+	 * Star power (shared/types/stars): bars of the star gauge kept from a starfall, spent by the next egg opened (its
+	 * variant drawn from getStarVariantOdds). 0 = none. Kept through rebirths.
+	 */
+	starPower: number;
+	/** The star gauge of the starfall running now (0 otherwise); it becomes the star power when the event ends. */
+	starCharge: number;
 	/** Rebirths done (shared/types/rebirths): permanent coin multiplier and aquarium theme. */
 	rebirths: number;
 	/** Titles, decor and finishes earned (shared/types/cosmetics), kept forever. */
@@ -135,6 +142,8 @@ export const DEFAULT_PLAYER_DATA: PlayerData = {
 	likesReceived: 0,
 	lastLikeGivenAt: 0,
 	coinBoostSeconds: 0,
+	starPower: 0,
+	starCharge: 0,
 	rebirths: 0,
 	cosmetics: [],
 	themeChoice: "Auto",

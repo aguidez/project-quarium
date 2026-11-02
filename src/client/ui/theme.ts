@@ -441,6 +441,24 @@ export const UFO_COLORS = {
 	sleep: Color3.fromHex("#BFD8FF"),
 };
 
+/** The starfall (StarfallEventController, StarGauge): a deep blue starry night, golden stars. */
+export const STARFALL_COLORS = {
+	bannerTop: Color3.fromHex("#1B3A8C"),
+	bannerBottom: Color3.fromHex("#070D2E"),
+	subtitle: Color3.fromHex("#FFE89A"),
+	/** The falling stars (gold, their glow) and their trail fading to blue: the banner glows from one to the other. */
+	star: Color3.fromHex("#FFD84A"),
+	starLight: Color3.fromHex("#FFF6C8"),
+	starEdge: Color3.fromHex("#B8770A"),
+	trail: Color3.fromHex("#8FD3FF"),
+	backdropTop: Color3.fromHex("#0A1650"),
+	backdropMiddle: Color3.fromHex("#16206B"),
+	backdropBottom: Color3.fromHex("#3B2A78"),
+	twinkles: [Color3.fromHex("#FFFFFF"), Color3.fromHex("#FFF3B0"), Color3.fromHex("#BDE3FF")],
+	water: Color3.fromHex("#14245E"),
+	tankLight: Color3.fromHex("#FFE7A0"),
+};
+
 /**
  * Look of the event banner, per event: music events flash on the beat through their accents (also the stage colours of
  * their guest, MusicEventController), the raids glow slowly from one accent to the other.
@@ -472,6 +490,12 @@ export const EVENT_BANNER_STYLES: Record<
 		bottom: UFO_COLORS.bannerBottom,
 		subtitle: UFO_COLORS.subtitle,
 		accents: [UFO_COLORS.beam, UFO_COLORS.dome],
+	},
+	Starfall: {
+		top: STARFALL_COLORS.bannerTop,
+		bottom: STARFALL_COLORS.bannerBottom,
+		subtitle: STARFALL_COLORS.subtitle,
+		accents: [STARFALL_COLORS.star, STARFALL_COLORS.trail],
 	},
 };
 
