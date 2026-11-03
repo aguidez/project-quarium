@@ -1,3 +1,4 @@
+import { isEggAvailable } from "./alpha";
 import { CompanionType, DEFAULT_COMPANION_SLOTS, WATER_HEN_HATCH_MULTIPLIER } from "./companions";
 import { CosmeticId } from "./cosmetics";
 import type { ThemeChoice, TitleChoice } from "./customization";
@@ -254,6 +255,7 @@ export function hasFreeIncubator(data: Pick<PlayerData, "incubating" | "incubato
 
 /** An egg shows up in the shop (and can be bought) once the player has bought one of the egg it requires. */
 export function isEggUnlocked(data: PlayerData, eggType: EggType): boolean {
+	if (!isEggAvailable(eggType, data.rebirths)) return false;
 	const requires = EGG_TYPES[eggType].requires;
 	return requires === undefined || (data.eggsBought[requires] ?? 0) > 0;
 }

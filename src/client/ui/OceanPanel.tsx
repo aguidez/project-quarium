@@ -5,7 +5,12 @@ import { getLivingVariant, PlayerData } from "shared/types/playerData";
 import { FISH_VARIANTS, FishVariant, getOceanPoints, VARIANT_ORDER } from "shared/types/variants";
 import { getPassOceanMultiplier } from "shared/types/gamepasses";
 import { COMPANION_TYPES } from "shared/types/companions";
-import { OCEAN_MILESTONES, OceanMilestone, OceanRewardId } from "shared/types/oceanRewards";
+import {
+	getAvailableOceanMilestones,
+	OCEAN_MILESTONES,
+	OceanMilestone,
+	OceanRewardId,
+} from "shared/types/oceanRewards";
 import { Button3D, Card, Chip, ItemSlot, Outline, Plate, ProgressBar, TextStroke } from "./kit";
 import { formatNumber, getWrappedHeight, Panel, PANEL_INNER_WIDTH } from "./Panel";
 import {
@@ -55,6 +60,8 @@ const MILESTONE_LIST_RIGHT = 12; // room for the scroll bar
 const MILESTONE_INFO_WIDTH =
 	MILESTONE_INNER_WIDTH - MILESTONE_LIST_INSET - MILESTONE_LIST_RIGHT - 20 - MILESTONE_ICON - 10;
 const MILESTONES_TEXT = "Ocean Points are never spent: reach each milestone to claim its reward.";
+/** Under the last milestone of the alpha (the later ones are left out of the list). */
+const MORE_MILESTONES_TEXT = "More Ocean rewards arrive with the full game!";
 /** Height of the milestone list: about four cards, then it scrolls (V1 has ~17 milestones). */
 const MILESTONE_LIST_HEIGHT = 470;
 const MILESTONE_GAP = 10;
@@ -64,6 +71,8 @@ export interface OceanPanelProps {
 	/** Living fish per type and rare variant (PlayerData.fish, fishVariants). */
 	tank: Pick<PlayerData, "fish" | "fishVariants" | "passes">;
 	oceanPoints: number;
+	/** Rebirths done: the alpha shows its own milestones only (getAvailableOceanMilestones). */
+	rebirths: number;
 	/** First visit after unlocking it: a short explanation on top (FigCraft: PanelCoach). */
 	showTutorial: boolean;
 	onRelease: (fishType: FishType, variant: FishVariant) => void;
@@ -481,7 +490,8 @@ export function OceanPanel(props: OceanPanelProps) {
 		/>
 	);
 
-	const milestones = OCEAN_MILESTONES.map((milestone, index) => (
+	const available = getAvailableOceanMilestones(props.rebirths);
+	const milestones = available.map((milestone, index) => (
 		<MilestoneCard
 			key={milestone.id}
 			order={index + 1}
@@ -492,9 +502,28 @@ export function OceanPanel(props: OceanPanelProps) {
 		/>
 	));
 
+	if (available.size() < OCEAN_MILESTONES.size()) {
+		const width = MILESTONE_INNER_WIDTH - MILESTONE_LIST_INSET - MILESTONE_LIST_RIGHT;
+		milestones.push(
+			<textlabel
+				key="More"
+				LayoutOrder={available.size() + 1}
+				Size={UDim2.fromOffset(width, getWrappedHeight(MORE_MILESTONES_TEXT, 14, FONT_BOLD, width) + 8)}
+				BackgroundTransparency={1}
+				Font={FONT_BOLD}
+				Text={MORE_MILESTONES_TEXT}
+				TextSize={14}
+				TextColor3={OCEAN_COLORS.light}
+				TextWrapped={true}
+			>
+				<TextStroke />
+			</textlabel>,
+		);
+	}
+
 	// The list opens on the first milestone not claimed yet (the claimed ones scroll out of the way)
 	const listRef = useRef<ScrollingFrame>();
-	const firstOpen = OCEAN_MILESTONES.findIndex((milestone) => !props.claimed.includes(milestone.id));
+	const firstOpen = available.findIndex((milestone) => !props.claimed.includes(milestone.id));
 	useEffect(() => {
 		if (firstOpen <= 0) return;
 		// After the layout pass: the cards' heights depend on their wrapped descriptions

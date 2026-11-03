@@ -3,10 +3,38 @@
 Every change to the game, patch by patch. The newest version is at the top.
 
 **Rules**
-- Each patch is a sub-patch: +0.01 (V0.01 → V0.02 → V0.03…), unless a bigger version step is asked for.
+- Each patch is a sub-patch: +0.0.1 since the alpha (V0.60.0 → V0.60.1 → V0.60.2…; +0.01 up to V0.59), unless a bigger
+  version step is asked for.
 - Every task that changes the game opens a new patch, and all its changes go into it.
 - Old versions are never deleted or rewritten: they are the history of the game.
 - Each patch lists its changes under **New**, **Changes**, **Balance** and **Fixes**. Leave out the sections that are empty.
+
+---
+
+## V0.60.0 — 2026-11-03 — Alpha
+
+**New**
+- **The alpha**: a short version of the game for the first testers, about 2h15 of play for an average player. It
+  holds the first two rebirths (Lagoon Aquarium, Neon Coral Lagoon), the six first eggs up to the Neon Coral Egg and
+  their nine species, the Snail and the Pelican, the Ocean rewards up to the second incubator, the story quests of
+  that part (Voyage up to "Crown of the Reef", Snail, Pelican, Hatchery 1, Collector 1 to 3, Ocean) and the daily
+  quests. The rest of the game waits for the full release.
+- **End of the alpha**: finding the nine species of the alpha shows "ALPHA COMPLETE!", thanks the player and invites
+  them to share their feedback, and gives the title **Alpha Pioneer**, kept for good.
+- **Version on screen**: the game's version shows small and faded in the bottom-right corner ("Alpha V0.60.0"), so
+  testers can say which version their feedback is about.
+- **Version numbers**: from the alpha on, versions get a third number: V0.60.0, then V0.60.1, V0.60.2…
+
+**Changes**
+- The egg shop shows the six eggs of the alpha. The Rebirth menu, after the second rebirth, says the Neon Coral Lagoon
+  is the last aquarium of the alpha and more arrive with the full game.
+- The Ocean lists its rewards up to the second incubator, then "More Ocean rewards arrive with the full game!". Ocean
+  Points keep counting.
+- The Fish Index lists the nine species of the alpha (36 entries) and the eggs of the alpha they hatch from; Customize
+  lists the three aquariums of the alpha.
+- The weekly quests tab says weekly quests arrive with the full game.
+- No gamepass is for sale during the alpha: the fisherman's shop shows them as SOON.
+- A save already past the alpha keeps the whole game: the alpha stops progress, it never takes anything back.
 
 ---
 

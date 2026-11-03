@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "@rbxts/react";
 import { Workspace } from "@rbxts/services";
+import { isEggAvailable } from "shared/types/alpha";
 import { EGG_TYPES, EggType, getEggPrice, STARTER_EGG } from "shared/types/eggs";
 import { canBuyEggs } from "shared/types/onboarding";
 import {
@@ -33,6 +34,7 @@ const ARROW_SIZE = new Vector2(36, 56);
 const ARROW_MARGIN = 14; // shelf edge to arrow
 const ARROW_GAP = 12; // arrow to the first / last slot
 const SHOP_ORDER = getShopOrder();
+/** The shelf keeps room for its arrows (every egg of the game); with fewer eggs (the alpha's six) they hide. */
 const HAS_ARROWS = SHOP_ORDER.size() > SLOT_COUNT;
 /** Shelf edge to the first slot. */
 const SLOTS_INSET = HAS_ARROWS ? ARROW_MARGIN + ARROW_SIZE.X + ARROW_GAP : SHELF_PADDING;
@@ -56,16 +58,16 @@ export interface ShopBarProps {
  * First egg shown when the player hasn't moved the shelf: the window ends on the first egg not unlocked yet
  * (its gate shows what comes next), or on the last egg, so the best eggs the player can buy are in view.
  */
-function getAutoStart(data: PlayerData | undefined): number {
-	let last = SHOP_ORDER.size() - 1;
-	for (let i = 0; i < SHOP_ORDER.size(); i++) {
-		const unlocked = data ? isEggUnlocked(data, SHOP_ORDER[i]) : EGG_TYPES[SHOP_ORDER[i]].requires === undefined;
+function getAutoStart(data: PlayerData | undefined, order: readonly EggType[]): number {
+	let last = order.size() - 1;
+	for (let i = 0; i < order.size(); i++) {
+		const unlocked = data ? isEggUnlocked(data, order[i]) : EGG_TYPES[order[i]].requires === undefined;
 		if (!unlocked) {
 			last = i;
 			break;
 		}
 	}
-	return math.clamp(last - (SLOT_COUNT - 1), 0, math.max(SHOP_ORDER.size() - SLOT_COUNT, 0));
+	return math.clamp(last - (SLOT_COUNT - 1), 0, math.max(order.size() - SLOT_COUNT, 0));
 }
 
 /** Whether an egg of these types is ready to open (its soonest egg's time has come). */
@@ -119,9 +121,7 @@ function ShelfArrow(props: { direction: -1 | 1; enabled: boolean; readyAway: boo
 			zIndex={2}
 			disabled={!props.enabled}
 			onClick={props.onClick}
-			overlay={
-				props.readyAway && <NotifBadge key="Ready" text="!" size={22} position={UDim2.fromOffset(4, 2)} />
-			}
+			overlay={props.readyAway && <NotifBadge key="Ready" text="!" size={22} position={UDim2.fromOffset(4, 2)} />}
 		>
 			<Chevron direction={props.direction} color={props.enabled ? new Color3(1, 1, 1) : NAVY.inactiveText} />
 		</Button3D>
@@ -134,15 +134,19 @@ export function ShopBar(props: ShopBarProps) {
 	const money = data?.money ?? 0;
 	const fishAndEggs = data ? getFishAndEggs(data) : 0;
 
+	// The eggs in the game for this player (the alpha's, see isEggAvailable)
+	const order = SHOP_ORDER.filter((eggType) => isEggAvailable(eggType, data?.rebirths ?? 0));
+	const showArrows = order.size() > SLOT_COUNT;
+
 	// The shelf follows the player's best eggs until they move it; a new egg unlocking brings it back there
-	const autoStart = getAutoStart(data);
+	const autoStart = getAutoStart(data, order);
 	const [moved, setMoved] = useState<{ start: number; autoStart: number }>();
-	const maxStart = math.max(SHOP_ORDER.size() - SLOT_COUNT, 0);
-	const start = moved && moved.autoStart === autoStart ? moved.start : autoStart;
+	const maxStart = math.max(order.size() - SLOT_COUNT, 0);
+	const start = moved && moved.autoStart === autoStart ? math.min(moved.start, maxStart) : autoStart;
 	const move = (step: number) => setMoved({ start: math.clamp(start + step, 0, maxStart), autoStart });
-	const visible = SHOP_ORDER.filter((_, index) => index >= start && index < start + SLOT_COUNT);
-	const before = SHOP_ORDER.filter((_, index) => index < start);
-	const after = SHOP_ORDER.filter((_, index) => index >= start + SLOT_COUNT);
+	const visible = order.filter((_, index) => index >= start && index < start + SLOT_COUNT);
+	const before = order.filter((_, index) => index < start);
+	const after = order.filter((_, index) => index >= start + SLOT_COUNT);
 	// Re-checked now and then: an egg out of view gets ready between two syncs
 	const [, setReadyTick] = useState(0);
 	useEffect(() => {
@@ -248,7 +252,7 @@ export function ShopBar(props: ShopBarProps) {
 						<uicorner CornerRadius={new UDim(0, 22)} />
 						<uistroke Color={PALETTES.lagoon.light} Transparency={0.75} Thickness={2} />
 					</frame>
-					{HAS_ARROWS && (
+					{showArrows && (
 						<>
 							<ShelfArrow
 								direction={-1}

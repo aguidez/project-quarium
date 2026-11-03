@@ -35,7 +35,8 @@ import { SideButtons } from "./SideButtons";
 import { StarGauge } from "./StarGauge";
 import { StarPowerPill } from "./StarPowerPill";
 import { Button3D, Chip, TextStroke } from "./kit";
-import { FONT_TITLE, PALETTES, V2_IMAGES } from "./theme";
+import { FONT_BOLD, FONT_TITLE, PALETTES, V2_IMAGES } from "./theme";
+import { getVersionLabel } from "shared/version";
 
 const MIN_SCALE = 0.4;
 const SIDE_MARGIN = 16; // gap kept between the bar and Roblox's topbar buttons
@@ -295,6 +296,22 @@ export function App(props: AppProps) {
 					scale={scale}
 				/>
 			)}
+			{/* The version, small and faded in the corner (above the owner's test chip when it shows) */}
+			<textlabel
+				key="Version"
+				AnchorPoint={new Vector2(1, 1)}
+				Position={new UDim2(1, -12, 1, props.testMode !== undefined ? -48 : -8)}
+				Size={UDim2.fromOffset(160, 18)}
+				BackgroundTransparency={1}
+				Font={FONT_BOLD}
+				Text={getVersionLabel()}
+				TextSize={14}
+				TextColor3={new Color3(1, 1, 1)}
+				TextTransparency={0.35}
+				TextXAlignment={Enum.TextXAlignment.Right}
+			>
+				<TextStroke transparency={0.6} thickness={1.5} />
+			</textlabel>
 			{props.testMode !== undefined && (
 				<Chip
 					key="TestSpeed"
@@ -356,7 +373,7 @@ export function App(props: AppProps) {
 							: undefined
 					}
 					oceanCoach={oceanTutorial && openPanel !== "Ocean"}
-					oceanBadge={hasClaimableOceanReward(data.oceanPoints, data.oceanRewardsClaimed)}
+					oceanBadge={hasClaimableOceanReward(data.oceanPoints, data.oceanRewardsClaimed, data.rebirths)}
 					onRebirth={
 						rebirthUnlocked
 							? () => {
@@ -469,6 +486,7 @@ export function App(props: AppProps) {
 					key="OceanPanel"
 					tank={data}
 					oceanPoints={data.oceanPoints}
+					rebirths={data.rebirths}
 					showTutorial={oceanTutorial}
 					onRelease={(fishType, variant) => {
 						releasedFish.current = true;

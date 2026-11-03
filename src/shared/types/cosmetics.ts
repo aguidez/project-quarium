@@ -18,6 +18,7 @@ export type CosmeticId =
 	| "TitleMasterAquarist"
 	| "TitleCollector"
 	| "TitleOceanFriend"
+	| "TitleAlphaPioneer"
 	| "TitleOceanLegend"
 	| "TitleTankTycoon"
 	| "TitleDevotedKeeper"
@@ -54,6 +55,11 @@ export const COSMETICS: Record<CosmeticId, CosmeticConfig> = {
 		kind: "Title",
 		displayName: "Ocean Friend",
 		description: "A title for those who set a Shiny free.",
+	},
+	TitleAlphaPioneer: {
+		kind: "Title",
+		displayName: "Alpha Pioneer",
+		description: "A title for the testers who reached the end of the alpha.",
 	},
 	TitleOceanLegend: {
 		kind: "Title",
@@ -106,6 +112,7 @@ export function isCosmeticId(value: unknown): value is CosmeticId {
 export const TITLE_ORDER: readonly CosmeticId[] = [
 	"TitleMasterAquarist",
 	"TitleOceanGuardian",
+	"TitleAlphaPioneer",
 	"TitleCollector",
 	"TitleOceanFriend",
 ];

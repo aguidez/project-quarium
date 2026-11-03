@@ -1,5 +1,6 @@
 import React, { useBinding, useEffect, useState } from "@rbxts/react";
 import { RunService, Workspace } from "@rbxts/services";
+import { isAlphaLimited } from "shared/types/alpha";
 import { COMPANION_TYPES } from "shared/types/companions";
 import { COSMETICS } from "shared/types/cosmetics";
 import { FEATURES } from "shared/types/features";
@@ -439,6 +440,7 @@ export function QuestPanel(props: QuestPanelProps) {
 	const [tab, setTab] = useState<QuestCategory>("Story");
 	const [contentHeight, setContentHeight] = useBinding(0);
 	const quests = getTabQuests(props.quests, tab);
+	const alpha = isAlphaLimited(props.rebirths);
 
 	const tabs = TABS.map(({ category, label }, index) => (
 		<Tab
@@ -464,7 +466,13 @@ export function QuestPanel(props: QuestPanelProps) {
 			/>
 		));
 	} else if (tab === "Story") {
-		content = [<EmptyState key="Empty" title="You finished every story quest! More are coming soon." order={0} />];
+		const text = alpha
+			? "You finished every story quest of the alpha! More arrive with the full game."
+			: "You finished every story quest! More are coming soon.";
+		content = [<EmptyState key="Empty" title={text} order={0} />];
+	} else if (tab === "Weekly" && alpha) {
+		// The weekly board opens at rebirth 3, past the alpha
+		content = [<EmptyState key="Empty" title="Weekly quests arrive with the full game." order={0} />];
 	} else if (!isBoardUnlocked(tab, props.rebirths)) {
 		// The first hours stay on the story quests
 		const name = tab === "Daily" ? "Daily" : "Weekly";

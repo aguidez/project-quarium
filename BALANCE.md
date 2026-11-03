@@ -3,7 +3,7 @@
 > The game's balance: what an average player reaches after how long, and why. **Update it in the same task whenever a
 > number of the economy changes** (fish income, eggs, odds, rebirths, Ocean milestones, variants, food, capacity,
 > companions…): run the simulators, copy their results here, add a line to the history (§6).
-> Last updated: 2026-11-02 (V0.52: the starfall, a recurring event whose star gauge chooses the next egg's variant).
+> Last updated: 2026-11-03 (V0.60.0: the alpha, the first ~2h15 of the game for the first testers, §7).
 
 
 **Where the numbers live**: `src/shared/types/fish.ts` (species), `eggs.ts` (eggs), `rebirths.ts` (rebirths),
@@ -615,3 +615,26 @@ content (species, eggs, aquariums, capacity, companions themselves) away from fr
 | V0.49 | UFO night (recurring event, not modelled): mutations x2 / x0.5 / asleep for a minute (+0.25 fish-minute per kidnapping on average), 4.5 % a better variant, 0.5 % the Alien Fish (no coin, its scream: one coin from every other fish every 30 s, 500 points, stays) | Unchanged (events are not in the simulator); expected ~6.5 better variants and ~0.7 Alien Fish per 12 h run, the alien worth +17 % to +100 % of the tank's income while it stays |
 | V0.51 | Island Breeze (recurring music event, not modelled): 124 BPM, coins on every other beat with chance boost x 0.97 s / the fish's payout interval, boost 0.5 → 1.5, finale (every fish's coin once, ~57 s) | Unchanged (events are not in the simulator): x2 coins for the minute at every stage, +1.1 to +1.5 min of income per event, +3 to +4 % while playing. Three recurring events instead of two: UFO nights ~2.7 → ~1.7 an hour (~4 better variants, ~0.45 Alien Fish per 12 h run) |
 | V0.52 | Starfall (recurring event, not in the economy simulator; `tools/starfall-sim.js`): 16–20 stars per tank, 4 sizes (0.05–0.09 / 0.11–0.18 / 0.25–0.4 / 0.6–0.9 bars, 56 / 30 / 11 / 3 %), floor 1.5 bars x the share caught; star power for the next egg: 1 bar Anomaly+, 2 bars Ghost+, 3 bars Shiny | Coins unchanged. 75 % of the stars caught: 1.8 bars at the median, ~6 Anomalies, ~7 Ghosts, ~2 Shinies per 12 h run on top of ~90 / 45 / 9 from the eggs; all caught: 2.5 bars, 3 bars one time in five. Four recurring events: Island Breeze and UFO nights ~1.7 → ~1.25 an hour (Island +2.5 to +3 % while playing, ~3 better variants and ~0.35 Alien Fish per run from the UFO) |
+| V0.60.0 | The alpha (§7): rebirths 1–2, eggs up to the Neon Coral Egg, Ocean milestones up to 5,000, the story quests of that part, dailies, no gamepass; no number changed | Unchanged: rebirth 2 ~1h33, the alpha's end (all nine species) **~2h16** (1h51–2h39); with the +50 % Coins pass it would be ~1h34 |
+
+---
+
+## 7. The alpha (V0.60.0, `shared/types/alpha.ts`)
+
+A short version for the first testers, decided by the owner (2026-11-03): **~2 h of play**, the content the
+reference player reaches in that time, then feedback for V1. Nothing in the economy changes: the alpha only stops the
+progression (no price, odds or reward was touched, so the simulator's run of §2 is the alpha's too).
+
+| Kept in the alpha | Why there |
+|---|---|
+| Rebirths 1–2 (Lagoon, Neon Coral Lagoon) | Rebirth 2 at ~1h33 (1h20–1h47); rebirth 3 (~2h48) is past the target |
+| Eggs up to the Neon Coral Egg, the nine first species | The Imperial Discus, last of them, at ~2h16 (1h51–2h39): **the end of the alpha** |
+| Ocean milestones up to 5,000 points (Pelican, Faster Snail, second slot, Hungry Pelican, 15 fish, second incubator) | 1,500 at rebirth 2; 5,000 at ~2h44 for a player who keeps releasing. 8,000 (17 fish) belongs to rebirth 3 |
+| Story quests: Start, Ocean (Full House, Back to the Sea, Ocean Friend), Voyage to "Crown of the Reef", Snail, Pelican, Hatchery 1, Collector 1–3 | Reached in the first ~1h35; Hatchery 2 (~4h17) and Collector 4–6 (25 / 50 cells, Shiny: 2,500 Ocean Points each, tuned for after ~3 h) are left out |
+| Daily quests (from rebirth 2) | ~40 min of them at the end; the weekly ones open at rebirth 3, so none |
+
+Cut-off measured on the live simulator (V0.60.0 run, 1,000 players, 1 h a day): **all nine species at ~2h16 (1h51–2h39)**.
+A player who stops at the cut-off can keep farming the Neon Coral Egg for the variants (36 Fish Index entries) and
+Ocean Points; nothing else opens. Stopping at rebirth 1 would have given ~1h10, at rebirth 3 + the Catfish ~3h40.
+Gamepasses are not sold: the +50 % Coins pass alone would bring the end to ~1h34 (1h22–1h49, simulator `{"P":{"coinBoost":1.5}}`) and skew the feedback.
+`tools/player-stats.js` expects the `AlphaComplete` milestone at ~136 min.

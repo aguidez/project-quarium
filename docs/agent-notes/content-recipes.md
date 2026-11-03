@@ -10,6 +10,11 @@ CLAUDE.md §7 (moderation): describe it to the owner first when its theme is ris
 Numbers are tuned with `tools/economy-sim.js` (a `--plan <file>` previews them before they go in the config), then
 BALANCE.md is updated (CLAUDE.md §0c). Asset quirks: [[fish-asset-pipeline]].
 
+**While the alpha is on** (`shared/types/alpha.ts`, V0.60.0): content placed after the Neon Coral Egg / rebirth 2 /
+5,000 Ocean Points stays hidden from the testers by itself; a new story quest only opens in the alpha once its id is in
+`ALPHA_STORY_QUESTS` (leave it out when it belongs to the later game). Test such content on a save past the alpha or
+with `ALPHA_ENABLED = false`, never by widening the alpha without the owner.
+
 ## A new species
 
 0. Prompts that work with generate_mesh: "fish swimming horizontally, side view, <shape> body longer than tall, ...,

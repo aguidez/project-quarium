@@ -31,6 +31,7 @@ const REFERENCE = {
 	Rebirth8: 665,
 	"Species:FlameGourami": 54,
 	"Species:ImperialDiscus": 135,
+	AlphaComplete: 136, // the alpha's nine species (V0.60.0): the Imperial Discus is usually the last one
 	"Species:Catfish": 219,
 	"Species:BabySunfish": 324,
 	"Species:Lanternfish": 410,
@@ -45,6 +46,7 @@ const MILESTONE_ORDER = [
 	"Onboarding:Done",
 	...Object.keys(REFERENCE).filter((k) => k.startsWith("Rebirth")),
 	...Object.keys(REFERENCE).filter((k) => k.startsWith("Species:")),
+	"AlphaComplete",
 	"AllSpecies",
 ];
 

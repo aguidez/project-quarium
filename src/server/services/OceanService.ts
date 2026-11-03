@@ -8,6 +8,7 @@ import { getCompanionSlots, getLivingVariant, getTotalFish } from "shared/types/
 import { FISH_VARIANTS, FishVariant, getOceanPoints } from "shared/types/variants";
 import { COMPANION_TYPES } from "shared/types/companions";
 import { getOceanMilestone } from "shared/types/oceanRewards";
+import { isOceanMilestoneAvailable } from "shared/types/alpha";
 import { CompanionService } from "./CompanionService";
 import { getTestSpeed } from "../playerStats";
 import { DataService } from "./DataService";
@@ -80,6 +81,7 @@ class OceanServiceSingleton implements Lifecycle {
 		const data = DataService.getData(player);
 		const milestone = getOceanMilestone(id);
 		if (!data || !milestone || !data.features.includes("Ocean")) return;
+		if (!isOceanMilestoneAvailable(milestone.points, data.rebirths)) return;
 		if (data.oceanPoints < milestone.points || data.oceanRewardsClaimed.includes(milestone.id)) return;
 
 		data.oceanRewardsClaimed.push(milestone.id);

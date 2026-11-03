@@ -1,3 +1,4 @@
+import { isStoryQuestAvailable } from "./alpha";
 import { CompanionType } from "./companions";
 import { CosmeticId } from "./cosmetics";
 import { Feature } from "./features";
@@ -774,9 +775,14 @@ export function isStoryQuestDone(lines: QuestsData["lines"], questId: string): b
 
 /**
  * Opens the lines whose requirement is met (first quest, from zero) and moves a finished line on to a
- * quest added to it since. Returns whether anything changed.
+ * quest added to it since. A quest left out of the alpha (isStoryQuestAvailable) is never opened: its line stays
+ * finished there. Returns whether anything changed.
  */
-export function refreshStoryLines(lines: QuestsData["lines"], companions: readonly CompanionType[]): boolean {
+export function refreshStoryLines(
+	lines: QuestsData["lines"],
+	companions: readonly CompanionType[],
+	rebirths: number,
+): boolean {
 	let changed = false;
 	for (const line of getStoryLineOrder()) {
 		const config = STORY_LINES[line];
@@ -785,12 +791,12 @@ export function refreshStoryLines(lines: QuestsData["lines"], companions: readon
 			if (config.requires !== undefined && !isStoryQuestDone(lines, config.requires)) continue;
 			if (config.requiresCompanion !== undefined && !companions.includes(config.requiresCompanion)) continue;
 			const first = config.quests[0];
-			if (first === undefined) continue;
+			if (first === undefined || !isStoryQuestAvailable(first, rebirths)) continue;
 			lines[line] = { id: first, progress: 0, claimed: false };
 			changed = true;
 		} else if (current.claimed) {
 			const following = config.quests[config.quests.indexOf(current.id) + 1];
-			if (following === undefined) continue;
+			if (following === undefined || !isStoryQuestAvailable(following, rebirths)) continue;
 			lines[line] = { id: following, progress: 0, claimed: false };
 			changed = true;
 		}
@@ -897,7 +903,7 @@ export function hasClaimableQuest(quests: QuestsData, passes: readonly GamePass[
 
 export function createQuestsData(): QuestsData {
 	const lines: QuestsData["lines"] = {};
-	refreshStoryLines(lines, []);
+	refreshStoryLines(lines, [], 0);
 	return {
 		lines,
 		daily: { period: -1, quests: [] }, // drawn by QuestService

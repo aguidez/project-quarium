@@ -6,7 +6,8 @@
 
 ## 0b. Release Notes (KEEP UP TO DATE)
 - `RELEASE_NOTES.md` records every change to the game, patch by patch, newest version at the top.
-- **Every task that changes the game opens a new patch in the same task**: a sub-patch (+0.01, e.g. V0.01 → V0.02) unless the user asks for a bigger version step. All the changes of the task go into it, under **New**, **Changes**, **Balance** and **Fixes**. Bug fixes are always listed.
+- **Every task that changes the game opens a new patch in the same task**: a sub-patch (+0.0.1, e.g. V0.60.0 → V0.60.1; it was +0.01 up to V0.59) unless the user asks for a bigger version step. All the changes of the task go into it, under **New**, **Changes**, **Balance** and **Fixes**. Bug fixes are always listed.
+- The new patch number also goes in `src/shared/version.ts` (`GAME_VERSION`), shown in the corner of the screen.
 - **Never delete or rewrite old versions**: only add the new patch on top. A task isn't finished while its changes are missing from the release notes.
 
 ## 0c. Balance (KEEP UP TO DATE)

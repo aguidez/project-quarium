@@ -1,4 +1,5 @@
 import React, { useBinding } from "@rbxts/react";
+import { isRebirthAvailable } from "shared/types/alpha";
 import { COSMETICS, CosmeticId } from "shared/types/cosmetics";
 import {
 	getDisplayedTheme,
@@ -231,7 +232,8 @@ export function AquariumPanel(props: AquariumPanelProps) {
 	const unlocked = getUnlockedThemes(props.rebirths);
 	const worn = getDisplayedTheme(props);
 
-	// Themes: Automatic first, then every aquarium in rebirth order (the ones not reached yet, locked)
+	// Themes: Automatic first, then every aquarium in rebirth order (the ones not reached yet, locked; past the alpha's
+	// last rebirth, left out)
 	const themeCards = [
 		<ThemeCard
 			key="Auto"
@@ -246,6 +248,7 @@ export function AquariumPanel(props: AquariumPanelProps) {
 	];
 	for (const { theme, rebirth } of getThemeOrder()) {
 		const locked = !unlocked.includes(theme);
+		if (locked && !isRebirthAvailable(rebirth, props.rebirths)) continue;
 		themeCards.push(
 			<ThemeCard
 				key={theme}
