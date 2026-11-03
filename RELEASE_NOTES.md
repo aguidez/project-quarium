@@ -11,6 +11,15 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.60.2 — 2026-11-03
+
+**Fixes**
+- **Fish growing up**: young fish never looked bigger as they grew (their coins did grow): they kept their baby size
+  on screen until they were drawn again, which is why a fish beamed up by a UFO came back much bigger. Fish now grow
+  in front of you at each stage, with a little bounce.
+
+---
+
 ## V0.60.1 — 2026-11-03
 
 **Changes**

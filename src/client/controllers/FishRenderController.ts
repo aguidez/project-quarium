@@ -267,10 +267,13 @@ class FishRenderControllerSingleton implements Lifecycle {
 	private applyState(fish: LocalFish, hunger: HungerState, growthStage: number, paused: boolean) {
 		const view = fish.view;
 		if (view.hunger !== hunger) this.tint(fish, hunger, TINT_TIME);
-		if (view.growthStage !== growthStage) this.grow(fish, growthStage);
+		const grown = view.growthStage !== growthStage;
 		view.hunger = hunger;
 		view.growthStage = growthStage;
 		view.paused = paused;
+		// After the new stage is stored: grow's loop runs while the fish is at that stage (it stopped at once before,
+		// so fish only showed their size once rebuilt, e.g. back from a UFO)
+		if (grown) this.grow(fish, growthStage);
 		fish.model.SetAttribute("Hunger", hunger);
 		fish.model.SetAttribute("GrowthStage", growthStage);
 		fish.model.SetAttribute("Paused", paused);
