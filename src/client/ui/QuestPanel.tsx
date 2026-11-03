@@ -49,6 +49,7 @@ const DESCRIPTION_SIZE = 15;
 // The list grows with its quests up to this height, then scrolls (the panel must fit small screens)
 const LIST_MAX_HEIGHT = 470;
 const SCROLL_ROOM = 14; // right of the cards, for the scroll bar
+const EDGE_ROOM = 6; // left of the cards: the list clips, and their outline is drawn outside them
 const WHITE = new Color3(1, 1, 1);
 
 /** Colour of each story line's tag (FigCraft redesign-v2: LineTag). */
@@ -507,38 +508,49 @@ export function QuestPanel(props: QuestPanelProps) {
 				/>
 				{tabs}
 			</frame>
-			<scrollingframe
-				key="List"
+			{/* As wide as the cards, so the panel centres them; the list's side rooms spill into the panel's padding */}
+			<frame
+				key="ListArea"
 				LayoutOrder={2}
-				Size={contentHeight.map((h) =>
-					UDim2.fromOffset(INNER_WIDTH + SCROLL_ROOM, math.min(h, LIST_MAX_HEIGHT)),
-				)}
+				Size={contentHeight.map((h) => UDim2.fromOffset(INNER_WIDTH, math.min(h, LIST_MAX_HEIGHT)))}
 				BackgroundTransparency={1}
-				BorderSizePixel={0}
-				CanvasSize={contentHeight.map((h) => UDim2.fromOffset(0, h))}
-				ScrollingDirection={Enum.ScrollingDirection.Y}
-				ScrollBarThickness={6}
-				ScrollBarImageColor3={PALETTES.gold.base}
-				// Even unused the bar leaves a sliver: hidden while everything fits
-				ScrollBarImageTransparency={contentHeight.map((h) => (h > LIST_MAX_HEIGHT ? 0 : 1))}
 			>
-				<frame
-					key="Content"
-					Size={UDim2.fromOffset(INNER_WIDTH, 0)}
-					AutomaticSize={Enum.AutomaticSize.Y}
+				<scrollingframe
+					key="List"
+					Position={UDim2.fromOffset(-EDGE_ROOM, 0)}
+					Size={contentHeight.map((h) =>
+						UDim2.fromOffset(INNER_WIDTH + EDGE_ROOM + SCROLL_ROOM, math.min(h, LIST_MAX_HEIGHT)),
+					)}
 					BackgroundTransparency={1}
-					Change={{
-						// Its height before the panel's UIScale: the list grows with it up to LIST_MAX_HEIGHT, then scrolls
-						AbsoluteSize: (frame) =>
-							setContentHeight(frame.AbsoluteSize.Y * (INNER_WIDTH / math.max(frame.AbsoluteSize.X, 1))),
-					}}
+					BorderSizePixel={0}
+					CanvasSize={contentHeight.map((h) => UDim2.fromOffset(0, h))}
+					ScrollingDirection={Enum.ScrollingDirection.Y}
+					// The canvas stays as wide as the visible area once the bar shows: nothing can slide sideways
+					VerticalScrollBarInset={Enum.ScrollBarInset.ScrollBar}
+					ScrollBarThickness={6}
+					ScrollBarImageColor3={PALETTES.gold.base}
+					// Even unused the bar leaves a sliver: hidden while everything fits
+					ScrollBarImageTransparency={contentHeight.map((h) => (h > LIST_MAX_HEIGHT ? 0 : 1))}
 				>
-					{/* Room for the first card's line tag, above its top edge */}
-					<uipadding PaddingTop={new UDim(0, 14)} />
-					<uilistlayout Padding={new UDim(0, 18)} SortOrder={Enum.SortOrder.LayoutOrder} />
-					{content}
-				</frame>
-			</scrollingframe>
+					<frame
+						key="Content"
+						Position={UDim2.fromOffset(EDGE_ROOM, 0)}
+						Size={UDim2.fromOffset(INNER_WIDTH, 0)}
+						AutomaticSize={Enum.AutomaticSize.Y}
+						BackgroundTransparency={1}
+						Change={{
+							// Its height before the panel's UIScale: the list grows with it up to LIST_MAX_HEIGHT, then scrolls
+							AbsoluteSize: (frame) =>
+								setContentHeight(frame.AbsoluteSize.Y * (INNER_WIDTH / math.max(frame.AbsoluteSize.X, 1))),
+						}}
+					>
+						{/* Room for the first card's line tag, above its top edge */}
+						<uipadding PaddingTop={new UDim(0, 14)} />
+						<uilistlayout Padding={new UDim(0, 18)} SortOrder={Enum.SortOrder.LayoutOrder} />
+						{content}
+					</frame>
+				</scrollingframe>
+			</frame>
 		</Panel>
 	);
 }

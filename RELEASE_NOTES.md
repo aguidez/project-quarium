@@ -11,6 +11,14 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.60.7 — 2026-11-03
+
+**Fixes**
+- **Quest book**: the list of quests sat a little to the left and the left edge of its cards was cut off. It is now
+  centred in the book, with its outline fully drawn, and it can no longer slide sideways once it scrolls.
+
+---
+
 ## V0.60.6 — 2026-11-03
 
 **New**

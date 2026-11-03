@@ -14,4 +14,8 @@ On 2026-10-30 the owner rejected the old UI as "too flat, generic, AI-template l
 
 FigCraft build scripts: an `ellipse` node can't hold children ("can't contain children"): make round parents (medallions, coins, avatars) a frame with `cornerRadius` = half its size. World boards (like / leaderboard signs) follow the same V2 style on a SurfaceGui; letters next to digits in a score ("$7.2M/s", "212h 05m") go in Fredoka, not Luckiest Guy.
 
-Scrolling lists inside a Panel (V0.57, the owner spotted both): the Panel centres its children, so a list widened for its scroll bar shifts the content left; wrap it in a frame exactly `PANEL_INNER_WIDTH` wide and let the scroll bar room spill into the right padding. A ScrollingFrame clips, and a selection ring (Border stroke) spills out of its card: leave a few pixels of room on every side of the content (AquariumPanel's `RING_ROOM`). Round grid cell widths down and split the spare pixels on both sides.
+Scrolling lists inside a Panel (V0.57, the owner spotted both): the Panel centres its children, so a list widened for its scroll bar shifts the content left; wrap it in a frame exactly `PANEL_INNER_WIDTH` wide and let the scroll bar room spill into the right padding. A ScrollingFrame clips, and a selection ring (Border stroke) spills out of its card: leave a few pixels of room on every side of the content (AquariumPanel's `RING_ROOM`). Round grid cell widths down and split the spare pixels on both sides. The QuestPanel had the same bug until V0.60.7
+(the owner saw its cards cut on the left): any new scrolling list follows AquariumPanel's `ListArea` pattern (wrapper
+frame of the content's width, scrolling frame at `-EDGE_ROOM` and `EDGE_ROOM + content + SCROLL_ROOM` wide, content at
+`+EDGE_ROOM`), plus `VerticalScrollBarInset = ScrollBar`: without it, once the bar shows, the visible area shrinks by
+its thickness while the canvas keeps its width, so the content becomes a few pixels wider than the window.
