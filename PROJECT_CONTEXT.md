@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-03 (V0.60.4: the owner's meshes shared with the group's game, tools/share-assets.js).
+> Last updated: 2026-11-03 (V0.60.5: the animated meshes belong to the group, tools/group-mesh-upload.js).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -55,7 +55,7 @@ How to add content: `docs/agent-notes/content-recipes.md`. **`ROADMAP_V1.1.md`**
 | Sync | **Rojo 7.7.1** (aftman). `default.project.json` maps `out/server` → ServerScriptService.TS, `out/shared` → ReplicatedStorage.TS, `out/client` → StarterPlayerScripts.TS, `out/first` → ReplicatedFirst.TS (loading screen). Never edit those scripts in Studio. A change to `default.project.json` needs `rojo serve` restarted (and the plugin reconnected) |
 | Packages | `@rbxts/react` + `react-roblox` (UI), `@rbxts/t` (runtime validation), `@rbxts/janitor` (cleanup), `@rbxts/services`, `@rbxts/profile-store` (player saves, see §3.1) |
 | Build / check | `npx rbxtsc` after every change; it must report zero errors |
-| Workspace | Windows or macOS, set up from `SETUP.md`; `npm run doctor` checks a machine. Machine-specific values (install paths, GPU flags, API keys) only in the git-ignored `workspace.local.json` (via `tools/local-config.js`), never in committed files; scripts are cross-platform Node. npm scripts: `build`, `watch`, `serve` (rojo serve), `sim` (economy simulator), `stats` (real players), `share-assets`, `doctor`. `jimp` 0.22 and `@resvg/resvg-js` 2.6 (SVG → PNG without FigCraft) are devDependencies for the image tools |
+| Workspace | Windows or macOS, set up from `SETUP.md`; `npm run doctor` checks a machine. Machine-specific values (install paths, GPU flags, API keys) only in the git-ignored `workspace.local.json` (via `tools/local-config.js`), never in committed files; scripts are cross-platform Node. npm scripts: `build`, `watch`, `serve` (rojo serve), `sim` (economy simulator), `stats` (real players), `share-assets`, `group-mesh-upload`, `doctor`. `jimp` 0.22 and `@resvg/resvg-js` 2.6 (SVG → PNG without FigCraft) are devDependencies for the image tools |
 | Framework | `shared/framework.ts`: singletons implementing `Lifecycle { onInit (sync), onStart (task.spawn) }`, registered in order in `server/main.server.ts` / `client/main.client.ts` |
 | Server authority | The client only sends **intents**. The server validates each one with `t`, reads prices and odds from shared config, and owns money, inventory, timers and every gameplay state. Even fish positions are server-computed (swim segments): clients only render them, never report them |
 | World ↔ code | Studio models are found by **CollectionService tags** (`shared/tags.ts`) and attributes, never by deep paths. Templates live in `ServerStorage.Assets` in the place file, which Rojo does not manage: **remind the user to save the place** after MCP edits |
@@ -82,6 +82,7 @@ ProjectQuarium/
 ├─ .gitattributes            LF everywhere (CRLF for .bat/.cmd), binaries marked; .gitignore keeps local config out
 ├─ docs/agent-notes/         The agent's shared working knowledge (owner preferences, asset pipeline, Studio MCP
 │                            testing, lobby decor, moderation, player stats), index in its README
+├─ design/meshes/           OBJ source of the 24 animated meshes (exported V0.60.5) + manifest.json (template, old id)
 ├─ design/previews/          Images shown to the owner (Studio captures, mock-ups): crab-sax-preview.jpg (mock-
 │                            up), crab-sax-carry-1-right / -2-middle / -3-left.jpg (Island Breeze's guest dancing),
 │                            admin-panel-mockup.png / admin-panel-ingame.jpg (the admin panel), star-gauge-mockup.png
@@ -137,7 +138,11 @@ ProjectQuarium/
 ├─ tools/starfall-sim.js     The starfall's star gauge (mirrors shared/types/stars): bars per share of stars caught, the
 │                            next egg's variant, what a 12 h run gets (`--luck`, `--perHour`); results in BALANCE.md §3
 ├─ tools/share-assets.js     `npm run share-assets <id...>`: grants the group's game (Open Cloud asset-permissions,
-│                            Universe / Use) the use of assets of the owner's account (animated meshes, private audio)
+│                            Universe / Use) the use of assets of the owner's account (private audio; not enough for
+│                            an animated mesh)
+├─ tools/group-mesh-upload.js  `npm run group-mesh-upload <file.obj...>`: OBJ to GLB, uploaded as the group's Model
+│                            (group key), granted to the owner's account and the universe; prints the model ids
+├─ tools/obj-receiver.js     Local receiver of the OBJ files a Studio script exports (agent note fish-asset-pipeline)
 ├─ tools/player-stats.js     Real players vs the simulator (`npm run stats`): reads every profile of PlayerData_v1 through
 │                            Open Cloud (read-only key in workspace.local.json; universe 10774507209), prints attendance,
 │                            play time at each milestone (vs BALANCE.md §2), coin pickup share, dailies, devices;
@@ -270,7 +275,8 @@ ProjectQuarium/
    │  │                      ServerStorage.Assets.Fish / FishVariants; require(fishType, variant) copies them into
    │  │                      ReplicatedStorage.Assets.Fish / FishVariants before a fish's Spawn message, sweep(inUse)
    │  │                      (FishService, every 10 s) removes copies no tank used for 60 s
-   │  ├─ admins.ts           isGameOwner / isAdmin (owner of the place or its group + ADMIN_USER_IDS), checked server-side;
+   │  ├─ admins.ts           isGameOwner (the place's user, or rank 255 of its group) / isAdmin (the owner, the group's ranks ≥ 254 =
+   │  │                      GROUP_ADMIN_RANK: the Manager role, + ADMIN_USER_IDS), checked server-side;
    │  │                      canUseAdminPanel (Studio playtests only for now; isAdmin at the release)
    │  ├─ saveData.ts         SaveData (profile: PlayerData + saved tank + stats + leaderboardBanned), SavedFish,
    │  │                      SAVE_TEMPLATE, sanitizeSave
@@ -380,7 +386,7 @@ ProjectQuarium/
    │     ├─ LikeService      Places a like board beside each tank, GiveLike (range / own tank / cooldown), onLikeGiven,
    │     │                   keeps each owner's boost in memory (getCoinMultiplier), publishes likes + boost as attributes
    │     └─ DevCommandService  Studio-only chat commands (TextChatCommands created only when RunService.IsStudio(), only
-   │                         for the place's owner): "/datareset" then "/datareset confirm" within 15 s (wipes the save,
+   │                         for the game's admins, server/admins.ts): "/datareset" then "/datareset confirm" within 15 s (wipes the save,
    │                         kicks); "/nextfrench" (next egg hatches a French Fish); "/incubators <n>" (1–4, saved);
    │                         "/pass <GamePass>" (session only); "/boost <minutes>" (quest coin boost, saved); "/speed <x>"
    │                         (1–10, PlayerStats.testSpeed, saved so it also applies on the published game: coins, hatch
@@ -873,10 +879,11 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
 - **Where the game lives** (since 2026-11-03): the owner's group (Roblox studio) 815548702, universe 10774507209,
   place 84909007254888. The first home (the owner's user account, universe 10773319506) is left behind with its saves,
   leaderboards and gamepasses: the passes were created again (ids in `gamepasses.ts`). In a group game the group's
-  owner (rank 255) is the game's owner for `isGameOwner` (dev commands, admins). The meshes, images and audio stay the
-  owner's user account's: images and plain meshes show anyway, but the 24 meshes the clients animate (20 fish, the
-  Swordfish, the abyss lantern, the K-pop idol, the UFO) and the 6 private musics were shared with the game
-  (`npm run share-assets`, Creator Dashboard for the audio); a new one must be too, or only the owner sees it work.
+  owner (rank 255) is the game's owner for `isGameOwner`: that is Secret_Lokii; the developer's account DOT_Pinpin is
+  a Manager (rank 254), an admin through `GROUP_ADMIN_RANK` (dev commands in Studio, `/event`). Images, plain meshes and audio stay DOT_Pinpin's (the 6 private musics
+  shared with the game); the 24 meshes the clients animate (20 fish, the Swordfish, the abyss lantern, the K-pop idol,
+  the UFO) were re-uploaded as the group (V0.60.5, `design/meshes/` holds their OBJ source): a new animated mesh must
+  be too (agent note fish-asset-pipeline "Meshes the group owns"), or only DOT_Pinpin sees it swim.
 - **Saves in Studio** need *Game Settings → Security → Enable Studio Access to API Services*; without it ProfileStore
   runs on a mock store (warning in the output) and nothing persists between playtests. Studio and live servers
   share the same store. Reset everyone by bumping `STORE_NAME`; reset your own save in a Studio playtest with

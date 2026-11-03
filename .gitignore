@@ -43,3 +43,6 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Exported OBJ sources of the animated meshes (big; the manifest is kept)
+/design/meshes/*.obj

@@ -36,3 +36,28 @@ Related: [[studio-mcp-ui-testing]]
 - **Lighting during icon captures**: the sheet setup parents the Atmosphere to nil and disables the PostEffects; if Studio is saved / closed before the restore, the Atmosphere is gone for good (no local place file: only the cloud version history). On 2026-11-01 it had to be recreated by hand (Density 0.3, Offset 0.25, Color c7e1f0, Decay 6a8ca5, Glare 0.2, Haze 1; SunRays, Bloom, BeachGrade on, DepthOfField off). Prefer moving it to ServerStorage (survives a save) and restore right after the two captures.
 - **Titles and decor (V0.44)**: a decor cosmetic is a model in `ServerStorage.Assets.Decor` (tag `DecorTemplate`, attr `Cosmetic`, PrimaryPart its Mesh) placed at its `DECOR_SLOTS` entry (tank-local X / Z, Y = the sand top) by AquariumService with the theme decor; a title is just a `COSMETICS` entry ranked in `TITLE_ORDER` (TitleService shows the best one).
 - **2026-11-02 (V0.49: UFO + Alien Fish)**: three UFO candidates (classic silver saucer with green lights, pastel mint with a pink dome, tall violet with portholes) and three alien fish ("fish swimming horizontally, side view, ... alien fish ..., antennae with round tips on top of its head ..., nothing in front of the mouth"); the owner picked the classic saucer and the lime green fish with two antennae. **A generated fish can have its face on one side only**: the chosen alien shows big eyes and a smile on its right side and a single plain eye on the left; always capture both sides before showing candidates. Its sticker uses the face side (yaw −125° with the camera on +Z looking −Z). An event prop that isn't a fish (the UFO) still goes in `Assets.EventFish` (tag EventFishTemplate, attr EventType) with the Body + welded Mesh layout, sized by its max dimension (8 studs). Templates were rebuilt from the candidates' MeshParts (`MeshPart:Clone()`, size set directly, TextureID moved into a SurfaceAppearance), never from a ScaleTo'd model.
+
+## Meshes the group owns (V0.60.5)
+
+The game belongs to the owner's group (SecretVerse Fish, 815548702); the owner's account DOT_Pinpin is a Manager there
+(rank 254; the group's owner is Secret_Lokii). A mesh the clients animate (`CreateEditableMeshAsync`: the fish, the
+Swordfish, the event guests) must belong to the group. Meshes made from Studio (`generate_mesh`) belong to DOT_Pinpin:
+re-upload them as the group. What works (V0.60.5, the 24 animated meshes):
+1. **Export** from the place (Edit): `node tools/obj-receiver.js design/meshes` in the background; in an execute_luau,
+   `HttpService.HttpEnabled = true` (off on this place: put it back after), `CreateEditableMeshAsync(Content.fromUri(
+   part.MeshId))`, write `v` / `vt` (**1 - V**) / `vn` / `f v/vt/vn` lines (ids mapped to 1-based indices) and POST
+   them to `http://127.0.0.1:34999/<Name>.obj` in ~500 KB pieces (header `x-append: 1` after the first). Windows
+   file names ignore case: two meshes named Lanternfish / LanternFish overwrite each other, rename one.
+2. **Upload**: `npm run group-mesh-upload design/meshes/<Name>.obj ...` (OBJ to GLB pre-rotated 180° around Y, upload as
+   a group Model, grants to DOT_Pinpin and to the universe with dependencies); it prints { name: modelId }.
+3. **Swap** (Edit): `game:GetObjects("rbxassetid://<modelId>")[1]` holds one MeshPart with the group's mesh; check it
+   against the old one (same face count, nearest-vertex distance < 0.001), then on the template's `Mesh`:
+   `ApplyMesh(source)`, put back its `Size` and `CFrame` (the SurfaceAppearance stays). Destroy the loaded model.
+   Then ask the owner to **save and publish** the place (ServerStorage.Assets is in the place file, not Rojo's).
+
+Dead ends: `AssetService:CreateAssetAsync` ("not available yet", Edit and playtest), `AssetImportService` (not
+exposed), sharing the owner's meshes with the universe (accepted, useless) or with the group (CannotManageSubject),
+uploading as the group with the owner's personal key (unauthorized), loading a group model in Studio before it is
+granted to DOT_Pinpin ("User is not authorized to access Asset"; `grantToDependencies` only works for the Universe
+subject). A GLB uploaded without the pre-rotation lands turned 180° (X and Z negated: the fish would swim backwards).
+The exported OBJ files stay as the source (design/meshes, manifest.json: template and old mesh id).

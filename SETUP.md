@@ -48,6 +48,7 @@ cp workspace.local.example.json workspace.local.json      # Windows PowerShell: 
 | `robloxStudioMcp` | the Studio MCP server isn't found automatically | path of `StudioMCP` (macOS) or `mcp.bat` / `StudioMCP.exe` (Windows) |
 | `robloxFontsDir` | the Roblox fonts aren't found (FigCraft V2 build script) | Studio's `content/fonts` folder |
 | `robloxOpenCloudKey` | you read the real players' statistics (`npm run stats`) | an Open Cloud API key, see below. **Secret**: only in this file, never in git |
+| `robloxGroupOpenCloudKey` | you upload meshes for the game (`npm run group-mesh-upload`) | an Open Cloud key made **under the group** (see below). **Secret** |
 | `robloxUniverseId` | another experience than Project: Quarium's (10774507209) | its universe id (`game.GameId`) |
 
 Each key can also be given as an environment variable (`FIGCRAFT_DIR`, `ROBLOX_STUDIO_MCP`, `ROBLOX_FONTS_DIR`,
@@ -65,6 +66,13 @@ operations **List entry keys** and **Read entry**
 `0.0.0.0/0`; an expiration date is wise. Copy the key into `robloxOpenCloudKey`. Each machine can have its own key.
 For `npm run share-assets` (`tools/share-assets.js`) the same key, made by the account that owns the assets, also
 needs the API system **Asset Permissions** with **write** (`asset-permissions:write`).
+
+**Group key (meshes the clients animate, optional).** The game belongs to the owner's group: a mesh the clients
+animate must belong to the group too. `npm run group-mesh-upload` (`tools/group-mesh-upload.js`) uploads meshes as the
+group, so it needs a key created with the **group** picked as the creator on the Creator Dashboard: API systems
+**Assets** (Read, Write) and **Asset Permissions** (Write); Data Stores (List entry keys, Read entry) can be added for
+`npm run stats`. Copy it into `robloxGroupOpenCloudKey`. A personal key can't create assets as a group ("unauthorized
+to create an Model asset as Group").
 
 ## 4. Roblox Studio
 
@@ -94,7 +102,8 @@ npm run doctor        # Node, packages, Rojo version, Studio MCP, fonts, FigCraf
 npx rbxtsc            # zero errors
 npm run sim           # economy simulator (BALANCE.md)
 npm run stats         # real players' statistics vs the simulator (needs robloxOpenCloudKey)
-npm run share-assets <id...>  # lets the group's game use assets of the owner's account (needs robloxOpenCloudKey)
+npm run share-assets <id...>  # lets the group's game use assets of the owner's account: audio (robloxOpenCloudKey)
+npm run group-mesh-upload <file.obj...>  # uploads meshes as the group, for the clients to animate (robloxGroupOpenCloudKey)
 ```
 
 ## What is shared, what stays on each machine

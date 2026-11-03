@@ -11,6 +11,19 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.60.5 — 2026-11-03
+
+**Changes**
+- **Admins**: the group's Manager role and above are the game's admins (admin events, and the developer commands in
+  Studio), not only the group's owner.
+
+**Fixes**
+- **Fish swim for everyone (for real)**: sharing the fish models with the game (V0.60.4) wasn't enough, players other
+  than the developer still saw them sway instead of swim. The fish, the Swordfish and the event guests now use models
+  owned by the game's group, identical to the old ones.
+
+---
+
 ## V0.60.4 — 2026-11-03
 
 **Fixes**

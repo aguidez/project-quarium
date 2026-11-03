@@ -11,9 +11,11 @@ Numbers are tuned with `tools/economy-sim.js` (a `--plan <file>` previews them b
 BALANCE.md is updated (CLAUDE.md §0c). Asset quirks: [[fish-asset-pipeline]].
 
 **Every new mesh, sound or music** generated or uploaded from Studio belongs to the owner's user account, while the
-game belongs to their group (since V0.60.3): a mesh the clients animate (fish, Swordfish, event guests: EditableMesh)
-fails for every other player ("not allowed to be forked", the fish only sway) and a private sound stays silent until
-`npm run share-assets <assetId...>` grants the game their use. Run it right after the upload.
+game belongs to their group (since V0.60.3). A private sound stays silent for the players until `npm run share-assets
+<assetId...>` grants the game its use. A mesh the clients animate (fish, Swordfish, event guests: EditableMesh) must
+**belong to the group**: sharing it with the universe is not enough (V0.60.4 tried; "not allowed to be forked", the
+fish only sway for everyone but the owner). Re-upload it as the group: [[fish-asset-pipeline]] "Meshes the group
+owns". Static meshes (decor, coins, the Snail, the Pelican) and images show anyway.
 
 **While the alpha is on** (`shared/types/alpha.ts`, V0.60.0): content placed after the Neon Coral Egg / rebirth 2 /
 5,000 Ocean Points stays hidden from the testers by itself; a new story quest only opens in the alpha once its id is in
@@ -29,7 +31,8 @@ with `ALPHA_ENABLED = false`, never by widening the alpha without the owner.
 1. **Design brief** to the owner (silhouette, colours, coin).
 2. `generate_mesh` (≤ 3 at a time, `maxTriangles` ~4000, real bbox), screen_capture check (both sides); template in
    `ServerStorage.Assets.Fish` (tag `FishTemplate`, attr `FishType`, root `Body` + welded `Mesh`, head −Z,
-   SurfaceAppearance 512²); `npm run share-assets <meshId>` (the clients animate it).
+   SurfaceAppearance 512²); then its mesh goes to the group (the clients animate it): [[fish-asset-pipeline]] "Meshes the
+   group owns".
 3. Variants: `tools/fish-variant-recolor.js` (`sheet <Type>` to pick the hues, then `build`) → upload the Anomaly /
    Shiny textures → `ServerStorage.Assets.FishVariants`, ids in design/ui/fish/variants/variant-spec.json.
 4. Sticker icons (`tools/fish-sticker-icons.js`, 4 variants), checked at 256×160 as a moderator, uploaded once → ids

@@ -1,6 +1,6 @@
 import { Players, RunService, TextChatService, Workspace } from "@rbxts/services";
 import { Lifecycle } from "shared/framework";
-import { isGameOwner } from "../admins";
+import { isAdmin } from "../admins";
 import { CoinService } from "./CoinService";
 import { DataService } from "./DataService";
 import { EggService } from "./EggService";
@@ -29,7 +29,7 @@ const MAX_TEST_INCUBATORS = 4;
 
 /**
  * Developer chat commands, for playtests in Studio only. They don't exist at all on a live server
- * (the TextChatCommand is never created there), and even in Studio only the place's owner can use
+ * (the TextChatCommand is never created there), and even in Studio only the game's admins can use
  * them. Each one checks the player again when it runs.
  *
  *  /datareset           asks for a confirmation
@@ -141,18 +141,18 @@ class DevCommandServiceSingleton implements Lifecycle {
 	public onStart() {
 		if (RunService.IsStudio())
 			print(
-				`[Server] DevCommandService: ${RESET_COMMAND}, ${NEXT_FRENCH_COMMAND}, ${INCUBATORS_COMMAND}, ${PASS_COMMAND}, ${BOOST_COMMAND}, ${SPEED_COMMAND}, ${PASSES_COMMAND}, ${UFO_COMMAND}, ${LB_TITLE_COMMAND} available (Studio, place owner only).`,
+				`[Server] DevCommandService: ${RESET_COMMAND}, ${NEXT_FRENCH_COMMAND}, ${INCUBATORS_COMMAND}, ${PASS_COMMAND}, ${BOOST_COMMAND}, ${SPEED_COMMAND}, ${PASSES_COMMAND}, ${UFO_COMMAND}, ${LB_TITLE_COMMAND} available (Studio, admins only).`,
 			);
 	}
 
-	/** Studio and the place's owner (its user, or the owner of its group): nobody else, ever. */
+	/** Studio and the game's admins (its owner, its group's admin roles: server/admins.ts): nobody else, ever. */
 	private isAllowed(player: Player): boolean {
-		return RunService.IsStudio() && isGameOwner(player);
+		return RunService.IsStudio() && isAdmin(player);
 	}
 
 	private onNextFrench(player: Player) {
 		if (!this.isAllowed(player)) {
-			warn(`[Server] ${player.Name} tried ${NEXT_FRENCH_COMMAND}: refused (not the place's owner).`);
+			warn(`[Server] ${player.Name} tried ${NEXT_FRENCH_COMMAND}: refused (not an admin).`);
 			return;
 		}
 		EggService.forceNextHatch(player, "FrenchFish");
@@ -162,7 +162,7 @@ class DevCommandServiceSingleton implements Lifecycle {
 	private onIncubators(player: Player, text: string) {
 		const data = DataService.getData(player);
 		if (!this.isAllowed(player) || !data) {
-			warn(`[Server] ${player.Name} tried ${INCUBATORS_COMMAND}: refused (not the place's owner).`);
+			warn(`[Server] ${player.Name} tried ${INCUBATORS_COMMAND}: refused (not an admin).`);
 			return;
 		}
 		const count = tonumber(text.split(" ")[1]);
@@ -174,7 +174,7 @@ class DevCommandServiceSingleton implements Lifecycle {
 
 	private onLeaderboardTitle(player: Player, text: string) {
 		if (!this.isAllowed(player)) {
-			warn(`[Server] ${player.Name} tried ${LB_TITLE_COMMAND}: refused (not the place's owner).`);
+			warn(`[Server] ${player.Name} tried ${LB_TITLE_COMMAND}: refused (not an admin).`);
 			return;
 		}
 		const data = DataService.getData(player);
@@ -206,7 +206,7 @@ class DevCommandServiceSingleton implements Lifecycle {
 
 	private onUfo(player: Player, text: string) {
 		if (!this.isAllowed(player)) {
-			warn(`[Server] ${player.Name} tried ${UFO_COMMAND}: refused (not the place's owner).`);
+			warn(`[Server] ${player.Name} tried ${UFO_COMMAND}: refused (not an admin).`);
 			return;
 		}
 		const word = text.split(" ")[1]?.lower();
@@ -224,7 +224,7 @@ class DevCommandServiceSingleton implements Lifecycle {
 
 	private onPasses(player: Player, text: string) {
 		if (!this.isAllowed(player)) {
-			warn(`[Server] ${player.Name} tried ${PASSES_COMMAND}: refused (not the place's owner).`);
+			warn(`[Server] ${player.Name} tried ${PASSES_COMMAND}: refused (not an admin).`);
 			return;
 		}
 		const word = text.split(" ")[1]?.lower();
@@ -245,7 +245,7 @@ class DevCommandServiceSingleton implements Lifecycle {
 	private onSpeed(player: Player, text: string) {
 		const stats = DataService.getSave(player)?.stats;
 		if (!this.isAllowed(player) || !stats) {
-			warn(`[Server] ${player.Name} tried ${SPEED_COMMAND}: refused (not the place's owner).`);
+			warn(`[Server] ${player.Name} tried ${SPEED_COMMAND}: refused (not an admin).`);
 			return;
 		}
 		const speed = tonumber(text.split(" ")[1]);
@@ -265,7 +265,7 @@ class DevCommandServiceSingleton implements Lifecycle {
 	private onBoost(player: Player, text: string) {
 		const data = DataService.getData(player);
 		if (!this.isAllowed(player) || !data) {
-			warn(`[Server] ${player.Name} tried ${BOOST_COMMAND}: refused (not the place's owner).`);
+			warn(`[Server] ${player.Name} tried ${BOOST_COMMAND}: refused (not an admin).`);
 			return;
 		}
 		const minutes = tonumber(text.split(" ")[1]);
@@ -277,7 +277,7 @@ class DevCommandServiceSingleton implements Lifecycle {
 
 	private onPass(player: Player, text: string) {
 		if (!this.isAllowed(player)) {
-			warn(`[Server] ${player.Name} tried ${PASS_COMMAND}: refused (not the place's owner).`);
+			warn(`[Server] ${player.Name} tried ${PASS_COMMAND}: refused (not an admin).`);
 			return;
 		}
 		const pass = text.split(" ")[1];
@@ -294,7 +294,7 @@ class DevCommandServiceSingleton implements Lifecycle {
 
 	private onReset(player: Player, text: string) {
 		if (!this.isAllowed(player)) {
-			warn(`[Server] ${player.Name} tried ${RESET_COMMAND}: refused (not the place's owner).`);
+			warn(`[Server] ${player.Name} tried ${RESET_COMMAND}: refused (not an admin).`);
 			return;
 		}
 		const words = text
