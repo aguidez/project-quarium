@@ -23,9 +23,13 @@ metadata:
   `GetVersionAsync` show what a save looked like hour by hour, and `MetaData.SessionLoadCount` tells sessions apart.
   On 2026-11-01 it showed the owner's save turned into a fresh one: the owner had reset it on purpose,
   not a bug. Ask before suspecting a wipe, and never write a player's key without the owner's OK.
-- **Open Cloud** (tools/player-stats.js): v2 endpoints `https://apis.roblox.com/cloud/v2/universes/10773319506/
+- **Open Cloud** (tools/player-stats.js): v2 endpoints `https://apis.roblox.com/cloud/v2/universes/10774507209/
   data-stores/PlayerData_v1/entries` (list: `dataStoreEntries[].id`, `nextPageToken`) and `.../entries/<id>` (`value`),
-  header `x-api-key`; the key is the owner's, read-only, in workspace.local.json only. Not tested against the live API
+  header `x-api-key`; the key is the owner's, read-only, in workspace.local.json only. Since 2026-11-03 the game is the
+  group's (universe 10774507209): the key needs DataStore read access to that universe, so a key made before (on the
+  user's first game, universe 10773319506) answers 403 "Scope not authorized". Checked 2026-11-03: with the Data Stores system (List entry keys, Read
+  entry) added for that experience, the owner's key works; a 404 "Data store not found" only means nobody has saved in
+  the universe yet (the tool says so). `control:list` (listing the stores) is not granted, not needed. Not tested against the live API
   yet (no key on 2026-11-01): check the field names on the first real run.
 - **Creator Dashboard facts** (2026-11-02): events are only recorded from **published** servers (a Studio playtest
   prints "AnalyticsService: ... event fired." but sends nothing); charts fill up to ~24 h later (the Funnel / Custom

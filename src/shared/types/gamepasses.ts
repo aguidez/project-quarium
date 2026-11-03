@@ -30,7 +30,7 @@ export const GAME_PASSES: Record<GamePass, GamePassConfig> = {
 	ThirdCompanionSlot: {
 		displayName: "Third Companion Slot",
 		description: "One more companion in your aquarium at once.",
-		id: 2062559663,
+		id: 2070385400,
 		image: "rbxassetid://91011389500250", // design/ui/passes/Pass_ThirdCompanionSlot.png
 		badge: "+1",
 		shopOrder: 1,
@@ -38,7 +38,7 @@ export const GAME_PASSES: Record<GamePass, GamePassConfig> = {
 	OceanBoost: {
 		displayName: "x2 Ocean Points",
 		description: "Fish you release to the ocean give twice the Ocean Points, rebirths included.",
-		id: 2057683410,
+		id: 2070517298,
 		image: "rbxassetid://100468634358996", // design/ui/passes/Pass_OceanBoost.png
 		badge: "x2",
 		shopOrder: 2,
@@ -46,7 +46,7 @@ export const GAME_PASSES: Record<GamePass, GamePassConfig> = {
 	Lucky: {
 		displayName: "Lucky",
 		description: "Anomaly, Ghost and Shiny fish hatch twice as often.",
-		id: 2062643680,
+		id: 2068051760,
 		image: "rbxassetid://96173355511700", // design/ui/passes/Pass_Lucky.png
 		badge: "x2",
 		shopOrder: 3,
@@ -54,7 +54,7 @@ export const GAME_PASSES: Record<GamePass, GamePassConfig> = {
 	Coins: {
 		displayName: "+50% Coins",
 		description: "Every coin your fish drop is worth 50% more, forever.",
-		id: 2061240101,
+		id: 2068045751,
 		image: "rbxassetid://120529755774174", // design/ui/passes/Pass_Coins.png
 		badge: "+50%",
 		shopOrder: 4,
@@ -64,19 +64,19 @@ export const GAME_PASSES: Record<GamePass, GamePassConfig> = {
 	WaterHenPass: {
 		displayName: "Water Hen Pass",
 		description: "Unlocks the Water Hen's quests: eggs hatch up to 35% faster with it.",
-		id: 2057906427,
+		id: 2070397345,
 		image: "rbxassetid://106605624608137", // design/ui/companions/Companion_WaterHen.png
 	},
 	SwordfishPass: {
 		displayName: "Swordfish Pass",
 		description: "Unlocks the Swordfish's quests: it swims up to 2.2x as fast and grabs almost every coin.",
-		id: 2058734507,
+		id: 2066413853,
 		image: "rbxassetid://94908996690740", // design/ui/companions/Companion_Swordfish.png
 	},
 	JellyfishPass: {
 		displayName: "Jellyfish Pass",
 		description: "Unlocks the Jellyfish's quests: it feeds faster, with more charges and pellets, up to 25 fish.",
-		id: 2061499264,
+		id: 2068729703,
 		image: "rbxassetid://96894492239649", // design/ui/companions/Companion_Jellyfish.png
 	},
 };

@@ -48,7 +48,7 @@ cp workspace.local.example.json workspace.local.json      # Windows PowerShell: 
 | `robloxStudioMcp` | the Studio MCP server isn't found automatically | path of `StudioMCP` (macOS) or `mcp.bat` / `StudioMCP.exe` (Windows) |
 | `robloxFontsDir` | the Roblox fonts aren't found (FigCraft V2 build script) | Studio's `content/fonts` folder |
 | `robloxOpenCloudKey` | you read the real players' statistics (`npm run stats`) | an Open Cloud API key, see below. **Secret**: only in this file, never in git |
-| `robloxUniverseId` | another experience than Project: Quarium's (10773319506) | its universe id (`game.GameId`) |
+| `robloxUniverseId` | another experience than Project: Quarium's (10774507209) | its universe id (`game.GameId`) |
 
 Each key can also be given as an environment variable (`FIGCRAFT_DIR`, `ROBLOX_STUDIO_MCP`, `ROBLOX_FONTS_DIR`,
 `ROBLOX_OPEN_CLOUD_KEY`...).
@@ -58,7 +58,9 @@ Default locations searched without config: Studio MCP in `%LOCALAPPDATA%\Roblox\
 **Open Cloud key (players' statistics, optional).** `npm run stats` (`tools/player-stats.js`) reads every player
 profile of the live DataStore to compare the real players with the balance simulator (ROADMAP M7). On the Creator
 Dashboard: *Open Cloud → API Keys → Create API Key*; name it (e.g. "Project Quarium stats"), add the API system **Data
-Stores**, pick the experience **Project: Quarium** and only the operations **List entry keys** and **Read entry**
+Stores**, pick the experience **[ALPHA] Project: Quarium** (the owner's group's, universe 10774507209: a key that
+only has the API system Universes reads the game but answers 403 "Scope not authorized" on its saves) and only the
+operations **List entry keys** and **Read entry**
 (`universe-datastores.objects:list` / `:read`: the tool never writes); accepted IP addresses: your own, or
 `0.0.0.0/0`; an expiration date is wise. Copy the key into `robloxOpenCloudKey`. Each machine can have its own key.
 

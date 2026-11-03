@@ -11,6 +11,14 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.60.3 — 2026-11-03
+
+**Changes**
+- **Gamepasses**: the seven passes were created again for the game's new home (Third Companion Slot, x2 Ocean
+  Points, Lucky, +50% Coins and the Water Hen, Swordfish and Jellyfish passes). Still not for sale during the alpha.
+
+---
+
 ## V0.60.2 — 2026-11-03
 
 **Fixes**

@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-03 (V0.60.2: fish grow on screen again at each growth stage).
+> Last updated: 2026-11-03 (V0.60.3: the game moved to the owner's group, new universe and gamepass ids).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -137,7 +137,7 @@ ProjectQuarium/
 ├─ tools/starfall-sim.js     The starfall's star gauge (mirrors shared/types/stars): bars per share of stars caught, the
 │                            next egg's variant, what a 12 h run gets (`--luck`, `--perHour`); results in BALANCE.md §3
 ├─ tools/player-stats.js     Real players vs the simulator (`npm run stats`): reads every profile of PlayerData_v1 through
-│                            Open Cloud (read-only key in workspace.local.json; universe 10773319506), prints attendance,
+│                            Open Cloud (read-only key in workspace.local.json; universe 10774507209), prints attendance,
 │                            play time at each milestone (vs BALANCE.md §2), coin pickup share, dailies, devices;
 │                            `--file dump.json` to test without the API, `--out` to keep a snapshot
 ├─ tools/fish-variant-recolor.js  Hue rotation of a species' texture into its Anomaly / Shiny looks (`sheet <Type>` to
@@ -868,6 +868,10 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
 
 ## 4. Known limits / next steps
 
+- **Where the game lives** (since 2026-11-03): the owner's group (Roblox studio) 815548702, universe 10774507209,
+  place 84909007254888. The first home (the owner's user account, universe 10773319506) is left behind with its saves,
+  leaderboards and gamepasses: the passes were created again (ids in `gamepasses.ts`). In a group game the group's
+  owner (rank 255) is the game's owner for `isGameOwner` (dev commands, admins).
 - **Saves in Studio** need *Game Settings → Security → Enable Studio Access to API Services*; without it ProfileStore
   runs on a mock store (warning in the output) and nothing persists between playtests. Studio and live servers
   share the same store. Reset everyone by bumping `STORE_NAME`; reset your own save in a Studio playtest with

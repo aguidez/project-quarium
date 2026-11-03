@@ -9,7 +9,7 @@
 const fs = require("fs");
 const config = require("./local-config");
 
-const UNIVERSE_ID = config.get("robloxUniverseId", "10773319506"); // Project: Quarium's experience (game.GameId)
+const UNIVERSE_ID = config.get("robloxUniverseId", "10774507209"); // Project: Quarium's experience (game.GameId)
 const args = process.argv.slice(2);
 const flag = (name) => {
 	const i = args.indexOf(name);
@@ -61,6 +61,16 @@ async function request(url, apiKey) {
 			await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt)); // rate limited / outage: back off
 			continue;
 		}
+		if (res.status === 404 && url.includes("/data-stores/")) {
+			// The store is created by the first save: nobody has played the published game of this universe yet
+			throw new Error(
+				`No save yet: the data store ${STORE} doesn't exist in universe ${UNIVERSE_ID} (no player saved there).`,
+			);
+		}
+		if (res.status === 403)
+			throw new Error(
+				`403 on ${url}: the key lacks the Data Stores scope (List entry keys, Read entry) for universe ${UNIVERSE_ID}, see SETUP.md.`,
+			);
 		if (!res.ok) throw new Error(`${res.status} ${res.statusText} on ${url}: ${await res.text()}`);
 		return res.json();
 	}
