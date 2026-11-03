@@ -63,6 +63,8 @@ only has the API system Universes reads the game but answers 403 "Scope not auth
 operations **List entry keys** and **Read entry**
 (`universe-datastores.objects:list` / `:read`: the tool never writes); accepted IP addresses: your own, or
 `0.0.0.0/0`; an expiration date is wise. Copy the key into `robloxOpenCloudKey`. Each machine can have its own key.
+For `npm run share-assets` (`tools/share-assets.js`) the same key, made by the account that owns the assets, also
+needs the API system **Asset Permissions** with **write** (`asset-permissions:write`).
 
 ## 4. Roblox Studio
 
@@ -92,6 +94,7 @@ npm run doctor        # Node, packages, Rojo version, Studio MCP, fonts, FigCraf
 npx rbxtsc            # zero errors
 npm run sim           # economy simulator (BALANCE.md)
 npm run stats         # real players' statistics vs the simulator (needs robloxOpenCloudKey)
+npm run share-assets <id...>  # lets the group's game use assets of the owner's account (needs robloxOpenCloudKey)
 ```
 
 ## What is shared, what stays on each machine

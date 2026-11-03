@@ -10,6 +10,11 @@ CLAUDE.md §7 (moderation): describe it to the owner first when its theme is ris
 Numbers are tuned with `tools/economy-sim.js` (a `--plan <file>` previews them before they go in the config), then
 BALANCE.md is updated (CLAUDE.md §0c). Asset quirks: [[fish-asset-pipeline]].
 
+**Every new mesh, sound or music** generated or uploaded from Studio belongs to the owner's user account, while the
+game belongs to their group (since V0.60.3): a mesh the clients animate (fish, Swordfish, event guests: EditableMesh)
+fails for every other player ("not allowed to be forked", the fish only sway) and a private sound stays silent until
+`npm run share-assets <assetId...>` grants the game their use. Run it right after the upload.
+
 **While the alpha is on** (`shared/types/alpha.ts`, V0.60.0): content placed after the Neon Coral Egg / rebirth 2 /
 5,000 Ocean Points stays hidden from the testers by itself; a new story quest only opens in the alpha once its id is in
 `ALPHA_STORY_QUESTS` (leave it out when it belongs to the later game). Test such content on a save past the alpha or
@@ -24,7 +29,7 @@ with `ALPHA_ENABLED = false`, never by widening the alpha without the owner.
 1. **Design brief** to the owner (silhouette, colours, coin).
 2. `generate_mesh` (≤ 3 at a time, `maxTriangles` ~4000, real bbox), screen_capture check (both sides); template in
    `ServerStorage.Assets.Fish` (tag `FishTemplate`, attr `FishType`, root `Body` + welded `Mesh`, head −Z,
-   SurfaceAppearance 512²).
+   SurfaceAppearance 512²); `npm run share-assets <meshId>` (the clients animate it).
 3. Variants: `tools/fish-variant-recolor.js` (`sheet <Type>` to pick the hues, then `build`) → upload the Anomaly /
    Shiny textures → `ServerStorage.Assets.FishVariants`, ids in design/ui/fish/variants/variant-spec.json.
 4. Sticker icons (`tools/fish-sticker-icons.js`, 4 variants), checked at 256×160 as a moderator, uploaded once → ids

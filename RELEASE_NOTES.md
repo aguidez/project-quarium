@@ -11,6 +11,15 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.60.4 — 2026-11-03
+
+**Fixes**
+- **Fish swim for everyone again**: since the game moved to the group, only its owner saw the fish swim (the others
+  only swayed gently): the fish, the Swordfish and the event guests' models are now shared with the game. The
+  background music and the event musics play for everyone too.
+
+---
+
 ## V0.60.3 — 2026-11-03
 
 **Changes**

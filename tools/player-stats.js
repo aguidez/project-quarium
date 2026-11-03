@@ -82,8 +82,12 @@ async function fetchProfiles(apiKey) {
 	const ids = [];
 	let pageToken = "";
 	do {
-		const page = await request(`${base}?maxPageSize=256${pageToken ? `&pageToken=${pageToken}` : ""}`, apiKey);
-		for (const entry of page.dataStoreEntries || []) ids.push(entry.id);
+		const page = await request(
+			`${base}?maxPageSize=256${pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : ""}`,
+			apiKey,
+		);
+		// Listed as "<scope>/<key>" ("global/Player_123"); the entry is read by its key (default scope)
+		for (const entry of page.dataStoreEntries || []) ids.push(entry.id.split("/").pop());
 		pageToken = page.nextPageToken || "";
 	} while (pageToken && ids.length < LIMIT);
 	const keys = ids.filter((id) => id.startsWith("Player_")).slice(0, LIMIT);

@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-03 (V0.60.3: the game moved to the owner's group, new universe and gamepass ids).
+> Last updated: 2026-11-03 (V0.60.4: the owner's meshes shared with the group's game, tools/share-assets.js).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -55,7 +55,7 @@ How to add content: `docs/agent-notes/content-recipes.md`. **`ROADMAP_V1.1.md`**
 | Sync | **Rojo 7.7.1** (aftman). `default.project.json` maps `out/server` → ServerScriptService.TS, `out/shared` → ReplicatedStorage.TS, `out/client` → StarterPlayerScripts.TS, `out/first` → ReplicatedFirst.TS (loading screen). Never edit those scripts in Studio. A change to `default.project.json` needs `rojo serve` restarted (and the plugin reconnected) |
 | Packages | `@rbxts/react` + `react-roblox` (UI), `@rbxts/t` (runtime validation), `@rbxts/janitor` (cleanup), `@rbxts/services`, `@rbxts/profile-store` (player saves, see §3.1) |
 | Build / check | `npx rbxtsc` after every change; it must report zero errors |
-| Workspace | Windows or macOS, set up from `SETUP.md`; `npm run doctor` checks a machine. Machine-specific values (install paths, GPU flags, API keys) only in the git-ignored `workspace.local.json` (via `tools/local-config.js`), never in committed files; scripts are cross-platform Node. npm scripts: `build`, `watch`, `serve` (rojo serve), `sim` (economy simulator), `stats` (real players), `doctor`. `jimp` 0.22 and `@resvg/resvg-js` 2.6 (SVG → PNG without FigCraft) are devDependencies for the image tools |
+| Workspace | Windows or macOS, set up from `SETUP.md`; `npm run doctor` checks a machine. Machine-specific values (install paths, GPU flags, API keys) only in the git-ignored `workspace.local.json` (via `tools/local-config.js`), never in committed files; scripts are cross-platform Node. npm scripts: `build`, `watch`, `serve` (rojo serve), `sim` (economy simulator), `stats` (real players), `share-assets`, `doctor`. `jimp` 0.22 and `@resvg/resvg-js` 2.6 (SVG → PNG without FigCraft) are devDependencies for the image tools |
 | Framework | `shared/framework.ts`: singletons implementing `Lifecycle { onInit (sync), onStart (task.spawn) }`, registered in order in `server/main.server.ts` / `client/main.client.ts` |
 | Server authority | The client only sends **intents**. The server validates each one with `t`, reads prices and odds from shared config, and owns money, inventory, timers and every gameplay state. Even fish positions are server-computed (swim segments): clients only render them, never report them |
 | World ↔ code | Studio models are found by **CollectionService tags** (`shared/tags.ts`) and attributes, never by deep paths. Templates live in `ServerStorage.Assets` in the place file, which Rojo does not manage: **remind the user to save the place** after MCP edits |
@@ -136,6 +136,8 @@ ProjectQuarium/
 │                            FishService hunger, FoodService, CoinService
 ├─ tools/starfall-sim.js     The starfall's star gauge (mirrors shared/types/stars): bars per share of stars caught, the
 │                            next egg's variant, what a 12 h run gets (`--luck`, `--perHour`); results in BALANCE.md §3
+├─ tools/share-assets.js     `npm run share-assets <id...>`: grants the group's game (Open Cloud asset-permissions,
+│                            Universe / Use) the use of assets of the owner's account (animated meshes, private audio)
 ├─ tools/player-stats.js     Real players vs the simulator (`npm run stats`): reads every profile of PlayerData_v1 through
 │                            Open Cloud (read-only key in workspace.local.json; universe 10774507209), prints attendance,
 │                            play time at each milestone (vs BALANCE.md §2), coin pickup share, dailies, devices;
@@ -871,7 +873,10 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
 - **Where the game lives** (since 2026-11-03): the owner's group (Roblox studio) 815548702, universe 10774507209,
   place 84909007254888. The first home (the owner's user account, universe 10773319506) is left behind with its saves,
   leaderboards and gamepasses: the passes were created again (ids in `gamepasses.ts`). In a group game the group's
-  owner (rank 255) is the game's owner for `isGameOwner` (dev commands, admins).
+  owner (rank 255) is the game's owner for `isGameOwner` (dev commands, admins). The meshes, images and audio stay the
+  owner's user account's: images and plain meshes show anyway, but the 24 meshes the clients animate (20 fish, the
+  Swordfish, the abyss lantern, the K-pop idol, the UFO) and the 6 private musics were shared with the game
+  (`npm run share-assets`, Creator Dashboard for the audio); a new one must be too, or only the owner sees it work.
 - **Saves in Studio** need *Game Settings → Security → Enable Studio Access to API Services*; without it ProfileStore
   runs on a mock store (warning in the output) and nothing persists between playtests. Studio and live servers
   share the same store. Reset everyone by bumping `STORE_NAME`; reset your own save in a Studio playtest with
