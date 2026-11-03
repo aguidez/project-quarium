@@ -83,7 +83,7 @@ odds, `requires` = previous egg), shop order, `EGG_SPRITES` in theme.ts.
    joining late included, `isEventImmune` skipped) and `stop()` (called by `EventService.clearEvent`); branch it in
    `EventService.startEvent` (`runRaid` with a Studio template, `runUntilEnd` without one, and leave a model-less
    kind out of `loadTemplates` or it warns at start).
-3. A client controller following `MusicEventController.onEventChanged` for the world look (save / restore Lighting,
+3. A client controller following `MusicEventController.onEventChanged` for the world look (its night through `setEventNight` of client/eventLighting.ts, never its own Lighting save / restore: two events would save each other's night,
    dress the tanks' backdrops). Clickable things in a tank: an invisible tagged ball in the tank's Coins folder, drawn
    by the clients (the starfall's stars are a ★ glyph on a BillboardGui: nothing uploaded), a new `InteractionKind`
    checked before coins in AquariumInteractionController.

@@ -6,18 +6,21 @@ import { getAquariumFrame } from "shared/types/aquarium";
 import { ActiveEvent } from "shared/types/events";
 import { UFO_BEAM_ATTRIBUTE } from "shared/types/ufo";
 import { UFO_COLORS } from "client/ui/theme";
+import { EventNight, setEventNight } from "client/eventLighting";
 import { MusicEventController } from "./MusicEventController";
 
 // The world going dark (local Lighting changes, put back when the night ends): a violet night
 const DARKEN_TIME = 2.5;
 const BRIGHTEN_TIME = 2.5;
-const NIGHT_CLOCK = 24.5; // ClockTime the day runs to (past midnight), through the sunset
-const NIGHT_BRIGHTNESS = 0.5;
-const NIGHT_EXPOSURE = -0.35;
-const NIGHT_AMBIENT = Color3.fromRGB(26, 16, 48);
-const NIGHT_OUTDOOR_AMBIENT = Color3.fromRGB(30, 22, 62);
-const NIGHT_ATMOSPHERE = Color3.fromRGB(40, 24, 80);
-const NIGHT_DECAY = Color3.fromRGB(14, 10, 40);
+const NIGHT: EventNight = {
+	clockTime: 24.5, // the day runs on past midnight, through the sunset
+	brightness: 0.5,
+	exposure: -0.35,
+	ambient: Color3.fromRGB(26, 16, 48),
+	outdoorAmbient: Color3.fromRGB(30, 22, 62),
+	atmosphere: Color3.fromRGB(40, 24, 80),
+	decay: Color3.fromRGB(14, 10, 40),
+};
 const GRADE_TINT = Color3.fromRGB(200, 185, 255);
 const GRADE_SATURATION = 0.05;
 const GRADE_CONTRAST = 0.1;
@@ -49,15 +52,6 @@ const BEAM_LIGHT_BRIGHTNESS = 4;
 const BEAM_LIGHT_RANGE = 18;
 const UFO_LIGHT_BRIGHTNESS = 1.5; // its own soft glow, always on
 const SPARKLE_TEXTURE = "rbxasset://textures/particles/sparkles_main.dds";
-
-interface SavedLighting {
-	clockTime: number;
-	brightness: number;
-	exposure: number;
-	ambient: Color3;
-	outdoorAmbient: Color3;
-	atmosphere?: { instance: Atmosphere; color: Color3; decay: Color3 };
-}
 
 interface Twinkle {
 	frame: GuiObject;
@@ -106,7 +100,6 @@ class UfoEventControllerSingleton implements Lifecycle {
 	/** 0 = normal world, 1 = full night; tweened on start / end. */
 	private darkness = new Instance("NumberValue");
 	private darknessTween?: Tween;
-	private saved?: SavedLighting;
 	private grade?: ColorCorrectionEffect;
 	private tanks = new Map<Model, TankDressing>();
 	private ufos = new Map<Model, UfoLook>();
@@ -133,7 +126,6 @@ class UfoEventControllerSingleton implements Lifecycle {
 		if (active === this.active) return;
 		this.active = active;
 		if (active) {
-			if (this.darkness.Value === 0) this.saveLighting();
 			for (const instance of CollectionService.GetTagged(TAGS.Aquarium)) this.dressTank(instance);
 		}
 		this.darknessTween?.Cancel();
@@ -153,33 +145,9 @@ class UfoEventControllerSingleton implements Lifecycle {
 	// Darkness
 	// ---------------------------------------------------------------------
 
-	/** The place's own lighting, read before the first change: it is what comes back after the night. */
-	private saveLighting() {
-		const atmosphere = Lighting.FindFirstChildOfClass("Atmosphere");
-		this.saved = {
-			clockTime: Lighting.ClockTime,
-			brightness: Lighting.Brightness,
-			exposure: Lighting.ExposureCompensation,
-			ambient: Lighting.Ambient,
-			outdoorAmbient: Lighting.OutdoorAmbient,
-			atmosphere: atmosphere && { instance: atmosphere, color: atmosphere.Color, decay: atmosphere.Decay },
-		};
-	}
-
 	private applyDarkness() {
-		const saved = this.saved;
-		if (!saved) return;
 		const amount = this.darkness.Value;
-		Lighting.ClockTime = (saved.clockTime + (NIGHT_CLOCK - saved.clockTime) * amount) % 24;
-		Lighting.Brightness = saved.brightness + (NIGHT_BRIGHTNESS - saved.brightness) * amount;
-		Lighting.ExposureCompensation = saved.exposure + (NIGHT_EXPOSURE - saved.exposure) * amount;
-		Lighting.Ambient = saved.ambient.Lerp(NIGHT_AMBIENT, amount);
-		Lighting.OutdoorAmbient = saved.outdoorAmbient.Lerp(NIGHT_OUTDOOR_AMBIENT, amount);
-		// Only its colours: FocusController owns the atmosphere's density / haze (clear 2.5D view)
-		if (saved.atmosphere) {
-			saved.atmosphere.instance.Color = saved.atmosphere.color.Lerp(NIGHT_ATMOSPHERE, amount);
-			saved.atmosphere.instance.Decay = saved.atmosphere.decay.Lerp(NIGHT_DECAY, amount);
-		}
+		setEventNight("Ufo", NIGHT, amount);
 
 		if (amount > 0 && !this.grade) {
 			this.grade = new Instance("ColorCorrectionEffect");

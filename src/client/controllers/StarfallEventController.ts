@@ -6,18 +6,21 @@ import { getAquariumFrame } from "shared/types/aquarium";
 import { ActiveEvent } from "shared/types/events";
 import { isStarSize, STAR_CAUGHT_ATTRIBUTE, STAR_FADING_ATTRIBUTE, STAR_SIZE_ATTRIBUTE, STAR_SIZES } from "shared/types/stars";
 import { STARFALL_COLORS } from "client/ui/theme";
+import { EventNight, setEventNight } from "client/eventLighting";
 import { MusicEventController } from "./MusicEventController";
 
 // The night falling (local Lighting changes, put back when it ends): a clear deep blue night, brighter than the UFO's
 const DARKEN_TIME = 2.5;
 const BRIGHTEN_TIME = 2.5;
-const NIGHT_CLOCK = 23.5;
-const NIGHT_BRIGHTNESS = 0.8;
-const NIGHT_EXPOSURE = -0.2;
-const NIGHT_AMBIENT = Color3.fromRGB(30, 38, 84);
-const NIGHT_OUTDOOR_AMBIENT = Color3.fromRGB(44, 56, 120);
-const NIGHT_ATMOSPHERE = Color3.fromRGB(36, 52, 128);
-const NIGHT_DECAY = Color3.fromRGB(16, 22, 64);
+const NIGHT: EventNight = {
+	clockTime: 23.5,
+	brightness: 0.8,
+	exposure: -0.2,
+	ambient: Color3.fromRGB(30, 38, 84),
+	outdoorAmbient: Color3.fromRGB(44, 56, 120),
+	atmosphere: Color3.fromRGB(36, 52, 128),
+	decay: Color3.fromRGB(16, 22, 64),
+};
 const GRADE_TINT = Color3.fromRGB(205, 215, 255);
 const GRADE_SATURATION = 0.1;
 const GRADE_CONTRAST = 0.08;
@@ -46,15 +49,6 @@ const STAR_LIGHT_BRIGHTNESS = 2.5;
 const BURST_TIME = 0.35; // a caught star swells and vanishes
 const BLINK_PERIOD = 0.3;
 const SPARKLE_TEXTURE = "rbxasset://textures/particles/sparkles_main.dds";
-
-interface SavedLighting {
-	clockTime: number;
-	brightness: number;
-	exposure: number;
-	ambient: Color3;
-	outdoorAmbient: Color3;
-	atmosphere?: { instance: Atmosphere; color: Color3; decay: Color3 };
-}
 
 interface Twinkle {
 	frame: GuiObject;
@@ -109,7 +103,6 @@ class StarfallEventControllerSingleton implements Lifecycle {
 	/** 0 = normal world, 1 = full night; tweened on start / end. */
 	private darkness = new Instance("NumberValue");
 	private darknessTween?: Tween;
-	private saved?: SavedLighting;
 	private grade?: ColorCorrectionEffect;
 	private tanks = new Map<Model, TankDressing>();
 	private skyStreaks = new Array<SkyStreak>();
@@ -136,7 +129,6 @@ class StarfallEventControllerSingleton implements Lifecycle {
 		if (active === this.active) return;
 		this.active = active;
 		if (active) {
-			if (this.darkness.Value === 0) this.saveLighting();
 			for (const instance of CollectionService.GetTagged(TAGS.Aquarium)) this.dressTank(instance);
 		}
 		this.darknessTween?.Cancel();
@@ -156,33 +148,9 @@ class StarfallEventControllerSingleton implements Lifecycle {
 	// The night
 	// ---------------------------------------------------------------------
 
-	/** The place's own lighting, read before the first change: it is what comes back after the night. */
-	private saveLighting() {
-		const atmosphere = Lighting.FindFirstChildOfClass("Atmosphere");
-		this.saved = {
-			clockTime: Lighting.ClockTime,
-			brightness: Lighting.Brightness,
-			exposure: Lighting.ExposureCompensation,
-			ambient: Lighting.Ambient,
-			outdoorAmbient: Lighting.OutdoorAmbient,
-			atmosphere: atmosphere && { instance: atmosphere, color: atmosphere.Color, decay: atmosphere.Decay },
-		};
-	}
-
 	private applyDarkness() {
-		const saved = this.saved;
-		if (!saved) return;
 		const amount = this.darkness.Value;
-		Lighting.ClockTime = saved.clockTime + (NIGHT_CLOCK - saved.clockTime) * amount;
-		Lighting.Brightness = saved.brightness + (NIGHT_BRIGHTNESS - saved.brightness) * amount;
-		Lighting.ExposureCompensation = saved.exposure + (NIGHT_EXPOSURE - saved.exposure) * amount;
-		Lighting.Ambient = saved.ambient.Lerp(NIGHT_AMBIENT, amount);
-		Lighting.OutdoorAmbient = saved.outdoorAmbient.Lerp(NIGHT_OUTDOOR_AMBIENT, amount);
-		// Only its colours: FocusController owns the atmosphere's density / haze (clear 2.5D view)
-		if (saved.atmosphere) {
-			saved.atmosphere.instance.Color = saved.atmosphere.color.Lerp(NIGHT_ATMOSPHERE, amount);
-			saved.atmosphere.instance.Decay = saved.atmosphere.decay.Lerp(NIGHT_DECAY, amount);
-		}
+		setEventNight("Starfall", NIGHT, amount);
 
 		if (amount > 0 && !this.grade) {
 			this.grade = new Instance("ColorCorrectionEffect");

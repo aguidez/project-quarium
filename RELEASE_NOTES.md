@@ -10,6 +10,16 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.59 — 2026-11-03
+
+**Fixes**
+- **Sky stuck dark after an event**: when an event started while another one's night was still on (a UFO night
+  replaced by a starfall, or an event starting during the fade back to day), the world stayed dark after it ended.
+  The abyssal raid, the UFO night and the starfall now share the same memory of the real daylight and always bring it
+  back exactly; switching from one to another crossfades their nights smoothly.
+
+---
+
 ## V0.58 — 2026-11-03
 
 **New**

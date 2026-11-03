@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-03 (V0.58: titles tag chat messages; the title hides with the avatar in the 2.5D view).
+> Last updated: 2026-11-03 (V0.59: event nights blend over one shared snapshot of the lighting, client/eventLighting.ts).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -378,6 +378,9 @@ ProjectQuarium/
       ├─ fishLook.ts         getFishTemplate / cloneFishTemplate (undefined until the server replicated the species),
       │                      hasVariantLook, onFishAssetAdded, applyVariantLook (recoloured appearance, ghost
       │                      translucency, shiny particles), used by FishRenderController
+      ├─ eventLighting.ts    setEventNight(name, night, amount): the Abyss / UFO / Starfall nights blend over one snapshot
+      │                      of the place's own Lighting (taken when the first night starts, restored exactly once all are
+      │                      at 0), so an event replacing another never keeps the other's night as its "day"
       ├─ controllers/
       │  ├─ UiController     Mounts React <App/> in PlayerGui.ReactUi; feeds it PlayerData; queues hatch reveals / rewards;
       │  │                   turns UI callbacks into RequestAction intents; sets the local "DataLoaded" player attribute;
@@ -421,12 +424,12 @@ ProjectQuarium/
       │  │                   the aquarium's INCOME_ATTRIBUTES
       │  ├─ MusicEventController  Follows the replicated event (any kind): its track if any; for music events, beat detection,
       │  │                   guest effects in its event's stage colours, onBeat listeners; getEvent / onEventChanged; hides events from immune clients
-      │  ├─ AbyssEventController  Abyssal raid visuals (local): world darkness (Lighting + AbyssGrade, put back after), abyss
+      │  ├─ AbyssEventController  Abyssal raid visuals (local): world darkness (eventLighting + AbyssGrade), abyss
       │  │                   backdrop SurfaceGui on every tank, navy water, marine snow, lantern lure light and red eye glows
-      │  ├─ UfoEventController  UFO night visuals (local): violet night (Lighting + UfoGrade), space backdrop on every tank,
+      │  ├─ UfoEventController  UFO night visuals (local): violet night (eventLighting + UfoGrade), space backdrop on every tank,
       │  │                   night-blue water, two green searchlights sweeping each tank; per UFO (tag Ufo) a pink glow and,
       │  │                   while "Beaming", a green tractor beam, sparkles and light
-      │  ├─ StarfallEventController  Starfall visuals (local): blue night (Lighting + StarfallGrade), starry backdrop with
+      │  ├─ StarfallEventController  Starfall visuals (local): blue night (eventLighting + StarfallGrade), starry backdrop with
       │  │                   shooting streaks on every tank, night-blue water, golden tank light, shooting stars in the sky
       │  │                   around the camera; draws each Star hitbox (★ glyph billboard with halo, light, trail,
       │  │                   sparkles), bursts it when "Caught", blinks it while "Fading"

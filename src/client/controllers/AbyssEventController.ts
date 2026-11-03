@@ -5,18 +5,21 @@ import { TAGS } from "shared/tags";
 import { getAquariumFrame } from "shared/types/aquarium";
 import { ActiveEvent, LURKING_ATTRIBUTE } from "shared/types/events";
 import { ABYSS_COLORS } from "client/ui/theme";
+import { EventNight, setEventNight } from "client/eventLighting";
 import { MusicEventController } from "./MusicEventController";
 
 // The world going dark (local Lighting changes, put back when the raid ends)
 const DARKEN_TIME = 2.5;
 const BRIGHTEN_TIME = 2.5;
-const NIGHT_CLOCK = 24.5; // ClockTime the day runs to (past midnight), through the sunset
-const NIGHT_BRIGHTNESS = 0.6;
-const NIGHT_EXPOSURE = -0.3;
-const NIGHT_AMBIENT = Color3.fromRGB(16, 22, 42);
-const NIGHT_OUTDOOR_AMBIENT = Color3.fromRGB(22, 30, 58);
-const NIGHT_ATMOSPHERE = Color3.fromRGB(25, 40, 70);
-const NIGHT_DECAY = Color3.fromRGB(10, 20, 45);
+const NIGHT: EventNight = {
+	clockTime: 24.5, // the day runs on past midnight, through the sunset
+	brightness: 0.6,
+	exposure: -0.3,
+	ambient: Color3.fromRGB(16, 22, 42),
+	outdoorAmbient: Color3.fromRGB(22, 30, 58),
+	atmosphere: Color3.fromRGB(25, 40, 70),
+	decay: Color3.fromRGB(10, 20, 45),
+};
 const GRADE_TINT = Color3.fromRGB(175, 195, 255);
 const GRADE_SATURATION = -0.15;
 const GRADE_CONTRAST = 0.08;
@@ -44,15 +47,6 @@ const LURE_RANGE = 16;
 const LURE_PULSE = 0.15; // ± share of the brightness, slow flicker
 const SPARKLE_TEXTURE = "rbxasset://textures/particles/sparkles_main.dds";
 const SNOW_TEXTURE = "rbxasset://textures/particles/smoke_main.dds";
-
-interface SavedLighting {
-	clockTime: number;
-	brightness: number;
-	exposure: number;
-	ambient: Color3;
-	outdoorAmbient: Color3;
-	atmosphere?: { instance: Atmosphere; color: Color3; decay: Color3 };
-}
 
 interface Speck {
 	frame: Frame;
@@ -89,7 +83,6 @@ class AbyssEventControllerSingleton implements Lifecycle {
 	/** 0 = normal world, 1 = full abyss; tweened on start / end. */
 	private darkness = new Instance("NumberValue");
 	private darknessTween?: Tween;
-	private saved?: SavedLighting;
 	private grade?: ColorCorrectionEffect;
 	private tanks = new Map<Model, TankDressing>();
 	private lanterns = new Map<Model, Lantern>();
@@ -116,7 +109,6 @@ class AbyssEventControllerSingleton implements Lifecycle {
 		if (active === this.active) return;
 		this.active = active;
 		if (active) {
-			if (this.darkness.Value === 0) this.saveLighting();
 			for (const instance of CollectionService.GetTagged(TAGS.Aquarium)) this.dressTank(instance);
 		}
 		this.darknessTween?.Cancel();
@@ -136,34 +128,9 @@ class AbyssEventControllerSingleton implements Lifecycle {
 	// Darkness
 	// ---------------------------------------------------------------------
 
-	/** The place's own lighting, read before the first change: it is what comes back after the raid. */
-	private saveLighting() {
-		const atmosphere = Lighting.FindFirstChildOfClass("Atmosphere");
-		this.saved = {
-			clockTime: Lighting.ClockTime,
-			brightness: Lighting.Brightness,
-			exposure: Lighting.ExposureCompensation,
-			ambient: Lighting.Ambient,
-			outdoorAmbient: Lighting.OutdoorAmbient,
-			atmosphere: atmosphere && { instance: atmosphere, color: atmosphere.Color, decay: atmosphere.Decay },
-		};
-	}
-
 	private applyDarkness() {
-		const saved = this.saved;
-		if (!saved) return;
 		const amount = this.darkness.Value;
-		// The day runs on to the night (a sunset), and back
-		Lighting.ClockTime = (saved.clockTime + (NIGHT_CLOCK - saved.clockTime) * amount) % 24;
-		Lighting.Brightness = saved.brightness + (NIGHT_BRIGHTNESS - saved.brightness) * amount;
-		Lighting.ExposureCompensation = saved.exposure + (NIGHT_EXPOSURE - saved.exposure) * amount;
-		Lighting.Ambient = saved.ambient.Lerp(NIGHT_AMBIENT, amount);
-		Lighting.OutdoorAmbient = saved.outdoorAmbient.Lerp(NIGHT_OUTDOOR_AMBIENT, amount);
-		// Only its colours: FocusController owns the atmosphere's density / haze (clear 2.5D view)
-		if (saved.atmosphere) {
-			saved.atmosphere.instance.Color = saved.atmosphere.color.Lerp(NIGHT_ATMOSPHERE, amount);
-			saved.atmosphere.instance.Decay = saved.atmosphere.decay.Lerp(NIGHT_DECAY, amount);
-		}
+		setEventNight("Abyss", NIGHT, amount);
 
 		if (amount > 0 && !this.grade) {
 			this.grade = new Instance("ColorCorrectionEffect");
