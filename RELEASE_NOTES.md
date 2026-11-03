@@ -11,6 +11,18 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.60.1 — 2026-11-03
+
+**Changes**
+- **Recurring events**: still drawn at random, but never the same one twice in a row (an event can come back after
+  another one).
+
+**Fixes**
+- **UFO night**: the "z Z z" over a fish put to sleep by a UFO only showed once the event was over; it now shows
+  as soon as the fish comes back asleep.
+
+---
+
 ## V0.60.0 — 2026-11-03 — Alpha
 
 **New**

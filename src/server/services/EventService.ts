@@ -99,7 +99,8 @@ function utcNow(): number {
 /**
  * Events (one at a time per server). Two sources:
  * - recurring: this server's clock, restarted with the server and at the end of every event, draws one
- *   of the recurring events between minutes 5 and 15 (getRecurringChance). Only this server has it.
+ *   of the recurring events between minutes 5 and 15 (getRecurringChance), never the one that ran last. Only this
+ *   server has it.
  * - admin: "/event <name>" by an admin starts any event on every server (MessagingService + a MemoryStore
  *   for servers started meanwhile). It replaces a recurring event; none can start while it runs.
  * Players still in the tutorial are event immune (EVENT_IMMUNE_ATTRIBUTE, kept up to date here): no guest,
@@ -120,6 +121,8 @@ class EventServiceSingleton implements Lifecycle {
 	/** Recurring clock: os.clock() of its start, and the last minute already drawn. */
 	private clockStartedAt = os.clock();
 	private lastDrawnMinute = 0;
+	/** The last event started on this server (recurring or admin): the next recurring one is another. */
+	private lastEventType?: GameEventType;
 
 	public onInit() {
 		const eventTypes = new Array<GameEventType>();
@@ -190,7 +193,10 @@ class EventServiceSingleton implements Lifecycle {
 		if (!this.hasAudience()) return;
 		this.lastDrawnMinute = minute;
 		if (this.rng.NextNumber() >= chance) return;
-		const pool = getRecurringEvents();
+		// Never the same event twice in a row (with a single recurring event, it repeats)
+		const all = getRecurringEvents();
+		const others = all.filter((eventType) => eventType !== this.lastEventType);
+		const pool = others.size() > 0 ? others : all;
 		if (pool.size() === 0) return;
 		const eventType = pool[this.rng.NextInteger(0, pool.size() - 1)];
 		this.startEvent(eventType, "Recurring", GAME_EVENTS[eventType].duration);
@@ -332,6 +338,7 @@ class EventServiceSingleton implements Lifecycle {
 		this.clearEvent();
 		const token = ++this.token;
 		this.current = { eventType, source, adminId };
+		this.lastEventType = eventType;
 		const startsAt = Workspace.GetServerTimeNow() + EVENT_LEAD_TIME;
 		const endsAt = startsAt + duration;
 		ReplicatedStorage.SetAttribute(EVENT_ATTRIBUTES.type, eventType);

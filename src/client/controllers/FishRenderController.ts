@@ -330,7 +330,9 @@ class FishRenderControllerSingleton implements Lifecycle {
 		bubble.StudsOffsetWorldSpace = new Vector3(0, fish.body.Size.Y / 2 + 0.8, 0);
 		bubble.LightInfluence = 0;
 		bubble.AlwaysOnTop = false;
-		bubble.MaxDistance = 120;
+		// Like the hunger badges: the 2.5D camera stands ~133 studs back during a UFO night (its headroom), farther
+		// than a distance limit of 120 (the bubble only showed once the event ended)
+		bubble.MaxDistance = math.huge;
 		const label = new Instance("TextLabel");
 		label.BackgroundTransparency = 1;
 		label.Size = UDim2.fromScale(1, 1);
