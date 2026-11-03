@@ -78,6 +78,7 @@ class FocusControllerSingleton implements Lifecycle {
 	private savedFov = 70;
 	private transitionToken = 0;
 	private hiddenCharacters = new Set<Model>();
+	private hiddenBillboards = new Set<BillboardGui>(); // turned off here (the title above the head), turned back on
 	private backButton!: TextButton;
 	private aquariumButton!: TextButton;
 	private actionRemote = getRemoteEvent("RequestAction");
@@ -545,6 +546,16 @@ class FocusControllerSingleton implements Lifecycle {
 		for (const descendant of character.GetDescendants()) {
 			if (descendant.IsA("BasePart") || descendant.IsA("Decal")) {
 				descendant.LocalTransparencyModifier = modifier;
+			} else if (hidden && descendant.IsA("BillboardGui") && descendant.Enabled) {
+				// The title would float alone above an invisible avatar (a new one, after a title change, too)
+				descendant.Enabled = false;
+				this.hiddenBillboards.add(descendant);
+			}
+		}
+		if (!hidden) {
+			for (const billboard of this.hiddenBillboards) {
+				if (billboard.IsDescendantOf(character)) billboard.Enabled = true;
+				if (billboard.IsDescendantOf(character) || !billboard.Parent) this.hiddenBillboards.delete(billboard);
 			}
 		}
 		if (hidden) this.hiddenCharacters.add(character);

@@ -1,6 +1,12 @@
 import { Players, TextService } from "@rbxts/services";
 import { Lifecycle } from "shared/framework";
-import { COSMETICS, CosmeticId } from "shared/types/cosmetics";
+import {
+	COSMETICS,
+	CosmeticId,
+	EARNED_TITLE_COLOR,
+	TITLE_ATTRIBUTE,
+	TITLE_RANK_ATTRIBUTE,
+} from "shared/types/cosmetics";
 import { getDisplayedTitle, getTitleRank } from "shared/types/customization";
 import {
 	getTitleTier,
@@ -14,7 +20,6 @@ import { DataService } from "./DataService";
 /** Titles are checked this often (earned from a quest or an Ocean milestone, or a new character). */
 const CHECK_INTERVAL = 1;
 const BILLBOARD_NAME = "PlayerTitle";
-const TITLE_COLOR = Color3.fromHex("#FFD54A");
 const OUTLINE = Color3.fromHex("#071320");
 const WHITE = new Color3(1, 1, 1);
 
@@ -55,11 +60,14 @@ class TitleServiceSingleton implements Lifecycle {
 	}
 
 	private refresh(player: Player) {
-		const head = player.Character?.FindFirstChild("Head");
-		if (!head?.IsA("BasePart")) return;
 		const data = DataService.getData(player);
 		const title = data ? getDisplayedTitle(data) : undefined; // the player's pick, else the best one
 		const rank = data && title ? getTitleRank(data, title) : undefined;
+		// Also on the Player (ChatTitleController tags their chat messages with it), even without a character
+		player.SetAttribute(TITLE_ATTRIBUTE, title);
+		player.SetAttribute(TITLE_RANK_ATTRIBUTE, rank);
+		const head = player.Character?.FindFirstChild("Head");
+		if (!head?.IsA("BasePart")) return;
 		const existing = head.FindFirstChild(BILLBOARD_NAME);
 		const key = title === undefined ? "" : rank === undefined ? title : `${title}#${rank}`;
 		// A new character has no billboard yet: rebuild it even if the title didn't change
@@ -80,7 +88,7 @@ class TitleServiceSingleton implements Lifecycle {
 		label.Font = Enum.Font.LuckiestGuy;
 		label.Text = COSMETICS[title].displayName.upper();
 		label.TextScaled = true;
-		label.TextColor3 = TITLE_COLOR;
+		label.TextColor3 = EARNED_TITLE_COLOR;
 		this.stroke(label, OUTLINE, 2);
 		label.Parent = billboard;
 		billboard.Parent = head;

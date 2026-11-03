@@ -117,6 +117,13 @@ export const LEADERBOARD_TITLES: Record<LeaderboardId, CosmeticId> = {
 	PlayTime: "TitleDevotedKeeper",
 };
 
+/** Player attributes (TitleService): the title worn (a CosmeticId) and, for a leaderboard title, its rank today. */
+export const TITLE_ATTRIBUTE = "Title";
+export const TITLE_RANK_ATTRIBUTE = "TitleRank";
+
+/** Gold of the earned titles: their text above the head and their tag in the chat. */
+export const EARNED_TITLE_COLOR = Color3.fromHex("#FFD54A");
+
 export function isLeaderboardTitle(id: CosmeticId): boolean {
 	return COSMETICS[id].leaderboard !== undefined;
 }

@@ -10,6 +10,20 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.58 — 2026-11-03
+
+**New**
+- **Titles in the chat**: the title you wear now shows before your name in the chat window, for everyone in the
+  server: earned titles in gold ("[OCEAN FRIEND]"), leaderboard titles with their rank in their tier's colour
+  ("[OCEAN LEGEND #1]" gold, #2 silver, #3 bronze, #4 to #10 aqua). Pick "No title" in Customize and the tag goes too.
+
+**Fixes**
+- **Titles in the aquarium view**: entering the 2.5D view hides your avatar, but its title (and the title of anyone
+  standing in front of the glass) stayed on screen, floating alone over the tank. It now hides with the avatar and
+  comes back when you leave the view.
+
+---
+
 ## V0.57 — 2026-11-02
 
 **Fixes**

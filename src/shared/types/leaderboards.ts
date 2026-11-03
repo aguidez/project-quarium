@@ -60,6 +60,8 @@ export interface TitleTierStyle {
 	badgeShadow: Color3;
 	gloss: number;
 	sparkles: number;
+	/** Its tag's colour in the chat window (light: the window is dark). */
+	chat: Color3;
 }
 
 export const TITLE_TIER_STYLES: Record<TitleTier, TitleTierStyle> = {
@@ -72,6 +74,7 @@ export const TITLE_TIER_STYLES: Record<TitleTier, TitleTierStyle> = {
 		badgeShadow: Color3.fromHex("#8F5A00"),
 		gloss: 0.65,
 		sparkles: 2,
+		chat: Color3.fromHex("#FFD233"),
 	},
 	Silver: {
 		faceTop: Color3.fromHex("#FFFFFF"),
@@ -82,6 +85,7 @@ export const TITLE_TIER_STYLES: Record<TitleTier, TitleTierStyle> = {
 		badgeShadow: Color3.fromHex("#46525E"),
 		gloss: 0.65,
 		sparkles: 1,
+		chat: Color3.fromHex("#DDE5EE"),
 	},
 	Bronze: {
 		faceTop: Color3.fromHex("#F7B48A"),
@@ -92,6 +96,7 @@ export const TITLE_TIER_STYLES: Record<TitleTier, TitleTierStyle> = {
 		badgeShadow: Color3.fromHex("#4E220C"),
 		gloss: 0.65,
 		sparkles: 0,
+		chat: Color3.fromHex("#F7B48A"),
 	},
 	Common: {
 		faceTop: Color3.fromHex("#2F5684"),
@@ -102,6 +107,7 @@ export const TITLE_TIER_STYLES: Record<TitleTier, TitleTierStyle> = {
 		badgeShadow: Color3.fromHex("#005A61"),
 		gloss: 0.88,
 		sparkles: 0,
+		chat: Color3.fromHex("#8AF7F9"),
 	},
 };
 

@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-02 (V0.57: Aquarium panel content centred; V0.56: Atlantis corals grounded on the sand).
+> Last updated: 2026-11-03 (V0.58: titles tag chat messages; the title hides with the avatar in the 2.5D view).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -190,7 +190,7 @@ ProjectQuarium/
    │     ├─ cosmetics.ts     CosmeticId / COSMETICS (kind Title / Decor / Finish; `leaderboard` on the three leaderboard
    │     │                   titles TitleOceanLegend / TitleTankTycoon / TitleDevotedKeeper, never in PlayerData.cosmetics),
    │     │                   TITLE_ORDER (earned titles), LEADERBOARD_TITLES, isLeaderboardTitle, DECOR_SLOTS (tank-local
-   │     │                   position per decor id), isDecor
+   │     │                   position per decor id), isDecor, TITLE_ATTRIBUTE / TITLE_RANK_ATTRIBUTE, EARNED_TITLE_COLOR
    │     ├─ gamepasses.ts    GamePass / GAME_PASSES (name, shop text, Roblox id, icon, badge, shopOrder), getShopPasses,
    │     │                   getPassById, getPassCoinMultiplier (x1.5) / getPassOceanMultiplier (x2) /
    │     │                   getPassVariantLuck (x2) / getPassCompanionSlots (+1). The companion passes (WaterHenPass,
@@ -235,7 +235,7 @@ ProjectQuarium/
    │     │                   LEADERBOARD_ATTRIBUTE ("Board" on a sign), LeaderboardEntry {userId, name, value},
    │     │                   LeaderboardSync {boards, own?}, formatPlayTime ("212h 05m"), formatLeaderboardValue;
    │     │                   titles: LEADERBOARD_TITLE_RANKS (10), getLeaderboardDay (UTC day), TitleTier (Gold / Silver /
-   │     │                   Bronze / Common) + getTitleTier(rank), TITLE_TIER_STYLES (nameplate colours), TITLE_PLATE_IMAGES
+   │     │                   Bronze / Common) + getTitleTier(rank), TITLE_TIER_STYLES (nameplate colours, `chat` tag colour), TITLE_PLATE_IMAGES
    │     ├─ events.ts        GameEventType (Kpop, Island, Abyss, Ufo, Starfall), GAME_EVENTS: kind "Music" (bpm,
    │     │                   beatOffset, beatCoins Flat (K-pop) or Paced (Island: income-paced, growing boost, finale)),
    │     │                   "Abyss", "Ufo" or "Starfall", subtitle, optional musicId and coinMultiplier, duration, recurring flag;
@@ -353,7 +353,8 @@ ProjectQuarium/
    │     ├─ TitleService     Polls every 1 s: a BillboardGui "PlayerTitle" on each character's Head with getDisplayedTitle:
    │     │                   an earned title is gold LuckiestGuy text (4.2 × 0.65 studs); a leaderboard title a nameplate in
    │     │                   its rank's tier (pill + rank badge + board icon, laid out in design px and drawn in scale, 0.65
-   │     │                   stud tall); MaxDistance 120, rebuilt when the title or its rank changes, removed without one
+   │     │                   stud tall); MaxDistance 120, rebuilt when the title or its rank changes, removed without one;
+   │     │                   also sets the Player attributes `Title` / `TitleRank` (the chat tag)
    │     ├─ GamePassService  The only writer of PlayerData.passes: at join asks Roblox for each pass on sale
    │     │                   (UserOwnsGamePassAsync, 3 tries; no answer keeps the saved state; passes without an id are
    │     │                   dropped), grants a purchase from PromptGamePassPurchaseFinished (thank-you Reward),
@@ -387,7 +388,8 @@ ProjectQuarium/
       │  │                   puts the character in its tank's focus zone and enters the view; "clarity" tween in the view
       │  │                   (less haze, clearer own GlassFront / Water, local); headroom above the tank: 6 studs while a
       │  │                   companion is perched / floating (Pelican, Water Hen), 9 while a UFO flies over it (re-framed
-      │  │                   once the fly-in lands)
+      │  │                   once the fly-in lands); hides the characters between the camera and the glass (local
+      │  │                   transparency, and their BillboardGuis such as the title, turned back on when they leave)
       │  ├─ AquariumInteractionController  Clicks in focus view → CatchStar (a star under the cursor), CollectCoin (a
       │  │                   coin) or DropFood
       │  ├─ FishRenderController  Builds / moves the local fish models of the watched tanks (own tank in 2.5D, else tanks
@@ -404,6 +406,8 @@ ProjectQuarium/
       │  │                   Body every frame) and the Jellyfish's bell pulse
       │  ├─ PelicanChargesController  Charge gauge above the local player's on-demand Pelican / Jellyfish (BillboardGui): one
       │  │                   slot per charge, a pellet growing while it refills; hidden while MaxCharges is 0
+      │  ├─ ChatTitleController  TextChatService.OnIncomingMessage: the sender's title as a coloured tag before their name in
+      │  │                   the chat window ("[OCEAN LEGEND #1]", tier colour; earned titles gold), from the Player attributes
       │  ├─ StatsReportController  Once a minute sends "ReportClientStats" (platform, average fps, memory, SwimTriangleBudget)
       │  ├─ ShopKeeperController  The fisherman's shop (tag ShopKeeper): isNearby / onNearbyChanged (opens within 9 studs,
       │  │                   closes beyond 12; nearest hut) → App `shopNearby` opens / closes the Shop panel (closed by hand
@@ -661,7 +665,8 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   `Caught`. Tanks carry `OwnerUserId`, `Likes`, `LikeBoostEndsAt`, `Theme` and the
   `INCOME_ATTRIBUTES`. `LikeBoard` models carry `PlotIndex`; `Leaderboard` signs carry `Board`. Players carry `EventImmune`,
   `CoinBoostSeconds` /
-  `CoinBoostRunning`, `TestSpeed` (the owner's test chip) and `AdminPanel` (may open the admin panel).
+  `CoinBoostRunning`, `TestSpeed` (the owner's test chip), `AdminPanel` (may open the admin panel) and `Title` /
+  `TitleRank` (the title worn and its leaderboard rank, TitleService).
 - **Events:** ReplicatedStorage attributes `EventType`, `EventStartsAt`, `EventEndsAt` and `EventSource`
   ("Recurring" / "Admin") (`EVENT_ATTRIBUTES`), with beats computed from `Workspace.GetServerTimeNow()`. Players carry
   `EventImmune` (true until loaded and while in the tutorial; absent = immune).
