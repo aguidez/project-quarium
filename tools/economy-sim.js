@@ -1,7 +1,7 @@
 // Economy simulator for Project: Quarium. Mirrors src/shared/types/fish.ts, eggs.ts, rebirths.ts and the
 // capacity milestones of oceanRewards.ts: keep the numbers below in sync when the balance changes, and
 // write the results in BALANCE.md.
-// Monte Carlo over many "average players" (collect 50% of the coins, feed their fish, save for the
+// Monte Carlo over many "average players" (collect 50% of the coins, feed their fish (free food), save for the
 // best unlocked egg, fill empty slots, swap the weakest fish once the tank is full, complete the
 // Fish Index, rebirth as soon as they can, release the weakest fish for room once the Ocean is open).
 // Prints median / p10 / p90 times of each step, and the median income at a few checkpoints.
@@ -172,7 +172,7 @@ const P = Object.assign(
 	{
 		collect: 0.5, // share of coin value the player collects (0.5 = average player, calibrated)
 		special: 1 + 1 / 15, // special coins x2 one time out of 15
-		food: 10, // per pellet
+		food: 0, // per pellet: free since V0.60.6 (the food reserve: 5 portions, each one back 10 s after use)
 		feedEvery: 35, // seconds between two meals of a fish
 		capacity: 10,
 		reveal: 3.8,

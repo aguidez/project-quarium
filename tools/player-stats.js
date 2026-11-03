@@ -18,28 +18,28 @@ const flag = (name) => {
 const STORE = flag("--store") || "PlayerData_v1"; // DataService STORE_NAME
 const LIMIT = Number(flag("--limit") || Infinity);
 
-// What the simulator predicts for the reference player (BALANCE.md §2, V0.48: 1 h a day with the dailies), in minutes of
+// What the simulator predicts for the reference player (BALANCE.md §2, V0.60.6: 1 h a day with the dailies, free food), in minutes of
 // play in front of the tank. Keep in line with BALANCE.md when the balance changes.
 const REFERENCE = {
-	Rebirth1: 25,
-	Rebirth2: 92,
-	Rebirth3: 167,
-	Rebirth4: 264,
-	Rebirth5: 354,
-	Rebirth6: 487,
-	Rebirth7: 603,
-	Rebirth8: 665,
-	"Species:FlameGourami": 54,
-	"Species:ImperialDiscus": 135,
-	AlphaComplete: 136, // the alpha's nine species (V0.60.0): the Imperial Discus is usually the last one
-	"Species:Catfish": 219,
-	"Species:BabySunfish": 324,
-	"Species:Lanternfish": 410,
-	"Species:Dragonfish": 557,
-	"Species:WolfDogfish": 679,
-	"Species:BunnyShark": 733,
-	"Species:MiniLeviathan": 748,
-	AllSpecies: 751,
+	Rebirth1: 19,
+	Rebirth2: 84,
+	Rebirth3: 160,
+	Rebirth4: 259,
+	Rebirth5: 344,
+	Rebirth6: 477,
+	Rebirth7: 590,
+	Rebirth8: 656,
+	"Species:FlameGourami": 46,
+	"Species:ImperialDiscus": 124,
+	AlphaComplete: 125, // the alpha's nine species: the Imperial Discus is usually the last one
+	"Species:Catfish": 214,
+	"Species:BabySunfish": 316,
+	"Species:Lanternfish": 404,
+	"Species:Dragonfish": 544,
+	"Species:WolfDogfish": 675,
+	"Species:BunnyShark": 722,
+	"Species:MiniLeviathan": 736,
+	AllSpecies: 738,
 };
 const REFERENCE_PICKUP = 0.5; // the simulator's P.collect: share of the coins' value picked up (clicks + companions)
 const MILESTONE_ORDER = [

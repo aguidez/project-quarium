@@ -8,7 +8,7 @@ import { FishType } from "./fish";
  * - OpenEgg: the egg is ready: click it in the shop to open it (eggs never open by themselves).
  * - CollectCoin: the fish drops a frozen coin ONBOARDING_COIN_DELAY seconds after it is born: collect it.
  * - CoinCollected: congratulations, then ONBOARDING_FEED_DELAY seconds later the fish turns hungry.
- * - Feed: drop food (clicking the water) to feed the hungry fish.
+ * - Feed: drop food (clicking the water) to feed the hungry fish; the food reserve shows up with this step.
  * - Done: the game is unlocked and the player receives ONBOARDING_REWARD.
  * Until Done, fish hunger and coin drops are held (only the scripted coin / hunger happen).
  */
@@ -30,7 +30,7 @@ export const ONBOARDING_STEPS: readonly OnboardingStep[] = [
 export const ONBOARDING_FISH: FishType = "Basic";
 export const ONBOARDING_COIN_DELAY = 2; // seconds between the first fish's birth and its first coin
 export const ONBOARDING_FEED_DELAY = 5; // seconds the "Well done!" stays readable before the fish gets hungry
-/** Money given when the onboarding is done (players start with nothing: the first egg and food are free). */
+/** Money given when the onboarding is done (players start with nothing: the first egg is free). */
 export const ONBOARDING_REWARD = 300;
 /** Seconds after the onboarding before a bubble invites the player to read the story quests (after the reward popup). */
 export const STORY_QUEST_HINT_DELAY = 5;
@@ -44,14 +44,9 @@ export function isOnboardingDone(step: OnboardingStep): boolean {
 	return step === "Done";
 }
 
-/** Food can only be dropped once the onboarding asks for it (so the player can't waste their money before). */
+/** Food can only be dropped once the onboarding asks for it: its reserve (shared/types/food.ts) shows up then. */
 export function canDropFood(step: OnboardingStep): boolean {
 	return step === "Feed" || step === "Done";
-}
-
-/** The food of the onboarding's Feed step is free: the player starts with no money. */
-export function isFoodFree(step: OnboardingStep): boolean {
-	return step === "Feed";
 }
 
 /** Eggs can only be bought at the onboarding's BuyEgg step, then freely once it is done. */

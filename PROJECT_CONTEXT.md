@@ -4,12 +4,12 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-03 (V0.60.5: the animated meshes belong to the group, tools/group-mesh-upload.js).
+> Last updated: 2026-11-03 (V0.60.6: free food from a reserve of 5 portions, FoodReserve HUD).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
-into fish of various rarities. Fish drop coins the player clicks to collect, and must be fed (food costs
-money). An unfed fish never dies: it turns weak (very slow) and only lets out 1 $ fart bubbles instead of its
+into fish of various rarities. Fish drop coins the player clicks to collect, and must be fed (food is free, from a
+reserve of 5 portions that refill one by one, 10 s each). An unfed fish never dies: it turns weak (very slow) and only lets out 1 $ fart bubbles instead of its
 coins. Around that core loop:
 
 - a quest book: story lines (the "Voyage" main line to the end of the content, companion lines, free side lines)
@@ -39,10 +39,10 @@ coins. Around that core loop:
   night), their own Fish Index category.
 
 18 species (+ 2 secret), 12 eggs, 8 rebirths: the whole V1 content. **The alpha is on** (`shared/types/alpha.ts`,
-`ALPHA_ENABLED`): players get the first ~2h15 of it only (rebirths 1–2, the eggs up to the Neon Coral Egg, the nine first
+`ALPHA_ENABLED`): players get the first ~2h of it only (rebirths 1–2, the eggs up to the Neon Coral Egg, the nine first
 species, the Ocean milestones up to the second incubator, the story quests of that part, the dailies, no weekly quest,
 no gamepass for sale); finding the nine species ends it with the "Alpha Pioneer" title (§3.4 Alpha). **`BALANCE.md`** holds the expected progression
-(rebirth 1 ~25 min … all eighteen species ~12h30 for a player of 1 h a day), every number and the design rules.
+(rebirth 1 ~19 min … all eighteen species ~12h20 for a player of 1 h a day), every number and the design rules.
 How to add content: `docs/agent-notes/content-recipes.md`. **`ROADMAP_V1.1.md`**: the plan after V1 (animation revamp with Blender skeletons, steps A0–A8).
 
 ---
@@ -88,8 +88,12 @@ ProjectQuarium/
 │                            admin-panel-mockup.png / admin-panel-ingame.jpg (the admin panel), star-gauge-mockup.png
 │                            (the starfall's gauge and the star power pill), star-power-pill-ingame.jpg,
 │                            leaderboards-mockup.png / leaderboards-ingame.jpg, leaderboard-titles-mockup.png /
-│                            leaderboard-titles-ingame.jpg (the nameplates' four tiers)
+│                            leaderboard-titles-ingame.jpg (the nameplates' four tiers), food-reserve-mockup.png /
+│                            food-reserve-ingame.jpg / -empty-ingame.jpg / -onboarding-ingame.jpg (the food reserve)
 ├─ design/ui/
+│  ├─ food-reserve.figcraft  The food reserve HUD (FoodReserve_Mockup: in the tank view, in the onboarding's Feed step,
+│  │                         full / refilling / empty), built by food-reserve.build.js (figcraft-cli; exports
+│  │                         design/previews/food-reserve-mockup.png)
 │  ├─ leaderboards.figcraft  The lobby leaderboards (Leaderboards_Mockup: the three signs on the beach, Board_ocean /
 │  │                         _income / _time faces; LeaderboardTitles_Mockup: the nameplates, Plate_<board>_<tier>),
 │  │                         built by leaderboards.build.js (figcraft-cli; exports both previews)
@@ -178,7 +182,7 @@ ProjectQuarium/
    │     ├─ fish.ts          FishType, FishRarity (Common … Mythic, Secret = easter eggs), CoinType, HungerState
    │     │                   (Satiated/Hungry/Weak, no death), FISH_TYPES (income, interval, coin, rarity, oceanPoints,
    │     │                   cannibal?, growth, hunger, easterEgg?: EasterEggConfig {hatchChance, incomeShare, lifetime,
-   │     │                   leaveMessage, source, perk, screamInterval}), FART_BUBBLE_VALUE, growth helpers, FOOD_PRICE,
+   │     │                   leaveMessage, source, perk, screamInterval}), FART_BUBBLE_VALUE, growth helpers,
    │     │                   DEFAULT_FISH_CAPACITY, isEasterEgg, getFishIndexOrder
    │     ├─ eggs.ts          EggType, EGG_TYPES (price, hatchTime, odds, order, requires: the odds the UI shows),
    │     │                   getDrawOdds (+ easter eggs, taken from the most common fish), rollEgg, starter egg
@@ -226,6 +230,9 @@ ProjectQuarium/
    │     ├─ companions.ts    CompanionType (Snail, Pelican, WaterHen, Swordfish, Jellyfish), COMPANION_TYPES (+ sticker
    │     │                   `image`), DEFAULT_COMPANION_SLOTS, PELICAN_FEED_INTERVAL, WATER_HEN_HATCH_MULTIPLIER,
    │     │                   JELLYFISH_FEED_INTERVAL / JELLYFISH_CHARGES / JELLYFISH_PELLETS
+   │     ├─ food.ts          The food reserve: FOOD_RESERVE_SLOTS (5), FOOD_REFILL_TIME (10 s, each slot its own timer),
+   │     │                   FOOD_RESERVE_ATTRIBUTES (Player `FoodSlots`, `FoodRefills` = the used portions' return times,
+   │     │                   comma-separated), encodeFoodRefills / decodeFoodRefills, getFoodReady
    │     ├─ foodLooks.ts     FoodLook (Pellet, Shrimp), FOOD_LOOKS (min satiety bonus per look), getFoodLook: the more a
    │     │                   meal feeds (perks' satiety bonus), the more filling the food looks
    │     ├─ oceanRewards.ts  OCEAN_MILESTONES (id, points, title, description, reward: Companion / CompanionSlot /
@@ -297,7 +304,9 @@ ProjectQuarium/
    │     │                   tanks Basic), the Pearl rims finish (pearly F3ECF7 rims, Reflectance 0.3, any theme) and the
    │     │                   decor cosmetics (DecorTemplate clones at DECOR_SLOTS), rebuilt when any of them changes;
    │     │                   clears the INCOME_ATTRIBUTES of a freed tank
-   │     ├─ FoodService      Drops / sinks food pellets (DropFood), price per pellet, max 10 per player; throwFood (the
+   │     ├─ FoodService      Drops / sinks food pellets (DropFood, free), the player's food reserve (in memory, full at
+   │     │                   join: a drop takes a portion back in FOOD_REFILL_TIME, refused when none is ready; published
+   │     │                   as the FOOD_RESERVE_ATTRIBUTES), max 10 pellets in the water per player; throwFood (the
    │     │                   Pelican's pellet: falls through the air onto the surface, then sinks) and releaseFood (the
    │     │                   Jellyfish's: sinks straight down); Food.byCompanion names the companion, so FishService's fed
    │     │                   callbacks know who fed; look from getFoodLook (Pellet = brown ball, others = a FoodTemplate
@@ -409,14 +418,15 @@ ProjectQuarium/
       │  │                   preloads every fish and companion icon at start
       │  ├─ HudController    Toast notifications (Notify remote; V2 navy toast, gold / red border)
       │  ├─ FocusController  Lobby ↔ 2.5D focus camera, back button (FocusUi: blue V2 3D button in plain instances), reports
-      │  │                   SetFocus; isFocused(), getOwnAquarium(); in the lobby a "My aquarium" button (FocusUi.GoToAquarium)
+      │  │                   SetFocus; isFocused(), isInView() / onViewChanged (entering or in the view: the food reserve;
+      │  │                   the own tank's OwnerPlate is turned off locally meanwhile, the reserve sits over it), getOwnAquarium(); in the lobby a "My aquarium" button (FocusUi.GoToAquarium)
       │  │                   puts the character in its tank's focus zone and enters the view; "clarity" tween in the view
       │  │                   (less haze, clearer own GlassFront / Water, local); headroom above the tank: 6 studs while a
       │  │                   companion is perched / floating (Pelican, Water Hen), 9 while a UFO flies over it (re-framed
       │  │                   once the fly-in lands); hides the characters between the camera and the glass (local
       │  │                   transparency, and their BillboardGuis such as the title, turned back on when they leave)
       │  ├─ AquariumInteractionController  Clicks in focus view → CatchStar (a star under the cursor), CollectCoin (a
-      │  │                   coin) or DropFood
+      │  │                   coin) or DropFood (only with a portion ready in the food reserve, else onFoodDenied listeners)
       │  ├─ FishRenderController  Builds / moves the local fish models of the watched tanks (own tank in 2.5D, else tanks
       │  │                   within 160 studs of the camera) from FishSync segments; growth, weak tint, exits (Abducted:
       │  │                   sucked into the UFO); UFO mutations (green / red tint + sparkles + glow, a "z Z z" bubble and
@@ -481,7 +491,11 @@ ProjectQuarium/
          │                   only while the starfall runs
          ├─ StarPowerPill    The star power kept (starPower > 0, no starfall running): a pill under the egg shop, stacked
          │                   under the boost pills, in the guaranteed variant's colour ("NEXT EGG: AT LEAST A GHOST")
-         ├─ OnboardingPanel  Onboarding instruction card
+         ├─ FoodReserve      The food reserve (FigCraft food-reserve.figcraft), bottom centre of the tank view from the Feed
+         │                   step, never over the bottom-left buttons: navy plate, one round slot per portion (a pellet,
+         │                   or one growing back with its seconds left), "FOOD n/5" chip; an empty click flashes it red and
+         │                   shakes it ("REFILLING..."); FoodPellet (also the Feed card's icon), getFoodReserveTop
+         ├─ OnboardingPanel  Onboarding instruction card (`bottom`: lifted above the food reserve)
          ├─ RewardPopup      Reward celebration (money / companion / feature, optional image)
          ├─ EventBanner      Running event banner (style per event, EVENT_BANNER_STYLES: beat flashes / slow glow), formatTime
          ├─ AdminPanel       Admin panel (FigCraft admin-panel.figcraft), opened by the purple ADMIN button (bottom-left,
@@ -690,7 +704,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   `Caught`. Tanks carry `OwnerUserId`, `Likes`, `LikeBoostEndsAt`, `Theme` and the
   `INCOME_ATTRIBUTES`. `LikeBoard` models carry `PlotIndex`; `Leaderboard` signs carry `Board`. Players carry `EventImmune`,
   `CoinBoostSeconds` /
-  `CoinBoostRunning`, `TestSpeed` (the owner's test chip), `AdminPanel` (may open the admin panel) and `Title` /
+  `CoinBoostRunning`, `FoodSlots` / `FoodRefills` (the food reserve, FoodService), `TestSpeed` (the owner's test chip), `AdminPanel` (may open the admin panel) and `Title` /
   `TitleRank` (the title worn and its leaderboard rank, TitleService).
 - **Events:** ReplicatedStorage attributes `EventType`, `EventStartsAt`, `EventEndsAt` and `EventSource`
   ("Recurring" / "Admin") (`EVENT_ATTRIBUTES`), with beats computed from `Workspace.GetServerTimeNow()`. Players carry
@@ -728,7 +742,8 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   `MoneyPopup` and runs the `onCollected` callbacks (quests, onboarding, stats).
 - **Hunger.** Satiated (30 s) → Hungry (15 s) → Weak (until fed; it never dies). A weak fish swims at 35 % speed, is
   tinted dull and farts a 1 $ bubble instead of its coin ("WeakBubble" SFX at most every 2.5 s per player, "FishWeak"
-  SFX and a notice at most every 30 s). `DropFood` drops a paid pellet; a fish chases it and eats it, back to Satiated.
+  SFX and a notice at most every 30 s). `DropFood` drops a free pellet if the food reserve has a portion ready (5 slots, each back 10 s after use; companions'
+  pellets don't use it); a hungry fish chases it and eats it, back to Satiated (only hungry fish eat).
   Species flagged `cannibal` eat smaller fish when weak (none yet). Hunger, growth and coins all stop while the owner
   is AFK (not tending) or still in the onboarding.
 - **Companions** (CompanionService). **Snail** (3.6 studs/s x its Ocean upgrade): goes for the coin it can pick up
@@ -860,7 +875,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   owner's boost restarts at 5 min (it never adds up), both players are notified. The boost is session-only
   (LikeService memory) and reaches the clients through the aquarium's `LikeBoostEndsAt` attribute (board + pill).
 - **Onboarding.** EnterView → BuyEgg (free) → Hatching → OpenEgg → CollectCoin (frozen coin) → CoinCollected →
-  Feed (free food) → Done (+300 $). Menus (side buttons) appear only once the onboarding is Done.
+  Feed (the food reserve appears, the card above it) → Done (+300 $). Menus (side buttons) appear only once the onboarding is Done.
   `STORY_QUEST_HINT_DELAY` later, a coach bubble on the Quests button points at the Snail quest (client-only: shows only
   if the onboarding was played in this session and Story1 is still to claim; ends when the book is opened).
 - **Gamepasses.** None is sold during the alpha (`arePassesOnSale`: the shop cards say SOON, GamePassService refuses the

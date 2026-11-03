@@ -7,7 +7,7 @@ import { EggType } from "shared/types/eggs";
 import { ActiveEvent, GameEventType } from "shared/types/events";
 import { Feature } from "shared/types/features";
 import { FishType } from "shared/types/fish";
-import { isOnboardingDone, STORY_QUEST_HINT_DELAY } from "shared/types/onboarding";
+import { canDropFood, isOnboardingDone, STORY_QUEST_HINT_DELAY } from "shared/types/onboarding";
 import { getCompanionSlots, getPlayerVariantLuck, getTotalFish, PlayerData } from "shared/types/playerData";
 import { GamePass } from "shared/types/gamepasses";
 import { hasClaimableQuest } from "shared/types/quests";
@@ -19,6 +19,7 @@ import { EggReveal } from "./EggReveal";
 import { AdminPanel } from "./AdminPanel";
 import { EventBanner } from "./EventBanner";
 import { FishIndexPanel } from "./FishIndexPanel";
+import { FoodReserve, getFoodReserveTop } from "./FoodReserve";
 import { AquariumPanel } from "./AquariumPanel";
 import { CosmeticId } from "shared/types/cosmetics";
 import { getOwnedTitles, ThemeChoice, TitleChoice } from "shared/types/customization";
@@ -47,6 +48,10 @@ const ADMIN_BUTTON_SIZE = new Vector2(150, 50);
 const ADMIN_BUTTON_MARGIN = 16;
 const ADMIN_BUTTON_BOTTOM = 82;
 const CUSTOMIZE_SIZE = new Vector2(200, 50);
+// FocusController's "Back to lobby" / "My aquarium" button: 220 px wide, 16 px from the bottom-left corner
+const BACK_BUTTON_RIGHT = 16 + 220;
+const CUSTOMIZE_GAP = 12;
+const ONBOARDING_ABOVE_RESERVE = 6; // px between the food reserve and the onboarding card above it
 // "Aquarium full" reminder (opening a ready egg with no room): shown this long, at most once per cooldown,
 // and never again in the session once the player has released a fish (they know the way)
 const FULL_REMINDER_TIME = 8;
@@ -92,6 +97,10 @@ export interface AppProps {
 	onBuyPass: (pass: GamePass) => void;
 	/** The player stands at the fisherman's counter on the beach: the Shop panel opens (ShopKeeperController). */
 	shopNearby: boolean;
+	/** In the tank view (FocusController.isInView): the food reserve shows there. */
+	inView: boolean;
+	/** Called back on each click on the water while the food reserve is empty (it flashes). */
+	subscribeFoodDenied: (listener: () => void) => () => void;
 }
 
 type MenuPanel = "Quests" | "Companions" | "FishIndex" | "Ocean" | "Rebirth" | "Shop" | "Aquarium" | "Admin";
@@ -233,6 +242,9 @@ export function App(props: AppProps) {
 		return () => task.cancel(thread);
 	}, [remindRebirth]);
 
+	// Food reserve: in the tank view, from the onboarding's Feed step (the card then sits right above it)
+	const foodReserveShown = props.inView && data !== undefined && canDropFood(data.onboarding);
+
 	// Star gauge during a starfall; afterwards, the star power it left is a pill under the egg shop until an egg spends it
 	const starfall = props.event?.config.kind === "Starfall";
 	const starPower = data?.starPower ?? 0;
@@ -266,7 +278,16 @@ export function App(props: AppProps) {
 				step={props.data?.onboarding}
 				hidden={props.reveal !== undefined}
 				playSfx={props.playSfx}
+				bottom={foodReserveShown ? getFoodReserveTop(scale) + ONBOARDING_ABOVE_RESERVE : undefined}
 			/>
+			{foodReserveShown && (
+				<FoodReserve
+					key="FoodReserve"
+					scale={scale}
+					leftClear={BACK_BUTTON_RIGHT + (menusVisible && canCustomize ? CUSTOMIZE_GAP + CUSTOMIZE_SIZE.X : 0)}
+					subscribeDenied={props.subscribeFoodDenied}
+				/>
+			)}
 			{props.event && (
 				<EventBanner
 					key={`Event${props.event.startsAt}`}
@@ -405,7 +426,7 @@ export function App(props: AppProps) {
 					palette={PALETTES.pink}
 					size={UDim2.fromOffset(CUSTOMIZE_SIZE.X, CUSTOMIZE_SIZE.Y)}
 					anchorPoint={new Vector2(0, 1)}
-					position={new UDim2(0, 16 + 220 + 12, 1, -16)}
+					position={new UDim2(0, BACK_BUTTON_RIGHT + CUSTOMIZE_GAP, 1, -16)}
 					depth={6}
 					radius={14}
 					onClick={() => setOpenPanel(openPanel === "Aquarium" ? undefined : "Aquarium")}

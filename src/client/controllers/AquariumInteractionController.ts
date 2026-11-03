@@ -1,8 +1,9 @@
-import { CollectionService, UserInputService, Workspace } from "@rbxts/services";
+import { CollectionService, Players, UserInputService, Workspace } from "@rbxts/services";
 import { Lifecycle } from "shared/framework";
 import { getRemoteEvent, InteractionKind } from "shared/network";
 import { TAGS } from "shared/tags";
 import { COIN_HITBOX_SCALE } from "shared/types/fish";
+import { decodeFoodRefills, FOOD_RESERVE_ATTRIBUTES, getFoodReady } from "shared/types/food";
 import { FocusController } from "./FocusController";
 
 const MAX_RAY_DISTANCE = 500;
@@ -16,6 +17,7 @@ const COIN_PICK_RADIUS = 0.6 * COIN_HITBOX_SCALE;
  */
 class AquariumInteractionControllerSingleton implements Lifecycle {
 	private interactRemote = getRemoteEvent("Interact");
+	private foodDeniedListeners = new Array<() => void>();
 
 	public onInit() {
 		UserInputService.InputBegan.Connect((input, gameProcessed) => {
@@ -56,7 +58,31 @@ class AquariumInteractionControllerSingleton implements Lifecycle {
 		}
 
 		const position = this.getClickedWaterPoint(ray);
-		if (position) this.interact("DropFood", position);
+		if (!position) return;
+		// The server checks the reserve too; with none ready, the click only tells the HUD to flash
+		if (!this.hasFoodReady()) {
+			for (const listener of this.foodDeniedListeners) task.spawn(listener);
+			return;
+		}
+		this.interact("DropFood", position);
+	}
+
+	/** The food reserve FoodService publishes on the local player (shared/types/food.ts). */
+	private hasFoodReady(): boolean {
+		const player = Players.LocalPlayer;
+		const slots = player.GetAttribute(FOOD_RESERVE_ATTRIBUTES.slots);
+		if (!typeIs(slots, "number")) return true; // not published yet: let the server decide
+		const refills = decodeFoodRefills(player.GetAttribute(FOOD_RESERVE_ATTRIBUTES.refills));
+		return getFoodReady(slots, refills, Workspace.GetServerTimeNow()) > 0;
+	}
+
+	/** A click on the water with the food reserve empty (FoodReserve flashes). */
+	public onFoodDenied(listener: () => void): () => void {
+		this.foodDeniedListeners.push(listener);
+		return () => {
+			const index = this.foodDeniedListeners.indexOf(listener);
+			if (index >= 0) this.foodDeniedListeners.remove(index);
+		};
 	}
 
 	/** The own tank's hitbox with this tag (a coin, a star) under the cursor, with a forgiving radius. */

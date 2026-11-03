@@ -1,12 +1,14 @@
 import React, { useBinding, useEffect, useRef, useState } from "@rbxts/react";
 import { RunService, TweenService, Workspace } from "@rbxts/services";
 import { SfxName } from "shared/sounds";
-import { FOOD_PRICE } from "shared/types/fish";
+import { FOOD_REFILL_TIME, FOOD_RESERVE_SLOTS } from "shared/types/food";
 import { OnboardingStep } from "shared/types/onboarding";
+import { FoodPellet } from "./FoodReserve";
 import { TextStroke } from "./kit";
 import { COLORS, FONT_BOLD, FONT_TITLE, NAVY, OUTLINE, PALETTES, verticalGradient } from "./theme";
 
 const MAX_TEXT_WIDTH = 600;
+const BOTTOM_MARGIN = 28; // px under the card, unless something sits below it (the food reserve)
 const STEP_COUNT = 5;
 const POP_IN_TIME = 0.4;
 // Gentle "breathing" so the card catches the eye without being annoying
@@ -21,6 +23,8 @@ const MAX_SCREEN_SCALE = 1.7;
 
 interface StepContent {
 	icon: string;
+	/** Drawn instead of the glyph: a food pellet like the reserve's. */
+	pellet?: boolean;
 	title: string;
 	body: string;
 	number: number; // "STEP n / STEP_COUNT"
@@ -65,9 +69,10 @@ const STEP_CONTENT: Partial<Record<OnboardingStep, StepContent>> = {
 		number: 4,
 	},
 	Feed: {
-		icon: "🍽️",
+		icon: "",
+		pellet: true,
 		title: "Your fish is hungry!",
-		body: `Click the water to drop food. It normally costs ${FOOD_PRICE}$, this one is free! A fish that starves for too long dies.`,
+		body: `Click the water to drop food. Food is free! Your reserve below holds ${FOOD_RESERVE_SLOTS} portions: an empty one refills in ${FOOD_REFILL_TIME} seconds.`,
 		number: 5,
 	},
 };
@@ -76,6 +81,8 @@ export interface OnboardingPanelProps {
 	step?: OnboardingStep;
 	/** Hidden while something covers the screen (egg reveal); the card pops in again afterwards. */
 	hidden?: boolean;
+	/** Pixels kept free under the card (the food reserve sits there from the Feed step); BOTTOM_MARGIN otherwise. */
+	bottom?: number;
 	playSfx: (name: SfxName, playbackSpeed?: number) => void;
 }
 
@@ -109,7 +116,7 @@ function useTimeSinceMount(): React.Binding<number> {
 }
 
 /** One instruction card (FigCraft: OnboardingCard frame, horizontal auto layout); pops in, then breathes. */
-function OnboardingCard(props: { content: StepContent; screenScale: number }) {
+function OnboardingCard(props: { content: StepContent; screenScale: number; bottom: number }) {
 	const time = useTimeSinceMount();
 	const content = props.content;
 	// The card fades in at its final size (scaling it would make its text wobble), and the breathing is
@@ -124,7 +131,7 @@ function OnboardingCard(props: { content: StepContent; screenScale: number }) {
 		<canvasgroup
 			key="OnboardingCard"
 			AnchorPoint={new Vector2(0.5, 1)}
-			Position={new UDim2(0.5, 0, 1, -28 + STROKE_ROOM * props.screenScale)}
+			Position={new UDim2(0.5, 0, 1, -props.bottom + STROKE_ROOM * props.screenScale)}
 			Size={UDim2.fromOffset(0, 0)}
 			AutomaticSize={Enum.AutomaticSize.XY}
 			BackgroundTransparency={1}
@@ -171,14 +178,18 @@ function OnboardingCard(props: { content: StepContent; screenScale: number }) {
 					<uicorner CornerRadius={new UDim(0.5, 0)} />
 					<uistroke Color={OUTLINE} Thickness={3} ApplyStrokeMode={Enum.ApplyStrokeMode.Border} />
 					<uigradient Color={verticalGradient(PALETTES.gold.light, PALETTES.gold.dark)} Rotation={90} />
-					<textlabel
-						AnchorPoint={new Vector2(0.5, 0.5)}
-						Position={UDim2.fromScale(0.5, 0.5)}
-						Size={UDim2.fromScale(0.62, 0.62)}
-						BackgroundTransparency={1}
-						Text={content.icon}
-						TextScaled={true}
-					/>
+					{content.pellet ? (
+						<FoodPellet size={UDim2.fromScale(0.6, 0.6)} />
+					) : (
+						<textlabel
+							AnchorPoint={new Vector2(0.5, 0.5)}
+							Position={UDim2.fromScale(0.5, 0.5)}
+							Size={UDim2.fromScale(0.62, 0.62)}
+							BackgroundTransparency={1}
+							Text={content.icon}
+							TextScaled={true}
+						/>
+					)}
 				</frame>
 
 				<frame
@@ -252,5 +263,12 @@ export function OnboardingPanel(props: OnboardingPanelProps) {
 
 	const content = step !== undefined ? STEP_CONTENT[step] : undefined;
 	if (!content || props.hidden) return undefined;
-	return <OnboardingCard key={`Card${step}`} content={content} screenScale={screenScale} />;
+	return (
+		<OnboardingCard
+			key={`Card${step}`}
+			content={content}
+			screenScale={screenScale}
+			bottom={props.bottom ?? BOTTOM_MARGIN}
+		/>
+	);
 }

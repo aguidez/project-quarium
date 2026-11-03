@@ -16,7 +16,9 @@ import { FISH_VARIANTS, FishVariant } from "shared/types/variants";
 import { App } from "client/ui/App";
 import { BOOST_SECONDS_ATTRIBUTE } from "client/ui/QuestBoostPill";
 import { FISH_ICONS } from "client/ui/theme";
+import { AquariumInteractionController } from "./AquariumInteractionController";
 import { AudioController } from "./AudioController";
+import { FocusController } from "./FocusController";
 import { LikeBoardController } from "./LikeBoardController";
 import { MusicEventController } from "./MusicEventController";
 import { ShopKeeperController } from "./ShopKeeperController";
@@ -93,6 +95,7 @@ class UiControllerSingleton implements Lifecycle {
 			if (this.isQuestBoosted() !== this.questBoosted) this.render();
 		});
 		ShopKeeperController.onNearbyChanged(() => this.render());
+		FocusController.onViewChanged(() => this.render());
 		this.render();
 	}
 
@@ -168,6 +171,8 @@ class UiControllerSingleton implements Lifecycle {
 				onSetTitle: (title) => this.actionRemote.FireServer("SetTitle", title),
 				testMode: this.getTestMode(),
 				shopNearby: ShopKeeperController.isNearby(),
+				inView: FocusController.isInView(),
+				subscribeFoodDenied: (listener) => AquariumInteractionController.onFoodDenied(listener),
 				subscribeBeat: (listener) => MusicEventController.onBeat(listener),
 				// Intents only: the server checks the quest is complete / the companion is owned and a slot is free
 				onClaimQuest: (questId: string) => this.actionRemote.FireServer("ClaimQuest", questId),

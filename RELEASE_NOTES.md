@@ -11,6 +11,30 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.60.6 — 2026-11-03
+
+**New**
+- **Food reserve**: a new plate at the bottom of the tank view shows your food: 5 portions. Each click on the water
+  uses one, and each empty slot comes back 10 seconds later, all on their own timers (a pellet grows back with its
+  seconds left). Clicking with the reserve empty drops nothing: the plate flashes red and shakes ("REFILLING...").
+
+**Changes**
+- **Food is free**: a pellet cost 10 $; the beta showed players spending all their money on food. The reserve is the
+  only limit now. The Pelican's and the Jellyfish's pellets are still free and don't use it.
+- **Onboarding, step 5**: the reserve appears with the "Your fish is hungry!" card, which now sits right above it and
+  explains it ("Food is free! Your reserve below holds 5 portions: an empty one refills in 10 seconds."), with a drawn
+  pellet as its icon.
+- **Tank view**: your own tank's name plate is hidden while you look after it, since the food reserve sits there
+  (the other players still see it).
+
+**Balance**
+- No more food cost: the early game is a little faster (BALANCE.md §6).
+
+**Fixes**
+- The onboarding no longer says that a starving fish dies: a hungry fish turns weak, it never dies.
+
+---
+
 ## V0.60.5 — 2026-11-03
 
 **Changes**

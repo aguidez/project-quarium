@@ -88,6 +88,9 @@ class FocusControllerSingleton implements Lifecycle {
 	private atmosphere?: { instance: Atmosphere; density: number; haze: number };
 	/** Studs of room above the tank in the view (PERCH_HEADROOM while a perched companion is on its rim). */
 	private headroom = 0;
+	private viewListeners = new Array<(inView: boolean) => void>();
+	/** The own tank's name plate, turned off in the view: the food reserve sits over it (and it says nothing new there). */
+	private hiddenOwnerPlate?: SurfaceGui;
 
 	public onInit() {
 		this.buildUi();
@@ -108,6 +111,21 @@ class FocusControllerSingleton implements Lifecycle {
 
 	public isFocused(): boolean {
 		return this.state === "Focused";
+	}
+
+	/** In the tank view or flying into it (its back button shows): the view HUD (the food reserve) shows. */
+	public isInView(): boolean {
+		return this.state === "Entering" || this.state === "Focused";
+	}
+
+	public onViewChanged(listener: (inView: boolean) => void) {
+		this.viewListeners.push(listener);
+	}
+
+	private fireViewChanged() {
+		const inView = this.isInView();
+		this.showOwnerPlate(!inView);
+		for (const listener of this.viewListeners) task.spawn(listener, inView);
 	}
 
 	/** The local player's aquarium model, once the server has assigned it. */
@@ -414,6 +432,7 @@ class FocusControllerSingleton implements Lifecycle {
 		this.state = "Entering";
 		const token = ++this.transitionToken;
 		this.actionRemote.FireServer("SetFocus", true);
+		this.fireViewChanged();
 
 		// Cursor / touch only: no character movement, free mouse
 		this.lockMovement(parts[1]);
@@ -462,6 +481,7 @@ class FocusControllerSingleton implements Lifecycle {
 		this.state = "Exiting";
 		const token = ++this.transitionToken;
 		this.actionRemote.FireServer("SetFocus", false);
+		this.fireViewChanged();
 		this.mustLeaveZone = true;
 		this.backButton.Visible = false;
 		ContextActionService.UnbindAction(EXIT_ACTION);
@@ -504,6 +524,19 @@ class FocusControllerSingleton implements Lifecycle {
 			camera.FieldOfView = this.savedFov;
 			this.giveBackControl(camera);
 		}
+		this.fireViewChanged();
+	}
+
+	private showOwnerPlate(shown: boolean) {
+		if (shown) {
+			if (this.hiddenOwnerPlate) this.hiddenOwnerPlate.Enabled = true;
+			this.hiddenOwnerPlate = undefined;
+			return;
+		}
+		const plate = this.ownAquarium?.PrimaryPart?.FindFirstChild("OwnerPlate");
+		if (!plate || !plate.IsA("SurfaceGui")) return;
+		plate.Enabled = false; // local only
+		this.hiddenOwnerPlate = plate;
 	}
 
 	// ---------------------------------------------------------------------

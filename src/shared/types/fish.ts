@@ -493,7 +493,6 @@ export function getCoinValue(fishType: FishType, stage: number, special: boolean
 	return math.round(FISH_TYPES[fishType].income * multiplier);
 }
 
-export const FOOD_PRICE = 10;
 /** Living fish an aquarium holds at first; PlayerData.capacity grows with progression. */
 export const DEFAULT_FISH_CAPACITY = 10;
 

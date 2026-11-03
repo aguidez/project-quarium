@@ -1,12 +1,12 @@
-import { CollectionService, Players, TweenService } from "@rbxts/services";
+import { CollectionService, Players, TweenService, Workspace } from "@rbxts/services";
 import { t } from "@rbxts/t";
 import { Lifecycle } from "shared/framework";
 import { TAGS } from "shared/tags";
 import { CompanionType } from "shared/types/companions";
-import { FOOD_PRICE } from "shared/types/fish";
+import { encodeFoodRefills, FOOD_REFILL_TIME, FOOD_RESERVE_ATTRIBUTES, FOOD_RESERVE_SLOTS } from "shared/types/food";
 import { FoodLook, getFoodLook } from "shared/types/foodLooks";
 import { getSatietyBonus } from "shared/types/perks";
-import { canDropFood, isFoodFree } from "shared/types/onboarding";
+import { canDropFood } from "shared/types/onboarding";
 import { Aquarium, AquariumService } from "./AquariumService";
 import { DataService } from "./DataService";
 import { InteractionService } from "./InteractionService";
@@ -32,6 +32,8 @@ function isFiniteNumber(value: number) {
 
 class FoodServiceSingleton implements Lifecycle {
 	private foodByOwner = new Map<Player, Set<Food>>();
+	/** The food reserve: server times at which each used portion comes back (shared/types/food.ts). */
+	private refillsByOwner = new Map<Player, number[]>();
 	private templates = new Map<FoodLook, BasePart>();
 	private rng = new Random();
 
@@ -44,12 +46,17 @@ class FoodServiceSingleton implements Lifecycle {
 		// Rate limiting is handled globally by InteractionService
 		InteractionService.register("DropFood", t.Vector3, (player, position) => this.tryDropFood(player, position));
 
+		// Every player starts with a full reserve (it is never saved)
+		Players.PlayerAdded.Connect((player) => this.publishReserve(player));
+		for (const player of Players.GetPlayers()) this.publishReserve(player);
+
 		Players.PlayerRemoving.Connect((player) => {
 			const foods = this.foodByOwner.get(player);
 			if (foods) {
 				for (const food of foods) this.removeFood(food);
 			}
 			this.foodByOwner.delete(player);
+			this.refillsByOwner.delete(player);
 		});
 	}
 
@@ -63,7 +70,7 @@ class FoodServiceSingleton implements Lifecycle {
 		const aquarium = AquariumService.getAquarium(player);
 		if (!aquarium || !AquariumService.isAtOwnAquarium(player)) return;
 
-		// Onboarding: food only once the tutorial asks for it, so the player can't spend their money before
+		// Onboarding: food only once the tutorial asks for it (its reserve shows up at that step)
 		const step = DataService.getOnboardingStep(player);
 		if (!canDropFood(step)) {
 			DataService.notify(player, "Follow the tutorial first!", "info");
@@ -71,20 +78,34 @@ class FoodServiceSingleton implements Lifecycle {
 		}
 
 		if (DataService.getFishTotal(player) <= 0) {
-			DataService.notify(player, "You need at least one fish to buy food!");
+			DataService.notify(player, "You need at least one fish to feed!");
 			return;
 		}
 
 		const foods = this.getFoods(player);
 		if (foods.size() >= MAX_FOOD_PER_PLAYER) return;
 
-		const price = isFoodFree(step) ? 0 : FOOD_PRICE;
-		if (!DataService.trySpend(player, price)) {
-			DataService.notify(player, `Not enough money! (${price}$ needed)`);
-			return;
-		}
+		// Food is free, the reserve is the limit: empty, the click does nothing (the HUD flashes, client side)
+		if (!this.takePortion(player)) return;
 
 		this.spawnFood(player, aquarium, position);
+	}
+
+	/** Uses one portion of the player's reserve; false when none is ready. */
+	private takePortion(player: Player): boolean {
+		const now = Workspace.GetServerTimeNow();
+		const refills = (this.refillsByOwner.get(player) ?? []).filter((time) => time > now);
+		if (refills.size() >= FOOD_RESERVE_SLOTS) return false;
+		refills.push(now + FOOD_REFILL_TIME);
+		this.refillsByOwner.set(player, refills);
+		this.publishReserve(player);
+		return true;
+	}
+
+	/** The reserve on the Player: the HUD works the refills out from the server times. */
+	private publishReserve(player: Player) {
+		player.SetAttribute(FOOD_RESERVE_ATTRIBUTES.slots, FOOD_RESERVE_SLOTS);
+		player.SetAttribute(FOOD_RESERVE_ATTRIBUTES.refills, encodeFoodRefills(this.refillsByOwner.get(player) ?? []));
 	}
 
 	private getFoods(player: Player): Set<Food> {
