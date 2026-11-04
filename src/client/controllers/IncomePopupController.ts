@@ -37,13 +37,12 @@ type PopupStyle = keyof typeof POPUP_STYLES;
  */
 class IncomePopupControllerSingleton implements Lifecycle {
 	private popupRemote = getRemoteEvent("MoneyPopup");
-	private popupContainer!: Folder;
+	private playerGui!: PlayerGui;
 
 	public onInit() {
-		const playerGui = Players.LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
-		this.popupContainer = new Instance("Folder");
-		this.popupContainer.Name = "IncomePopups";
-		this.popupContainer.Parent = playerGui;
+		// Straight in PlayerGui with ResetOnSpawn off: a respawn empties PlayerGui of everything else (the Folder that
+		// held the popups was lost at the first respawn, and no "+X$" showed afterwards)
+		this.playerGui = Players.LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
 
 		this.popupRemote.OnClientEvent.Connect((popup: MoneyPopup) => {
 			if (!isMoneyPopup(popup)) return;
@@ -90,7 +89,8 @@ class IncomePopupControllerSingleton implements Lifecycle {
 		label.TextStrokeTransparency = 0.2;
 		label.Parent = billboard;
 
-		billboard.Parent = this.popupContainer;
+		billboard.ResetOnSpawn = false;
+		billboard.Parent = this.playerGui;
 
 		const info = new TweenInfo(POPUP_LIFETIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
 		TweenService.Create(billboard, info, { StudsOffsetWorldSpace: new Vector3(0, POPUP_RISE, 0) }).Play();

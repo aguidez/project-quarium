@@ -23,13 +23,11 @@ const PAUSED_STYLE = { color: Color3.fromRGB(90, 110, 170), icon: "💤" };
  */
 class FishIndicatorControllerSingleton implements Lifecycle {
 	private janitors = new Map<Instance, Janitor>();
-	private container!: Folder;
+	private playerGui!: PlayerGui;
 
 	public onInit() {
-		const playerGui = Players.LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
-		this.container = new Instance("Folder");
-		this.container.Name = "FishIndicators";
-		this.container.Parent = playerGui;
+		// Straight in PlayerGui with ResetOnSpawn off: a respawn empties PlayerGui of everything else (a Folder too)
+		this.playerGui = Players.LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
 
 		CollectionService.GetInstanceAddedSignal(TAGS.Fish).Connect((fish) => this.track(fish));
 		CollectionService.GetInstanceRemovedSignal(TAGS.Fish).Connect((fish) => this.untrack(fish));
@@ -100,7 +98,8 @@ class FishIndicatorControllerSingleton implements Lifecycle {
 		icon.Font = Enum.Font.GothamBold;
 		icon.Parent = badge;
 
-		billboard.Parent = this.container;
+		billboard.ResetOnSpawn = false;
+		billboard.Parent = this.playerGui;
 		janitor.Add(billboard);
 
 		let pulse: Tween | undefined;

@@ -11,6 +11,14 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.60.17 — 2026-11-04
+
+**Fixes**
+- **Coin gains after a respawn**: the floating "+X$" (and "+X Ocean", "-X$") no longer showed once the character had
+  respawned. They show again, and so do the hunger badges over the fish, which a respawn also cleared.
+
+---
+
 ## V0.60.16 — 2026-11-04
 
 **New**
