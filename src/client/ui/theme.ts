@@ -79,6 +79,8 @@ export const V2_IMAGES = {
 	ribbonTailRight: "rbxassetid://119721448521037",
 	sparkle: "rbxassetid://84841007993115", // white 4-point star
 	softGlow: "rbxassetid://94658909138748", // white radial glow
+	soundOn: "rbxassetid://136310058435900", // design/ui/sound/Sound_On.png (tools/sound-icons.js): white speaker, waves
+	soundOff: "rbxassetid://108833070861038", // ... Sound_Off.png: the speaker and a red cross
 };
 
 export const COLORS = {

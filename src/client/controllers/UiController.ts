@@ -70,6 +70,8 @@ class UiControllerSingleton implements Lifecycle {
 
 		this.root = createRoot(screenGui);
 		this.syncRemote.OnClientEvent.Connect((data: PlayerData) => {
+			// The saved volume, once: afterwards the sound control owns it (a later sync may predate its last change)
+			if (!this.data) AudioController.setMasterVolume(data.soundVolume);
 			this.data = data;
 			this.render();
 			// The save is loaded: the loading screen (src/first/LoadingScreen) can go. Local attribute only
@@ -173,6 +175,9 @@ class UiControllerSingleton implements Lifecycle {
 				shopNearby: ShopKeeperController.isNearby(),
 				inView: FocusController.isInView(),
 				subscribeFoodDenied: (listener) => AquariumInteractionController.onFoodDenied(listener),
+				onVolumeChange: (volume) => AudioController.setMasterVolume(volume),
+				// A preference: the server only checks the range and saves it
+				onVolumeCommit: (volume) => this.actionRemote.FireServer("SetSoundVolume", volume),
 				subscribeBeat: (listener) => MusicEventController.onBeat(listener),
 				// Intents only: the server checks the quest is complete / the companion is owned and a slot is free
 				onClaimQuest: (questId: string) => this.actionRemote.FireServer("ClaimQuest", questId),

@@ -92,6 +92,8 @@ export interface PlayerData {
 	themeChoice: ThemeChoice;
 	hiddenCosmetics: CosmeticId[];
 	titleChoice: TitleChoice;
+	/** The player's sound volume, 0 (muted) to 1 (the sound control, top-right): every sound of the game, client-side. */
+	soundVolume: number;
 	/**
 	 * The player's rank (1–10) in the day's top 10 of each board: the leaderboard titles held (cosmetics.ts
 	 * LEADERBOARD_TITLES). Written only by LeaderboardService from its daily snapshot, at join and when a new day's
@@ -158,6 +160,7 @@ export const DEFAULT_PLAYER_DATA: PlayerData = {
 	themeChoice: "Auto",
 	hiddenCosmetics: [],
 	titleChoice: "Auto",
+	soundVolume: 1,
 	leaderboardRanks: {},
 	leaderboardRanksDay: -1,
 	passes: [],

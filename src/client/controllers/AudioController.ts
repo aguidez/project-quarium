@@ -1,4 +1,4 @@
-import { ContentProvider, SoundService, TweenService, Workspace } from "@rbxts/services";
+import { ContentProvider, Players, SoundService, TweenService, Workspace } from "@rbxts/services";
 import { t } from "@rbxts/t";
 import { Lifecycle } from "shared/framework";
 import { getRemoteEvent } from "shared/network";
@@ -14,14 +14,32 @@ const EVENT_FADE_OUT = 2;
 const isSfxName = t.keyOf(SFX);
 const isPlaybackSpeed = t.numberConstrained(0.25, 4);
 
-/** Background music and the 2D sound effects (requested by the server, or by the UI such as the egg reveal). */
+/**
+ * Background music and the 2D sound effects (requested by the server, or by the UI such as the egg reveal). Every
+ * sound of the game plays through the Master SoundGroup: the player's volume (the sound control, PlayerData.soundVolume)
+ * is its Volume. Sounds made elsewhere (the character's footsteps and jumps) join it as they appear.
+ */
 class AudioControllerSingleton implements Lifecycle {
 	private sfxRemote = getRemoteEvent("PlaySfx");
 	private music!: Sound;
 	private eventMusic?: Sound;
 	private sfxTemplates = new Map<SfxName, Sound>();
+	private master!: SoundGroup;
 
 	public onInit() {
+		this.master = new Instance("SoundGroup");
+		this.master.Name = "Master";
+		this.master.Volume = 1;
+		this.master.Parent = SoundService;
+		// Sounds of the game's own scripts and of Roblox's (character sounds) that have no group yet
+		const adopt = (instance: Instance) => {
+			if (instance.IsA("Sound") && instance.SoundGroup === undefined) instance.SoundGroup = this.master;
+		};
+		for (const container of [Workspace, SoundService, Players.LocalPlayer]) {
+			for (const descendant of container.GetDescendants()) adopt(descendant);
+			container.DescendantAdded.Connect(adopt);
+		}
+
 		this.music = new Instance("Sound");
 		this.music.Name = "BackgroundMusic";
 		this.music.SoundId = MUSIC_ID;
@@ -108,6 +126,11 @@ class AudioControllerSingleton implements Lifecycle {
 		fadeOut.Completed.Connect(() => sound.Destroy());
 		fadeOut.Play();
 		TweenService.Create(this.music, fade, { Volume: MUSIC_VOLUME }).Play();
+	}
+
+	/** The player's volume, 0 (muted) to 1: applied at once to every sound (the Master group). */
+	public setMasterVolume(volume: number) {
+		this.master.Volume = math.clamp(volume, 0, 1);
 	}
 
 	/** Non-positional, so it is heard the same wherever the camera is. Overlapping plays are fine. */

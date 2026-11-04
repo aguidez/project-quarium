@@ -35,6 +35,7 @@ import { BAR_HEIGHT, BAR_WIDTH, ShopBar } from "./ShopBar";
 import { SideButtons } from "./SideButtons";
 import { StarGauge } from "./StarGauge";
 import { StarPowerPill } from "./StarPowerPill";
+import { getSoundControlRoom, SoundControl } from "./SoundControl";
 import { Button3D, Chip, TextStroke } from "./kit";
 import { FONT_BOLD, FONT_TITLE, PALETTES, V2_IMAGES } from "./theme";
 import { getVersionLabel } from "shared/version";
@@ -102,6 +103,9 @@ export interface AppProps {
 	inView: boolean;
 	/** Called back on each click on the water while the food reserve is empty (it flashes). */
 	subscribeFoodDenied: (listener: () => void) => () => void;
+	/** The sound control (top-right): live volume changes, and the settled value to save. */
+	onVolumeChange: (volume: number) => void;
+	onVolumeCommit: (volume: number) => void;
 }
 
 type MenuPanel = "Quests" | "Companions" | "FishIndex" | "Ocean" | "Rebirth" | "Shop" | "Aquarium" | "Admin";
@@ -126,7 +130,8 @@ function computeBarPlacement(): BarPlacement {
 	const viewportWidth = camera.ViewportSize.X;
 	const inset = GuiService.TopbarInset;
 	const left = inset.Width > 0 ? inset.Min.X : 0;
-	const right = inset.Width > 0 ? inset.Max.X : viewportWidth;
+	// The sound control takes the right end of the topbar row
+	const right = (inset.Width > 0 ? inset.Max.X : viewportWidth) - getSoundControlRoom();
 	const room = right - left - SIDE_MARGIN * 2;
 	return {
 		centerX: (left + right) / 2,
@@ -343,6 +348,14 @@ export function App(props: AppProps) {
 			>
 				<TextStroke transparency={0.6} thickness={1.5} />
 			</textlabel>
+			{data && (
+				<SoundControl
+					key="SoundControl"
+					initialVolume={data.soundVolume}
+					onChange={props.onVolumeChange}
+					onCommit={props.onVolumeCommit}
+				/>
+			)}
 			{props.testMode !== undefined && (
 				<Chip
 					key="TestSpeed"

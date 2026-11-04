@@ -8,7 +8,7 @@ const isShownChange = t.interface({ id: t.string, shown: t.boolean });
 
 /**
  * The player's aquarium choices (AquariumPanel): which reached theme the tank wears, which earned decor / finishes
- * show, which earned title floats above the head. Intents only: the server checks the theme is reached and the
+ * show, which earned title floats above the head; and the sound volume (SoundControl). Intents only: the server checks the theme is reached and the
  * cosmetic earned, then AquariumService and TitleService apply PlayerData's choices.
  */
 class CustomizationServiceSingleton implements Lifecycle {
@@ -38,6 +38,11 @@ class CustomizationServiceSingleton implements Lifecycle {
 				data.titleChoice = title;
 			else return;
 			DataService.sync(player);
+		});
+		// A preference, not gameplay: the client applies it at once, the server only keeps it in the save (no sync)
+		DataService.registerAction("SetSoundVolume", t.numberConstrained(0, 1), (player, volume) => {
+			const data = DataService.getData(player);
+			if (data) data.soundVolume = math.round(volume * 100) / 100;
 		});
 	}
 

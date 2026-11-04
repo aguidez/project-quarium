@@ -63,3 +63,9 @@ Related: [[lobby-decor-constraints]]
   magnifier during the test. FocusUi and the toast stay outside the box (judge them by their AbsoluteSize). The 3D
   focus camera frames the real viewport, not the box. Mouse clicks: `user_mouse_input` x / y = the `AbsolutePosition`
   values of ReactUi elements (no topbar offset to add).
+- **Coordinates in the topbar row** (2026-11-04, the sound control): `AbsolutePosition` counts from under Roblox's
+  topbar inset even in a ScreenGui with IgnoreGuiInset, so an element in the topbar row has a negative Y (-29 for the
+  sound button). `InputObject.Position` uses the same origin: compare them directly (adding `GetGuiInset` shifts a
+  slider by the topbar's height). `user_mouse_input` x / y take the same values, but a negative y can't be sent:
+  click topbar elements with `instance_path` (e.g. "LocalPlayer.PlayerGui.ReactUi.SoundControl.2.Face"; an unkeyed
+  React child is named by its index).

@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-04 (V0.60.10: the admin panel opens on live servers for ADMIN_PANEL_USER_IDS).
+> Last updated: 2026-11-04 (V0.60.11: the sound control, top-right; PlayerData.soundVolume, SetSoundVolume).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -90,7 +90,8 @@ ProjectQuarium/
 │                            leaderboards-mockup.png / leaderboards-ingame.jpg, leaderboard-titles-mockup.png /
 │                            leaderboard-titles-ingame.jpg (the nameplates' four tiers), food-reserve-mockup.png /
 │                            food-reserve-ingame.jpg / -empty-ingame.jpg / -onboarding-ingame.jpg (the food reserve),
-│                            phone-ui-lobby / -tank / -fish-index / -ocean.jpg (the UI on a phone, red box = 844 × 390)
+│                            phone-ui-lobby / -tank / -fish-index / -ocean.jpg (the UI on a phone, red box = 844 × 390),
+│                            sound-control-ingame.jpg (the sound control open, at 40)
 ├─ design/ui/
 │  ├─ food-reserve.figcraft  The food reserve HUD (FoodReserve_Mockup: in the tank view, in the onboarding's Feed step,
 │  │                         full / refilling / empty), built by food-reserve.build.js (figcraft-cli; exports
@@ -116,6 +117,8 @@ ProjectQuarium/
 │  ├─ v2/                    V2 sprites (2x PNG, ids in theme.ts V2_IMAGES): side icons, ribbon tails, Sparkle, SoftGlow
 │  ├─ passes/                Pass_<GamePass>.png, Pass_Shop.png, Pass_Aquarium.png (512 px, no text), rendered by
 │  │                         tools/pass-icons.js (its review _sheet.png is git-ignored); ids in GAME_PASSES.image / V2_IMAGES
+│  ├─ sound/                 Sound_On.png / Sound_Off.png (the sound control's speaker, 256 px), rendered by
+│  │                         tools/sound-icons.js (its _sheet.png is git-ignored); ids in V2_IMAGES soundOn / soundOff
 │  ├─ companions/            Companion_<Type>.png stickers (ids in COMPANION_TYPES.image)
 │  ├─ fish/stickers/         Icon_<Type>_<Variant>.png: the UI's fish icons, made by tools/fish-sticker-icons.js,
 │  │                         ids in theme.ts FISH_ICONS
@@ -155,6 +158,7 @@ ProjectQuarium/
 ├─ tools/fish-variant-recolor.js  Hue rotation of a species' texture into its Anomaly / Shiny looks (`sheet <Type>` to
 │                            pick the angles, `build variant-spec.json`; optional tint for grey fish); pipeline in its header
 ├─ tools/pass-icons.js       Gamepass, Shop and Aquarium icons drawn as SVG in the V2 style, rendered with @resvg/resvg-js
+├─ tools/sound-icons.js      The sound control's speaker icons (on: two waves, off: a red cross), same pipeline
 ├─ tools/loading-art.js     Loading screen art from design/ui/loading/LoadingArt.png: logo cut out along its navy outline,
 │                            its empty version, a preview; prints LOGO_RECT / ART_SIZE to copy into LoadingScreen.client.ts
 ├─ tools/fish-sticker-icons.js  Sticker icons from black / white Studio captures of a fish sheet (difference matting,
@@ -374,7 +378,8 @@ ProjectQuarium/
    │     │                   DailyQuestClaimed / WeeklyQuestClaimed; legacy saves stay out of the funnels, the owner's test
    │     │                   profiles (testSpeedUsed / testNoPasses) send nothing (the dashboard can't delete an event)
    │     ├─ CustomizationService  "SetAquariumTheme", "SetCosmeticShown" ({id, shown}), "SetTitle": checks, then PlayerData's
-   │     │                   choices; AquariumService and TitleService apply them
+   │     │                   choices; AquariumService and TitleService apply them. "SetSoundVolume" (0–1): saved only
+   │     │                   (soundVolume, rounded to 0.01, no sync: the client applies it itself)
    │     ├─ LeaderboardService  The lobby leaderboards (§3.4): one OrderedDataStore per board
    │     │                   (Leaderboard_<Id>_v1, key = UserId), writes its players' scores every 2 min (changed ones only)
    │     │                   and when they leave (sampled in onSave), reads the top 100 every 2 min, names from UserService,
@@ -451,7 +456,10 @@ ProjectQuarium/
       │  │                   it stays closed until the player comes back); turns him toward a player nearby and makes him
       │  │                   breathe (local PivotTo)
       │  ├─ IncomePopupController  Floating "+X$" / "-X$" / "+X Ocean" billboards (MoneyPopup remote)
-      │  ├─ AudioController  Background music, event music crossfade, SFX (PlaySfx remote or UI)
+      │  ├─ AudioController  Background music, event music crossfade, SFX (PlaySfx remote or UI); every sound plays
+      │  │                   through the `Master` SoundGroup (SoundService), whose Volume is the player's volume
+      │  │                   (setMasterVolume; UiController applies the saved one at the first sync); Sounds appearing
+      │  │                   without a group in Workspace / SoundService / the player (character sounds) join it
       │  ├─ OnboardingController  3D onboarding hints (floor marker, pointer over the frozen coin)
       │  ├─ CapacityPlaqueController  "n / capacity" plaque on the own tank
       │  ├─ IncomePlaqueController  Brass plaque on the left of every owned tank's base: "+X$/s  x250" (or "paused"), from
@@ -509,6 +517,12 @@ ProjectQuarium/
          │                   only with the AdminPanel attribute): scope chip, tabs (ADMIN_TABS); Events tab: NOW PLAYING
          │                   (name, time left, STOP) and one row per event (ADMIN_EVENT_ORDER: badge, RECURRING / ADMIN
          │                   ONLY, length, START)
+         ├─ SoundControl     Top-right, in Roblox's topbar row (TopbarInset, sized like its 44 px buttons): round blue
+         │                   speaker button (crossed out at 0) dropping down a navy plate: the volume (0–100, "OFF"),
+         │                   a vertical slider (gold fill, white knob, dragged anywhere until released), a mute toggle
+         │                   (red; green to bring the last volume back). Live changes → AudioController, the settled
+         │                   value → SetSoundVolume; a press outside closes it. getSoundControlRoom: App's shop bar keeps
+         │                   clear of it. The drop-down shrinks with the UI scale, never below 0.7 (phones)
          ├─ SideButtons      Left menu (3D squares, icon + label): Quests, Companions (once one is owned), Fish Index, Ocean
          │                   (once unlocked), Rebirth (gold halo pulsing + "!" while affordable, "REBIRTH READY!" bubble
          │                   driven by App: when it becomes affordable, then every 4 min, 8 s each) + coach bubbles (Quests:
@@ -660,6 +674,7 @@ ProjectQuarium/
   | `features`, `tutorialsDone` | Unlocked features, and those whose tutorial was seen |
   | `likesReceived`, `lastLikeGivenAt` | Likes received, last like given (cooldown, server time). The boost itself is not saved |
   | `themeChoice`, `hiddenCosmetics`, `titleChoice` | The aquarium choices (customization.ts): theme worn ("Auto" = the newest reached), earned decor / finishes hidden (everything earned shows by default), title shown ("Auto" = the best, "None") |
+  | `soundVolume` | The player's volume, 0 (muted) to 1 (default): the sound control; applied client-side (AudioController's Master group), only saved by the server |
   | `leaderboardRanks`, `leaderboardRanksDay` | The player's rank (1–10) in the day's top 10 of each board, and that UTC day: the leaderboard titles held. Written only by LeaderboardService from the daily snapshot (at join and when a new day's comes); ranks of an older day are cleared at join |
   | `coinBoostSeconds` | Quest coin boost left (daily / weekly rewards): adds up, runs down only while the tank produces, kept through rebirths |
   | `starPower` | Star power kept from a starfall (0–3 bars): the next opened egg draws its variant from getStarVariantOdds and spends it; kept through rebirths |
@@ -678,7 +693,7 @@ ProjectQuarium/
 | | `RequestSync` | DataService |
 | | `ClaimQuest` (quest id) | QuestService |
 | | `ReportClientStats` ({platform, fps, memoryMb, swimBudget}, once a minute) | StatsService (statistics only) |
-| | `SetAquariumTheme` (theme or "Auto"), `SetCosmeticShown` ({id, shown}), `SetTitle` (title, "Auto" or "None") | CustomizationService |
+| | `SetAquariumTheme` (theme or "Auto"), `SetCosmeticShown` ({id, shown}), `SetTitle` (title, "Auto" or "None"), `SetSoundVolume` (0–1) | CustomizationService |
 | | `EquipCompanion` / `UnequipCompanion` (CompanionType) | CompanionService |
 | | `ReleaseFish` ({fishType, variant}), `FinishTutorial` (Feature), `ClaimOceanReward` (milestone id) | OceanService |
 | | `AdminStartEvent` (GameEventType), `AdminStopEvent` (no payload): admin panel, refused without `canUseAdminPanel` | AdminService |

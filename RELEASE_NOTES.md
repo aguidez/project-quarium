@@ -11,6 +11,19 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.60.11 — 2026-11-04
+
+**New**
+- **Sound control**: a round speaker button at the top right of the screen, next to Roblox's buttons. Click it to drop
+  down a volume slider (the volume shows on top), and a button that turns the sound off completely, or back on at the
+  volume you had. The speaker on the button is crossed out while the sound is off. It sets every sound of the game:
+  music, event music, effects and your character's steps. Your volume is saved and comes back the next time you play.
+
+**Changes**
+- **Egg shop**: it moved a little to the left, to make room for the sound button.
+
+---
+
 ## V0.60.10 — 2026-11-04
 
 **Changes**

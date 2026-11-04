@@ -243,6 +243,9 @@ export function sanitizeSave(save: SaveData) {
 	);
 	if (data.titleChoice !== "Auto" && data.titleChoice !== "None" && !isCosmeticId(data.titleChoice))
 		data.titleChoice = "Auto";
+	// NaN fails both comparisons: back to full volume
+	const volume = data.soundVolume;
+	data.soundVolume = typeIs(volume, "number") && volume >= 0 && volume <= 1 ? volume : 1;
 	data.tutorialsDone = data.tutorialsDone.filter((f) => FEATURES[f] !== undefined);
 
 	save.tank = save.tank.filter(
