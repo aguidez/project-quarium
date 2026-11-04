@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-04 (V0.60.9: a joining owner's fish drop their first coin at a random time, 1–2 intervals).
+> Last updated: 2026-11-04 (V0.60.10: the admin panel opens on live servers for ADMIN_PANEL_USER_IDS).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -285,7 +285,8 @@ ProjectQuarium/
    │  │                      (FishService, every 10 s) removes copies no tank used for 60 s
    │  ├─ admins.ts           isGameOwner (the place's user, or rank 255 of its group) / isAdmin (the owner, the group's ranks ≥ 254 =
    │  │                      GROUP_ADMIN_RANK: the Manager role, + ADMIN_USER_IDS), checked server-side;
-   │  │                      canUseAdminPanel (Studio playtests only for now; isAdmin at the release)
+   │  │                      canUseAdminPanel (live: ADMIN_PANEL_USER_IDS only, the developer's account, by the
+   │  │                      owner's choice rather than a group rank; Studio: everyone)
    │  ├─ saveData.ts         SaveData (profile: PlayerData + saved tank + stats + leaderboardBanned), SavedFish,
    │  │                      SAVE_TEMPLATE, sanitizeSave
    │  ├─ playerStats.ts      PlayerStats (server only, never synced): sessions, days, play / tending seconds, milestones
@@ -957,9 +958,9 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
 - **Admin events across servers** rely on MessagingService (best effort, a few seconds of delay; a server that misses
   the message joins through the MemoryStore only when it starts). Add admins by UserId in `server/admins.ts` (the
   game's owner always is one).
-- **Admin panel**: Studio playtests only for now (`canUseAdminPanel`). For the release, make it return
-  `isAdmin(player)`: the button then shows for admins on live servers and its events reach every server (the scope chip
-  says so). New admin tools go in their own tab (`ADMIN_TABS` + a tab component in AdminPanel.tsx + AdminService actions).
+- **Admin panel**: on live servers only for the accounts of `ADMIN_PANEL_USER_IDS` (`server/admins.ts`: the
+  developer, DOT_Pinpin; the owner wants accounts, not a group rank), whose events reach every server (the scope chip
+  says so); everyone in a Studio playtest. Add an account there to open it to someone else. New admin tools go in their own tab (`ADMIN_TABS` + a tab component in AdminPanel.tsx + AdminService actions).
 - **Playtesting**: see `docs/agent-notes/studio-mcp-ui-testing.md` and `fish-asset-pipeline.md`. In short: stand at
   the tank CFrame × (0, 5, −14) to be in the focus zone, drive flows through remotes, feed fish in long tests, and
   mark temporary test values with `// TEMP TEST`, then restore them.

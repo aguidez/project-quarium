@@ -11,6 +11,14 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.60.10 — 2026-11-04
+
+**Changes**
+- **Admin panel on the live game**: it only opened in Studio. It now opens on live servers too, for the developer's
+  account only (DOT_Pinpin), whatever its role in the group. Its events start on every server at once.
+
+---
+
 ## V0.60.9 — 2026-11-04
 
 **Changes**

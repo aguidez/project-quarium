@@ -32,9 +32,15 @@ export function isAdmin(player: Player): boolean {
 }
 
 /**
- * Who may open the admin panel (AdminService). For now everyone in a Studio playtest, never on a live server;
- * for the release it becomes `isAdmin(player)`.
+ * The accounts that may open the admin panel on a live server, by UserId: the owner's choice is a list of accounts
+ * rather than a group rank, so a role change in the group never opens it to anyone else. DOT_Pinpin (the developer).
  */
-export function canUseAdminPanel(_player: Player): boolean {
-	return RunService.IsStudio();
+const ADMIN_PANEL_USER_IDS: number[] = [10580349267];
+
+/**
+ * Who may open the admin panel (AdminService): ADMIN_PANEL_USER_IDS on live servers (its events reach every
+ * server), and everyone in a Studio playtest (they only act on the playtest's own server).
+ */
+export function canUseAdminPanel(player: Player): boolean {
+	return RunService.IsStudio() || ADMIN_PANEL_USER_IDS.includes(player.UserId);
 }
