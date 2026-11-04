@@ -51,6 +51,7 @@ import { FoodService } from "./FoodService";
 import { LikeService } from "./LikeService";
 
 const TICK = 0.25; // hunger & coin drop update rate (seconds)
+const FIRST_COIN_SPREAD = 2; // on joining, a fish's first coin falls between 1 and this many of its intervals
 const INCOME_PUBLISH_INTERVAL = 1; // seconds between two updates of the tanks' income attributes (publishIncome)
 const ASSET_SWEEP_PERIOD = 10; // seconds between two looks for fish templates no tank uses anymore (FishAssets)
 const SWIM_MARGIN = 1.5;
@@ -967,7 +968,7 @@ class FishServiceSingleton implements Lifecycle {
 	 * Drops a new (baby) fish in the owner's aquarium. Called by EggService when an egg hatches (with
 	 * the variant it drew), and with `saved` to bring back a fish of a saved tank (same size, age,
 	 * hunger and variant). `arrival`: dropped by a UFO from that point (held in its beam for `time`
-	 * seconds) instead of the usual spot.
+	 * seconds) instead of the usual spot. `joining`: brought back with the tank of a joining owner (restoreTank).
 	 */
 	public spawnFish(
 		owner: Player,
@@ -975,6 +976,7 @@ class FishServiceSingleton implements Lifecycle {
 		saved?: SavedFish,
 		hatchedVariant?: FishVariant,
 		arrival?: { from: Vector3; time: number },
+		joining = false,
 	): FishEntity | undefined {
 		if (!owner.IsDescendantOf(Players)) return undefined;
 
@@ -1010,7 +1012,11 @@ class FishServiceSingleton implements Lifecycle {
 			segment: holdSegment(new CFrame(), now()),
 			state: HungerState.Satiated,
 			stateEndsAt: clock + config.hunger.satiatedDuration,
-			nextPayoutAt: clock + payoutInterval,
+			// A joining owner's fish all start together: their first coin falls at a random time between one and two
+			// intervals, so fish of the same pace don't drop in chorus (nor too soon); then the usual interval
+			nextPayoutAt:
+				clock +
+				(joining ? this.rng.NextNumber(payoutInterval, payoutInterval * FIRST_COIN_SPREAD) : payoutInterval),
 			paused: !AquariumService.isTending(owner),
 			alive: true,
 			away: false,
@@ -1108,7 +1114,14 @@ class FishServiceSingleton implements Lifecycle {
 			for (let i = 0; i < count; i++) {
 				const index = saved.findIndex((fish) => fish.fishType === fishType);
 				// More fish than saved ones (e.g. left during a hatch reveal): the extra ones are newborn
-				this.spawnFish(owner, fishType, index >= 0 ? saved.remove(index) : undefined);
+				this.spawnFish(
+					owner,
+					fishType,
+					index >= 0 ? saved.remove(index) : undefined,
+					undefined,
+					undefined,
+					true,
+				);
 			}
 		}
 	}

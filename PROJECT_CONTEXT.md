@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-04 (V0.60.8: one UI scale for every screen, phones included: client/ui/screenScale.ts).
+> Last updated: 2026-11-04 (V0.60.9: a joining owner's fish drop their first coin at a random time, 1–2 intervals).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -623,7 +623,9 @@ ProjectQuarium/
   same profile (the older one ends its session and kicks the player). Right before each save, `onSave` hooks write
   runtime state into the profile: FishService writes the tank (also in its own PlayerRemoving, before cleaning up).
 - **Restoring.** `onLoaded` hooks: FishService waits for the aquarium, then respawns `PlayerData.fish` (the count
-  is the authority) using the saved fish for age / size / hunger (extra ones are newborn). Companions come back
+  is the authority) using the saved fish for age / size / hunger (extra ones are newborn). Each restored fish drops
+  its first coin at a random time between 1 and `FIRST_COIN_SPREAD` (2) of its payout intervals (`spawnFish`
+  `joining`), so fish of the same pace don't drop in chorus; then its usual interval. Companions come back
   through CompanionService's refresh loop, the onboarding resumes at its saved step, eggs keep their absolute hatch
   time. Not saved: coins and food in the water, the frozen onboarding coin (dropped again).
 - **Offline rules.** Eggs keep incubating offline (absolute hatch time), at the speed they had at the disconnection.

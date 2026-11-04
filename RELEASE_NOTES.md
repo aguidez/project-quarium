@@ -11,6 +11,16 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.60.9 — 2026-11-04
+
+**Changes**
+- **Coins when you join**: all your fish came back at the same moment, so the fish with the same pace dropped their
+  coins together, in a stiff rhythm. Now each fish drops its first coin at a random moment between one and two of its
+  own coin intervals (a fish that drops a coin every 10 s: between 10 and 20 s after you join). After that first coin,
+  it keeps its usual pace. Newly hatched fish don't change.
+
+---
+
 ## V0.60.8 — 2026-11-04
 
 **Changes**
