@@ -16,9 +16,11 @@ import {
 	getIncomePerSecond,
 	GrowthStage,
 	HungerState,
+	isEasterEgg,
 	SPECIAL_COIN_MULTIPLIER,
 	SPECIAL_COIN_ODDS,
 } from "shared/types/fish";
+import { AdminTankFish } from "shared/types/admin";
 import {
 	FISH_VARIANTS,
 	FishVariant,
@@ -781,6 +783,41 @@ class FishServiceSingleton implements Lifecycle {
 		if (!fishes) return;
 		for (const fish of [...fishes]) this.removeFish(fish, "Released");
 		this.sfxRemote.FireClient(owner, "FishReleased", 1.1);
+	}
+
+	// ---------------------------------------------------------------------
+	// Admin panel (AdminService checks the right): see and change a player's tank
+	// ---------------------------------------------------------------------
+
+	/** The owner's fish (those away in a UFO included), for the admin panel: id, species, variant. */
+	public getFishList(owner: Player): AdminTankFish[] {
+		const list = new Array<AdminTankFish>();
+		const fishes = this.fishByOwner.get(owner);
+		if (!fishes) return list;
+		for (const fish of fishes)
+			if (fish.alive) list.push({ id: fish.id, fishType: fish.fishType, variant: fish.variant });
+		list.sort((a, b) => a.id < b.id);
+		return list;
+	}
+
+	/** Takes one fish out of the owner's tank, no Ocean Points (not while a UFO holds it). Returns whether it was. */
+	public adminRemoveFish(owner: Player, id: number): boolean {
+		const fish = this.findById(id);
+		if (!fish || fish.owner !== owner || !fish.alive || fish.away || fish.held) return false;
+		this.removeFish(fish, "Released");
+		return true;
+	}
+
+	/**
+	 * Drops a new fish of the admin's choice in the owner's tank, even a full one (a newborn; an easter egg is always
+	 * Normal), found in the Fish Index like a hatch. Returns whether it came.
+	 */
+	public adminAddFish(owner: Player, fishType: FishType, variant: FishVariant): boolean {
+		if (!AquariumService.getAquarium(owner) || !this.templates.has(fishType) || !DataService.getData(owner))
+			return false;
+		const kept = isEasterEgg(fishType) ? "Normal" : variant;
+		DataService.addFish(owner, fishType, kept);
+		return this.spawnFish(owner, fishType, undefined, kept) !== undefined;
 	}
 
 	/** Whether one of the owner's fish is hungry (or weak). */

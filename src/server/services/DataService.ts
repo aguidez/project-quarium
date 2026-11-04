@@ -253,14 +253,22 @@ class DataServiceController implements Lifecycle {
 	}
 
 	/**
-	 * A fish that comes without an egg (Sugar, brought by a like): counted in the tank and found in the Fish Index, like
-	 * a hatch. Easter eggs only (no variant).
+	 * A fish that comes without an egg (Sugar brought by a like, the admin panel): counted in the tank and found in the
+	 * Fish Index (species and variant), like a hatch.
 	 */
-	public addFish(player: Player, fishType: FishType) {
+	public addFish(player: Player, fishType: FishType, variant: FishVariant = "Normal") {
 		const data = this.getData(player);
 		if (!data) return;
 		data.fish[fishType] += 1;
 		data.hatched[fishType] = (data.hatched[fishType] ?? 0) + 1;
+		if (variant !== "Normal") {
+			const variants = data.hatchedVariants[fishType] ?? {};
+			variants[variant] = (variants[variant] ?? 0) + 1;
+			data.hatchedVariants[fishType] = variants;
+			const living = data.fishVariants[fishType] ?? {};
+			living[variant] = (living[variant] ?? 0) + 1;
+			data.fishVariants[fishType] = living;
+		}
 		this.sync(player);
 	}
 

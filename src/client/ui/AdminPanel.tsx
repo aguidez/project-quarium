@@ -2,6 +2,7 @@ import React, { useBinding, useEffect, useState } from "@rbxts/react";
 import { RunService, Workspace } from "@rbxts/services";
 import { ADMIN_TABS, AdminTab } from "shared/types/admin";
 import { ActiveEvent, ADMIN_EVENT_ORDER, GAME_EVENTS, GameEventType } from "shared/types/events";
+import { AdminTankActions, AquariumsTab } from "./AdminAquariumsTab";
 import { formatTime } from "./EventBanner";
 import { Button3D, Card, Chip, TextStroke } from "./kit";
 import { Panel, PANEL_INNER_WIDTH } from "./Panel";
@@ -15,12 +16,16 @@ const WHITE = new Color3(1, 1, 1);
 /** Text drawn in an event's badge (no emoji: the K-pop's own icon is one). */
 const BADGE_TEXT: Partial<Record<GameEventType, string>> = { Kpop: "♪", Island: "♫", Ufo: "UFO", Starfall: "★" };
 
+/** Intents only (UiController): the server checks the admin right again for each one (AdminService). */
+export interface AdminActions extends AdminTankActions {
+	onStartEvent: (eventType: GameEventType) => void;
+	onStopEvent: () => void;
+}
+
 export interface AdminPanelProps {
 	/** The event running on this server, if any. */
 	event?: ActiveEvent;
-	/** Intents only: the server checks the admin right again (AdminService). */
-	onStartEvent: (eventType: GameEventType) => void;
-	onStopEvent: () => void;
+	actions: AdminActions;
 	onClose: () => void;
 }
 
@@ -223,7 +228,7 @@ function EventsTab(props: AdminPanelProps) {
 		>
 			<uilistlayout Padding={new UDim(0, 12)} SortOrder={Enum.SortOrder.LayoutOrder} />
 			{props.event && (
-				<NowPlaying key={`Now${props.event.startsAt}`} event={props.event} onStop={props.onStopEvent} />
+				<NowPlaying key={`Now${props.event.startsAt}`} event={props.event} onStop={props.actions.onStopEvent} />
 			)}
 			<textlabel
 				key="Section"
@@ -241,7 +246,7 @@ function EventsTab(props: AdminPanelProps) {
 					key={eventType}
 					eventType={eventType}
 					order={3 + index}
-					onStart={() => props.onStartEvent(eventType)}
+					onStart={() => props.actions.onStartEvent(eventType)}
 				/>
 			))}
 		</frame>
@@ -255,7 +260,13 @@ function EventsTab(props: AdminPanelProps) {
  */
 export function AdminPanel(props: AdminPanelProps) {
 	const [tab, setTab] = useState<AdminTab>("Events");
-	const scope = RunService.IsStudio() ? "STUDIO ONLY - THIS SERVER" : "LIVE - EVERY SERVER";
+	// Events reach every live server; the tanks are this server's only
+	const scope =
+		tab === "Aquariums"
+			? "THIS SERVER ONLY"
+			: RunService.IsStudio()
+				? "STUDIO ONLY - THIS SERVER"
+				: "LIVE - EVERY SERVER";
 	return (
 		<Panel
 			title="ADMIN"
@@ -281,6 +292,7 @@ export function AdminPanel(props: AdminPanelProps) {
 				))}
 			</frame>
 			{tab === "Events" && <EventsTab {...props} />}
+			{tab === "Aquariums" && <AquariumsTab actions={props.actions} />}
 		</Panel>
 	);
 }

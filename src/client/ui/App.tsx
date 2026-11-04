@@ -16,7 +16,7 @@ import { hasClaimableOceanReward, OceanRewardId } from "shared/types/oceanReward
 import { AQUARIUM_THEMES, formatMultiplier, getNextRebirth } from "shared/types/rebirths";
 import { CompanionPanel } from "./CompanionPanel";
 import { EggReveal } from "./EggReveal";
-import { AdminPanel } from "./AdminPanel";
+import { AdminActions, AdminPanel } from "./AdminPanel";
 import { EventBanner } from "./EventBanner";
 import { FishIndexPanel } from "./FishIndexPanel";
 import { FoodReserve, getFoodReserveTop } from "./FoodReserve";
@@ -88,7 +88,7 @@ export interface AppProps {
 	/** The owner's test modes ("/speed", "/passes off" in Studio), shown so they are never forgotten; undefined for everyone else. */
 	testMode?: string;
 	/** The admin panel's intents, only given when the server allows this player (AdminService checks them again). */
-	admin?: { onStartEvent: (eventType: GameEventType) => void; onStopEvent: () => void };
+	admin?: AdminActions;
 	onClaimQuest: (questId: string) => void;
 	onEquipCompanion: (companionType: CompanionType) => void;
 	onUnequipCompanion: (companionType: CompanionType) => void;
@@ -563,8 +563,7 @@ export function App(props: AppProps) {
 				<AdminPanel
 					key="AdminPanel"
 					event={props.event}
-					onStartEvent={props.admin.onStartEvent}
-					onStopEvent={props.admin.onStopEvent}
+					actions={props.admin}
 					onClose={() => setOpenPanel(undefined)}
 				/>
 			)}

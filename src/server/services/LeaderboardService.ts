@@ -158,6 +158,25 @@ class LeaderboardServiceSingleton implements Lifecycle {
 		return os.clock() - session.joinedAt >= SETTLE_DELAY;
 	}
 
+	/**
+	 * The admin panel's LB BAN (SaveData.leaderboardBanned, saved): banned, the player's entries leave the stores and
+	 * the boards at once (and their titles at the next day's snapshot); unbanned, their scores are written again at the
+	 * next write (a test profile stays off anyway). The boards are sent again right away.
+	 */
+	public setBanned(player: Player, banned: boolean) {
+		const save = DataService.getSave(player);
+		const session = this.sessions.get(player);
+		if (!save || save.leaderboardBanned === banned) return;
+		save.leaderboardBanned = banned;
+		if (session && !banned && !save.stats.testSpeedUsed) {
+			session.removed = false;
+			session.written = {};
+			session.writtenAt = -math.huge;
+		}
+		if (session) this.isExcluded(player, session);
+		this.push();
+	}
+
 	/** Banned profiles and the owner's test ones stay off the boards; their entries are removed from the stores once. */
 	private isExcluded(player: Player, session: Session): boolean {
 		if (session.removed) return true;

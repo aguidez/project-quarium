@@ -1,7 +1,8 @@
 // FigCraft script: the admin panel mock-up (V2 arcade style), the Studio admin tools (AdminPanel.tsx).
 // Usage: node design/ui/admin-panel.build.js <script.json>
 //        figcraft-cli run <script.json> --out design/ui/admin-panel.figcraft
-// The run also exports design/previews/admin-panel-mockup.png (in the same session, which has the Roblox fonts).
+// The run also exports design/previews/admin-panel-mockup.png and admin-aquariums-mockup.png (the Aquariums tab), in
+// the same session, which has the Roblox fonts.
 const fs = require("fs");
 const path = require("path");
 const localConfig = require("../../tools/local-config");
@@ -92,7 +93,8 @@ button(win, "Close", W - 30, -22, 50, 50, PAL.red, "X", { radius: 25, depth: 5, 
 chip(body, "Scope", W / 2 - 150, 40, 300, 30, PAL.amber[1], "STUDIO ONLY - THIS SERVER");
 
 // Tabs (QuestPanel's style: gold = open, navy = the others); Events is the first one, more admin tools come later
-button(body, "Tab_Events", W / 2 - 75, 84, 150, 44, PAL.gold, "EVENTS", { size: 22 });
+button(body, "Tab_Events", W / 2 - 157, 84, 150, 44, PAL.gold, "EVENTS", { size: 22 });
+button(body, "Tab_Aquariums", W / 2 + 7, 84, 150, 44, PAL.navy, "AQUARIUMS", { size: 22 });
 
 // Now playing
 const now = card(body, "NowPlaying", 22, 146, W - 44, 78, PAL.gold[1]);
@@ -125,5 +127,139 @@ label(board, "ToggleCaption", 700, 560, 260, 24, "Opens the panel (bottom-left):
 button(board, "AdminToggle", 700, 592, 150, 50, PAL.purple, "ADMIN");
 
 cmds.push({ command: "file.export", params: { ids: [{ $step: board }], format: "png", scale: 1, path: PREVIEW } });
+
+// ---------------------------------------------------------------------------------------------------------------
+// Aquariums tab (V0.60.16): the players of this server (list), then one player's aquarium (its fish, remove / add)
+// ---------------------------------------------------------------------------------------------------------------
+const UI = __dirname.split(path.sep).join("/");
+const PREVIEW_TANKS = path.join(__dirname, "..", "previews", "admin-aquariums-mockup.png").split(path.sep).join("/");
+function image(parent, name, file, x, y, w, h) {
+	const p = parent !== undefined ? { $step: parent } : undefined;
+	cmds.push({ command: "image.place", params: { path: `${UI}/${file}`, parent: p, x, y, width: w, height: h, mode: "fit" } });
+	const id = cmds.length - 1;
+	cmds.push({ command: "node.set", params: { ids: [{ $step: id }], name } });
+	return id;
+}
+/** The LB ban checkbox: a rounded box (red with a white tick when banned) and its caption. */
+function checkbox(parent, name, x, y, checked) {
+	const root = add("frame", parent, name, x, y, 112, 34, {});
+	const box = add("frame", root, "Box", 0, 0, 34, 34, {
+		fills: checked ? vgrad(PAL.red[0], PAL.red[1]) : vgrad("#0F2236", "#0A1826"),
+		cornerRadius: 9,
+		strokes: [checked ? OUT : "#9FC3E8"],
+		strokeWeight: 3,
+		strokeAlign: "inside",
+	});
+	if (checked)
+		cmds.push({
+			command: "vector.create",
+			params: { path: "M 8 17 L 14 23 L 26 10", parent: { $step: box }, props: { name: "Tick", stroke: "#FFFFFF", strokeWeight: 5, strokeCap: "round", strokeJoin: "round", fill: "none" } },
+		});
+	label(root, "Caption", 42, 0, 70, 34, "LB BAN", { size: 18, color: checked ? PAL.red[0] : "#A9CBEF", align: "left" });
+	return root;
+}
+/** A round avatar (in game: the player's headshot thumbnail). */
+function avatar(parent, x, y, size, letter, pal) {
+	const a = add("frame", parent, "Avatar", x, y, size, size, { fills: vgrad(pal[0], pal[2]), cornerRadius: size / 2, strokes: ["#FFFFFF"], strokeWeight: 3, strokeAlign: "inside" });
+	label(a, "Letter", 0, 0, size, size, letter, { font: TITLE, size: Math.round(size * 0.5), stroke: OUT, strokeWeight: 2 });
+	return a;
+}
+/** A window like the Events one, with the tabs, AQUARIUMS open. */
+function window(parent, name, x, h) {
+	const w = add("frame", parent, name, x, 110, W, h + 20, {});
+	add("rectangle", w, "Shadow", 0, 10, W, h, { fill: "#050B12", cornerRadius: 30 });
+	const b = add("frame", w, "Body", 0, 0, W, h, { fills: vgrad("#23446E", "#0F1B29"), cornerRadius: 30, strokes: [OUT], strokeWeight: 4, strokeAlign: "inside" });
+	add("rectangle", b, "InnerRim", 7, 7, W - 14, h - 14, { fills: [], cornerRadius: 24, strokes: ["#FFFFFF26"], strokeWeight: 2, strokeAlign: "inside" });
+	const ribbon = add("frame", w, "Banner", W / 2 - 170, -36, 340, 58, { fills: vgrad(PAL.red[0], PAL.red[1]), cornerRadius: 14, strokes: [OUT], strokeWeight: 4, strokeAlign: "inside" });
+	label(ribbon, "Title", 0, 2, 340, 56, "ADMIN", { font: TITLE, size: 36, stroke: PAL.red[3], strokeWeight: 4 });
+	button(w, "Close", W - 30, -22, 50, 50, PAL.red, "X", { radius: 25, depth: 5, size: 28 });
+	chip(b, "Scope", W / 2 - 150, 40, 300, 30, PAL.amber[1], "THIS SERVER ONLY");
+	button(b, "Tab_Events", W / 2 - 157, 84, 150, 44, PAL.navy, "EVENTS", { size: 22 });
+	button(b, "Tab_Aquariums", W / 2 + 7, 84, 150, 44, PAL.gold, "AQUARIUMS", { size: 22 });
+	return b;
+}
+const VARIANT_SLOT = { Normal: PAL.lagoon, Anomaly: PAL.purple, Ghost: ["#F2FBFF", "#CFEFFF", "#9FD6F0", "#4F8FB0"], Shiny: PAL.gold };
+/** A fish of the tank: its sticker on its variant's colour, a small red X (or, armed, a red REMOVE? cover). */
+function fishSlot(parent, x, y, size, fishType, variant, armed) {
+	const pal = VARIANT_SLOT[variant];
+	const root = add("frame", parent, `Fish_${fishType}_${variant}`, x, y, size, size + 4, {});
+	add("rectangle", root, "Shadow", 0, 4, size, size, { fill: pal[3], cornerRadius: 14, strokes: [OUT], strokeWeight: 3, strokeAlign: "inside" });
+	const face = add("frame", root, "Face", 0, 0, size, size, { fills: vgrad(pal[0], pal[1]), cornerRadius: 14, strokes: [OUT], strokeWeight: 3, strokeAlign: "inside" });
+	image(face, "Icon", `fish/stickers/Icon_${fishType}_${variant === "Normal" || fishType === "FrenchFish" || fishType === "Sugar" ? "Normal" : variant}.png`, 4, 10, size - 8, (size - 8) * 0.625);
+	if (armed) {
+		const cover = add("frame", face, "Confirm", 0, 0, size, size, { fills: [{ type: "solid", color: "#D92B45", opacity: 0.88 }], cornerRadius: 14, strokes: [OUT], strokeWeight: 3, strokeAlign: "inside" });
+		label(cover, "Text", 0, 0, size, size, "REMOVE?", { font: TITLE, size: 15, stroke: PAL.red[3], strokeWeight: 2 });
+	} else {
+		button(root, "Remove", size - 22, -8, 28, 28, PAL.red, "X", { radius: 14, depth: 3, size: 15 });
+	}
+	return root;
+}
+
+const tanks = add("frame", undefined, "AdminAquariums_Mockup", 1040, 0, 1400, 1010, { fill: "#16293D" });
+label(tanks, "Caption", 30, 16, 1300, 30, "ADMIN PANEL - AQUARIUMS TAB  (left: the players of this server;  right: MANAGE opens one aquarium)", { size: 18, color: "#A9CBEF", align: "left" });
+
+// Left: the list
+const list = window(tanks, "Players", 60, 640);
+label(list, "Section", 22, 146, 400, 24, "PLAYERS ON THIS SERVER  (4)", { size: 18, color: "#A9CBEF", align: "left" });
+const PLAYERS = [
+	{ name: "DOT_Pinpin", letter: "D", pal: PAL.purple, rebirth: "REBIRTH 2", fish: "16/15", income: "143.9K $/S", ban: false },
+	{ name: "CoralQueen", letter: "C", pal: PAL.lagoon, rebirth: "REBIRTH 2", fish: "15/15", income: "117.6K $/S", ban: false },
+	{ name: "xXFishGodXx", letter: "X", pal: PAL.green, rebirth: "REBIRTH 1", fish: "12/15", income: "8.2K $/S", ban: true },
+	{ name: "Bubbles", letter: "B", pal: PAL.amber, rebirth: "NO REBIRTH", fish: "4/10", income: "96 $/S", ban: false },
+];
+PLAYERS.forEach((p, i) => {
+	const c = card(list, `Player_${p.name}`, 22, 178 + i * 108, W - 44, 94);
+	avatar(c, 14, 15, 64, p.letter, p.pal);
+	label(c, "Name", 90, 10, 280, 34, p.name.toUpperCase(), { font: TITLE, size: 24, stroke: OUT, align: "left" });
+	chip(c, "Rebirth", 90, 50, 104, 24, PAL.purple[1], p.rebirth);
+	chip(c, "Fish", 200, 50, 70, 24, "#9FC3E8", p.fish);
+	chip(c, "Income", 276, 50, 104, 24, PAL.gold[1], p.income);
+	checkbox(c, "LbBan", 398, 6, p.ban);
+	button(c, "Manage", W - 44 - 136, 46, 120, 38, PAL.lagoon, "MANAGE", { size: 18, depth: 5 });
+});
+
+// Right: one aquarium
+const tank = window(tanks, "Aquarium", 760, 860);
+const head = card(tank, "Owner", 22, 146, W - 44, 76, PAL.gold[1]);
+button(head, "Back", 12, 13, 96, 44, PAL.navy, "BACK", { size: 20, depth: 5 });
+avatar(head, 120, 10, 56, "C", PAL.lagoon);
+label(head, "Name", 186, 6, 240, 34, "CORALQUEEN", { font: TITLE, size: 24, stroke: OUT, align: "left" });
+label(head, "Sub", 186, 40, 240, 24, "Rebirth 2 - 117.6K $/s", { size: 16, color: "#A9CBEF", align: "left" });
+checkbox(head, "LbBan", W - 44 - 124, 21, false);
+
+label(tank, "FishSection", 22, 240, 400, 24, "FISH  15 / 15", { size: 18, color: "#A9CBEF", align: "left" });
+const TANK = [
+	["ImperialDiscus", "Normal"], ["ImperialDiscus", "Normal"], ["ImperialDiscus", "Anomaly"], ["ImperialDiscus", "Normal"],
+	["ImperialDiscus", "Ghost"], ["ImperialDiscus", "Normal"], ["PirateFish", "Normal"], ["PirateFish", "Shiny"],
+	["SilverAngelfish", "Normal"], ["FlameGourami", "Normal"], ["ImperialDiscus", "Normal"], ["Sugar", "Normal"],
+	["ImperialDiscus", "Normal"], ["FrenchFish", "Normal"], ["ImperialDiscus", "Normal"],
+];
+const SLOT = 78;
+const GAP = 12;
+const gridX = 22 + Math.floor((W - 44 - (6 * SLOT + 5 * GAP)) / 2);
+TANK.forEach(([type, variant], i) => {
+	fishSlot(tank, gridX + (i % 6) * (SLOT + GAP), 276 + Math.floor(i / 6) * (SLOT + GAP + 4), SLOT, type, variant, i === 9);
+});
+
+// Add a fish: species strip (scrolls), variant chips, ADD
+const addCard = card(tank, "AddFish", 22, 566, W - 44, 262);
+label(addCard, "Title", 18, 10, 300, 30, "ADD A FISH", { font: TITLE, size: 22, stroke: OUT, align: "left" });
+const STRIP = ["Basic", "Big", "RedTetra", "Clownfish", "ZebraDanio", "FlameGourami", "SilverAngelfish"];
+const PICK = 64;
+STRIP.forEach((type, i) => {
+	const x = 18 + i * (PICK + 9);
+	const selected = type === "Clownfish";
+	const s = add("frame", addCard, `Pick_${type}`, x, 48, PICK, PICK, { fills: vgrad("#2F5684", "#1E3A5C"), cornerRadius: 12, strokes: [selected ? PAL.gold[1] : OUT], strokeWeight: selected ? 4 : 3, strokeAlign: "inside" });
+	image(s, "Icon", `fish/stickers/Icon_${type}_Normal.png`, 4, 12, PICK - 8, (PICK - 8) * 0.625);
+});
+add("rectangle", addCard, "ScrollBar", 18, 120, 230, 6, { fill: "#9FC3E8", cornerRadius: 3, opacity: 0.6 });
+label(addCard, "Picked", 18, 132, 400, 28, "CLOWNFISH  -  Uncommon", { size: 18, color: "#FFFFFF", align: "left" });
+const VARIANTS = [["NORMAL", PAL.lagoon], ["ANOMALY", PAL.purple], ["GHOST", ["#F2FBFF", "#CFEFFF", "#9FD6F0", "#4F8FB0"]], ["SHINY", PAL.gold]];
+VARIANTS.forEach(([text, pal], i) => {
+	button(addCard, `Variant_${text}`, 18 + i * 104, 176, 94, 40, i === 2 ? pal : PAL.navy, text, { size: 16, depth: 5 });
+});
+button(addCard, "Add", W - 44 - 124, 172, 108, 50, PAL.green, "ADD", { size: 24 });
+
+cmds.push({ command: "file.export", params: { ids: [{ $step: tanks }], format: "png", scale: 1, path: PREVIEW_TANKS } });
 fs.writeFileSync(SCRIPT, JSON.stringify(cmds, null, 1));
 console.log(`${cmds.length} steps -> ${SCRIPT}`);

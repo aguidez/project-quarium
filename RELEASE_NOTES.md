@@ -11,6 +11,17 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.60.16 — 2026-11-04
+
+**New**
+- **Admin panel, Aquariums tab** (admins only, acts on the current server): every player of the server with their
+  rebirth, fish and leaderboard income. **MANAGE** opens a player's aquarium: remove any fish (the red X, then
+  REMOVE? to confirm; no Ocean Points), or add a fish of any species and variant (even into a full tank; the secret
+  fish are always Normal). An **LB BAN** checkbox keeps a player off the three leaderboards (saved): checked, their
+  scores leave the boards at once; unchecked, they come back within seconds.
+
+---
+
 ## V0.60.15 — 2026-11-04
 
 **Fixes**

@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-04 (V0.60.15: the income leaderboard leaves out the French Fish, a temporary bonus).
+> Last updated: 2026-11-04 (V0.60.16: the admin panel's Aquariums tab: this server's tanks, remove / add fish, LB BAN).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -86,7 +86,9 @@ ProjectQuarium/
 │                            (template, old id)
 ├─ design/previews/          Images shown to the owner (Studio captures, mock-ups): crab-sax-preview.jpg (mock-
 │                            up), crab-sax-carry-1-right / -2-middle / -3-left.jpg (Island Breeze's guest dancing),
-│                            admin-panel-mockup.png / admin-panel-ingame.jpg (the admin panel), star-gauge-mockup.png
+│                            admin-panel-mockup.png / admin-panel-ingame.jpg (the admin panel), admin-aquariums-
+│                            mockup.png / admin-aquariums-list-ingame.jpg / -tank-ingame.jpg (its Aquariums tab),
+│                            star-gauge-mockup.png
 │                            (the starfall's gauge and the star power pill), star-power-pill-ingame.jpg,
 │                            leaderboards-mockup.png / leaderboards-ingame.jpg, leaderboard-titles-mockup.png /
 │                            leaderboard-titles-ingame.jpg (the nameplates' four tiers), food-reserve-mockup.png /
@@ -106,8 +108,8 @@ ProjectQuarium/
 │  ├─ starfall.figcraft      The starfall's star gauge (StarGauge_Mockup: in the tank view, its states, the star power
 │  │                         pills), built by
 │  │                         starfall.build.js (figcraft-cli; exports design/previews/star-gauge-mockup.png)
-│  ├─ admin-panel.figcraft   The admin panel (AdminPanel_Mockup), built by admin-panel.build.js (run through
-│  │                         figcraft-cli; it also exports design/previews/admin-panel-mockup.png)
+│  ├─ admin-panel.figcraft   The admin panel (AdminPanel_Mockup, AdminAquariums_Mockup: the Aquariums tab), built by
+│  │                         admin-panel.build.js (run through figcraft-cli; it also exports both previews)
 │  ├─ shopbar.figcraft       FigCraft source of the older UI frames: OnboardingCard, RewardPopup, CapacityPlaque,
 │  │                         EventBanner(Abyss), QuestPanel, CompanionPanel, OceanPanel / OceanCoach / PanelCoach,
 │  │                         LikeBoard / LikeBoostPill, LoadingScreen / TailSprite, RebirthPanel, OwnerPlate,
@@ -259,7 +261,8 @@ ProjectQuarium/
    │     │                   isRebirthAvailable / isNextRebirthAvailable, isEggAvailable, isSpeciesAvailable,
    │     │                   isOceanMilestoneAvailable, isStoryQuestAvailable, arePassesOnSale, hasFinishedAlpha
    │     ├─ admin.ts         ADMIN_PANEL_ATTRIBUTE (player: may open the admin panel), AdminTab / ADMIN_TABS (one
-   │     │                   tab per admin tool: Events for now)
+   │     │                   tab per admin tool: Events, Aquariums), AdminTankInfo / AdminTankFish (the Aquariums tab's
+   │     │                   data), ADMIN_TANKS_REFRESH (3 s)
    │     ├─ ufo.ts           UfoOutcome (Sleep / Green / Red / Variant / Alien), UFO_OUTCOME_ODDS, drawUfoOutcome, FishEffect
    │     │                   (Sleep / Green / Red) + FISH_EFFECT_DURATION + FISH_EFFECT_COIN_MULTIPLIER, getNextVariant,
    │     │                   UFO_TIMING / UFO_KIDNAP_TIME, UFO_BEAM_ATTRIBUTE
@@ -358,7 +361,11 @@ ProjectQuarium/
    │     │                   AbyssService / UfoService; Starfall: runUntilEnd runs StarfallService (no template). startAdminEvent / stopRunningEvent (the "/event" command and the admin
    │     │                   panel; in Studio: the playtest server only)
    │     ├─ AdminService     Admin panel's server side: sets each player's AdminPanel attribute (canUseAdminPanel) and
-   │     │                   runs its actions, checking the right again: "AdminStartEvent", "AdminStopEvent"
+   │     │                   runs its actions, checking the right again: "AdminStartEvent", "AdminStopEvent";
+   │     │                   Aquariums tab (this server's players): "AdminRequestTanks" → AdminTanks, "AdminRemoveFish"
+   │     │                   (FishService.adminRemoveFish: no points), "AdminAddFish" (adminAddFish: even into a full tank,
+   │     │                   easter eggs Normal; DataService.addFish with its variant), "AdminSetLeaderboardBan"
+   │     │                   (LeaderboardService.setBanned); every action answers with the tanks again
    │     ├─ AbyssService     Abyssal raid: one lantern fish raid loop per owned tank until the event ends (§3.4)
    │     ├─ UfoService       UFO night: one UFO per owned tank (clone of the Ufo template, tag Ufo, anchored, moved by
    │     │                   PivotTo), kidnaps one fish at a time (each once per event), notifies the owner of the outcome;
@@ -391,7 +398,8 @@ ProjectQuarium/
    │     │                   choices; AquariumService and TitleService apply them. "SetSoundVolume" (0–1): saved only
    │     │                   (soundVolume, rounded to 0.01, no sync: the client applies it itself)
    │     ├─ LeaderboardService  The lobby leaderboards (§3.4): one OrderedDataStore per board
-   │     │                   (Leaderboard_<Id>_v1, key = UserId), writes its players' scores every 2 min (changed ones only)
+   │     │                   (Leaderboard_<Id>_v1, key = UserId), writes its players' scores every 2 min (changed ones only;
+   │     │                   setBanned: the admin panel's LB BAN, removes at once / writes again at the next tick)
    │     │                   and when they leave (sampled in onSave), reads the top 100 every 2 min, names from UserService,
    │     │                   merges its players' live scores and sends LeaderboardSync every 30 s and at join; the titles'
    │     │                   daily snapshot (DataStore LeaderboardTitles_v1, key Daily) → PlayerData.leaderboardRanks (§3.4)
@@ -531,7 +539,10 @@ ProjectQuarium/
          ├─ AdminPanel       Admin panel (FigCraft admin-panel.figcraft), opened by the purple ADMIN button (bottom-left,
          │                   only with the AdminPanel attribute): scope chip, tabs (ADMIN_TABS); Events tab: NOW PLAYING
          │                   (name, time left, STOP) and one row per event (ADMIN_EVENT_ORDER: badge, RECURRING / ADMIN
-         │                   ONLY, length, START)
+         │                   ONLY, length, START); Aquariums tab (AdminAquariumsTab.tsx, AquariumsTab): the players
+         │                   (headshot, rebirth / fish / income chips, LB BAN checkbox, MANAGE), then one tank (BACK, its
+         │                   fish as ItemSlots with a red X → REMOVE? for 3 s, ADD A FISH: species strip, variants, ADD);
+         │                   asks for the tanks on open and every ADMIN_TANKS_REFRESH s while open
          ├─ SoundControl     Top-right, in Roblox's topbar row (TopbarInset, sized like its 44 px buttons): round blue
          │                   speaker button (crossed out at 0) dropping down a navy plate: the volume (0–100, "OFF"),
          │                   a vertical slider (gold fill, white knob, dragged anywhere until released), a mute toggle
@@ -647,7 +658,8 @@ ProjectQuarium/
   `Player_<UserId>`), holding a `SaveData` (`server/saveData.ts`): `player` (the PlayerData below, synced to the
   client), `tank` (the fish: type, adult scale, age, hunger and time left, variant; not a UFO effect), `stats` (`server/playerStats.ts`,
   never synced; read offline by `npm run stats`) and `leaderboardBanned` (moderation, server only: kept off the
-  leaderboards; set by hand while the player is offline, docs/agent-notes/player-stats.md). On load: `Reconcile()` (fields added to `DEFAULT_PLAYER_DATA`
+  leaderboards; the admin panel's LB BAN for a player on the server, or by hand while they are offline,
+  docs/agent-notes/player-stats.md). On load: `Reconcile()` (fields added to `DEFAULT_PLAYER_DATA`
   since), then `sanitizeSave` (drops ids removed from the config, migrates old shapes, restarts the story where it
   was). A failed load kicks the player (never play on unsaved default data). `getData` is undefined until loaded:
   actions sent before are ignored.
@@ -714,7 +726,7 @@ ProjectQuarium/
 | | `SetAquariumTheme` (theme or "Auto"), `SetCosmeticShown` ({id, shown}), `SetTitle` (title, "Auto" or "None"), `SetSoundVolume` (0–1) | CustomizationService |
 | | `EquipCompanion` / `UnequipCompanion` (CompanionType) | CompanionService |
 | | `ReleaseFish` ({fishType, variant}), `FinishTutorial` (Feature), `ClaimOceanReward` (milestone id) | OceanService |
-| | `AdminStartEvent` (GameEventType), `AdminStopEvent` (no payload): admin panel, refused without `canUseAdminPanel` | AdminService |
+| | `AdminStartEvent` (GameEventType), `AdminStopEvent` (no payload), `AdminRequestTanks` (no payload), `AdminRemoveFish` ({userId, fishId}), `AdminAddFish` ({userId, fishType, variant}), `AdminSetLeaderboardBan` ({userId, banned}): admin panel, refused without `canUseAdminPanel` | AdminService |
 | | `WatchAquariums` (PlotIndex[], ≤ 6, debounced 0.25 s): only changes what this client receives | FishService |
 | | `GiveLike` (PlotIndex, from the board's prompt) | LikeService |
 | | `Rebirth` (no payload) | RebirthService |
@@ -737,6 +749,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
 | `MoneyPopup` | `{position, amount, special, ocean?, stolen?, ghost?}` | IncomePopupController |
 | `PlaySfx` | `(SfxName, pitch)` | AudioController |
 | `LeaderboardSync` | `{boards: Record<LeaderboardId, LeaderboardEntry[]>, own?}` (every 30 s, at join) | LeaderboardController |
+| `AdminTanks` | `AdminTankInfo[]` (this server's players and tanks, to an admin who asked or acted) | AdminPanel (Aquariums tab) |
 | `FishSync` | `FishMessage`: `Tank` (full state of a newly watched tank), `Spawn`, `Swim` (new segment), `State` (hunger, growth, paused, UFO effect), `Remove` (Eaten / Released / Gone / Abducted), `Scream` (an alien fish) | FishRenderController |
 
 **Replicated state outside remotes:**
