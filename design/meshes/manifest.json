@@ -23,5 +23,6 @@
 	"Swordfish": { "path": "ServerStorage.Assets.Companions.Swordfish.Mesh", "oldMeshId": 130405239802447 },
 	"EventLanternFish": { "path": "ServerStorage.Assets.EventFish.LanternFish.Mesh", "oldMeshId": 124852645344173 },
 	"KpopIdol": { "path": "ServerStorage.Assets.EventFish.KpopIdol.Mesh", "oldMeshId": 123631089443197 },
-	"Ufo": { "path": "ServerStorage.Assets.EventFish.Ufo.Mesh", "oldMeshId": 133018116229364 }
+	"Ufo": { "path": "ServerStorage.Assets.EventFish.Ufo.Mesh", "oldMeshId": 133018116229364 },
+	"Sugar": { "path": "ServerStorage.Assets.Fish.Sugar.Mesh", "oldMeshId": 76055235755410 }
 }

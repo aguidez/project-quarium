@@ -5,7 +5,7 @@ import { formatNumber } from "shared/format";
 import { RewardItem } from "shared/network";
 import { SfxName } from "shared/sounds";
 import { CoinIcon, HeaderBanner, TextStroke } from "./kit";
-import { COLORS, FONT_BOLD, FONT_TITLE, NAVY, OUTLINE, PALETTES, verticalGradient } from "./theme";
+import { COLORS, FISH_ICONS, FONT_BOLD, FONT_TITLE, NAVY, OUTLINE, PALETTES, verticalGradient } from "./theme";
 
 // Timeline (seconds)
 const POP_IN_TIME = 0.45; // the rays
@@ -42,6 +42,8 @@ function getScreenScale(): number {
  */
 export function RewardPopup(props: RewardPopupProps) {
 	const [time, setTime] = useBinding(0);
+	const fishType = props.item?.fishType;
+	const image = fishType !== undefined ? FISH_ICONS[fishType].Normal : props.item?.image;
 
 	useEffect(() => {
 		props.playSfx("FishObtained");
@@ -164,13 +166,13 @@ export function RewardPopup(props: RewardPopupProps) {
 							Padding={new UDim(0, 6)}
 							SortOrder={Enum.SortOrder.LayoutOrder}
 						/>
-						{props.item?.image !== undefined && props.item.image !== "" ? (
+						{image !== undefined && image !== "" ? (
 							<imagelabel
 								key="Gift"
 								LayoutOrder={1}
 								Size={UDim2.fromOffset(128, 80)}
 								BackgroundTransparency={1}
-								Image={props.item.image}
+								Image={image}
 								ScaleType={Enum.ScaleType.Fit}
 								Rotation={time.map((t) => math.sin(t * 6) * 8)}
 							/>

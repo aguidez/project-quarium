@@ -149,9 +149,16 @@ Rarity is only a label (Fish Index order, colours).
 | French Fish (Secret) | 0.1 % of any egg, taken from its most common fish, shown nowhere | Croissant, every 60 s | 0.5 x the tank's theoretical income per minute (other fish, growth and variants, sparkling coins on average), then x rebirth, like, event; sparkles 1/15 (x2) | 100 | 1 h of tended time (age), then leaves for the ocean with its points |
 
 | Alien Fish (Secret) | Never from an egg: 0.5 % of the fish a UFO kidnaps (UFO night) | None | Its scream, every 30 s of play: every other awake fish of the tank drops one plain coin (no sparkle, no ghost coin), on top of its own | 500 | Until released |
+| Sugar (Secret) | Never from an egg: 1 % of the likes a player gives, into the giver's own tank (past the onboarding), even a full one; one per tank | Sugar cube, as often as the tank's best fish (highest income per second, variant pace included) | 1.1 x that fish's coin at its growth stage, then its own sparkle roll (1/15, x2) and x rebirth, like, pass, event | 500 | Until released |
 
 No variant. The French Fish earns +50 % of the tank for an hour: a nice bonus that never breaks the curve (the
-simulator's medians move by less than the noise). Neither is one of the 18 species of the V1 count.
+simulator's medians move by less than the noise). None of them is one of the 18 species of the V1 count.
+
+**Sugar** (V0.60.14; likes are not in the simulator): a copy of the best fish at 110 %, so **+1.1 / N** of the income
+of a tank of N similar fish (+4 % for a full 25-fish late tank, +11 % for 10), more while one fish dominates the tank
+(+50 % to +100 % early, when the best fish earns half of it or more). A player gives one like an hour at most (1 % each): ~1 player in 10 who likes every hour of a 12 h run
+meets her, fewer for the others. One per tank, so her bonus never stacks. Released, she gives 500
+Ocean Points, like the Alien Fish. A lucky bonus a player keeps, not part of the reference curve.
 
 **The UFO night** (V0.49, recurring with the Abyss, one minute; not in the simulator): 4–5 kidnappings per tank, each
 fish once. Per kidnapping the expected effect is tiny: green (55 %) +1 fish-minute of coins, red (20 %) −0.5, asleep
@@ -625,6 +632,7 @@ content (species, eggs, aquariums, capacity, companions themselves) away from fr
 | V0.60.0 | The alpha (§7): rebirths 1–2, eggs up to the Neon Coral Egg, Ocean milestones up to 5,000, the story quests of that part, dailies, no gamepass; no number changed | Unchanged: rebirth 2 ~1h33, the alpha's end (all nine species) **~2h16** (1h51–2h39); with the +50 % Coins pass it would be ~1h34 |
 | V0.60.6 | Food is free (was 10 $ a pellet; the beta's players spent all their money on it); the food reserve (5 portions, each back 10 s after use) limits the pace instead, not simulated (§4). Simulator `P.food` 10 → 0; nothing re-tuned (the owner: a faster start is fine) | Faster early game, the same end: rebirth 1 ~25 → **~19 min** (15–23), first six species ~55 → ~46 min, rebirth 2 ~1h32 → ~1h24, the alpha's end (Imperial Discus) ~2h15 → **~2h04** (1h43–2h29), rebirth 3 ~2h46 → ~2h40, rebirth 8 ~11h03 → ~10h56, all eighteen species ~12h32 → **~12h18** (11h35–13h01). The cost was ~0.29 $/s per fish: it weighed on the first half-hour, nothing later |
 | V0.60.9 | On joining, each fish's first coin falls at a random time between 1 and 2 of its intervals (was exactly 1), then the usual pace: the coins no longer drop in chorus. Not simulated (the simulator's income is continuous) | One coin per fish later on average, half an interval of its income per session: 2–15 s of a fish's income an hour (4–30 s intervals), under 0.5 % of a 1 h session. Timeline unchanged |
+| V0.60.14 | Sugar, easter egg of the likes: 1 % of the likes a player gives, into the giver's tank (even a full one, one per tank), a sugar cube as often as the best fish's coin, worth 1.1 x it, 500 Ocean Points, stays. Not simulated (likes are not modelled) | Timeline unchanged; +1.1 / N of a tank of N similar fish while she stays (+4 % for 25 fish, +11 % for 10, more early) |
 
 ---
 

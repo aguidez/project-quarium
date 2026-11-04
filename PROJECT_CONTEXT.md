@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-04 (V0.60.13: the staff's profiles out of the analytics and npm run stats; dailies counted over their board's owners).
+> Last updated: 2026-11-04 (V0.60.14: Sugar, the likes' easter egg fish: copies the tank's best fish).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -35,10 +35,10 @@ coins. Around that core loop:
 - cosmetics: titles above the head, decor in the tank, Pearl rims; the player can pick the theme, title and shown
   decor (Customize button); the leaderboard titles are held, not earned: the day's top 10 of each board wears its
   title on a nameplate (gold #1, silver #2, bronze #3, navy #4–#10) until the next day's ranking;
-- easter eggs: secret fish hidden in every egg (the French Fish) or made by an event (the Alien Fish of the UFO
-  night), their own Fish Index category.
+- easter eggs: secret fish hidden in every egg (the French Fish), made by an event (the Alien Fish of the UFO
+  night) or brought by a like (Sugar), their own Fish Index category.
 
-18 species (+ 2 secret), 12 eggs, 8 rebirths: the whole V1 content. **The alpha is on** (`shared/types/alpha.ts`,
+18 species (+ 3 secret), 12 eggs, 8 rebirths: the whole V1 content. **The alpha is on** (`shared/types/alpha.ts`,
 `ALPHA_ENABLED`): players get the first ~2h of it only (rebirths 1–2, the eggs up to the Neon Coral Egg, the nine first
 species, the Ocean milestones up to the second incubator, the story quests of that part, the dailies, no weekly quest,
 no gamepass for sale); finding the nine species ends it with the "Alpha Pioneer" title (§3.4 Alpha). **`BALANCE.md`** holds the expected progression
@@ -82,7 +82,8 @@ ProjectQuarium/
 ├─ .gitattributes            LF everywhere (CRLF for .bat/.cmd), binaries marked; .gitignore keeps local config out
 ├─ docs/agent-notes/         The agent's shared working knowledge (owner preferences, asset pipeline, Studio MCP
 │                            testing, lobby decor, moderation, player stats), index in its README
-├─ design/meshes/           OBJ source of the 24 animated meshes (exported V0.60.5) + manifest.json (template, old id)
+├─ design/meshes/           OBJ source of the 25 animated meshes (exported V0.60.5; Sugar V0.60.14) + manifest.json
+│                            (template, old id)
 ├─ design/previews/          Images shown to the owner (Studio captures, mock-ups): crab-sax-preview.jpg (mock-
 │                            up), crab-sax-carry-1-right / -2-middle / -3-left.jpg (Island Breeze's guest dancing),
 │                            admin-panel-mockup.png / admin-panel-ingame.jpg (the admin panel), star-gauge-mockup.png
@@ -92,7 +93,9 @@ ProjectQuarium/
 │                            food-reserve-ingame.jpg / -empty-ingame.jpg / -onboarding-ingame.jpg (the food reserve),
 │                            phone-ui-lobby / -tank / -fish-index / -ocean.jpg (the UI on a phone, red box = 844 × 390),
 │                            sound-control-ingame.jpg (the sound control open, at 40),
-│                            shop-zone-idle.jpg / shop-zone-active.jpg (the east hut's mat, alone / stood on)
+│                            shop-zone-idle.jpg / shop-zone-active.jpg (the east hut's mat, alone / stood on),
+│                            pink-fish-candidates.jpg (Sugar's three candidates, #3 chosen), sugar-in-tank.jpg /
+│                            sugar-popup.jpg / sugar-fish-index.jpg
 ├─ design/ui/
 │  ├─ food-reserve.figcraft  The food reserve HUD (FoodReserve_Mockup: in the tank view, in the onboarding's Feed step,
 │  │                         full / refilling / empty), built by food-reserve.build.js (figcraft-cli; exports
@@ -188,8 +191,9 @@ ProjectQuarium/
    │  └─ types/
    │     ├─ fish.ts          FishType, FishRarity (Common … Mythic, Secret = easter eggs), CoinType, HungerState
    │     │                   (Satiated/Hungry/Weak, no death), FISH_TYPES (income, interval, coin, rarity, oceanPoints,
-   │     │                   cannibal?, growth, hunger, easterEgg?: EasterEggConfig {hatchChance, incomeShare, lifetime,
-   │     │                   leaveMessage, source, perk, screamInterval}), FART_BUBBLE_VALUE, growth helpers,
+   │     │                   cannibal?, growth, hunger, easterEgg?: EasterEggConfig {hatchChance, likeChance,
+   │     │                   incomeShare, bestFishShare, lifetime, leaveMessage, source, perk, screamInterval}),
+   │     │                   FART_BUBBLE_VALUE, growth helpers,
    │     │                   DEFAULT_FISH_CAPACITY, isEasterEgg, getFishIndexOrder
    │     ├─ eggs.ts          EggType, EGG_TYPES (price, hatchTime, odds, order, requires: the odds the UI shows),
    │     │                   getDrawOdds (+ easter eggs, taken from the most common fish), rollEgg, starter egg
@@ -332,7 +336,9 @@ ProjectQuarium/
    │     │                   nor release), mutations (effect / effectLeft: Sleep freezes the fish, Green / Red x2 / x0.5 its
    │     │                   coins), pickKidnapTarget / beamUp / beamDown, the alien fish's scream (Scream message,
    │     │                   AlienScream SFX, one plain coin from every other awake fish); easter egg fish: coin from
-   │     │                   getTankIncomePerMinute, leave after their lifetime (onFishLeft); getSteadyIncomePerSecond (the income
+   │     │                   getTankIncomePerMinute, leave after their lifetime (onFishLeft); Sugar: getBestFish (it copies
+   │     │                   its coin and pace), rollLikeGift (LikeService.onLikeSent: into the giver's tank) /
+   │     │                   canReceiveLikeGift (one per tank) / bringLikeGift (the "SECRET FISH!" Reward); getSteadyIncomePerSecond (the income
    │     │                   leaderboard: theoretical income x rebirth x Coins pass, no temporary boost); onFishSpawned / onFishFed
    │     │                   callbacks, findHungryFishPosition / hasHungryFish (feeders); replication to the clients that
    │     │                   watch each tank ("WatchAquariums" → FishSync messages); the quest coin boost (runCoinBoost:
@@ -403,10 +409,12 @@ ProjectQuarium/
    │     │                   → the ALPHA_TITLE and the "ALPHA COMPLETE!" thank-you Reward inviting feedback; only while
    │     │                   ALPHA_ENABLED
    │     ├─ LikeService      Places a like board beside each tank, GiveLike (range / own tank / cooldown), onLikeGiven,
+   │     │                   onLikeSent (giver, owner: after the notices),
    │     │                   keeps each owner's boost in memory (getCoinMultiplier), publishes likes + boost as attributes
    │     └─ DevCommandService  Studio-only chat commands (TextChatCommands created only when RunService.IsStudio(), only
    │                         for the game's admins, server/admins.ts): "/datareset" then "/datareset confirm" within 15 s (wipes the save,
-   │                         kicks); "/nextfrench" (next egg hatches a French Fish); "/incubators <n>" (1–4, saved);
+   │                         kicks); "/nextfrench" (next egg hatches a French Fish); "/sugar" (Sugar swims in, as from a like);
+   │                         "/incubators <n>" (1–4, saved);
    │                         "/pass <GamePass>" (session only); "/boost <minutes>" (quest coin boost, saved); "/speed <x>"
    │                         (1–10, PlayerStats.testSpeed, saved so it also applies on the published game: coins, hatch
    │                         time, Ocean Points x it via getTestSpeed; red "TEST SPEED x6" chip; the profile is left out
@@ -517,7 +525,7 @@ ProjectQuarium/
          │                   or one growing back with its seconds left), "FOOD n/5" chip; an empty click flashes it red and
          │                   shakes it ("REFILLING..."); FoodPellet (also the Feed card's icon), getFoodReserveTop
          ├─ OnboardingPanel  Onboarding instruction card (`bottom`: lifted above the food reserve)
-         ├─ RewardPopup      Reward celebration (money / companion / feature, optional image)
+         ├─ RewardPopup      Reward celebration (money / companion / feature, optional image or fishType: its sticker)
          ├─ EventBanner      Running event banner (style per event, EVENT_BANNER_STYLES: beat flashes / slow glow), formatTime
          ├─ AdminPanel       Admin panel (FigCraft admin-panel.figcraft), opened by the purple ADMIN button (bottom-left,
          │                   only with the AdminPanel attribute): scope chip, tabs (ADMIN_TABS); Events tab: NOW PLAYING
@@ -587,7 +595,8 @@ ProjectQuarium/
   MeshPart, head / front toward −Z, texture in a **SurfaceAppearance** (tinted by its `Color` when needed), built at
   the right size (never `ScaleTo`: CompanionService tweens back to scale 1). Generated meshes, ≤ ~4k triangles.
 - **`ServerStorage.Assets`**:
-  - `Fish/` (tag `FishTemplate`, attr `FishType`): the 18 species + `FrenchFish` and `AlienFish` (no FishVariants).
+  - `Fish/` (tag `FishTemplate`, attr `FishType`): the 18 species + `FrenchFish`, `AlienFish` and `Sugar` (no
+    FishVariants).
     Copied on demand into `ReplicatedStorage.Assets.Fish` (server/fishAssets); `ReplicatedStorage.Assets` is an empty
     folder in the place, filled at runtime. Oddities: the Golden Guppy's ColorMap is a 1024² copy (the generated one
     was 4096²); `MiniLeviathan` is pitched −30° about X inside its template (the mesh came out upright; never yaw a
@@ -597,7 +606,8 @@ ProjectQuarium/
   - `FishVariants/` (tag `FishVariantAppearance`, attrs `FishType` + `Variant`): one SurfaceAppearance per species for
     Anomaly and Shiny (recoloured ColorMap, ids in variant-spec.json), copied on demand like the models. A game
     script can't set a texture, so FishRenderController swaps a clone in place of the template's.
-  - `Coins/` (tag `CoinTemplate`, attr `CoinType`): one per species' coin + `CroissantCoin` (French Fish); object
+  - `Coins/` (tag `CoinTemplate`, attr `CoinType`): one per species' coin + `CroissantCoin` (French Fish) and
+    `SugarCube` (Sugar: pink, a white heart on its front); object
     meshes come with their front on local −X: rotated so they face the glass.
   - `EventFish/` (tag `EventFishTemplate`, attr `EventType`): `KpopIdol` (Kpop), `LanternFish` (Abyss: near-black
     anglerfish, welded parts lit / faded by the client: `Lure` and per eye an `EyeShell`, a red Neon `Eye` and a
@@ -768,6 +778,13 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   while frozen: offline and paused time don't count) and `onFishLeft` lets OceanService credit its points with a
   notice. **Alien Fish**: `hatchChance` 0 (only from the UFO night), no coin, no lifetime; every `screamInterval` (30 s
   of play) it screams: every other awake, present fish drops one plain coin (a weak one farts) on top of its own.
+  **Sugar**: `hatchChance` 0, `likeChance` 1 (% of the likes a player gives, into the giver's own tank, giver past the
+  onboarding; it comes into a full tank too, never while one is there: one per tank; DataService.addFish,
+  FishService.bringLikeGift), no lifetime. `bestFishShare` 1.1: it copies
+  `FishService.getBestFish` (the fish in the water with the highest income per second, easter eggs aside): a sugar
+  cube each time that fish's payout interval passes (followBestFish moves its next coin when the best fish changes),
+  worth 1.1 x that fish's coin at its growth stage, then its own sparkle roll and the usual multipliers; nothing while
+  it is alone. Its income counts in the tank's (getFullIncomePerMinute: the published income and the leaderboard).
 - **Coins.** `FishService.tick` (every 0.25 s) calls `dropCoin` (value x rebirth, like, pass, quest boost, event, UFO
   effect, test speed), which uses `CoinService.spawnCoin`; the coin sinks and expires 5 s (+ perks) after reaching the
   sand. Collected by a click (`CollectCoin`) or by the Snail / the Swordfish; `credit()` adds the money, fires

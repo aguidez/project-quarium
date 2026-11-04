@@ -11,6 +11,19 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.60.14 — 2026-11-04
+
+**New**
+- **Sugar, a new secret fish**: a round pink fish with white polka dots, a white bow, long lashes and rosy cheeks.
+  Each like you give to another aquarium has a 1 in 100 chance to bring her into yours, even when your tank is full
+  (one Sugar per aquarium). She drops a pink
+  sugar cube with a heart, as often as your best fish drops its coin, worth 110% of that coin. She follows your best
+  fish: hatch a better one and she copies it. She stays until you release her (500 Ocean Points). Her arrival is
+  celebrated with a "SECRET FISH!" window.
+- **Fish Index**: Sugar joins the Easter Eggs once found.
+
+---
+
 ## V0.60.13 — 2026-11-04
 
 **Changes**

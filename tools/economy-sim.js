@@ -61,7 +61,8 @@ if (plan.FISH) FISH = plan.FISH;
 // most common fish; no variant; a coin every `interval` s worth `share` of the tank's theoretical income per
 // minute (other fish only), so it earns `share` x the tank's income; leaves for the ocean after `lifetime` s
 // in the water. Not a species of the "all species" count. The Alien Fish (hatchChance 0: only from the UFO night)
-// is not here: events are not modelled (BALANCE.md §3 Easter eggs).
+// is not here: events are not modelled (BALANCE.md §3 Easter eggs). Nor is Sugar (likeChance 1 % per like received,
+// bestFishShare 1.1: copies the best fish): likes between players are not modelled.
 const EASTER = { FrenchFish: { chance: 0.1, share: 0.5, interval: 60, lifetime: 3600, ocean: 100 } };
 const FIRST_SIX = ["Basic", "Big", "RedTetra", "Clownfish", "ZebraDanio", "FlameGourami"];
 const DEFAULT_GROWTH = [

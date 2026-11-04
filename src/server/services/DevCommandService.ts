@@ -17,6 +17,7 @@ const CONFIRM_WORD = "confirm";
 /** "/datareset confirm" must follow "/datareset" within this many seconds. */
 const CONFIRM_WINDOW = 15;
 const NEXT_FRENCH_COMMAND = "/nextfrench";
+const SUGAR_COMMAND = "/sugar";
 const INCUBATORS_COMMAND = "/incubators";
 const PASS_COMMAND = "/pass";
 const BOOST_COMMAND = "/boost";
@@ -36,6 +37,7 @@ const MAX_TEST_INCUBATORS = 4;
  *  /datareset confirm   wipes the player's save to a brand new one and kicks them (stop / start the
  *                       playtest to begin again from the onboarding)
  *  /nextfrench          the next egg opened hatches a French Fish (the easter egg), to test it
+ *  /sugar               Sugar (the likes' easter egg) swims into the player's tank, as if a like brought it
  *  /incubators <n>      sets the player's incubators per egg type (saved: "/incubators 1" puts it back)
  *  /pass <Pass>         gives or takes a gamepass (e.g. "/pass Coins"), for this session only: the next join
  *                       asks Roblox again
@@ -72,6 +74,15 @@ class DevCommandServiceSingleton implements Lifecycle {
 			if (player) this.onNextFrench(player);
 		});
 		nextFrench.Parent = TextChatService;
+
+		const sugar = new Instance("TextChatCommand");
+		sugar.Name = "DevSugar";
+		sugar.PrimaryAlias = SUGAR_COMMAND;
+		sugar.Triggered.Connect((source) => {
+			const player = Players.GetPlayerByUserId(source.UserId);
+			if (player) this.onSugar(player);
+		});
+		sugar.Parent = TextChatService;
 
 		const incubators = new Instance("TextChatCommand");
 		incubators.Name = "DevIncubators";
@@ -141,7 +152,7 @@ class DevCommandServiceSingleton implements Lifecycle {
 	public onStart() {
 		if (RunService.IsStudio())
 			print(
-				`[Server] DevCommandService: ${RESET_COMMAND}, ${NEXT_FRENCH_COMMAND}, ${INCUBATORS_COMMAND}, ${PASS_COMMAND}, ${BOOST_COMMAND}, ${SPEED_COMMAND}, ${PASSES_COMMAND}, ${UFO_COMMAND}, ${LB_TITLE_COMMAND} available (Studio, admins only).`,
+				`[Server] DevCommandService: ${RESET_COMMAND}, ${NEXT_FRENCH_COMMAND}, ${SUGAR_COMMAND}, ${INCUBATORS_COMMAND}, ${PASS_COMMAND}, ${BOOST_COMMAND}, ${SPEED_COMMAND}, ${PASSES_COMMAND}, ${UFO_COMMAND}, ${LB_TITLE_COMMAND} available (Studio, admins only).`,
 			);
 	}
 
@@ -157,6 +168,15 @@ class DevCommandServiceSingleton implements Lifecycle {
 		}
 		EggService.forceNextHatch(player, "FrenchFish");
 		DataService.notify(player, "Your next egg will hatch a French Fish.", "info");
+	}
+
+	private onSugar(player: Player) {
+		if (!this.isAllowed(player)) {
+			warn(`[Server] ${player.Name} tried ${SUGAR_COMMAND}: refused (not an admin).`);
+			return;
+		}
+		if (!FishService.bringLikeGift(player, "Sugar"))
+			DataService.notify(player, "Your aquarium already has Sugar (one per aquarium).", "info");
 	}
 
 	private onIncubators(player: Player, text: string) {

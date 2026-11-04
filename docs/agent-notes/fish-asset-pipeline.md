@@ -61,3 +61,8 @@ uploading as the group with the owner's personal key (unauthorized), loading a g
 granted to DOT_Pinpin ("User is not authorized to access Asset"; `grantToDependencies` only works for the Universe
 subject). A GLB uploaded without the pre-rotation lands turned 180° (X and Z negated: the fish would swim backwards).
 The exported OBJ files stay as the source (design/meshes, manifest.json: template and old mesh id).
+- **2026-11-04 (Sugar, V0.60.14)**: the User grant right after the upload failed with `CannotManageAsset` (the asset had
+  only just been created); the same PATCH a minute later worked for the User and the Universe. If it happens, retry the
+  two grants (asset-permissions-api, same body as tools/group-mesh-upload.js) instead of uploading again. Sugar's sugar
+  cube coin (generate_mesh, "a single pastel pink sugar cube ... a small white heart shape on its front face") showed the
+  heart on mesh-local +Z: the template's Mesh is turned 180° about Y so it faces the glass.

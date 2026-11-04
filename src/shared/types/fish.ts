@@ -18,7 +18,8 @@ export type FishType =
 	| "BunnyShark"
 	| "MiniLeviathan"
 	| "FrenchFish"
-	| "AlienFish";
+	| "AlienFish"
+	| "Sugar";
 
 /** Rarity of a fish type, shown in the fish index, the egg odds and the hatch reveal. */
 export type FishRarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythic" | "Secret";
@@ -53,7 +54,8 @@ export type CoinType =
 	| "Moon"
 	| "Star"
 	| "Planet"
-	| "Croissant";
+	| "Croissant"
+	| "Sugar";
 export const COIN_TYPES: readonly CoinType[] = [
 	"Bronze",
 	"Silver",
@@ -74,6 +76,7 @@ export const COIN_TYPES: readonly CoinType[] = [
 	"Star",
 	"Planet",
 	"Croissant",
+	"Sugar",
 ];
 
 /**
@@ -136,11 +139,24 @@ export interface FishConfig {
  * `incomeShare` of the tank's theoretical income per minute (FishService.getTankIncomePerMinute) instead
  * of `income` (none at 0), and with a `lifetime` it doesn't stay: after that many seconds in the water (its
  * age: frozen offline and while the tank is paused, like its growth) it leaves for the ocean by itself, Ocean
- * Points included. The alien fish (UFO event) never hatches from an egg and stays: it screams instead.
+ * Points included. The alien fish (UFO event) never hatches from an egg and stays: it screams instead. Sugar comes
+ * with a like (`likeChance`) and copies the tank's best fish (`bestFishShare`).
  */
 export interface EasterEggConfig {
 	/** Percent per egg opened (0: never from an egg). */
 	hatchChance: number;
+	/**
+	 * Percent per like the player gives (LikeService): it swims into the giver's own tank, even a full one, and never
+	 * while one is already there (one per tank).
+	 */
+	likeChance?: number;
+	/**
+	 * Copies the tank's best fish (FishService.getBestFish: the highest income per second, easter eggs aside): drops its
+	 * own coin each time that fish's interval passes (variant pace included), worth this many times that fish's coin at
+	 * its growth stage (then its own sparkle roll and the usual multipliers). Nothing while it is alone. Overrides
+	 * `incomeShare`.
+	 */
+	bestFishShare?: number;
 	/** Fish Index: where it comes from (in place of the eggs and odds), and what it does (in place of its coins). */
 	source: string;
 	perk: string;
@@ -461,6 +477,30 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 			perk: "Screams every 30s: your fish drop coins",
 			incomeShare: 0,
 			screamInterval: 30,
+		},
+	},
+	// Easter egg of the likes (1 % of the likes a player gives, into the giver's tank, one per tank): a sugar cube as often as the tank's best fish drops
+	// its coin, worth 110 % of that coin (EasterEggConfig.bestFishShare); it stays
+	Sugar: {
+		displayName: "Sugar",
+		rarity: "Secret",
+		income: 0,
+		oceanPoints: 500,
+		coin: "Sugar",
+		incomeInterval: 60, // until the tank has another fish to copy
+		scaleMin: 0.95,
+		scaleMax: 1.05,
+		speedMin: 2,
+		speedMax: 3.2, // round and plump: a little slower than the other secret fish
+		hunger: DEFAULT_HUNGER,
+		growth: [{ age: 0, size: 1, coinMultiplier: 1 }], // arrives grown up
+		easterEgg: {
+			hatchChance: 0,
+			likeChance: 1,
+			source: "Give a like: 1 chance in 100",
+			perk: "A sugar cube: 110% of your best fish's coin",
+			incomeShare: 0,
+			bestFishShare: 1.1,
 		},
 	},
 };

@@ -77,6 +77,8 @@ export interface RewardItem {
 	name: string;
 	/** Image asset id shown instead of `icon` (companion sticker...). */
 	image?: string;
+	/** A fish's sticker (the client's FISH_ICONS, Normal) shown instead of `icon` / `image`. */
+	fishType?: FishType;
 }
 
 /** A fish as the clients render it: no 3D model exists on the server (see FishService). */

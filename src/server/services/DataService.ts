@@ -253,6 +253,18 @@ class DataServiceController implements Lifecycle {
 	}
 
 	/**
+	 * A fish that comes without an egg (Sugar, brought by a like): counted in the tank and found in the Fish Index, like
+	 * a hatch. Easter eggs only (no variant).
+	 */
+	public addFish(player: Player, fishType: FishType) {
+		const data = this.getData(player);
+		if (!data) return;
+		data.fish[fishType] += 1;
+		data.hatched[fishType] = (data.hatched[fishType] ?? 0) + 1;
+		this.sync(player);
+	}
+
+	/**
 	 * Turns the soonest incubating egg of the type into a fish of the inventory (the caller checked it is ready).
 	 * Returns false if there was no such egg.
 	 */

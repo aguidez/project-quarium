@@ -1,7 +1,7 @@
 import { Players, Workspace } from "@rbxts/services";
 import { t } from "@rbxts/t";
 import { Lifecycle } from "shared/framework";
-import { FishMessage, FishView, getRemoteEvent } from "shared/network";
+import { FishMessage, FishView, getRemoteEvent, Reward } from "shared/network";
 import { SfxName } from "shared/sounds";
 import { getSwimEnd, getSwimPose, holdSegment, SwimSegment } from "shared/swim";
 import { TAGS } from "shared/tags";
@@ -128,6 +128,7 @@ class FishServiceSingleton implements Lifecycle {
 	private rng = new Random();
 	private sfxRemote = getRemoteEvent("PlaySfx");
 	private fishRemote = getRemoteEvent("FishSync");
+	private rewardRemote = getRemoteEvent("Reward");
 	private fishByOwner = new Map<Player, Set<FishEntity>>();
 	private nextId = 0;
 	private templates = new Map<FishType, Model>();
@@ -156,6 +157,7 @@ class FishServiceSingleton implements Lifecycle {
 		// Saved fish come back grown and as hungry as they were (the count itself is PlayerData.fish)
 		DataService.onLoaded((player, save) => this.restoreTank(player, save));
 		DataService.onSave((player, save) => this.saveTank(player, save));
+		LikeService.onLikeSent((giver, owner) => this.rollLikeGift(giver, owner));
 
 		Players.PlayerRemoving.Connect((player) => {
 			// Written before the cleanup: DataService's final save may come before or after this handler
@@ -333,6 +335,8 @@ class FishServiceSingleton implements Lifecycle {
 					fish.nextScreamAt = clock + easterEgg.screamInterval;
 					this.scream(owner, fish);
 				}
+				// Sugar keeps the pace of the tank's best fish, whichever it is now
+				if (easterEgg?.bestFishShare !== undefined) this.followBestFish(owner, fish);
 
 				// Income is no longer passive: the fish drops a coin the owner has to click (a weak one only farts)
 				if (clock >= fish.nextPayoutAt) {
@@ -374,9 +378,7 @@ class FishServiceSingleton implements Lifecycle {
 			LikeService.getCoinMultiplier(owner) *
 			((data?.coinBoostSeconds ?? 0) > 0 ? QUEST_COIN_BOOST_MULTIPLIER : 1) *
 			getEventCoinMultiplier(owner);
-		const perSecond = math.floor(
-			((this.getTankIncomePerMinute(owner) * this.getIncomeShares(fishes)) / 60) * multiplier + 0.5,
-		);
+		const perSecond = math.floor((this.getFullIncomePerMinute(owner, fishes) / 60) * multiplier + 0.5);
 		const set = (name: string, value: number | boolean) => {
 			if (model.GetAttribute(name) !== value) model.SetAttribute(name, value);
 		};
@@ -385,11 +387,66 @@ class FishServiceSingleton implements Lifecycle {
 		set(INCOME_ATTRIBUTES.paused, frozen);
 	}
 
-	/** The tank's income in shares of getTankIncomePerMinute: 1 plus each easter egg fish's share. */
-	private getIncomeShares(fishes: ReadonlySet<FishEntity>): number {
+	/**
+	 * The tank's theoretical income per minute, easter egg fish included: getTankIncomePerMinute times 1 plus each easter
+	 * egg's share (the French Fish), plus what each fish copying the best one earns (Sugar: its share of that fish's).
+	 */
+	private getFullIncomePerMinute(owner: Player, fishes: ReadonlySet<FishEntity>): number {
 		let shares = 1;
-		for (const fish of fishes) if (fish.alive && fish.config.easterEgg) shares += fish.config.easterEgg.incomeShare;
-		return shares;
+		let copies = 0;
+		for (const fish of fishes) {
+			const easterEgg = fish.alive ? fish.config.easterEgg : undefined;
+			if (!easterEgg) continue;
+			shares += easterEgg.incomeShare;
+			copies += easterEgg.bestFishShare ?? 0;
+		}
+		const best = copies > 0 ? this.getBestFish(owner) : undefined;
+		const copied = best ? this.getFishIncomePerMinute(best) * copies : 0;
+		return this.getTankIncomePerMinute(owner) * shares + copied;
+	}
+
+	/**
+	 * The fish a copying easter egg (Sugar) follows: the owner's fish in the water with the highest income per second
+	 * (species, growth stage, variant), easter eggs aside; undefined while there is none.
+	 */
+	public getBestFish(owner: Player): FishEntity | undefined {
+		const fishes = this.fishByOwner.get(owner);
+		if (!fishes) return undefined;
+		let best: FishEntity | undefined;
+		let bestIncome = 0;
+		for (const fish of fishes) {
+			if (!fish.alive || fish.away || fish.config.easterEgg) continue;
+			const income = this.getFishIncomePerMinute(fish);
+			if (best === undefined || income > bestIncome) {
+				best = fish;
+				bestIncome = income;
+			}
+		}
+		return best;
+	}
+
+	/** A fish's theoretical coins per minute: its growth stage and variant, sparkling coins on average. */
+	private getFishIncomePerMinute(fish: FishEntity): number {
+		const sparkling = 1 + (SPECIAL_COIN_MULTIPLIER - 1) / SPECIAL_COIN_ODDS;
+		return (
+			getIncomePerSecond(fish.fishType) *
+			fish.growth[fish.growthStage].coinMultiplier *
+			getVariantIncomeMultiplier(fish.variant) *
+			sparkling *
+			60
+		);
+	}
+
+	/**
+	 * A copying easter egg (Sugar) drops its coin as often as the best fish: when that fish changes (or its variant),
+	 * its next coin moves by the difference, so the time since its last coin counts toward the new interval.
+	 */
+	private followBestFish(owner: Player, fish: FishEntity) {
+		const best = this.getBestFish(owner);
+		const interval = best ? best.payoutInterval : fish.config.incomeInterval;
+		if (interval === fish.payoutInterval) return;
+		fish.nextPayoutAt += interval - fish.payoutInterval;
+		fish.payoutInterval = interval;
 	}
 
 	/**
@@ -401,14 +458,13 @@ class FishServiceSingleton implements Lifecycle {
 		const data = DataService.getData(owner);
 		if (!fishes || !data) return 0;
 		const multiplier = getRebirthMultiplier(data.rebirths) * getPassCoinMultiplier(data.passes);
-		return math.floor(
-			((this.getTankIncomePerMinute(owner) * this.getIncomeShares(fishes)) / 60) * multiplier + 0.5,
-		);
+		return math.floor((this.getFullIncomePerMinute(owner, fishes) / 60) * multiplier + 0.5);
 	}
 
 	private payout(owner: Player, fish: FishEntity, plain = false) {
 		// An easter egg without income (the alien fish) drops nothing
-		if (fish.config.easterEgg && fish.config.easterEgg.incomeShare <= 0) return;
+		const easterEgg = fish.config.easterEgg;
+		if (easterEgg && easterEgg.incomeShare <= 0 && easterEgg.bestFishShare === undefined) return;
 		if (fish.state === HungerState.Weak) this.fart(owner, fish);
 		else this.dropCoin(owner, fish, false, plain);
 	}
@@ -421,6 +477,10 @@ class FishServiceSingleton implements Lifecycle {
 	 * fish's special coins are ghost coins instead, worth GHOST_COIN_MULTIPLIER special ones.
 	 */
 	private dropCoin(owner: Player, fish: FishEntity, frozen = false, plain = false) {
+		// Sugar copies the tank's best fish: alone, it has nothing to copy
+		const easterEgg = fish.config.easterEgg;
+		const copied = easterEgg?.bestFishShare !== undefined ? this.getBestFish(owner) : undefined;
+		if (easterEgg?.bestFishShare !== undefined && !copied) return;
 		// `plain`: never sparkling nor ghost (the alien fish's scream)
 		const special = !frozen && !plain && this.rng.NextNumber() * getSpecialCoinOdds(fish.variant) < 1;
 		const ghost = special && FISH_VARIANTS[fish.variant].ghostCoins;
@@ -434,11 +494,13 @@ class FishServiceSingleton implements Lifecycle {
 			getTestSpeed(DataService.getSave(owner)?.stats) *
 			(fish.effect !== undefined ? FISH_EFFECT_COIN_MULTIPLIER[fish.effect] : 1) *
 			(ghost ? GHOST_COIN_MULTIPLIER : 1);
-		// An easter egg fish's coin (the French Fish's croissant) is worth a share of the tank's income
-		const easterEgg = fish.config.easterEgg;
-		const base = easterEgg
-			? this.getTankIncomePerMinute(owner) * easterEgg.incomeShare * (special ? SPECIAL_COIN_MULTIPLIER : 1)
-			: getCoinValue(fish.fishType, fish.growthStage, special);
+		// An easter egg fish's coin is worth a share of the tank's income (the French Fish's croissant) or of its best
+		// fish's coin (Sugar's sugar cube)
+		const base = copied
+			? getCoinValue(copied.fishType, copied.growthStage, special) * (easterEgg?.bestFishShare ?? 1)
+			: easterEgg
+				? this.getTankIncomePerMinute(owner) * easterEgg.incomeShare * (special ? SPECIAL_COIN_MULTIPLIER : 1)
+				: getCoinValue(fish.fishType, fish.growthStage, special);
 		const value = math.max(math.round(base * multiplier), 1);
 		const belly = this.getPose(fish).Position.sub(new Vector3(0, this.getSize(fish).Y / 2, 0));
 		CoinService.spawnCoin(owner, fish.config.coin, value, belly, special && !ghost, frozen, ghost);
@@ -567,6 +629,53 @@ class FishServiceSingleton implements Lifecycle {
 	/** Registers a callback fired when a fish eats (food or another fish). */
 	public onFishFed(callback: FishCallback) {
 		this.fedCallbacks.push(callback);
+	}
+
+	/**
+	 * A like the player gives may bring an easter egg fish into their own tank (EasterEggConfig.likeChance: Sugar), one
+	 * at most per like: it rewards liking, not being liked.
+	 */
+	private rollLikeGift(giver: Player, likedOwner: Player) {
+		if (!isOnboardingDone(DataService.getOnboardingStep(giver))) return;
+		for (const [fishType, config] of pairs(FISH_TYPES)) {
+			const chance = config.easterEgg?.likeChance;
+			if (chance === undefined || !this.canReceiveLikeGift(giver, fishType)) continue;
+			if (this.rng.NextNumber() * 100 >= chance) continue;
+			this.bringLikeGift(giver, fishType, likedOwner);
+			return;
+		}
+	}
+
+	/** One of each like gift per tank at most (Sugar stays: several would weigh too much in the late game). */
+	public canReceiveLikeGift(player: Player, fishType: FishType): boolean {
+		const data = DataService.getData(player);
+		return data !== undefined && (data.fish[fishType] ?? 0) === 0;
+	}
+
+	/**
+	 * An easter egg fish swims into the player's tank for a like they gave (or a Studio test command, no liked owner):
+	 * even into a full tank (a gift is never refused; the player releases a fish to buy eggs again), never a second one.
+	 * Celebrated like a reward. Returns whether it came.
+	 */
+	public bringLikeGift(player: Player, fishType: FishType, likedOwner?: Player): boolean {
+		const config = FISH_TYPES[fishType];
+		if (!AquariumService.getAquarium(player) || !this.templates.has(fishType)) return false;
+		if (!this.canReceiveLikeGift(player, fishType)) return false;
+		DataService.addFish(player, fishType);
+		this.spawnFish(player, fishType, undefined, "Normal");
+		const like = likedOwner ? `Your like to ${likedOwner.DisplayName}` : "Your like";
+		const reward: Reward = {
+			title: "SECRET FISH!",
+			subtitle: `${like} brought ${config.displayName} to your aquarium. ${config.easterEgg?.perk ?? ""}!`,
+			amount: 0,
+			item: { icon: "", name: config.displayName, fishType },
+		};
+		this.rewardRemote.FireClient(player, reward);
+		this.sfxRemote.FireClient(player, "FishObtained", 1);
+		print(
+			`[Server] ${player.Name} got ${fishType} ${likedOwner ? `by liking ${likedOwner.Name}'s aquarium` : "from a test command"}.`,
+		);
+		return true;
 	}
 
 	/** Registers a callback fired when an easter egg fish leaves the tank on its own (OceanService credits it). */

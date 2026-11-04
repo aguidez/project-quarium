@@ -103,6 +103,8 @@ export function verticalGradient(top: Color3, bottom: Color3): ColorSequence {
 const FRENCH_FISH_ICON = "rbxassetid://83659319201974"; // Icon_FrenchFish_Normal.png
 /** The alien fish (UFO night easter egg) has no variant either: one sticker, front three-quarter view (its smiling side). */
 const ALIEN_FISH_ICON = "rbxassetid://140655796951738"; // Icon_AlienFish_Normal.png
+/** Sugar (the likes' easter egg) has no variant either: one sticker, front three-quarter view (its face, lashes and bow). */
+const SUGAR_ICON = "rbxassetid://128957058423702"; // Icon_Sugar_Normal.png
 
 /** Fish icons exported from FigCraft at 2x and uploaded to Roblox. */
 /**
@@ -232,6 +234,12 @@ export const FISH_ICONS: Record<FishType, Record<FishVariant, string>> = {
 		Anomaly: ALIEN_FISH_ICON,
 		Ghost: ALIEN_FISH_ICON,
 		Shiny: ALIEN_FISH_ICON,
+	},
+	Sugar: {
+		Normal: SUGAR_ICON,
+		Anomaly: SUGAR_ICON,
+		Ghost: SUGAR_ICON,
+		Shiny: SUGAR_ICON,
 	},
 };
 
