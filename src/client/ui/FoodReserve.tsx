@@ -2,6 +2,7 @@ import React, { useBinding, useEffect, useRef, useState } from "@rbxts/react";
 import { Players, RunService, Workspace } from "@rbxts/services";
 import { decodeFoodRefills, FOOD_REFILL_TIME, FOOD_RESERVE_ATTRIBUTES, FOOD_RESERVE_SLOTS } from "shared/types/food";
 import { TextStroke } from "./kit";
+import { getViewportSize, onViewportChanged } from "./screenScale";
 import { FONT_BOLD, FONT_TITLE, NAVY, OUTLINE, PALETTES, verticalGradient } from "./theme";
 
 // FigCraft food-reserve.figcraft (FoodReserve_Mockup)
@@ -56,14 +57,9 @@ function readReserve(): Reserve {
 }
 
 function useViewportWidth(): number {
-	const read = () => Workspace.CurrentCamera?.ViewportSize.X ?? 0;
+	const read = () => getViewportSize().X;
 	const [width, setWidth] = useState(read);
-	useEffect(() => {
-		const camera = Workspace.CurrentCamera;
-		if (!camera) return;
-		const connection = camera.GetPropertyChangedSignal("ViewportSize").Connect(() => setWidth(read()));
-		return () => connection.Disconnect();
-	}, []);
+	useEffect(() => onViewportChanged(() => setWidth(read())), []);
 	return width;
 }
 
@@ -89,7 +85,12 @@ export function FoodPellet(props: {
 			{props.scale && <uiscale Scale={props.scale} />}
 			<uicorner CornerRadius={new UDim(0.5, 0)} />
 			<uigradient Color={new ColorSequence(PELLET_LIGHT, PELLET_DARK)} Rotation={60} />
-			<uistroke Color={OUTLINE} Thickness={3} Transparency={transparency} ApplyStrokeMode={Enum.ApplyStrokeMode.Border} />
+			<uistroke
+				Color={OUTLINE}
+				Thickness={3}
+				Transparency={transparency}
+				ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
+			/>
 			<frame
 				key="Shine"
 				Position={UDim2.fromScale(0.2, 0.18)}
@@ -211,7 +212,10 @@ export function FoodReserve(props: FoodReserveProps) {
 						return (
 							<frame
 								key={`Slot${index + 1}`}
-								Position={UDim2.fromOffset(PADDING + index * (SLOT_SIZE + SLOT_GAP), (PLATE_HEIGHT - SLOT_SIZE) / 2 + 4)}
+								Position={UDim2.fromOffset(
+									PADDING + index * (SLOT_SIZE + SLOT_GAP),
+									(PLATE_HEIGHT - SLOT_SIZE) / 2 + 4,
+								)}
 								Size={UDim2.fromOffset(SLOT_SIZE, SLOT_SIZE)}
 								BackgroundColor3={NAVY.track}
 								BorderSizePixel={0}
@@ -236,7 +240,9 @@ export function FoodReserve(props: FoodReserveProps) {
 									Font={FONT_BOLD}
 									Text={now.map((time) => {
 										const refill = refillOf(time);
-										return refill === undefined ? "" : tostring(math.max(math.ceil(refill - time), 1));
+										return refill === undefined
+											? ""
+											: tostring(math.max(math.ceil(refill - time), 1));
 									})}
 									TextSize={20}
 									TextColor3={WHITE}

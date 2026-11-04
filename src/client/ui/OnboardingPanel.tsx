@@ -1,5 +1,6 @@
 import React, { useBinding, useEffect, useRef, useState } from "@rbxts/react";
-import { RunService, TweenService, Workspace } from "@rbxts/services";
+import { RunService, TweenService } from "@rbxts/services";
+import { useUiScale } from "./screenScale";
 import { SfxName } from "shared/sounds";
 import { FOOD_REFILL_TIME, FOOD_RESERVE_SLOTS } from "shared/types/food";
 import { OnboardingStep } from "shared/types/onboarding";
@@ -17,8 +18,6 @@ const BORDER_MIN = 4; // px of the gold border, which swells up to BORDER_MAX
 const BORDER_MAX = 14;
 const STROKE_ROOM = BORDER_MAX + 2; // px kept around the card for its border
 // Designed for a 1080p screen, grown on bigger screens (never shrunk below MIN_SCREEN_SCALE)
-const REFERENCE_HEIGHT = 1080;
-const MIN_SCREEN_SCALE = 0.8;
 const MAX_SCREEN_SCALE = 1.7;
 
 interface StepContent {
@@ -84,24 +83,6 @@ export interface OnboardingPanelProps {
 	/** Pixels kept free under the card (the food reserve sits there from the Feed step); BOTTOM_MARGIN otherwise. */
 	bottom?: number;
 	playSfx: (name: SfxName, playbackSpeed?: number) => void;
-}
-
-function computeScreenScale(): number {
-	const viewport = Workspace.CurrentCamera?.ViewportSize;
-	return viewport ? math.clamp(viewport.Y / REFERENCE_HEIGHT, MIN_SCREEN_SCALE, MAX_SCREEN_SCALE) : 1;
-}
-
-function useScreenScale(): number {
-	const [scale, setScale] = useState(computeScreenScale);
-	useEffect(() => {
-		const camera = Workspace.CurrentCamera;
-		if (!camera) return;
-		const connection = camera
-			.GetPropertyChangedSignal("ViewportSize")
-			.Connect(() => setScale(computeScreenScale()));
-		return () => connection.Disconnect();
-	}, []);
-	return scale;
 }
 
 /** Seconds since the component mounted, updated every frame. */
@@ -251,7 +232,7 @@ function OnboardingCard(props: { content: StepContent; screenScale: number; bott
 /** Bottom-of-screen instruction for the current onboarding step (the server validates each step). */
 export function OnboardingPanel(props: OnboardingPanelProps) {
 	const step = props.step;
-	const screenScale = useScreenScale();
+	const screenScale = useUiScale(MAX_SCREEN_SCALE);
 	const previousStep = useRef<OnboardingStep>();
 
 	useEffect(() => {
@@ -268,7 +249,7 @@ export function OnboardingPanel(props: OnboardingPanelProps) {
 			key={`Card${step}`}
 			content={content}
 			screenScale={screenScale}
-			bottom={props.bottom ?? BOTTOM_MARGIN}
+			bottom={props.bottom ?? BOTTOM_MARGIN * screenScale}
 		/>
 	);
 }

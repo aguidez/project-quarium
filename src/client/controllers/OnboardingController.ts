@@ -6,6 +6,7 @@ import { FOCUS_ZONE_DEPTH, FRONT_GLASS_Z, getAquariumFrame } from "shared/types/
 import { OnboardingStep } from "shared/types/onboarding";
 import { PlayerData } from "shared/types/playerData";
 import { FocusController } from "./FocusController";
+import { getWorldLabelScale } from "client/ui/screenScale";
 
 const UPDATE_INTERVAL = 0.25;
 const MARKER_COLOR = Color3.fromHex("#FFC93C");
@@ -18,7 +19,8 @@ function createPointer(text: string, adornee: BasePart, offsetY: number): Billbo
 	const billboard = new Instance("BillboardGui");
 	billboard.Name = "OnboardingPointer";
 	billboard.Adornee = adornee;
-	billboard.Size = UDim2.fromOffset(160, 90);
+	const labelScale = getWorldLabelScale();
+	billboard.Size = UDim2.fromOffset(160 * labelScale, 90 * labelScale);
 	billboard.StudsOffsetWorldSpace = new Vector3(0, offsetY, 0);
 	billboard.AlwaysOnTop = true;
 	billboard.MaxDistance = math.huge;

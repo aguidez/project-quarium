@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-03 (V0.60.7: the quest list centred, never cut on the left).
+> Last updated: 2026-11-04 (V0.60.8: one UI scale for every screen, phones included: client/ui/screenScale.ts).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -59,7 +59,7 @@ How to add content: `docs/agent-notes/content-recipes.md`. **`ROADMAP_V1.1.md`**
 | Framework | `shared/framework.ts`: singletons implementing `Lifecycle { onInit (sync), onStart (task.spawn) }`, registered in order in `server/main.server.ts` / `client/main.client.ts` |
 | Server authority | The client only sends **intents**. The server validates each one with `t`, reads prices and odds from shared config, and owns money, inventory, timers and every gameplay state. Even fish positions are server-computed (swim segments): clients only render them, never report them |
 | World ↔ code | Studio models are found by **CollectionService tags** (`shared/tags.ts`) and attributes, never by deep paths. Templates live in `ServerStorage.Assets` in the place file, which Rojo does not manage: **remind the user to save the place** after MCP edits |
-| UI | Designed first in **FigCraft** (`design/ui/redesign-v2.figcraft` for the V2 style, `design/ui/shopbar.figcraft` for the older panels and pieces), then translated to `@rbxts/react` in `src/client/ui/*.tsx`. Colours, fonts and asset ids live in `client/ui/theme.ts`. **V2 style ("arcade aquatic")**: build screens from `client/ui/kit.tsx` (Button3D, Plate, Card, HeaderBanner, CloseButton, ItemSlot, ProgressBar, Chip, CoinIcon, NotifBadge, Sparkle, SoftGlow, TextStroke, Outline); fonts `FONT_TITLE` (Luckiest Guy: titles, buttons, big numbers) and `FONT_BOLD` (Fredoka One: the rest), every text with a `TextStroke`, every surface outlined in `OUTLINE` (3 px); colours from `PALETTES` (light / base / dark / shadow per role: green action, gold buy, red confirm / close, blue / lagoon secondary, navy inactive) and `NAVY`. Relief = a container of face height + depth holding a Shadow (darker, `depth` px lower) and the Face (gradient light → base, gloss); a frame's AutomaticSize ignores scale-sized children, which is how `Plate` / `Card` / `Panel` keep their bevel under content-sized faces. Luckiest Guy's lowercase "s" reads like a 5: short labels mixing digits and letters ("+1s") use Fredoka. Text drawn over a `UIGradient` goes in a child TextLabel, otherwise the gradient tints it. Wrapped text inside a `Panel` gets a fixed height from `getWrappedHeight` (Panel.tsx), never AutomaticSize. **Popups never animate the scale of text**: re-rendered at every size, it wobbles. Panels, the onboarding card, the event banner and the reward window fade in at their final size (CanvasGroup `GroupTransparency`, with padding for their border stroke); only images (rays, eggs, fish, icons) pop with a UIScale |
+| UI | Designed first in **FigCraft** (`design/ui/redesign-v2.figcraft` for the V2 style, `design/ui/shopbar.figcraft` for the older panels and pieces), then translated to `@rbxts/react` in `src/client/ui/*.tsx`. Colours, fonts and asset ids live in `client/ui/theme.ts`. **V2 style ("arcade aquatic")**: build screens from `client/ui/kit.tsx` (Button3D, Plate, Card, HeaderBanner, CloseButton, ItemSlot, ProgressBar, Chip, CoinIcon, NotifBadge, Sparkle, SoftGlow, TextStroke, Outline); fonts `FONT_TITLE` (Luckiest Guy: titles, buttons, big numbers) and `FONT_BOLD` (Fredoka One: the rest), every text with a `TextStroke`, every surface outlined in `OUTLINE` (3 px); colours from `PALETTES` (light / base / dark / shadow per role: green action, gold buy, red confirm / close, blue / lagoon secondary, navy inactive) and `NAVY`. Relief = a container of face height + depth holding a Shadow (darker, `depth` px lower) and the Face (gradient light → base, gloss); a frame's AutomaticSize ignores scale-sized children, which is how `Plate` / `Card` / `Panel` keep their bevel under content-sized faces. Luckiest Guy's lowercase "s" reads like a 5: short labels mixing digits and letters ("+1s") use Fredoka. Text drawn over a `UIGradient` goes in a child TextLabel, otherwise the gradient tints it. Wrapped text inside a `Panel` gets a fixed height from `getWrappedHeight` (Panel.tsx), never AutomaticSize. **Popups never animate the scale of text**: re-rendered at every size, it wobbles. Panels, the onboarding card, the event banner and the reward window fade in at their final size (CanvasGroup `GroupTransparency`, with padding for their border stroke); only images (rays, eggs, fish, icons) pop with a UIScale. **Screen sizes**: layouts are in design pixels for 1920 × 1080; every screen element takes its size from `client/ui/screenScale.ts` (`getUiScale` / `useUiScale`, `getWorldLabelScale` for pixel-sized billboards), never its own viewport formula: a phone in landscape (~390 px tall) gets ~0.5, 1080p is 1. Margins and positions next to a scaled element are multiplied by the same scale; a lone kit button takes `Button3D scale`; the `Panel` also shrinks to fit the screen |
 | Style | English identifiers and comments; comments explain the *why*. UI text is in English, with **no emoji** (the owner finds them too "AI"): icons are drawn. Tabs, Prettier, eslint-plugin-roblox-ts |
 | Gotchas | Luau reserved words can't be identifiers (`next`, `end`…). Don't use the `in` operator or `??` on a macro union (`map.get(x) ?? []` in a `for…of` fails). In Node edit scripts, `String.replace` treats `$$`, `` $` `` and `$&` specially: prefer `split().join()` or the Edit tool. **A function declaration is not hoisted with its value**: a module-level `const X = f()` above `function f` compiles to a call of nil (declare the function first) |
 
@@ -89,7 +89,8 @@ ProjectQuarium/
 │                            (the starfall's gauge and the star power pill), star-power-pill-ingame.jpg,
 │                            leaderboards-mockup.png / leaderboards-ingame.jpg, leaderboard-titles-mockup.png /
 │                            leaderboard-titles-ingame.jpg (the nameplates' four tiers), food-reserve-mockup.png /
-│                            food-reserve-ingame.jpg / -empty-ingame.jpg / -onboarding-ingame.jpg (the food reserve)
+│                            food-reserve-ingame.jpg / -empty-ingame.jpg / -onboarding-ingame.jpg (the food reserve),
+│                            phone-ui-lobby / -tank / -fish-index / -ocean.jpg (the UI on a phone, red box = 844 × 390)
 ├─ design/ui/
 │  ├─ food-reserve.figcraft  The food reserve HUD (FoodReserve_Mockup: in the tank view, in the onboarding's Feed step,
 │  │                         full / refilling / empty), built by food-reserve.build.js (figcraft-cli; exports
@@ -477,6 +478,11 @@ ProjectQuarium/
          │                   THEME_PALETTES, V2_IMAGES), asset ids (FISH_ICONS per type and variant, EGG_SPRITES), rarity /
          │                   variant styles, ocean / rebirth / event colours
          ├─ kit.tsx          UI kit V2 (FigCraft UIKit_V2), see §1 UI
+         ├─ screenScale.ts   The one UI scale (§1 UI): getViewportSize, getUiScale(max) (height / 1080, or width / 1700 if
+         │                   narrower, raised to the power 0.7 below 1: a phone keeps readable text), useUiScale,
+         │                   onViewportChanged, getWorldLabelScale (billboards: the UI scale, at least 0.6). Used by App
+         │                   (bar, side buttons, bottom buttons, food reserve, star gauge), Panel, OnboardingPanel,
+         │                   RewardPopup, EggReveal, FocusController's button, HudController's toast and the billboards
          ├─ ShopBar / EggSlot / MoneyCounter  Egg shop: navy shelf of 6 square 3D slots coloured by state (buy, timer +
          │                   cracks + filling tag, OPEN!, FULL, gated, "Soon"), prices shortened (formatShort), then the
          │                   money pill. Arrows on the shelf's sides move the window one egg at a time (navy at the ends,
@@ -510,7 +516,8 @@ ProjectQuarium/
          │                   fish was released; on Ocean, or on Quests while the Ocean is locked; skipped while another
          │                   bubble or a panel is up)
          ├─ Panel            Shared modal (backdrop closes): navy window with a bevel, ribbon title (`banner` palette),
-         │                   round close button on its corner, `headerExtra` under the ribbon, `width`; getWrappedHeight
+         │                   round close button on its corner, `headerExtra` under the ribbon, `width`; getWrappedHeight.
+         │                   Drawn at the UI scale, smaller if it wouldn't fit the screen (measured from its AbsoluteSize)
          ├─ QuestPanel       Story / Daily / Weekly tabs; the card list grows up to 470 px then scrolls; a quest of a paid
          │                   line without its pass shows "LOCKED: NEEDS THE <PASS>" and a purple BUY button (BuyGamePass)
          ├─ CompanionPanel   Owned companions, equip / unequip, ability + getCompanionStats line

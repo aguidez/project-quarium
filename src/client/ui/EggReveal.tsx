@@ -1,10 +1,11 @@
 import React, { useBinding, useEffect } from "@rbxts/react";
-import { RunService, TweenService, Workspace } from "@rbxts/services";
+import { RunService, TweenService } from "@rbxts/services";
 import { SfxName } from "shared/sounds";
 import { EGG_TYPES, EggType, getHatchChance, HATCH_REVEAL_TIME } from "shared/types/eggs";
 import { FISH_TYPES, FishType } from "shared/types/fish";
 import { FISH_VARIANTS, FishVariant, formatVariantChance } from "shared/types/variants";
 import { TextStroke } from "./kit";
+import { getViewportSize } from "./screenScale";
 import {
 	COLORS,
 	EGG_CRACKS,
@@ -79,8 +80,8 @@ function crackStage(time: number): number {
 
 /** Screen-size factor so the reveal fits small screens and doesn't look tiny on big ones. */
 function getStageScale(): number {
-	const viewport = Workspace.CurrentCamera?.ViewportSize;
-	return viewport ? math.clamp(viewport.Y / 760, 0.55, 1.15) : 1;
+	// A phone in landscape (~360-390 px tall) still fits the 560 px stage with its captions
+	return math.clamp(getViewportSize().Y / 760, 0.45, 1.15);
 }
 
 /**

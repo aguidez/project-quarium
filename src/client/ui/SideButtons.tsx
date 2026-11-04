@@ -1,5 +1,5 @@
 import React, { useBinding, useEffect } from "@rbxts/react";
-import { RunService, Workspace } from "@rbxts/services";
+import { RunService } from "@rbxts/services";
 import { COMPANION_TYPES } from "shared/types/companions";
 import { Button3D, CoinIcon, NotifBadge, Outline, Plate, SoftGlow, TextStroke } from "./kit";
 import { getWrappedHeight } from "./Panel";
@@ -9,9 +9,10 @@ const BUTTON_SIZE = 86;
 const BUTTON_DEPTH = 6;
 const ICON_SIZE = 54; // leaves the bottom of the face to the label
 const SIDE_MARGIN = 16;
-const REFERENCE_HEIGHT = 1080;
 
 export interface SideButtonsProps {
+	/** The UI scale (screenScale.ts). */
+	scale: number;
 	/** A quest reward is waiting to be claimed. */
 	questBadge: boolean;
 	/** Just after the onboarding: a bubble invites the player to read the story quests until the book is opened. */
@@ -230,13 +231,12 @@ function SideButton(props: {
 
 /** Left-edge menu buttons (FigCraft redesign-v2: SideButtons): quests, companions, fish index, Ocean, rebirth (the shop is the fisherman's hut on the beach; the aquarium's customization is in the tank view). */
 export function SideButtons(props: SideButtonsProps) {
-	const viewport = Workspace.CurrentCamera?.ViewportSize;
-	const scale = viewport ? math.clamp(viewport.Y / REFERENCE_HEIGHT, 0.7, 1.3) : 1;
+	const scale = props.scale;
 	return (
 		<frame
 			key="SideButtons"
 			AnchorPoint={new Vector2(0, 0.5)}
-			Position={new UDim2(0, SIDE_MARGIN, 0.5, 0)}
+			Position={new UDim2(0, SIDE_MARGIN * scale, 0.5, 0)}
 			Size={UDim2.fromOffset(0, 0)}
 			AutomaticSize={Enum.AutomaticSize.XY}
 			BackgroundTransparency={1}

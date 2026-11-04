@@ -23,6 +23,7 @@ import {
 	TANK_FRONT_Z,
 } from "shared/types/aquarium";
 import { getTopHudBottom } from "client/ui/App";
+import { getUiScale, onViewportChanged } from "client/ui/screenScale";
 import { FONT_TITLE, OUTLINE, PALETTES, verticalGradient } from "client/ui/theme";
 
 const ENTER_TIME = 1.1;
@@ -201,8 +202,7 @@ class FocusControllerSingleton implements Lifecycle {
 		const button = new Instance("TextButton");
 		button.Name = name;
 		// Bottom-left: the top of the screen belongs to the shop bar
-		button.AnchorPoint = new Vector2(0, 1);
-		button.Position = new UDim2(0, BACK_BUTTON_MARGIN, 1, -BACK_BUTTON_MARGIN - BACK_BUTTON_DEPTH);
+		button.AnchorPoint = new Vector2(0, 1); // its position: refresh() below
 		button.Size = UDim2.fromOffset(BACK_BUTTON_SIZE.X, BACK_BUTTON_SIZE.Y);
 		button.BackgroundColor3 = new Color3(1, 1, 1);
 		button.BorderSizePixel = 0;
@@ -268,17 +268,41 @@ class FocusControllerSingleton implements Lifecycle {
 		labelStroke.Parent = label;
 
 		// Pressed: the face sinks onto its bevel
-		const rest = button.Position;
-		button.MouseButton1Down.Connect(() => (button.Position = rest.add(UDim2.fromOffset(0, BACK_BUTTON_DEPTH - 2))));
-		const release = () => (button.Position = rest);
-		button.MouseButton1Up.Connect(release);
-		// Hovered: grows a little, like the kit's Button3D (the Customize button next to it)
+		// Drawn at the UI scale (screenScale.ts) around its bottom-left anchor, its margins scaled with it
 		const scale = new Instance("UIScale");
 		scale.Parent = button;
-		button.MouseEnter.Connect(() => (scale.Scale = BACK_BUTTON_HOVER_SCALE));
+		let uiScale = getUiScale(1);
+		let pressed = false;
+		let hovered = false;
+		const refresh = () => {
+			const margin = BACK_BUTTON_MARGIN * uiScale;
+			const sink = pressed ? (BACK_BUTTON_DEPTH - 2) * uiScale : 0;
+			button.Position = new UDim2(0, margin, 1, -margin - BACK_BUTTON_DEPTH * uiScale + sink);
+			// Hovered: grows a little, like the kit's Button3D (the Customize button next to it)
+			scale.Scale = uiScale * (hovered ? BACK_BUTTON_HOVER_SCALE : 1);
+		};
+		refresh();
+		onViewportChanged(() => {
+			uiScale = getUiScale(1);
+			refresh();
+		});
+		// Pressed: the face sinks onto its bevel
+		button.MouseButton1Down.Connect(() => {
+			pressed = true;
+			refresh();
+		});
+		button.MouseButton1Up.Connect(() => {
+			pressed = false;
+			refresh();
+		});
+		button.MouseEnter.Connect(() => {
+			hovered = true;
+			refresh();
+		});
 		button.MouseLeave.Connect(() => {
-			release();
-			scale.Scale = 1;
+			pressed = false;
+			hovered = false;
+			refresh();
 		});
 		button.Activated.Connect(onActivated);
 		return button;
@@ -369,7 +393,8 @@ class FocusControllerSingleton implements Lifecycle {
 		const origin = this.aquariumCFrame!;
 		const viewport = camera.ViewportSize;
 		const top = getTopHudBottom() + FRAME_GAP;
-		const bottom = viewport.Y - BACK_BUTTON_MARGIN - BACK_BUTTON_SIZE.Y - BACK_BUTTON_DEPTH - FRAME_GAP;
+		const bottom =
+			viewport.Y - (BACK_BUTTON_MARGIN + BACK_BUTTON_SIZE.Y + BACK_BUTTON_DEPTH) * getUiScale(1) - FRAME_GAP;
 		const freeWidth = math.max(viewport.X - FRAME_GAP * 2, 1);
 		const freeHeight = math.max(bottom - top, 1);
 

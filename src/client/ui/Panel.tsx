@@ -1,6 +1,7 @@
-import React, { useBinding, useEffect } from "@rbxts/react";
-import { RunService, TextService, TweenService, Workspace } from "@rbxts/services";
+import React, { useBinding, useEffect, useRef } from "@rbxts/react";
+import { RunService, TextService, TweenService } from "@rbxts/services";
 import { BANNER_HEIGHT, CloseButton, HeaderBanner } from "./kit";
+import { getViewportSize, useUiScale } from "./screenScale";
 import { NAVY, Palette, PALETTES, verticalGradient } from "./theme";
 
 export const PANEL_WIDTH = 600;
@@ -27,7 +28,8 @@ const BUBBLES: [number, number, number][] = [
 	[-150, -44, 18],
 ];
 const BACKDROP_TRANSPARENCY = 0.5;
-const REFERENCE_HEIGHT = 1080;
+/** Screen pixels kept between the window and the screen's edges when it has to shrink to fit (a phone). */
+const SCREEN_MARGIN = 8;
 
 export interface PanelProps {
 	title: string;
@@ -41,9 +43,34 @@ export interface PanelProps {
 	children?: React.ReactNode;
 }
 
-function getScreenScale(): number {
-	const viewport = Workspace.CurrentCamera?.ViewportSize;
-	return viewport ? math.clamp(viewport.Y / REFERENCE_HEIGHT, 0.6, 1.4) : 1;
+/**
+ * The window's scale: the UI scale, smaller if the window would not fit the screen at it (a tall menu on a
+ * phone). Measured from the canvas group's AbsoluteSize, which includes the scale: dividing by the scale it
+ * was drawn at gives its size in design pixels, which the scale doesn't change.
+ */
+function useFitScale(panelRef: React.MutableRefObject<CanvasGroup | undefined>): React.Binding<number> {
+	const uiScale = useUiScale();
+	const [scale, setScale] = useBinding(uiScale);
+	useEffect(() => {
+		const panel = panelRef.current;
+		if (!panel) return;
+		const update = () => {
+			const current = scale.getValue();
+			const size = panel.AbsoluteSize;
+			if (current <= 0 || size.X <= 0 || size.Y <= 0) return;
+			const viewport = getViewportSize();
+			const fit = math.min(
+				uiScale,
+				(viewport.X - SCREEN_MARGIN * 2) / (size.X / current),
+				(viewport.Y - SCREEN_MARGIN * 2) / (size.Y / current),
+			);
+			if (math.abs(fit - current) > 0.002) setScale(fit);
+		};
+		update();
+		const connection = panel.GetPropertyChangedSignal("AbsoluteSize").Connect(update);
+		return () => connection.Disconnect();
+	}, [uiScale]);
+	return scale;
 }
 
 /**
@@ -78,6 +105,8 @@ export function Panel(props: PanelProps) {
 		TweenService.GetValue(math.min(t / POP_IN_TIME, 1), Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 	);
 	const width = props.width ?? PANEL_WIDTH;
+	const panelRef = useRef<CanvasGroup>();
+	const scale = useFitScale(panelRef);
 
 	return (
 		<frame key="Modal" Size={UDim2.fromScale(1, 1)} BackgroundTransparency={1} ZIndex={20}>
@@ -100,8 +129,9 @@ export function Panel(props: PanelProps) {
 				BackgroundTransparency={1}
 				GroupTransparency={fadeIn.map((p) => 1 - p)}
 				ZIndex={2}
+				ref={panelRef}
 			>
-				<uiscale Scale={getScreenScale()} />
+				<uiscale Scale={scale} />
 				<uipadding
 					PaddingTop={new UDim(0, ROOM_TOP)}
 					PaddingBottom={new UDim(0, ROOM_BOTTOM)}

@@ -3,6 +3,7 @@ import { t } from "@rbxts/t";
 import { Lifecycle } from "shared/framework";
 import { getRemoteEvent, NotifyKind } from "shared/network";
 import { getTopHudBottom } from "client/ui/App";
+import { getUiScale } from "client/ui/screenScale";
 
 const TOAST_GAP = 10; // pixels below the top HUD (shop bar + hint line)
 const TOAST_SLIDE = 10; // pixels it slides down while appearing
@@ -34,6 +35,7 @@ class HudControllerSingleton implements Lifecycle {
 
 	private toast!: TextLabel;
 	private toastStroke!: UIStroke;
+	private toastScale!: UIScale;
 	private toastToken = 0;
 
 	public onInit() {
@@ -84,8 +86,13 @@ class HudControllerSingleton implements Lifecycle {
 		stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border;
 		stroke.Parent = toast;
 
+		// Drawn at the UI scale (screenScale.ts), around its top-centre anchor
+		const scale = new Instance("UIScale");
+		scale.Parent = toast;
+
 		this.toast = toast;
 		this.toastStroke = stroke;
+		this.toastScale = scale;
 		screenGui.Parent = playerGui;
 	}
 
@@ -93,7 +100,9 @@ class HudControllerSingleton implements Lifecycle {
 		const token = ++this.toastToken;
 		const toast = this.toast;
 		const style = TOAST_STYLES[kind];
-		const top = getTopHudBottom() + TOAST_GAP;
+		const uiScale = getUiScale(1);
+		this.toastScale.Scale = uiScale;
+		const top = getTopHudBottom() + TOAST_GAP * uiScale;
 
 		toast.Text = message;
 		this.toastStroke.Color = style.stroke;

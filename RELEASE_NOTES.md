@@ -11,6 +11,22 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.60.8 — 2026-11-04
+
+**Changes**
+- **Phones**: the whole interface was too big on a phone. Each piece had its own minimum size, set for a computer
+  screen, so on a phone in landscape everything stayed 1.5 to 2 times too large (the side buttons filled the whole
+  height, the menus went past the screen). The interface now follows one shared size, worked out from the screen:
+  on a phone it is about half its computer size. Text and buttons stay readable and easy to tap.
+- **Menus** (quests, Fish Index, Ocean, companions, rebirth, shop, aquarium) shrink a little more when needed, so they
+  always fit the screen.
+- **"Back to lobby" / "My aquarium", Customize, the messages at the top, the hunger badges, the coin popups, the
+  Pelican's charges and the tutorial's pointer** now shrink on small screens too (they kept their computer size).
+- **Tank view on a phone**: with a smaller interface around it, the tank is shown bigger.
+- Computers with a normal screen (1080p and up) don't change.
+
+---
+
 ## V0.60.7 — 2026-11-03
 
 **Fixes**

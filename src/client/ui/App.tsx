@@ -38,6 +38,7 @@ import { StarPowerPill } from "./StarPowerPill";
 import { Button3D, Chip, TextStroke } from "./kit";
 import { FONT_BOLD, FONT_TITLE, PALETTES, V2_IMAGES } from "./theme";
 import { getVersionLabel } from "shared/version";
+import { getUiScale, onViewportChanged } from "./screenScale";
 
 const MIN_SCALE = 0.4;
 const SIDE_MARGIN = 16; // gap kept between the bar and Roblox's topbar buttons
@@ -107,7 +108,10 @@ type MenuPanel = "Quests" | "Companions" | "FishIndex" | "Ocean" | "Rebirth" | "
 
 interface BarPlacement {
 	centerX: number;
+	/** The shop bar's scale (and the pills / banner under it): the UI scale, smaller if the topbar's room is short. */
 	scale: number;
+	/** The UI scale (screenScale.ts): side buttons, bottom buttons, food reserve, star gauge. */
+	uiScale: number;
 }
 
 /**
@@ -117,7 +121,8 @@ interface BarPlacement {
  */
 function computeBarPlacement(): BarPlacement {
 	const camera = Workspace.CurrentCamera;
-	if (!camera) return { centerX: 0, scale: 1 };
+	const uiScale = getUiScale(1);
+	if (!camera) return { centerX: 0, scale: uiScale, uiScale };
 	const viewportWidth = camera.ViewportSize.X;
 	const inset = GuiService.TopbarInset;
 	const left = inset.Width > 0 ? inset.Min.X : 0;
@@ -125,7 +130,8 @@ function computeBarPlacement(): BarPlacement {
 	const room = right - left - SIDE_MARGIN * 2;
 	return {
 		centerX: (left + right) / 2,
-		scale: math.clamp(room / BAR_WIDTH, MIN_SCALE, 1),
+		scale: math.clamp(room / BAR_WIDTH, MIN_SCALE, uiScale),
+		uiScale,
 	};
 }
 
@@ -138,19 +144,19 @@ function useBarPlacement(): BarPlacement {
 	const [placement, setPlacement] = useState(computeBarPlacement);
 	useEffect(() => {
 		const update = () => setPlacement(computeBarPlacement());
-		const connections = [GuiService.GetPropertyChangedSignal("TopbarInset").Connect(update)];
-		const camera = Workspace.CurrentCamera;
-		if (camera) connections.push(camera.GetPropertyChangedSignal("ViewportSize").Connect(update));
+		const connection = GuiService.GetPropertyChangedSignal("TopbarInset").Connect(update);
+		const disconnectViewport = onViewportChanged(update);
 		update();
 		return () => {
-			for (const connection of connections) connection.Disconnect();
+			connection.Disconnect();
+			disconnectViewport();
 		};
 	}, []);
 	return placement;
 }
 
 export function App(props: AppProps) {
-	const { centerX, scale } = useBarPlacement();
+	const { centerX, scale, uiScale } = useBarPlacement();
 	const [openPanel, setOpenPanel] = useState<MenuPanel>();
 	const data = props.data;
 	// The shop lives in the fisherman's hut: it opens as the player walks up to him and closes as they leave (closed
@@ -278,13 +284,16 @@ export function App(props: AppProps) {
 				step={props.data?.onboarding}
 				hidden={props.reveal !== undefined}
 				playSfx={props.playSfx}
-				bottom={foodReserveShown ? getFoodReserveTop(scale) + ONBOARDING_ABOVE_RESERVE : undefined}
+				bottom={foodReserveShown ? getFoodReserveTop(uiScale) + ONBOARDING_ABOVE_RESERVE * uiScale : undefined}
 			/>
 			{foodReserveShown && (
 				<FoodReserve
 					key="FoodReserve"
-					scale={scale}
-					leftClear={BACK_BUTTON_RIGHT + (menusVisible && canCustomize ? CUSTOMIZE_GAP + CUSTOMIZE_SIZE.X : 0)}
+					scale={uiScale}
+					leftClear={
+						(BACK_BUTTON_RIGHT + (menusVisible && canCustomize ? CUSTOMIZE_GAP + CUSTOMIZE_SIZE.X : 0)) *
+						uiScale
+					}
 					subscribeDenied={props.subscribeFoodDenied}
 				/>
 			)}
@@ -302,8 +311,9 @@ export function App(props: AppProps) {
 					key="AdminButton"
 					palette={PALETTES.purple}
 					size={UDim2.fromOffset(ADMIN_BUTTON_SIZE.X, ADMIN_BUTTON_SIZE.Y)}
-					position={new UDim2(0, ADMIN_BUTTON_MARGIN, 1, -ADMIN_BUTTON_BOTTOM)}
+					position={new UDim2(0, ADMIN_BUTTON_MARGIN * uiScale, 1, -ADMIN_BUTTON_BOTTOM * uiScale)}
 					anchorPoint={new Vector2(0, 1)}
+					scale={uiScale}
 					zIndex={3}
 					text="ADMIN"
 					onClick={() => setOpenPanel(openPanel === "Admin" ? undefined : "Admin")}
@@ -358,7 +368,7 @@ export function App(props: AppProps) {
 					bars={data.starCharge}
 					saved={starPower}
 					luck={getPlayerVariantLuck(data)}
-					scale={scale}
+					scale={uiScale}
 				/>
 			)}
 			{menusVisible && !starfall && starPower > 0 && (
@@ -376,6 +386,7 @@ export function App(props: AppProps) {
 			{menusVisible && (
 				<SideButtons
 					key="SideButtons"
+					scale={uiScale}
 					questBadge={hasClaimableQuest(data.quests, data.passes)}
 					questCoach={questCoach}
 					onQuests={() => {
@@ -426,7 +437,8 @@ export function App(props: AppProps) {
 					palette={PALETTES.pink}
 					size={UDim2.fromOffset(CUSTOMIZE_SIZE.X, CUSTOMIZE_SIZE.Y)}
 					anchorPoint={new Vector2(0, 1)}
-					position={new UDim2(0, BACK_BUTTON_RIGHT + CUSTOMIZE_GAP, 1, -16)}
+					position={new UDim2(0, (BACK_BUTTON_RIGHT + CUSTOMIZE_GAP) * uiScale, 1, -16 * uiScale)}
+					scale={uiScale}
 					depth={6}
 					radius={14}
 					onClick={() => setOpenPanel(openPanel === "Aquarium" ? undefined : "Aquarium")}

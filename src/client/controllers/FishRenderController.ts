@@ -9,6 +9,7 @@ import { FishEffect } from "shared/types/ufo";
 import { UFO_COLORS } from "client/ui/theme";
 import { applyVariantLook, cloneFishTemplate, hasVariantLook, onFishAssetAdded } from "client/fishLook";
 import { FocusController } from "./FocusController";
+import { getWorldLabelScale } from "client/ui/screenScale";
 
 // Which tanks this client renders (and receives): its own in the 2.5D view, else the near ones
 const WATCH_INTERVAL = 0.5;
@@ -329,7 +330,8 @@ class FishRenderControllerSingleton implements Lifecycle {
 	private makeSleepBubble(fish: LocalFish): Instance {
 		const bubble = new Instance("BillboardGui");
 		bubble.Name = "UfoSleep";
-		bubble.Size = new UDim2(0, 60, 0, 32);
+		const labelScale = getWorldLabelScale();
+		bubble.Size = UDim2.fromOffset(60 * labelScale, 32 * labelScale);
 		bubble.StudsOffsetWorldSpace = new Vector3(0, fish.body.Size.Y / 2 + 0.8, 0);
 		bubble.LightInfluence = 0;
 		bubble.AlwaysOnTop = false;

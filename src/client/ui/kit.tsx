@@ -83,6 +83,8 @@ export interface Button3DProps {
 	font?: Enum.Font;
 	/** Shown but not clickable: no press, no hover. */
 	disabled?: boolean;
+	/** Draws the whole button at this scale around its anchor point (a button placed alone on the screen: the UI scale). */
+	scale?: number;
 	onClick?: () => void;
 	onHover?: (hovered: boolean) => void;
 	/** Drawn on the face, over its gloss (icons, extra labels). */
@@ -116,7 +118,7 @@ export function Button3D(props: Button3DProps) {
 			ZIndex={props.zIndex}
 			Visible={props.visible}
 		>
-			<uiscale Scale={hovered && !props.disabled ? HOVER_SCALE : 1} />
+			<uiscale Scale={(hovered && !props.disabled ? HOVER_SCALE : 1) * (props.scale ?? 1)} />
 			<frame
 				key="Shadow"
 				Position={UDim2.fromOffset(0, depth)}

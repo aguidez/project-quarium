@@ -3,6 +3,7 @@ import { CollectionService, Players, TweenService } from "@rbxts/services";
 import { Lifecycle } from "shared/framework";
 import { TAGS } from "shared/tags";
 import { HungerState } from "shared/types/fish";
+import { getWorldLabelScale } from "client/ui/screenScale";
 
 const BADGE_SIZE = 40; // pixels: constant on screen, readable even from the far focus camera
 const PULSE_SCALE = 1.25;
@@ -60,7 +61,8 @@ class FishIndicatorControllerSingleton implements Lifecycle {
 		const billboard = new Instance("BillboardGui");
 		billboard.Name = "HungerBadge";
 		billboard.Adornee = body;
-		billboard.Size = new UDim2(0, BADGE_SIZE, 0, BADGE_SIZE);
+		const size = BADGE_SIZE * getWorldLabelScale();
+		billboard.Size = new UDim2(0, size, 0, size);
 		// Follows the fish's height as it grows
 		const updateOffset = () => {
 			billboard.StudsOffsetWorldSpace = new Vector3(0, body.Size.Y / 2 + 1.2, 0);

@@ -2,6 +2,7 @@ import { Janitor } from "@rbxts/janitor";
 import { CollectionService, Players, RunService, TweenService, Workspace } from "@rbxts/services";
 import { Lifecycle } from "shared/framework";
 import { TAGS } from "shared/tags";
+import { getWorldLabelScale } from "client/ui/screenScale";
 
 const SLOT_SIZE = 32; // pixels: constant on screen, like the fish's hunger badges
 const PELLET_SIZE = 24;
@@ -125,8 +126,11 @@ class PelicanChargesControllerSingleton implements Lifecycle {
 		pill.Name = "Pill";
 		pill.AnchorPoint = new Vector2(0.5, 0.5);
 		pill.Position = UDim2.fromScale(0.5, 0.5);
-		pill.Size = UDim2.fromScale(1, 1);
 		pill.BackgroundColor3 = PILL_COLOR;
+		const labelScale = getWorldLabelScale();
+		const pillScale = new Instance("UIScale");
+		pillScale.Scale = labelScale;
+		pillScale.Parent = pill;
 		pill.BorderSizePixel = 0;
 		corner(pill, new UDim(0.5, 0));
 		stroke(pill, PILL_STROKE, 2);
@@ -170,10 +174,9 @@ class PelicanChargesControllerSingleton implements Lifecycle {
 				frame.Parent = pill;
 				slots.push({ pellet, fill, scale });
 			}
-			billboard.Size = UDim2.fromOffset(
-				count * SLOT_SIZE + (count - 1) * GAP + PADDING * 2,
-				SLOT_SIZE + PADDING * 2,
-			);
+			const size = new Vector2(count * SLOT_SIZE + (count - 1) * GAP + PADDING * 2, SLOT_SIZE + PADDING * 2);
+			pill.Size = UDim2.fromOffset(size.X, size.Y);
+			billboard.Size = UDim2.fromOffset(size.X * labelScale, size.Y * labelScale);
 			shownCharges = -1;
 		};
 

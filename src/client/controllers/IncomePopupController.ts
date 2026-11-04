@@ -3,6 +3,7 @@ import { t } from "@rbxts/t";
 import { formatShort } from "shared/format";
 import { Lifecycle } from "shared/framework";
 import { getRemoteEvent, MoneyPopup } from "shared/network";
+import { getWorldLabelScale } from "client/ui/screenScale";
 
 const POPUP_LIFETIME = 1.2;
 const POPUP_RISE = 3; // studs
@@ -71,7 +72,8 @@ class IncomePopupControllerSingleton implements Lifecycle {
 		const billboard = new Instance("BillboardGui");
 		billboard.Name = "IncomePopup";
 		billboard.Adornee = anchor;
-		billboard.Size = new UDim2(0, style.width, 0, styleName === "normal" ? 34 : 44);
+		const labelScale = getWorldLabelScale();
+		billboard.Size = UDim2.fromOffset(style.width * labelScale, (styleName === "normal" ? 34 : 44) * labelScale);
 		billboard.AlwaysOnTop = true;
 		billboard.MaxDistance = math.huge;
 		billboard.LightInfluence = 0;

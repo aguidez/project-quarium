@@ -1,5 +1,6 @@
 import React, { useBinding, useEffect } from "@rbxts/react";
-import { RunService, TweenService, Workspace } from "@rbxts/services";
+import { RunService, TweenService } from "@rbxts/services";
+import { getUiScale } from "./screenScale";
 import { formatNumber } from "shared/format";
 import { RewardItem } from "shared/network";
 import { SfxName } from "shared/sounds";
@@ -15,7 +16,6 @@ const DURATION = 4.5;
 const FADE_TIME = 0.4; // at the end
 const BACKDROP_TRANSPARENCY = 0.45;
 const RAY_COUNT = 8;
-const REFERENCE_HEIGHT = 1080;
 const SUBTITLE_MAX_WIDTH = 520; // a longer subtitle wraps (the stage is 720 px wide)
 
 export interface RewardPopupProps {
@@ -33,8 +33,7 @@ function phase(time: number, start: number, duration: number): number {
 }
 
 function getScreenScale(): number {
-	const viewport = Workspace.CurrentCamera?.ViewportSize;
-	return viewport ? math.clamp(viewport.Y / REFERENCE_HEIGHT, 0.6, 1.6) : 1;
+	return getUiScale(1.6);
 }
 
 /**
