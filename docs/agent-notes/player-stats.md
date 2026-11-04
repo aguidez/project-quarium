@@ -35,6 +35,12 @@ metadata:
   prints "AnalyticsService: ... event fired." but sends nothing); charts fill up to ~24 h later (the Funnel / Custom
   pages' **View Events** button lists the latest events almost live); an event can't be deleted, it rolls off 90 days
   after the last data. To start a chart afresh, log under a new name (e.g. "Progression2"; max 10 funnels, 100 custom
-  event names). The owner's test profiles send nothing (StatsService.safely).
+  event names). The owner's test profiles and the staff's (`stats.staff` = isAdmin, set at each join since V0.60.13)
+  send nothing (StatsService.safely), and `npm run stats` leaves them out. Before V0.60.13 the developer's account
+  (10580349267) did send events: they stay in the dashboard (2026-11-03/04, about 1 of 20 profiles).
+- **Reading the funnels** (2026-11-04): the Creator Dashboard has no read API; the saves hold the same milestones.
+  `npm run stats -- --out snap.json`, then script over the snapshot (onboarding step by step, `player.rebirths`,
+  `stats.platforms`, last milestone vs `playSeconds` to see where each player stopped). Boards open late (dailies at
+  rebirth 2, weeklies at 3): count quest stats only over players who have them.
 - **Node 24 quirk**: `node - <<'EOF'` runs stdin as TypeScript and a `"\n"` in a search string no longer matches the
   file's `\n`: use the Edit tool for strings with escapes.

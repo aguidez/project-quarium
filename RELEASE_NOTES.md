@@ -11,6 +11,20 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.60.13 — 2026-11-04
+
+**Changes**
+- **Analytics without the staff**: the game's staff (the owner, the group's admin roles) no longer sends anything to the
+  Creator Dashboard (funnels, custom events), and `npm run stats` leaves their profiles out. The check runs at each
+  join, so a role change applies at the next one.
+
+**Fixes**
+- **`npm run stats`, quests**: "dailies a day" showed 0.0 because it counted every player, though the daily board only
+  opens at rebirth 2. Dailies, weeklies and the boost earned are now counted over the players whose board is open,
+  dailies from the day it opened.
+
+---
+
 ## V0.60.12 — 2026-11-04
 
 **New**

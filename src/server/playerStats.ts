@@ -66,6 +66,11 @@ export interface PlayerStats {
 	testSpeedUsed: boolean;
 	/** The owner plays without their gamepasses ("/passes off" in Studio, saved): GamePassService grants none. */
 	testNoPasses: boolean;
+	/**
+	 * The game's staff (admins.ts isAdmin: the owner, the group's admin roles), checked at every join: their profile
+	 * sends nothing to the Creator Dashboard and is left out of tools/player-stats.js.
+	 */
+	staff: boolean;
 }
 
 export const PLAYER_STATS_VERSION = 1;
@@ -97,6 +102,7 @@ export function createPlayerStats(): PlayerStats {
 		testSpeed: 1,
 		testSpeedUsed: false,
 		testNoPasses: false,
+		staff: false,
 	};
 }
 

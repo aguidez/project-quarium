@@ -41,6 +41,8 @@ const REFERENCE = {
 	"Species:MiniLeviathan": 736,
 	AllSpecies: 738,
 };
+// Rebirths a player needs before their daily / weekly boards open (src/shared/types/quests.ts BOARD_UNLOCK_REBIRTHS)
+const BOARD_UNLOCK_REBIRTHS = { Daily: 2, Weekly: 3 };
 const REFERENCE_PICKUP = 0.5; // the simulator's P.collect: share of the coins' value picked up (clicks + companions)
 const MILESTONE_ORDER = [
 	"Onboarding:Done",
@@ -125,13 +127,17 @@ const percent = (x) => (x === null ? "—" : `${Math.round(x * 100)} %`);
 function report(profiles) {
 	// A profile is { Data: { player, tank, stats }, MetaData } (ProfileStore); a dump may hold the Data alone
 	const saves = profiles.map((p) => (p && p.Data ? p.Data : p)).filter((d) => d && d.player);
-	// The owner's test runs ("/speed") would skew everything: left out
+	// The owner's test runs ("/speed") and the staff's profiles (StatsService: isAdmin) would skew everything: left out
 	const testers = saves.filter((d) => d.stats && d.stats.testSpeedUsed);
-	const tracked = saves.filter((d) => d.stats && d.stats.firstJoinAt > 0 && !d.stats.testSpeedUsed);
+	const staff = saves.filter((d) => d.stats && d.stats.staff && !d.stats.testSpeedUsed);
+	const tracked = saves.filter(
+		(d) => d.stats && d.stats.firstJoinAt > 0 && !d.stats.testSpeedUsed && !d.stats.staff,
+	);
 	const fresh = tracked.filter((d) => !d.stats.legacy);
 	console.log(
 		`Players: ${saves.length} profiles, ${tracked.length} with statistics (${fresh.length} new since V0.47)` +
-			(testers.length ? `, ${testers.length} left out (test speed)` : ""),
+			(testers.length ? `, ${testers.length} left out (test speed)` : "") +
+			(staff.length ? `, ${staff.length} left out (staff)` : ""),
 	);
 	if (tracked.length === 0) return;
 	const stats = tracked.map((d) => d.stats);
@@ -205,28 +211,29 @@ function report(profiles) {
 	);
 
 	// Quests and boosts
-	const dailiesPerDay = stats.filter((s) => s.days > 0).map((s) => s.questsClaimed.Daily / s.days);
+	// The boards only open after a few rebirths: counted over the players who have them, from the day they opened
+	const withBoard = (category) => tracked.filter((d) => d.player.rebirths >= BOARD_UNLOCK_REBIRTHS[category]);
+	const daysWithBoard = (d, category) => {
+		const opened = d.stats.milestones && d.stats.milestones[`Rebirth${BOARD_UNLOCK_REBIRTHS[category]}`];
+		return opened && opened.days > 0 ? d.stats.days - opened.days + 1 : d.stats.days;
+	};
+	const daily = withBoard("Daily").filter((d) => daysWithBoard(d, "Daily") > 0);
+	const weekly = withBoard("Weekly");
+	const dailiesPerDay = daily.map((d) => d.stats.questsClaimed.Daily / daysWithBoard(d, "Daily"));
+	const median = (values) => pct(values, 0.5) ?? "—";
 	console.log("\nQuests");
-	console.log(`  dailies a day      ${pct(dailiesPerDay, 0.5)?.toFixed(1) ?? "—"} of 3 (simulator: 3)`);
 	console.log(
-		`  weeklies           ${pct(
-			stats.map((s) => s.questsClaimed.Weekly),
-			0.5,
-		)} per player, story ${pct(
-			stats.map((s) => s.questsClaimed.Story),
-			0.5,
-		)}`,
+		`  dailies a day      ${pct(dailiesPerDay, 0.5)?.toFixed(1) ?? "—"} of 3 (simulator: 3)   ` +
+			`${daily.length} players with the board (rebirth ${BOARD_UNLOCK_REBIRTHS.Daily}+)`,
 	);
 	console.log(
-		`  boost earned       ${hm(
-			pct(
-				stats.map((s) => s.boostMinutesEarned),
-				0.5,
-			),
-		)} per player, likes given ${pct(
-			stats.map((s) => s.likesGiven),
-			0.5,
-		)}`,
+		`  weeklies           ${median(weekly.map((d) => d.stats.questsClaimed.Weekly))} per player   ` +
+			`${weekly.length} players with the board (rebirth ${BOARD_UNLOCK_REBIRTHS.Weekly}+)`,
+	);
+	console.log(`  story              ${median(stats.map((s) => s.questsClaimed.Story))} per player`);
+	console.log(
+		`  boost earned       ${hm(pct(daily.map((d) => d.stats.boostMinutesEarned), 0.5))} per player with the daily board, ` +
+			`likes given ${median(stats.map((s) => s.likesGiven))}`,
 	);
 
 	// Devices

@@ -6,6 +6,7 @@ import { FISH_TYPES, FishType, isEasterEgg } from "shared/types/fish";
 import { isOnboardingDone, ONBOARDING_STEPS } from "shared/types/onboarding";
 import { QuestConfig } from "shared/types/quests";
 import { REBIRTHS } from "shared/types/rebirths";
+import { isAdmin } from "../admins";
 import { getTestSpeed, MilestoneTime, PlayerStats } from "../playerStats";
 import { SaveData } from "../saveData";
 import { AquariumService } from "./AquariumService";
@@ -129,6 +130,11 @@ class StatsServiceSingleton implements Lifecycle {
 			coinValuePicked: 0,
 			reportedAt: -math.huge,
 			tickedAt: os.clock(),
+		});
+		// The staff stays out of the analytics; the group rank check yields, the saved flag applies meanwhile
+		task.spawn(() => {
+			const staff = isAdmin(player);
+			if (this.sessions.has(player)) stats.staff = staff;
 		});
 	}
 
@@ -286,11 +292,11 @@ class StatsServiceSingleton implements Lifecycle {
 
 	/**
 	 * Analytics never break the game (limits, Studio, an outage): a failed call is dropped. The owner's test runs
-	 * ("/speed", "/passes off") send nothing: the Creator Dashboard can't forget an event once received.
+	 * ("/speed", "/passes off") and the staff's profiles send nothing: the Creator Dashboard can't forget an event.
 	 */
 	private safely(player: Player, log: () => void) {
 		const stats = this.getStats(player);
-		if (stats && (stats.testSpeedUsed || stats.testNoPasses)) return;
+		if (stats && (stats.testSpeedUsed || stats.testNoPasses || stats.staff)) return;
 		const [ok, err] = pcall(log);
 		if (!ok) warn(`[Server] StatsService: analytics call failed (${err})`);
 	}

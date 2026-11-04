@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-04 (V0.60.12: the shop zone, a glowing mat in front of each counter (tag ShopZone)).
+> Last updated: 2026-11-04 (V0.60.13: the staff's profiles out of the analytics and npm run stats; dailies counted over their board's owners).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -154,8 +154,9 @@ ProjectQuarium/
 ├─ tools/obj-receiver.js     Local receiver of the OBJ files a Studio script exports (agent note fish-asset-pipeline)
 ├─ tools/player-stats.js     Real players vs the simulator (`npm run stats`): reads every profile of PlayerData_v1 through
 │                            Open Cloud (read-only key in workspace.local.json; universe 10774507209), prints attendance,
-│                            play time at each milestone (vs BALANCE.md §2), coin pickup share, dailies, devices;
-│                            `--file dump.json` to test without the API, `--out` to keep a snapshot
+│                            play time at each milestone (vs BALANCE.md §2), coin pickup share, dailies / weeklies
+│                            (over the players whose board is open, from that day), devices; leaves out the test-speed
+│                            and staff profiles; `--file dump.json` to test without the API, `--out` to keep a snapshot
 ├─ tools/fish-variant-recolor.js  Hue rotation of a species' texture into its Anomaly / Shiny looks (`sheet <Type>` to
 │                            pick the angles, `build variant-spec.json`; optional tint for grey fish); pipeline in its header
 ├─ tools/pass-icons.js       Gamepass, Shop and Aquarium icons drawn as SVG in the V2 style, rendered with @resvg/resvg-js
@@ -298,8 +299,8 @@ ProjectQuarium/
    │  │                      {tending, play, days, at} ("Onboarding:<step>", "Rebirth<n>", "Species:<type>", "AlphaComplete", "AllSpecies",
    │  │                      "Ocean:<id>", "Quest:<id>"; tending -1 = reached before the stats existed: `legacy`), coins
    │  │                      dropped / clicked / by a companion, meals by hand, quests claimed, boost minutes, likes given,
-   │  │                      platforms, per-device fps / memory / swim budget, testSpeed / testSpeedUsed, testNoPasses;
-   │  │                      createPlayerStats, sanitizePlayerStats, getTestSpeed
+   │  │                      platforms, per-device fps / memory / swim budget, testSpeed / testSpeedUsed, testNoPasses,
+   │  │                      staff (isAdmin, checked at each join); createPlayerStats, sanitizePlayerStats, getTestSpeed
    │  └─ services/
    │     ├─ DataService      ProfileStore sessions (load, auto-save, final save, onLoaded / onSave hooks), sync() (also runs
    │     │                   syncIncubationSpeed), notify(), registerAction(), money / fish helpers, changeFish (UFO
@@ -377,7 +378,8 @@ ProjectQuarium/
    │     │                   onboarding funnel, one-time "Progression" funnel (Onboarding:Done, Rebirth1–8, AllSpecies),
    │     │                   custom events MilestoneMinutes, SessionMinutes / SessionMinutesInGame, CoinPickupPercent,
    │     │                   DailyQuestClaimed / WeeklyQuestClaimed; legacy saves stay out of the funnels, the owner's test
-   │     │                   profiles (testSpeedUsed / testNoPasses) send nothing (the dashboard can't delete an event)
+   │     │                   profiles (testSpeedUsed / testNoPasses) and the staff's (stats.staff = isAdmin, set at each
+   │     │                   join) send nothing (the dashboard can't delete an event)
    │     ├─ CustomizationService  "SetAquariumTheme", "SetCosmeticShown" ({id, shown}), "SetTitle": checks, then PlayerData's
    │     │                   choices; AquariumService and TitleService apply them. "SetSoundVolume" (0–1): saved only
    │     │                   (soundVolume, rounded to 0.01, no sync: the client applies it itself)
