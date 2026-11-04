@@ -63,6 +63,12 @@ export const TAGS = {
 	 * Model with a PrimaryPart. Walking up to him opens the Shop panel (ShopKeeperController, client only).
 	 */
 	ShopKeeper: "ShopKeeper",
+	/**
+	 * The shop's interaction zone on the ground in front of a hut's counter (Studio: an invisible, non-colliding Part
+	 * whose top face is the floor, local X across the counter). Standing on it opens the Shop panel; the client draws
+	 * a glowing pad on it (ShopKeeperController).
+	 */
+	ShopZone: "ShopZone",
 	/** Studio-made decor model in ServerStorage.Assets.Decor (a cosmetic shown in its owner's tank). Attribute "Cosmetic". */
 	DecorTemplate: "DecorTemplate",
 	/**

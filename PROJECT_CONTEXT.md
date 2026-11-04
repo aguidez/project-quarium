@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-04 (V0.60.11: the sound control, top-right; PlayerData.soundVolume, SetSoundVolume).
+> Last updated: 2026-11-04 (V0.60.12: the shop zone, a glowing mat in front of each counter (tag ShopZone)).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -91,7 +91,8 @@ ProjectQuarium/
 │                            leaderboard-titles-ingame.jpg (the nameplates' four tiers), food-reserve-mockup.png /
 │                            food-reserve-ingame.jpg / -empty-ingame.jpg / -onboarding-ingame.jpg (the food reserve),
 │                            phone-ui-lobby / -tank / -fish-index / -ocean.jpg (the UI on a phone, red box = 844 × 390),
-│                            sound-control-ingame.jpg (the sound control open, at 40)
+│                            sound-control-ingame.jpg (the sound control open, at 40),
+│                            shop-zone-idle.jpg / shop-zone-active.jpg (the east hut's mat, alone / stood on)
 ├─ design/ui/
 │  ├─ food-reserve.figcraft  The food reserve HUD (FoodReserve_Mockup: in the tank view, in the onboarding's Feed step,
 │  │                         full / refilling / empty), built by food-reserve.build.js (figcraft-cli; exports
@@ -451,10 +452,13 @@ ProjectQuarium/
       │  ├─ ChatTitleController  TextChatService.OnIncomingMessage: the sender's title as a coloured tag before their name in
       │  │                   the chat window ("[OCEAN LEGEND #1]", tier colour; earned titles gold), from the Player attributes
       │  ├─ StatsReportController  Once a minute sends "ReportClientStats" (platform, average fps, memory, SwimTriangleBudget)
-      │  ├─ ShopKeeperController  The fisherman's shop (tag ShopKeeper): isNearby / onNearbyChanged (opens within 9 studs,
-      │  │                   closes beyond 12; nearest hut) → App `shopNearby` opens / closes the Shop panel (closed by hand
+      │  ├─ ShopKeeperController  The fisherman's shop (tag ShopKeeper): isNearby / onNearbyChanged (opens on a ShopZone,
+      │  │                   closes 2 studs past its edges; without any ShopZone in the place, the old rule: within 9 studs
+      │  │                   of the fisherman, closes beyond 12) → App `shopNearby` opens / closes the Shop panel (closed by hand
       │  │                   it stays closed until the player comes back); turns him toward a player nearby and makes him
-      │  │                   breathe (local PivotTo)
+      │  │                   breathe (local PivotTo). Draws each ShopZone's pad, local: a SurfaceGui (in PlayerGui,
+      │  │                   Adornee the zone, top face) gold with an orange outline and a white inner line, pulsing, lit
+      │  │                   while stood on; gold sparkles rising from the zone (more while stood on)
       │  ├─ IncomePopupController  Floating "+X$" / "-X$" / "+X Ocean" billboards (MoneyPopup remote)
       │  ├─ AudioController  Background music, event music crossfade, SFX (PlaySfx remote or UI); every sound plays
       │  │                   through the `Master` SoundGroup (SoundService), whose Volume is the player's volume
@@ -565,10 +569,11 @@ ProjectQuarium/
 
 - **`Workspace.Lobby`**: 6 `Aquarium` models (Aquarium1–6 at x = −64 / 0 / 64, z = ±16). Each has a PrimaryPart
   `Base`, an `AquariumWater` part and the Studio `Decorations` (basic theme, removed at runtime). Beach decor, the
-  `LobbySpawn` (x 100), the `WelcomeSign` at the north end (108, 0, 64), and two identical fishing huts, the shop, at
+  `LobbySpawn` (x 95.5, its sun decor with it), the `WelcomeSign` at the north end (108, 0, 64), and two identical fishing huts, the shop, at
   both ends of the central aisle: `FishingHutEast` (113, 0, 0, facing −X) and `FishingHutWest` (−113, 0, 0, facing +X).
   Each: `Hut` (driftwood shack, counter window), `Fisherman` (tag `ShopKeeper`, PrimaryPart its MeshPart, no
-  collision), `SignAnchor` (a BillboardGui "SHOP" plate). Layout constraints: `docs/agent-notes/lobby-decor-constraints.md`.
+  collision), `SignAnchor` (a BillboardGui "SHOP" plate), `ShopZone` (tag `ShopZone`: invisible, non-colliding Part,
+  9 × 3.2 studs, its top face on the floor 6.7 studs in front of the fisherman). Layout constraints: `docs/agent-notes/lobby-decor-constraints.md`.
   `Leaderboards` (folder): an alcove of three signs in the north-west corner, turned 30° from the north fence toward
   the middle of the lobby (along the corner's diagonal, open to players coming from either side): `OceanPointsBoard`
   (centre, ground (−103, 0, 67), screen 11 studs wide), `IncomeBoard` (north-east, the viewers' left) and

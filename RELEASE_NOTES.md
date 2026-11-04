@@ -11,6 +11,20 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.60.12 — 2026-11-04
+
+**New**
+- **Shop zone**: a glowing mat now lies on the ground in front of each fisherman's counter: gold, outlined in orange,
+  slowly pulsing, with sparkles rising from it. Step on it and the shop opens; the mat lights up while you stand on it.
+  Walk off it and the shop closes.
+
+**Changes**
+- **Opening the shop**: it used to open within a set distance of the fisherman, an invisible circle. Now it opens on
+  the mat itself, so what you see is what opens it.
+- **Lobby spawn**: the spawn and its sun moved a few steps away from the east hut, to make room for its mat.
+
+---
+
 ## V0.60.11 — 2026-11-04
 
 **New**
