@@ -6,7 +6,7 @@ import { FishType, HungerState } from "./types/fish";
 import { PlayerData } from "./types/playerData";
 import { FishEffect } from "./types/ufo";
 import { LeaderboardSync } from "./types/leaderboards";
-import { AdminTankInfo } from "./types/admin";
+import { AdminServersSync, AdminTankInfo } from "./types/admin";
 import { FishVariant } from "./types/variants";
 
 // Define all client <-> server contracts here
@@ -28,6 +28,8 @@ export interface ServerToClientEvents {
 	LeaderboardSync: (sync: LeaderboardSync) => void;
 	/** The admin panel's Aquariums tab: the players of this server and their tanks (AdminService, admins only). */
 	AdminTanks: (tanks: AdminTankInfo[]) => void;
+	/** The admin panel's Servers tab: the live servers and their versions (AdminService, admins only). */
+	AdminServers: (sync: AdminServersSync) => void;
 }
 
 export interface ClientToServerEvents {
@@ -35,7 +37,8 @@ export interface ClientToServerEvents {
 	 * "BuyEgg" | "OpenEgg" (payload: EggType) | "SetFocus" (payload: boolean, 2.5D view entered / left)
 	 * | "RequestSync" (no payload) | "AdminStartEvent" (payload: GameEventType) | "AdminStopEvent" (no payload)
 	 *   | "AdminRequestTanks" (no payload) | "AdminRemoveFish" ({ userId, fishId }) | "AdminAddFish" ({ userId,
-	 *   fishType, variant }) | "AdminSetLeaderboardBan" ({ userId, banned }) (admin panel, see AdminService: refused
+	 *   fishType, variant }) | "AdminSetLeaderboardBan" ({ userId, banned }) | "AdminRequestServers" (no payload)
+	 *   | "AdminUpdateOldServers" (no payload) (admin panel, see AdminService: refused
 	 *   without its right)
 	 * | "ClaimQuest" (payload: quest id) | "EquipCompanion" | "UnequipCompanion" (payload: CompanionType)
 	 * | "ReleaseFish" (payload: FishType) | "FinishTutorial" (payload: Feature)

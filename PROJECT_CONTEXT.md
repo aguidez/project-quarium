@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-04 (V0.60.17: popups and fish badges survive a respawn: GUIs straight in PlayerGui, ResetOnSpawn off).
+> Last updated: 2026-11-04 (V0.60.18: the admin panel's Servers tab and ServerUpdateService: move old servers' players).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -88,6 +88,7 @@ ProjectQuarium/
 │                            up), crab-sax-carry-1-right / -2-middle / -3-left.jpg (Island Breeze's guest dancing),
 │                            admin-panel-mockup.png / admin-panel-ingame.jpg (the admin panel), admin-aquariums-
 │                            mockup.png / admin-aquariums-list-ingame.jpg / -tank-ingame.jpg (its Aquariums tab),
+│                            admin-servers-mockup.png / admin-servers-ingame.jpg (its Servers tab),
 │                            star-gauge-mockup.png
 │                            (the starfall's gauge and the star power pill), star-power-pill-ingame.jpg,
 │                            leaderboards-mockup.png / leaderboards-ingame.jpg, leaderboard-titles-mockup.png /
@@ -261,8 +262,8 @@ ProjectQuarium/
    │     │                   isRebirthAvailable / isNextRebirthAvailable, isEggAvailable, isSpeciesAvailable,
    │     │                   isOceanMilestoneAvailable, isStoryQuestAvailable, arePassesOnSale, hasFinishedAlpha
    │     ├─ admin.ts         ADMIN_PANEL_ATTRIBUTE (player: may open the admin panel), AdminTab / ADMIN_TABS (one
-   │     │                   tab per admin tool: Events, Aquariums), AdminTankInfo / AdminTankFish (the Aquariums tab's
-   │     │                   data), ADMIN_TANKS_REFRESH (3 s)
+   │     │                   tab per admin tool: Events, Aquariums, Servers), AdminTankInfo / AdminTankFish (the Aquariums
+   │     │                   tab's data), ADMIN_TANKS_REFRESH (3 s), AdminServerInfo / AdminServersSync (the Servers tab's)
    │     ├─ ufo.ts           UfoOutcome (Sleep / Green / Red / Variant / Alien), UFO_OUTCOME_ODDS, drawUfoOutcome, FishEffect
    │     │                   (Sleep / Green / Red) + FISH_EFFECT_DURATION + FISH_EFFECT_COIN_MULTIPLIER, getNextVariant,
    │     │                   UFO_TIMING / UFO_KIDNAP_TIME, UFO_BEAM_ATTRIBUTE
@@ -290,7 +291,8 @@ ProjectQuarium/
    │     └─ aquarium.ts      Tank dimensions, getAquariumFrame, isInFocusZone (front-of-glass zone), INCOME_ATTRIBUTES
    │                         (IncomePerSecond / IncomeMultiplier / IncomePaused on an owned aquarium model)
    ├─ server/
-   │  ├─ main.server.ts      Registers services (order matters for onInit)
+   │  ├─ main.server.ts      Registers services (order matters for onInit); on an update relay (isUpdateRelayServer)
+   │  │                      only ServerUpdateService
    │  ├─ templates.ts        loadTemplates(tag, attribute, keys) (Studio templates found by tag), scaleModel
    │  ├─ fishAssets.ts       FishAssets: on-demand fish templates. Species models and variant textures live in
    │  │                      ServerStorage.Assets.Fish / FishVariants; require(fishType, variant) copies them into
@@ -365,7 +367,8 @@ ProjectQuarium/
    │     │                   Aquariums tab (this server's players): "AdminRequestTanks" → AdminTanks, "AdminRemoveFish"
    │     │                   (FishService.adminRemoveFish: no points), "AdminAddFish" (adminAddFish: even into a full tank,
    │     │                   easter eggs Normal; DataService.addFish with its variant), "AdminSetLeaderboardBan"
-   │     │                   (LeaderboardService.setBanned); every action answers with the tanks again
+   │     │                   (LeaderboardService.setBanned); every action answers with the tanks again. Servers tab:
+   │     │                   "AdminRequestServers" → AdminServers, "AdminUpdateOldServers" (ServerUpdateService)
    │     ├─ AbyssService     Abyssal raid: one lantern fish raid loop per owned tank until the event ends (§3.4)
    │     ├─ UfoService       UFO night: one UFO per owned tank (clone of the Ufo template, tag Ufo, anchored, moved by
    │     │                   PivotTo), kidnaps one fish at a time (each once per event), notifies the owner of the outcome;
@@ -420,6 +423,14 @@ ProjectQuarium/
    │     ├─ LikeService      Places a like board beside each tank, GiveLike (range / own tank / cooldown), onLikeGiven,
    │     │                   onLikeSent (giver, owner: after the notices),
    │     │                   keeps each owner's boost in memory (getCoinMultiplier), publishes likes + boost as attributes
+   │     ├─ ServerUpdateService  Moves old servers' players to the newest version: every server lists itself in the
+   │     │                   MemoryStore sorted map QuariumServers (key JobId: place version, GAME_VERSION, players; every
+   │     │                   30 s, 90 s TTL, removed on close); getServers (the Servers tab); updateOldServers publishes the
+   │     │                   newest version listed on MessagingService topic QuariumUpdate; a server below it notifies its
+   │     │                   players, 5 s later teleports them to a ReserveServer (the relay: a new server runs the newest
+   │     │                   version) and moves whoever joins it afterwards; the relay (reserved, no private-server owner)
+   │     │                   runs nothing else and sends them to a public server 6 s later (kick with a message if every
+   │     │                   teleport fails). No teleport in Studio (a notice instead)
    │     └─ DevCommandService  Studio-only chat commands (TextChatCommands created only when RunService.IsStudio(), only
    │                         for the game's admins, server/admins.ts): "/datareset" then "/datareset confirm" within 15 s (wipes the save,
    │                         kicks); "/nextfrench" (next egg hatches a French Fish); "/sugar" (Sugar swims in, as from a like);
@@ -544,7 +555,10 @@ ProjectQuarium/
          │                   ONLY, length, START); Aquariums tab (AdminAquariumsTab.tsx, AquariumsTab): the players
          │                   (headshot, rebirth / fish / income chips, LB BAN checkbox, MANAGE), then one tank (BACK, its
          │                   fish as ItemSlots with a red X → REMOVE? for 3 s, ADD A FISH: species strip, variants, ADD);
-         │                   asks for the tanks on open and every ADMIN_TANKS_REFRESH s while open
+         │                   asks for the tanks on open and every ADMIN_TANKS_REFRESH s while open; Servers tab
+         │                   (AdminServersTab.tsx, ServersTab): NEWEST VERSION card (patch, place version, servers / old /
+         │                   players chips), the live servers (NEWEST / OLD, THIS SERVER, players), UPDATE OLD SERVERS
+         │                   (armed 4 s: SURE? CLICK AGAIN); refreshed every 5 s while open
          ├─ SoundControl     Top-right, in Roblox's topbar row (TopbarInset, sized like its 44 px buttons): round blue
          │                   speaker button (crossed out at 0) dropping down a navy plate: the volume (0–100, "OFF"),
          │                   a vertical slider (gold fill, white knob, dragged anywhere until released), a mute toggle
@@ -728,7 +742,7 @@ ProjectQuarium/
 | | `SetAquariumTheme` (theme or "Auto"), `SetCosmeticShown` ({id, shown}), `SetTitle` (title, "Auto" or "None"), `SetSoundVolume` (0–1) | CustomizationService |
 | | `EquipCompanion` / `UnequipCompanion` (CompanionType) | CompanionService |
 | | `ReleaseFish` ({fishType, variant}), `FinishTutorial` (Feature), `ClaimOceanReward` (milestone id) | OceanService |
-| | `AdminStartEvent` (GameEventType), `AdminStopEvent` (no payload), `AdminRequestTanks` (no payload), `AdminRemoveFish` ({userId, fishId}), `AdminAddFish` ({userId, fishType, variant}), `AdminSetLeaderboardBan` ({userId, banned}): admin panel, refused without `canUseAdminPanel` | AdminService |
+| | `AdminStartEvent` (GameEventType), `AdminStopEvent` (no payload), `AdminRequestTanks` (no payload), `AdminRemoveFish` ({userId, fishId}), `AdminAddFish` ({userId, fishType, variant}), `AdminSetLeaderboardBan` ({userId, banned}), `AdminRequestServers`, `AdminUpdateOldServers` (no payload): admin panel, refused without `canUseAdminPanel` | AdminService |
 | | `WatchAquariums` (PlotIndex[], ≤ 6, debounced 0.25 s): only changes what this client receives | FishService |
 | | `GiveLike` (PlotIndex, from the board's prompt) | LikeService |
 | | `Rebirth` (no payload) | RebirthService |
@@ -752,6 +766,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
 | `PlaySfx` | `(SfxName, pitch)` | AudioController |
 | `LeaderboardSync` | `{boards: Record<LeaderboardId, LeaderboardEntry[]>, own?}` (every 30 s, at join) | LeaderboardController |
 | `AdminTanks` | `AdminTankInfo[]` (this server's players and tanks, to an admin who asked or acted) | AdminPanel (Aquariums tab) |
+| `AdminServers` | `AdminServersSync` (the live servers, the newest place version, listed?, studio?) | AdminPanel (Servers tab) |
 | `FishSync` | `FishMessage`: `Tank` (full state of a newly watched tank), `Spawn`, `Swim` (new segment), `State` (hunger, growth, paused, UFO effect), `Remove` (Eaten / Released / Gone / Abducted), `Scream` (an alien fish) | FishRenderController |
 
 **Replicated state outside remotes:**
@@ -1011,6 +1026,10 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   A SurfaceGui only takes input from PlayerGui with an Adornee, which the scrolling list needs. The wheel scrolls
   the list; whether it also zooms the camera over a sign was not checked. The titles' snapshot ranks the stored
   scores at midnight UTC (a live player's last 2 min may be missing) and Studio playtests write the real snapshot too.
+- **Server updates** (the Servers tab): "the newest version" is the newest place version among the listed servers, so
+  after a publish someone must join once for a new server to exist. Servers started before V0.60.18 neither list
+  themselves nor listen. Teleports are untested in Studio (impossible there): watch the first live use. Roblox's
+  Creator Dashboard can also migrate every server to the latest update, without the panel.
 - **Admin events across servers** rely on MessagingService (best effort, a few seconds of delay; a server that misses
   the message joins through the MemoryStore only when it starts). Add admins by UserId in `server/admins.ts` (the
   game's owner always is one).

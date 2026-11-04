@@ -1,8 +1,8 @@
 // FigCraft script: the admin panel mock-up (V2 arcade style), the Studio admin tools (AdminPanel.tsx).
 // Usage: node design/ui/admin-panel.build.js <script.json>
 //        figcraft-cli run <script.json> --out design/ui/admin-panel.figcraft
-// The run also exports design/previews/admin-panel-mockup.png and admin-aquariums-mockup.png (the Aquariums tab), in
-// the same session, which has the Roblox fonts.
+// The run also exports design/previews/admin-panel-mockup.png, admin-aquariums-mockup.png (the Aquariums tab) and
+// admin-servers-mockup.png (the Servers tab), in the same session, which has the Roblox fonts.
 const fs = require("fs");
 const path = require("path");
 const localConfig = require("../../tools/local-config");
@@ -261,5 +261,54 @@ VARIANTS.forEach(([text, pal], i) => {
 button(addCard, "Add", W - 44 - 124, 172, 108, 50, PAL.green, "ADD", { size: 24 });
 
 cmds.push({ command: "file.export", params: { ids: [{ $step: tanks }], format: "png", scale: 1, path: PREVIEW_TANKS } });
+
+// ---------------------------------------------------------------------------------------------------------------
+// Servers tab (V0.60.18): the live servers and their versions, UPDATE OLD SERVERS (left: idle, right: armed)
+// ---------------------------------------------------------------------------------------------------------------
+const PREVIEW_SERVERS = path.join(__dirname, "..", "previews", "admin-servers-mockup.png").split(path.sep).join("/");
+function serversWindow(parent, name, x, h) {
+	const w = add("frame", parent, name, x, 110, W, h + 20, {});
+	add("rectangle", w, "Shadow", 0, 10, W, h, { fill: "#050B12", cornerRadius: 30 });
+	const b = add("frame", w, "Body", 0, 0, W, h, { fills: vgrad("#23446E", "#0F1B29"), cornerRadius: 30, strokes: [OUT], strokeWeight: 4, strokeAlign: "inside" });
+	add("rectangle", b, "InnerRim", 7, 7, W - 14, h - 14, { fills: [], cornerRadius: 24, strokes: ["#FFFFFF26"], strokeWeight: 2, strokeAlign: "inside" });
+	const ribbon = add("frame", w, "Banner", W / 2 - 170, -36, 340, 58, { fills: vgrad(PAL.red[0], PAL.red[1]), cornerRadius: 14, strokes: [OUT], strokeWeight: 4, strokeAlign: "inside" });
+	label(ribbon, "Title", 0, 2, 340, 56, "ADMIN", { font: TITLE, size: 36, stroke: PAL.red[3], strokeWeight: 4 });
+	button(w, "Close", W - 30, -22, 50, 50, PAL.red, "X", { radius: 25, depth: 5, size: 28 });
+	chip(b, "Scope", W / 2 - 150, 40, 300, 30, PAL.amber[1], "LIVE - EVERY SERVER");
+	button(b, "Tab_Events", W / 2 - 239, 84, 150, 44, PAL.navy, "EVENTS", { size: 22 });
+	button(b, "Tab_Aquariums", W / 2 - 75, 84, 150, 44, PAL.navy, "AQUARIUMS", { size: 22 });
+	button(b, "Tab_Servers", W / 2 + 89, 84, 150, 44, PAL.gold, "SERVERS", { size: 22 });
+	return b;
+}
+const srv = add("frame", undefined, "AdminServers_Mockup", 2480, 0, 1400, 900, { fill: "#16293D" });
+label(srv, "Caption", 30, 16, 1300, 30, "ADMIN PANEL - SERVERS TAB  (left: the live servers;  right: UPDATE clicked once, waiting for the confirmation)", { size: 18, color: "#A9CBEF", align: "left" });
+const SERVERS = [
+	{ version: "V0.60.18", place: 58, players: 8, newest: true, here: true },
+	{ version: "V0.60.18", place: 58, players: 3, newest: true },
+	{ version: "V0.60.17", place: 57, players: 6, newest: false },
+	{ version: "V0.60.16", place: 56, players: 3, newest: false },
+];
+[false, true].forEach((armed, side) => {
+	const win = serversWindow(srv, armed ? "Armed" : "Idle", 60 + side * 700, 740);
+	const sum = card(win, "Newest", 22, 146, W - 44, 92, PAL.gold[1]);
+	label(sum, "Caption", 18, 8, 300, 20, "NEWEST VERSION", { size: 15, color: "#A9CBEF", align: "left" });
+	label(sum, "Version", 18, 28, 220, 40, "V0.60.18", { font: TITLE, size: 32, stroke: OUT, align: "left" });
+	label(sum, "Place", 18, 64, 220, 20, "place version 58", { size: 15, color: "#A9CBEF", align: "left" });
+	chip(sum, "Servers", 250, 34, 104, 28, "#9FC3E8", "4 SERVERS");
+	chip(sum, "Old", 362, 34, 76, 28, PAL.red[1], "2 OLD", "#FFFFFF");
+	chip(sum, "Players", 446, 34, 98, 28, PAL.gold[1], "20 PLAYERS");
+	label(win, "Section", 22, 258, 400, 24, "LIVE SERVERS", { size: 18, color: "#A9CBEF", align: "left" });
+	SERVERS.forEach((s, i) => {
+		const row = card(win, `Server_${i}`, 22, 290 + i * 80, W - 44, 66, s.newest ? OUT : PAL.red[1]);
+		label(row, "Version", 18, 6, 160, 32, s.version, { font: TITLE, size: 24, stroke: OUT, align: "left" });
+		label(row, "Place", 18, 38, 160, 20, `place v${s.place}`, { size: 14, color: "#A9CBEF", align: "left" });
+		chip(row, "State", 170, 20, s.newest ? 90 : 64, 26, s.newest ? PAL.green[1] : PAL.red[1], s.newest ? "NEWEST" : "OLD", s.newest ? OUT : "#FFFFFF");
+		if (s.here) chip(row, "Here", s.newest ? 268 : 242, 20, 116, 26, PAL.amber[1], "THIS SERVER");
+		label(row, "Players", W - 44 - 150, 16, 134, 34, `${s.players} PLAYERS`, { font: TITLE, size: 20, stroke: OUT, align: "right" });
+	});
+	button(win, "Update", 22, 624, W - 44, 58, PAL.red, armed ? "SURE? CLICK AGAIN" : "UPDATE 2 OLD SERVERS", { size: 26 });
+	label(win, "Hint", 22, 692, W - 44, 24, armed ? "Their 9 players move to V0.60.18 in 5 s" : "Their players move to the newest version (a short teleport)", { size: 15, color: armed ? PAL.red[0] : "#A9CBEF" });
+});
+cmds.push({ command: "file.export", params: { ids: [{ $step: srv }], format: "png", scale: 1, path: PREVIEW_SERVERS } });
 fs.writeFileSync(SCRIPT, JSON.stringify(cmds, null, 1));
 console.log(`${cmds.length} steps -> ${SCRIPT}`);

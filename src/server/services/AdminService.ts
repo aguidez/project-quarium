@@ -11,6 +11,7 @@ import { DataService } from "./DataService";
 import { EventService } from "./EventService";
 import { FishService } from "./FishService";
 import { LeaderboardService } from "./LeaderboardService";
+import { ServerUpdateService } from "./ServerUpdateService";
 
 const isEventType = t.keyOf(GAME_EVENTS);
 const isRemoveFish = t.strictInterface({ userId: t.integer, fishId: t.integer });
@@ -28,9 +29,12 @@ const isLeaderboardBan = t.strictInterface({ userId: t.integer, banned: t.boolea
  * ({ userId, fishId }) takes a fish out (no Ocean Points), "AdminAddFish" ({ userId, fishType, variant }) drops a new
  * one (even into a full tank), "AdminSetLeaderboardBan" ({ userId, banned }) is the LB BAN checkbox (saved). Each
  * action answers with the tanks again.
+ * Servers tab: "AdminRequestServers" answers with "AdminServers"; "AdminUpdateOldServers" moves the players of every
+ * server on an old place version to the newest one (ServerUpdateService).
  */
 class AdminServiceSingleton implements Lifecycle {
 	private tanksRemote = getRemoteEvent("AdminTanks");
+	private serversRemote = getRemoteEvent("AdminServers");
 
 	public onInit() {
 		Players.PlayerAdded.Connect((player) => this.grant(player));
@@ -46,6 +50,22 @@ class AdminServiceSingleton implements Lifecycle {
 			if (EventService.stopRunningEvent()) DataService.notify(player, "Event stopped.", "info");
 		});
 
+		DataService.registerAction("AdminRequestServers", t.nil, (player) => {
+			if (this.allowed(player, "AdminRequestServers")) this.serversRemote.FireClient(player, ServerUpdateService.getServers());
+		});
+		DataService.registerAction("AdminUpdateOldServers", t.nil, (player) => {
+			if (!this.allowed(player, "AdminUpdateOldServers")) return;
+			const moved = ServerUpdateService.updateOldServers();
+			print(`[Server] Admin ${player.Name}: update to place version ${moved.latest}, ${moved.servers} old server(s).`);
+			DataService.notify(
+				player,
+				moved.servers > 0
+					? `${moved.servers} old server(s) are moving ${moved.players} player(s) to version ${moved.latest}.`
+					: "Every server already runs the newest version.",
+				"info",
+			);
+			this.serversRemote.FireClient(player, ServerUpdateService.getServers());
+		});
 		DataService.registerAction("AdminRequestTanks", t.nil, (player) => {
 			if (this.allowed(player, "AdminRequestTanks")) this.sendTanks(player);
 		});

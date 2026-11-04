@@ -3,6 +3,7 @@ import { RunService, Workspace } from "@rbxts/services";
 import { ADMIN_TABS, AdminTab } from "shared/types/admin";
 import { ActiveEvent, ADMIN_EVENT_ORDER, GAME_EVENTS, GameEventType } from "shared/types/events";
 import { AdminTankActions, AquariumsTab } from "./AdminAquariumsTab";
+import { AdminServerActions, ServersTab } from "./AdminServersTab";
 import { formatTime } from "./EventBanner";
 import { Button3D, Card, Chip, TextStroke } from "./kit";
 import { Panel, PANEL_INNER_WIDTH } from "./Panel";
@@ -17,7 +18,7 @@ const WHITE = new Color3(1, 1, 1);
 const BADGE_TEXT: Partial<Record<GameEventType, string>> = { Kpop: "♪", Island: "♫", Ufo: "UFO", Starfall: "★" };
 
 /** Intents only (UiController): the server checks the admin right again for each one (AdminService). */
-export interface AdminActions extends AdminTankActions {
+export interface AdminActions extends AdminTankActions, AdminServerActions {
 	onStartEvent: (eventType: GameEventType) => void;
 	onStopEvent: () => void;
 }
@@ -293,6 +294,7 @@ export function AdminPanel(props: AdminPanelProps) {
 			</frame>
 			{tab === "Events" && <EventsTab {...props} />}
 			{tab === "Aquariums" && <AquariumsTab actions={props.actions} />}
+			{tab === "Servers" && <ServersTab actions={props.actions} />}
 		</Panel>
 	);
 }

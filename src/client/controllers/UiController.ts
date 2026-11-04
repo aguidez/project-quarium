@@ -50,6 +50,7 @@ class UiControllerSingleton implements Lifecycle {
 	private hatchRemote = getRemoteEvent("EggHatched");
 	private rewardRemote = getRemoteEvent("Reward");
 	private adminTanksRemote = getRemoteEvent("AdminTanks");
+	private adminServersRemote = getRemoteEvent("AdminServers");
 	private root?: Root;
 	private data?: PlayerData;
 	/** Hatches waiting for their reveal, played one after another (the server times the fish drops the same way). */
@@ -215,6 +216,13 @@ class UiControllerSingleton implements Lifecycle {
 									this.actionRemote.FireServer("AdminAddFish", { userId, fishType, variant }),
 								onSetLeaderboardBan: (userId, banned) =>
 									this.actionRemote.FireServer("AdminSetLeaderboardBan", { userId, banned }),
+								// Servers tab: the live servers and their versions; moving the old ones' players
+								onRequestServers: () => this.actionRemote.FireServer("AdminRequestServers"),
+								subscribeServers: (listener) => {
+									const connection = this.adminServersRemote.OnClientEvent.Connect(listener);
+									return () => connection.Disconnect();
+								},
+								onUpdateOldServers: () => this.actionRemote.FireServer("AdminUpdateOldServers"),
 							}
 						: undefined,
 			}),

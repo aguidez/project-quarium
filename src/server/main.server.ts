@@ -21,12 +21,15 @@ import { OnboardingService } from "./services/OnboardingService";
 import { OceanService } from "./services/OceanService";
 import { QuestService } from "./services/QuestService";
 import { RebirthService } from "./services/RebirthService";
+import { isUpdateRelayServer, ServerUpdateService } from "./services/ServerUpdateService";
 import { StarfallService } from "./services/StarfallService";
 import { StatsService } from "./services/StatsService";
 import { UfoService } from "./services/UfoService";
 
+// The relay of an update (a reserved server, see ServerUpdateService) only sends its players on: no game runs there
+if (isUpdateRelayServer()) bootstrap([ServerUpdateService]);
 // Register all server services here
-bootstrap([
+else bootstrap([
 	DataService,
 	InteractionService,
 	AquariumService,
@@ -52,4 +55,5 @@ bootstrap([
 	StatsService,
 	LeaderboardService,
 	DevCommandService,
+	ServerUpdateService,
 ]);

@@ -11,6 +11,16 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.60.18 — 2026-11-04
+
+**New**
+- **Admin panel, Servers tab** (admins only): every live server with its version and players, the old ones in red.
+  **UPDATE OLD SERVERS** (click, then click again to confirm) moves the players of every server on an older version to
+  the newest one: they are told a new version is out, then a short teleport takes them to an up-to-date server, their
+  progress saved as when they leave. Works for the servers started from this version on.
+
+---
+
 ## V0.60.17 — 2026-11-04
 
 **Fixes**
