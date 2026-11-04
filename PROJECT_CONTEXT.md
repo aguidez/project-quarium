@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-04 (V0.60.14: Sugar, the likes' easter egg fish: copies the tank's best fish).
+> Last updated: 2026-11-04 (V0.60.15: the income leaderboard leaves out the French Fish, a temporary bonus).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -339,7 +339,8 @@ ProjectQuarium/
    │     │                   getTankIncomePerMinute, leave after their lifetime (onFishLeft); Sugar: getBestFish (it copies
    │     │                   its coin and pace), rollLikeGift (LikeService.onLikeSent: into the giver's tank) /
    │     │                   canReceiveLikeGift (one per tank) / bringLikeGift (the "SECRET FISH!" Reward); getSteadyIncomePerSecond (the income
-   │     │                   leaderboard: theoretical income x rebirth x Coins pass, no temporary boost); onFishSpawned / onFishFed
+   │     │                   leaderboard: theoretical income x the permanent multipliers only, rebirth and Coins pass; no
+   │     │                   like, event, quest boost, UFO mutation nor French Fish: lifetime easter eggs); onFishSpawned / onFishFed
    │     │                   callbacks, findHungryFishPosition / hasHungryFish (feeders); replication to the clients that
    │     │                   watch each tank ("WatchAquariums" → FishSync messages); the quest coin boost (runCoinBoost:
    │     │                   PlayerData.coinBoostSeconds runs down only while the tank produces, coins x
@@ -784,7 +785,8 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   `FishService.getBestFish` (the fish in the water with the highest income per second, easter eggs aside): a sugar
   cube each time that fish's payout interval passes (followBestFish moves its next coin when the best fish changes),
   worth 1.1 x that fish's coin at its growth stage, then its own sparkle roll and the usual multipliers; nothing while
-  it is alone. Its income counts in the tank's (getFullIncomePerMinute: the published income and the leaderboard).
+  it is alone. Its income counts in the tank's (getFullIncomePerMinute: the published income and the leaderboard; the
+  French Fish only in the published income: it leaves).
 - **Coins.** `FishService.tick` (every 0.25 s) calls `dropCoin` (value x rebirth, like, pass, quest boost, event, UFO
   effect, test speed), which uses `CoinService.spawnCoin`; the coin sinks and expires 5 s (+ perks) after reaching the
   sand. Collected by a click (`CollectCoin`) or by the Snail / the Swordfish; `credit()` adds the money, fires

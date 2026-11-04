@@ -11,6 +11,15 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.60.15 — 2026-11-04
+
+**Fixes**
+- **Income leaderboard**: it counts the aquarium's lasting income only: its fish, times the rebirth and the +50% Coins
+  pass. Likes, events, the quest boost and the UFO's mutations never counted; the French Fish, who only stays an hour,
+  no longer does either. Sugar, who stays, still counts.
+
+---
+
 ## V0.60.14 — 2026-11-04
 
 **New**

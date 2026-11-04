@@ -390,13 +390,14 @@ class FishServiceSingleton implements Lifecycle {
 	/**
 	 * The tank's theoretical income per minute, easter egg fish included: getTankIncomePerMinute times 1 plus each easter
 	 * egg's share (the French Fish), plus what each fish copying the best one earns (Sugar: its share of that fish's).
+	 * `lasting`: only the fish that stay (an easter egg with a lifetime, the French Fish, only passes through).
 	 */
-	private getFullIncomePerMinute(owner: Player, fishes: ReadonlySet<FishEntity>): number {
+	private getFullIncomePerMinute(owner: Player, fishes: ReadonlySet<FishEntity>, lasting = false): number {
 		let shares = 1;
 		let copies = 0;
 		for (const fish of fishes) {
 			const easterEgg = fish.alive ? fish.config.easterEgg : undefined;
-			if (!easterEgg) continue;
+			if (!easterEgg || (lasting && easterEgg.lifetime !== undefined)) continue;
 			shares += easterEgg.incomeShare;
 			copies += easterEgg.bestFishShare ?? 0;
 		}
@@ -450,15 +451,16 @@ class FishServiceSingleton implements Lifecycle {
 	}
 
 	/**
-	 * The tank's lasting income per second (the lobby's income leaderboard): its theoretical income times the rebirth
-	 * and Coins pass multipliers, without what only lasts a while (like, quest boost, event) nor the test speed.
+	 * The tank's lasting income per second (the lobby's income leaderboard): its theoretical income times the permanent
+	 * multipliers only (rebirth, Coins pass; a future permanent bonus goes here too), without what only lasts a while
+	 * (like, quest boost, event, a UFO's mutation, the French Fish passing through) nor the test speed.
 	 */
 	public getSteadyIncomePerSecond(owner: Player): number {
 		const fishes = this.fishByOwner.get(owner);
 		const data = DataService.getData(owner);
 		if (!fishes || !data) return 0;
 		const multiplier = getRebirthMultiplier(data.rebirths) * getPassCoinMultiplier(data.passes);
-		return math.floor((this.getFullIncomePerMinute(owner, fishes) / 60) * multiplier + 0.5);
+		return math.floor((this.getFullIncomePerMinute(owner, fishes, true) / 60) * multiplier + 0.5);
 	}
 
 	private payout(owner: Player, fish: FishEntity, plain = false) {
