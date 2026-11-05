@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-04 (V0.60.18: the admin panel's Servers tab and ServerUpdateService: move old servers' players).
+> Last updated: 2026-11-05 (V0.60.19: PlayerListService, the player list shows each player's $/s and rebirth).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -406,6 +406,9 @@ ProjectQuarium/
    │     │                   and when they leave (sampled in onSave), reads the top 100 every 2 min, names from UserService,
    │     │                   merges its players' live scores and sends LeaderboardSync every 30 s and at join; the titles'
    │     │                   daily snapshot (DataStore LeaderboardTitles_v1, key Daily) → PlayerData.leaderboardRanks (§3.4)
+   │     ├─ PlayerListService  Roblox player list (top right): a `leaderstats` folder per player, every 1 s: "$/s"
+   │     │                   (StringValue, formatShort of the aquarium's IncomePerSecond, the plaque's number) and "Rebirth"
+   │     │                   (IntValue, PlayerData.rebirths)
    │     ├─ TitleService     Polls every 1 s: a BillboardGui "PlayerTitle" on each character's Head with getDisplayedTitle:
    │     │                   an earned title is gold LuckiestGuy text (4.2 × 0.65 studs); a leaderboard title a nameplate in
    │     │                   its rank's tier (pill + rank badge + board icon, laid out in design px and drawn in scale, 0.65

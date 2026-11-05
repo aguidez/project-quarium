@@ -11,6 +11,14 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.60.19 — 2026-11-05
+
+**New**
+- **Player list** (top right): two columns next to every name, the **$/s** their aquarium earns (as on its brass
+  plaque, shortened: "25K") and their current **Rebirth**.
+
+---
+
 ## V0.60.18 — 2026-11-04
 
 **New**
