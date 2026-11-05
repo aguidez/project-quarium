@@ -32,11 +32,25 @@ export interface Bounds {
 	max: Vector3;
 }
 
+/**
+ * Footprint of one decor piece in the tank's frame (local X / Z, front = -Z) and its top (local Y): a coin landing
+ * behind it, lower than its top, would be hidden (CoinService lands it in front instead).
+ */
+export interface DecorCover {
+	minX: number;
+	maxX: number;
+	minZ: number;
+	maxZ: number;
+	top: number;
+}
+
 export interface Aquarium {
 	index: number;
 	model: Model;
 	cframe: CFrame;
 	waterBounds: Bounds;
+	/** Decor pieces of the theme worn now, which coins must not land behind (see DecorCover). */
+	decorCovers: DecorCover[];
 	fishFolder: Folder;
 	foodFolder: Folder;
 	coinFolder: Folder;
@@ -64,6 +78,30 @@ function getWorldBounds(cframe: CFrame, size: Vector3): Bounds {
 		}
 	}
 	return { min, max };
+}
+
+/** A decor part this transparent hides nothing (the template's invisible Origin, helper parts). */
+const COVER_MAX_TRANSPARENCY = 0.9;
+
+/** The covers of a placed theme decor: one per top-level piece, from its visible parts. */
+function getDecorCovers(decor: Model, frame: CFrame): DecorCover[] {
+	const covers = new Array<DecorCover>();
+	for (const piece of decor.GetChildren()) {
+		const parts = piece.IsA("BasePart") ? [piece, ...piece.GetDescendants()] : piece.GetDescendants();
+		let min = new Vector3(math.huge, math.huge, math.huge);
+		let max = new Vector3(-math.huge, -math.huge, -math.huge);
+		for (const part of parts) {
+			if (!part.IsA("BasePart") || part === decor.PrimaryPart) continue;
+			if (part.Transparency >= COVER_MAX_TRANSPARENCY) continue;
+			const inTank = frame.ToObjectSpace(part.CFrame);
+			const bounds = getWorldBounds(inTank, part.Size); // in the tank's frame
+			min = min.Min(bounds.min);
+			max = max.Max(bounds.max);
+		}
+		if (min.X > max.X) continue; // nothing visible
+		covers.push({ minX: min.X, maxX: max.X, minZ: min.Z, maxZ: max.Z, top: max.Y });
+	}
+	return covers;
 }
 
 function getOrCreateFolder(parent: Instance, name: string): Folder {
@@ -208,6 +246,7 @@ class AquariumServiceSingleton implements Lifecycle {
 		decor.PivotTo(aquarium.cframe);
 		decor.Parent = aquarium.model;
 		aquarium.themeDecor = decor;
+		aquarium.decorCovers = getDecorCovers(decor, aquarium.cframe);
 		aquarium.model.SetAttribute("Theme", theme);
 	}
 
@@ -288,6 +327,7 @@ class AquariumServiceSingleton implements Lifecycle {
 			model: instance,
 			cframe,
 			waterBounds: getWorldBounds(water.CFrame, water.Size),
+			decorCovers: [],
 			fishFolder: getOrCreateFolder(instance, "Fish"),
 			foodFolder: getOrCreateFolder(instance, "Food"),
 			coinFolder: getOrCreateFolder(instance, "Coins"),

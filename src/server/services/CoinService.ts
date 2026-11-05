@@ -7,7 +7,8 @@ import { CompanionType } from "shared/types/companions";
 import { COIN_HITBOX_SCALE, COIN_TYPES, CoinType, FART_BUBBLE_VALUE } from "shared/types/fish";
 import { COIN_BOUNCE_TIME, getGroundTimeBonus, hasCoinBounce } from "shared/types/perks";
 import { loadTemplates } from "../templates";
-import { AquariumService } from "./AquariumService";
+import { AQUARIUM_INNER_SIZE } from "shared/types/aquarium";
+import { Aquarium, AquariumService } from "./AquariumService";
 import { DataService } from "./DataService";
 import { InteractionService } from "./InteractionService";
 
@@ -24,6 +25,9 @@ const BLINK_DURATION = 1.5; // last part of the ground lifetime, blinking as a w
 const BLINK_INTERVAL = 0.15;
 const BOUNCE_HEIGHT = 2.2; // studs a coin hops back up with the Bouncy coins perk (the Snail still reaches it)
 const MAX_COINS_PER_PLAYER = 80;
+// A coin that would land hidden behind the decor (a wreck's hull, a chest) lands in front of it instead
+const DRIFT_SPEED = 6; // studs/s at most toward the front while sinking
+const COVER_GAP = 0.3; // studs between the coin and the front of the decor it avoids
 
 // Fart bubbles of weak fish (see spawnBubble): built here, no Studio template
 const BUBBLE_SIZE = 1.1; // studs
@@ -39,6 +43,38 @@ const GLOW_COLOR = Color3.fromRGB(255, 210, 90);
 const GHOST_TRANSPARENCY = 0.45;
 const GHOST_TINT = Color3.fromRGB(185, 235, 255);
 const GHOST_WISP_TEXTURE = "rbxasset://textures/particles/smoke_main.dds";
+
+/**
+ * Where a coin dropped toward `ground` (world, its centre on the sand) lands so the decor doesn't hide it: moved
+ * toward the front glass until it stands in front of every decor piece of the tank taller than its centre whose width
+ * it overlaps. Never past the front of the water.
+ */
+function getVisibleLanding(aquarium: Aquarium, ground: Vector3, radius: number): Vector3 {
+	const covers = aquarium.decorCovers;
+	const inTank = aquarium.cframe.PointToObjectSpace(ground);
+	let z = inTank.Z;
+	// A move can bring the coin behind another piece: a few passes settle it
+	for (let pass = 0; pass <= covers.size(); pass++) {
+		let moved = false;
+		for (const cover of covers) {
+			if (cover.top <= inTank.Y) continue; // too low to hide it
+			if (inTank.X < cover.minX - radius || inTank.X > cover.maxX + radius) continue;
+			if (z <= cover.minZ - radius) continue; // already in front
+			z = cover.minZ - radius - COVER_GAP;
+			moved = true;
+		}
+		if (!moved) break;
+	}
+	if (z === inTank.Z) return ground;
+	const front = -AQUARIUM_INNER_SIZE.Z / 2 + EDGE_MARGIN;
+	const world = aquarium.cframe.PointToWorldSpace(new Vector3(inTank.X, inTank.Y, math.max(z, front)));
+	const bounds = aquarium.waterBounds;
+	return new Vector3(
+		math.clamp(world.X, bounds.min.X + EDGE_MARGIN, bounds.max.X - EDGE_MARGIN),
+		ground.Y,
+		math.clamp(world.Z, bounds.min.Z + EDGE_MARGIN, bounds.max.Z - EDGE_MARGIN),
+	);
+}
 
 interface Coin {
 	model: Model;
@@ -272,17 +308,24 @@ class CoinServiceSingleton implements Lifecycle {
 		this.coinsByHitbox.set(hitbox, coin);
 		if (frozen) return;
 
+		// Straight down, unless the decor would hide it there: then it drifts forward as it sinks
+		const ground = getVisibleLanding(aquarium, new Vector3(x, bottomY, z), radius);
+		const landed = facing.Rotation.add(ground);
+		const drift = new Vector3(ground.X - start.X, 0, ground.Z - start.Z).Magnitude;
 		const sink = TweenService.Create(
 			hitbox,
-			new TweenInfo(math.max(start.Y - bottomY, 0.01) / SINK_SPEED, Enum.EasingStyle.Linear),
-			{ CFrame: facing.add(new Vector3(0, bottomY - start.Y, 0)) },
+			new TweenInfo(
+				math.max((start.Y - bottomY) / SINK_SPEED, drift / DRIFT_SPEED, 0.01),
+				Enum.EasingStyle.Linear,
+			),
+			{ CFrame: landed },
 		);
 		coin.motion = sink;
 		sink.Completed.Connect((state) => {
 			if (state !== Enum.PlaybackState.Completed) return;
 			// The Bouncy coins perk: one bounce first, then the usual time on the sand
 			const perks = DataService.getData(owner)?.perks ?? [];
-			if (hasCoinBounce(perks)) this.bounce(coin, facing.add(new Vector3(0, bottomY - start.Y, 0)));
+			if (hasCoinBounce(perks)) this.bounce(coin, landed);
 			else task.spawn(() => this.expireOnGround(coin));
 		});
 		sink.Play();

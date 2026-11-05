@@ -11,6 +11,14 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.0.1 — 2026-11-05
+
+**Fixes**
+- Coins no longer land out of sight inside the Pirate Wreck's rowboat, or behind any tall decor of a tank: a coin that
+  would land hidden drifts toward the glass as it sinks and lands in front of the decor.
+
+---
+
 ## V1.0.0 — 2026-11-05
 
 The release: the alpha is over, the whole game is open.

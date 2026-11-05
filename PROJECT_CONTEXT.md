@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-05 (V1.0.0: the release, the alpha removed, the whole game open).
+> Last updated: 2026-11-05 (V1.0.1: coins land in front of the decor that would hide them).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -312,7 +312,8 @@ ProjectQuarium/
    │     │                   Base), runtime folders (Fish/Food/Coins/Companions), focus reports ("SetFocus") + isTending /
    │     │                   isAtOwnAquarium; dresses each tank in its owner's displayed theme (polled every second; free
    │     │                   tanks Basic), the Pearl rims finish (pearly F3ECF7 rims, Reflectance 0.3, any theme) and the
-   │     │                   decor cosmetics (DecorTemplate clones at DECOR_SLOTS), rebuilt when any of them changes;
+   │     │                   decor cosmetics (DecorTemplate clones at DECOR_SLOTS), rebuilt when any of them changes; `decorCovers`
+   │     │                   (each decor piece's footprint and top in the tank's frame, from its visible parts);
    │     │                   clears the INCOME_ATTRIBUTES of a freed tank
    │     ├─ FoodService      Drops / sinks food pellets (DropFood, free), the player's food reserve (in memory, full at
    │     │                   join: a drop takes a portion back in FOOD_REFILL_TIME, refused when none is ready; published
@@ -321,7 +322,8 @@ ProjectQuarium/
    │     │                   Jellyfish's: sinks straight down); Food.byCompanion names the companion, so FishService's fed
    │     │                   callbacks know who fed; look from getFoodLook (Pellet = brown ball, others = a FoodTemplate
    │     │                   MeshPart clone); random turn, then a slow 120° spin while sinking (CFrame tweens)
-   │     ├─ CoinService      Spawns coin models (sinking, ground lifetime) and fart bubbles (spawnBubble: rise, pop, 1 $),
+   │     ├─ CoinService      Spawns coin models (sinking, ground lifetime; getVisibleLanding: a coin that would land
+   │     │                   behind a decor piece taller than it drifts forward as it sinks, to land in front of it) and fart bubbles (spawnBubble: rise, pop, 1 $),
    │     │                   collection + credit, onSpawned / onCollected callbacks (with the companion that collected, if
    │     │                   any), the coin chime (playCoinSfx: +6 % pitch per click chained within 1.2 s, up to 8 steps,
    │     │                   x1.2 for sparkling / ghost coins; companion pickups play CompanionCoin, every 0.35 s at most),
