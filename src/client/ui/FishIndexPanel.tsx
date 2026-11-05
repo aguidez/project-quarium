@@ -1,5 +1,4 @@
 import React, { useState } from "@rbxts/react";
-import { isEggAvailable, isSpeciesAvailable } from "shared/types/alpha";
 import { EGG_TYPES, EggType, getHatchChance } from "shared/types/eggs";
 import { FISH_TYPES, FishType, getFishIndexOrder, isEasterEgg } from "shared/types/fish";
 import { getHatchedVariant, PlayerData } from "shared/types/playerData";
@@ -44,19 +43,19 @@ type HoverHandler = (variant: FishVariant | undefined) => void;
 
 export interface FishIndexPanelProps {
 	/** Fish hatched so far, per type and per rare variant (PlayerData). */
-	collection: Pick<PlayerData, "hatched" | "hatchedVariants" | "rebirths">;
+	collection: Pick<PlayerData, "hatched" | "hatchedVariants">;
 	/** The player's variant luck (getPlayerVariantLuck): the chances shown are the ones they hatch with. */
 	luck: number;
 	onClose: () => void;
 }
 
-/** Eggs a fish hatches from, with the odds: "Common Egg 80% · Improved Egg 30%", in shop order (the alpha's only). */
-function getSources(fishType: FishType, rebirths: number): string {
+/** Eggs a fish hatches from, with the odds: "Common Egg 80% · Improved Egg 30%", in shop order. */
+function getSources(fishType: FishType): string {
 	const easterEgg = FISH_TYPES[fishType].easterEgg;
 	if (easterEgg) return easterEgg.source;
 	const eggTypes = new Array<EggType>();
 	for (const [eggType] of pairs(EGG_TYPES)) {
-		if (getHatchChance(eggType, fishType) > 0 && isEggAvailable(eggType, rebirths)) eggTypes.push(eggType);
+		if (getHatchChance(eggType, fishType) > 0) eggTypes.push(eggType);
 	}
 	eggTypes.sort((a, b) => EGG_TYPES[a].order < EGG_TYPES[b].order);
 	const lines = eggTypes.map((eggType) => `${EGG_TYPES[eggType].displayName} ${getHatchChance(eggType, fishType)}%`);
@@ -281,7 +280,7 @@ function FishRow(props: {
 				/>
 				<Text
 					order={4}
-					text={getSources(props.fishType, props.collection.rebirths)}
+					text={getSources(props.fishType)}
 					size={13}
 					color={NAVY.muted}
 					height={16}
@@ -322,12 +321,8 @@ function SectionTitle(props: { order: number; text: string }) {
  */
 export function FishIndexPanel(props: FishIndexPanelProps) {
 	const [hovered, setHovered] = useState<FishVariant>();
-	// The species the player can find (the alpha's, plus any hatched before it)
-	const order = getFishIndexOrder().filter(
-		(fishType) =>
-			!isEasterEgg(fishType) &&
-			(isSpeciesAvailable(fishType, props.collection.rebirths) || (props.collection.hatched[fishType] ?? 0) > 0),
-	);
+	// Every species of the eggs (the easter eggs have their own category)
+	const order = getFishIndexOrder().filter((fishType) => !isEasterEgg(fishType));
 	const secrets = getFishIndexOrder().filter(
 		(fishType) => isEasterEgg(fishType) && (props.collection.hatched[fishType] ?? 0) > 0,
 	);

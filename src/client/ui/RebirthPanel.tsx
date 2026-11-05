@@ -5,11 +5,9 @@ import { PlayerData } from "shared/types/playerData";
 import {
 	AQUARIUM_THEMES,
 	formatMultiplier,
-	getAquariumTheme,
 	getNextRebirth,
 	getRebirthMultiplier,
 	getRebirthOceanPoints,
-	REBIRTHS,
 } from "shared/types/rebirths";
 import { Button3D, Card, Plate, ProgressBar, TextStroke } from "./kit";
 import { formatNumber, getWrappedHeight, Panel, PANEL_INNER_WIDTH } from "./Panel";
@@ -180,20 +178,15 @@ export function RebirthPanel(props: RebirthPanelProps) {
 	}, [confirming]);
 
 	if (!upcoming) {
-		// The last rebirth of the game, or of the alpha (REBIRTHS has more)
-		const alphaEnd = props.rebirths < REBIRTHS.size();
+		// The last rebirth of the game
 		return (
 			<Panel title="REBIRTH" banner={PALETTES.purple} onClose={props.onClose}>
 				<Hero from={getRebirthMultiplier(props.rebirths)} to={getRebirthMultiplier(props.rebirths)} />
 				<Row
 					order={2}
 					image={V2_IMAGES.iconRebirth}
-					title={alphaEnd ? "Last aquarium of the alpha!" : "Voyage complete!"}
-					body={
-						alphaEnd
-							? `You reached the ${AQUARIUM_THEMES[getAquariumTheme(props.rebirths)].displayName}, the last aquarium of the alpha. More aquariums arrive with the full game!`
-							: "You reached the Cosmic Sanctuary, the last aquarium of the ocean for now. More aquariums arrive with the next update!"
-					}
+					title="Voyage complete!"
+					body="You reached the Cosmic Sanctuary, the last aquarium of the ocean for now. More aquariums arrive with the next update!"
 				/>
 			</Panel>
 		);

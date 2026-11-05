@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "@rbxts/react";
 import { Workspace } from "@rbxts/services";
-import { isEggAvailable } from "shared/types/alpha";
 import { EGG_TYPES, EggType, getEggPrice, STARTER_EGG } from "shared/types/eggs";
 import { canBuyEggs } from "shared/types/onboarding";
 import {
@@ -34,7 +33,7 @@ const ARROW_SIZE = new Vector2(36, 56);
 const ARROW_MARGIN = 14; // shelf edge to arrow
 const ARROW_GAP = 12; // arrow to the first / last slot
 const SHOP_ORDER = getShopOrder();
-/** The shelf keeps room for its arrows (every egg of the game); with fewer eggs (the alpha's six) they hide. */
+/** The shelf keeps room for its arrows when the eggs don't all fit in it. */
 const HAS_ARROWS = SHOP_ORDER.size() > SLOT_COUNT;
 /** Shelf edge to the first slot. */
 const SLOTS_INSET = HAS_ARROWS ? ARROW_MARGIN + ARROW_SIZE.X + ARROW_GAP : SHELF_PADDING;
@@ -134,8 +133,7 @@ export function ShopBar(props: ShopBarProps) {
 	const money = data?.money ?? 0;
 	const fishAndEggs = data ? getFishAndEggs(data) : 0;
 
-	// The eggs in the game for this player (the alpha's, see isEggAvailable)
-	const order = SHOP_ORDER.filter((eggType) => isEggAvailable(eggType, data?.rebirths ?? 0));
+	const order = SHOP_ORDER;
 	const showArrows = order.size() > SLOT_COUNT;
 
 	// The shelf follows the player's best eggs until they move it; a new egg unlocking brings it back there

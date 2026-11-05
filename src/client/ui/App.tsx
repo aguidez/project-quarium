@@ -418,7 +418,7 @@ export function App(props: AppProps) {
 							: undefined
 					}
 					oceanCoach={oceanTutorial && openPanel !== "Ocean"}
-					oceanBadge={hasClaimableOceanReward(data.oceanPoints, data.oceanRewardsClaimed, data.rebirths)}
+					oceanBadge={hasClaimableOceanReward(data.oceanPoints, data.oceanRewardsClaimed)}
 					onRebirth={
 						rebirthUnlocked
 							? () => {
@@ -532,7 +532,6 @@ export function App(props: AppProps) {
 					key="OceanPanel"
 					tank={data}
 					oceanPoints={data.oceanPoints}
-					rebirths={data.rebirths}
 					showTutorial={oceanTutorial}
 					onRelease={(fishType, variant) => {
 						releasedFish.current = true;

@@ -139,7 +139,7 @@ function migrateStory(old: QuestProgress): QuestsData["lines"] {
 }
 
 /** Keeps valid story line entries (quest of that line, sane progress), then opens what can be opened. */
-function sanitizeStoryLines(quests: QuestsData, companions: readonly CompanionType[], rebirths: number) {
+function sanitizeStoryLines(quests: QuestsData, companions: readonly CompanionType[]) {
 	const old = (quests as unknown as { story?: QuestProgress }).story;
 	// Reconcile has already filled `lines` from the template (a fresh Story1) in an old save: the old chain wins
 	const raw = old !== undefined && getQuestConfig(old.id) !== undefined ? migrateStory(old) : (quests.lines ?? {});
@@ -150,7 +150,7 @@ function sanitizeStoryLines(quests: QuestsData, companions: readonly CompanionTy
 		if (getStoryLine(quest.id) !== storyLine || !isCount(quest.progress)) continue;
 		lines[storyLine] = { id: quest.id, progress: quest.progress, claimed: quest.claimed === true };
 	}
-	refreshStoryLines(lines, companions, rebirths);
+	refreshStoryLines(lines, companions);
 	quests.lines = lines;
 	(quests as unknown as { story?: QuestProgress }).story = undefined; // the single chain is gone for good
 }
@@ -200,7 +200,7 @@ export function sanitizeSave(save: SaveData) {
 	data.starPower = math.min(math.max(data.starPower, data.starCharge), STAR_MAX_BARS);
 	data.starCharge = 0;
 	data.rebirths = isCount(data.rebirths) ? math.min(math.floor(data.rebirths), REBIRTHS.size()) : 0;
-	sanitizeStoryLines(data.quests, data.companions, data.rebirths);
+	sanitizeStoryLines(data.quests, data.companions);
 	// Rebirth unlocked before its quest existed (it came with the first affordable rebirth): line done
 	const rebirthQuest = data.quests.lines.Rebirth;
 	// (only Saving Up: the Voyage quests after it in the same line are claimed normally)

@@ -59,7 +59,7 @@ export const COSMETICS: Record<CosmeticId, CosmeticConfig> = {
 	TitleAlphaPioneer: {
 		kind: "Title",
 		displayName: "Alpha Pioneer",
-		description: "A title for the testers who reached the end of the alpha.",
+		description: "A title for the testers who reached the end of the alpha. No longer earned.",
 	},
 	TitleOceanLegend: {
 		kind: "Title",

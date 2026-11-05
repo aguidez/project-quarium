@@ -1,4 +1,3 @@
-import { isOceanMilestoneAvailable } from "./alpha";
 import { CompanionType } from "./companions";
 import { CosmeticId } from "./cosmetics";
 
@@ -214,14 +213,9 @@ export function getOceanMilestone(id: string): OceanMilestone | undefined {
 	return OCEAN_MILESTONES.find((milestone) => milestone.id === id);
 }
 
-/** The milestones a player can reach (all of them, or the alpha's, see isOceanMilestoneAvailable). */
-export function getAvailableOceanMilestones(rebirths: number): OceanMilestone[] {
-	return OCEAN_MILESTONES.filter((milestone) => isOceanMilestoneAvailable(milestone.points, rebirths));
-}
-
 /** A milestone reached and not claimed yet (badge on the Ocean button). */
-export function hasClaimableOceanReward(oceanPoints: number, claimed: readonly string[], rebirths: number): boolean {
-	return getAvailableOceanMilestones(rebirths).some(
+export function hasClaimableOceanReward(oceanPoints: number, claimed: readonly string[]): boolean {
+	return OCEAN_MILESTONES.some(
 		(milestone) => oceanPoints >= milestone.points && !claimed.includes(milestone.id),
 	);
 }

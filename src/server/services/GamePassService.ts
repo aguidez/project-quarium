@@ -1,7 +1,6 @@
 import { MarketplaceService, Players } from "@rbxts/services";
 import { Lifecycle } from "shared/framework";
 import { getRemoteEvent, Reward } from "shared/network";
-import { arePassesOnSale } from "shared/types/alpha";
 import { GAME_PASSES, GamePass, getPassById, isGamePass } from "shared/types/gamepasses";
 import { getCompanionSlots } from "shared/types/playerData";
 import { DataService } from "./DataService";
@@ -44,7 +43,7 @@ class GamePassServiceSingleton implements Lifecycle {
 
 	private prompt(player: Player, pass: GamePass) {
 		const id = GAME_PASSES[pass].id;
-		if (id <= 0 || !arePassesOnSale()) {
+		if (id <= 0) {
 			DataService.notify(player, `${GAME_PASSES[pass].displayName} isn't on sale yet.`, "info");
 			return;
 		}

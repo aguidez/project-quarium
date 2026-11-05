@@ -3,7 +3,6 @@ import { t } from "@rbxts/t";
 import { formatNumber } from "shared/format";
 import { Lifecycle } from "shared/framework";
 import { getRemoteEvent, Reward } from "shared/network";
-import { isStoryQuestAvailable } from "shared/types/alpha";
 import { COMPANION_TYPES, CompanionType } from "shared/types/companions";
 import { COSMETICS } from "shared/types/cosmetics";
 import { FEATURES } from "shared/types/features";
@@ -128,7 +127,7 @@ class QuestServiceSingleton implements Lifecycle {
 			changed = true;
 		}
 		// Lines opened by something else than a quest (a companion earned in the Ocean...)
-		if (refreshStoryLines(data.quests.lines, data.companions, data.rebirths)) changed = true;
+		if (refreshStoryLines(data.quests.lines, data.companions)) changed = true;
 		if (changed) DataService.sync(player);
 		// Money also comes from elsewhere than coins (quest rewards...)
 		this.reportGauges(player);
@@ -267,12 +266,11 @@ class QuestServiceSingleton implements Lifecycle {
 		const line = getStoryLine(questId);
 		if (line && data.quests.lines[line] === quest) {
 			// The line's next quest starts right away, from zero (the last one stays, claimed: a quest added
-			// to the line later starts on the next join, one left out of the alpha never), and lines waiting for this
-			// quest open
+			// to the line later starts on the next join), and lines waiting for this quest open
 			const nextId = STORY_LINES[line].quests[STORY_LINES[line].quests.indexOf(questId) + 1];
-			if (nextId !== undefined && isStoryQuestAvailable(nextId, data.rebirths))
+			if (nextId !== undefined)
 				data.quests.lines[line] = { id: nextId, progress: 0, claimed: false };
-			refreshStoryLines(data.quests.lines, data.companions, data.rebirths);
+			refreshStoryLines(data.quests.lines, data.companions);
 		}
 		DataService.sync(player);
 		for (const reward of config.rewards) this.grant(player, reward);

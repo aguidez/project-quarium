@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-05 (V0.60.20: mobile locked to landscape).
+> Last updated: 2026-11-05 (V1.0.0: the release, the alpha removed, the whole game open).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -38,10 +38,9 @@ coins. Around that core loop:
 - easter eggs: secret fish hidden in every egg (the French Fish), made by an event (the Alien Fish of the UFO
   night) or brought by a like (Sugar), their own Fish Index category.
 
-18 species (+ 3 secret), 12 eggs, 8 rebirths: the whole V1 content. **The alpha is on** (`shared/types/alpha.ts`,
-`ALPHA_ENABLED`): players get the first ~2h of it only (rebirths 1–2, the eggs up to the Neon Coral Egg, the nine first
-species, the Ocean milestones up to the second incubator, the story quests of that part, the dailies, no weekly quest,
-no gamepass for sale); finding the nine species ends it with the "Alpha Pioneer" title (§3.4 Alpha). **`BALANCE.md`** holds the expected progression
+18 species (+ 3 secret), 12 eggs, 8 rebirths: the whole V1 content, all of it open since
+the release (V1.0.0). The testers who finished the alpha (V0.60) keep its "Alpha Pioneer" title; nobody earns it
+any more. **`BALANCE.md`** holds the expected progression
 (rebirth 1 ~19 min … all eighteen species ~12h20 for a player of 1 h a day), every number and the design rules.
 How to add content: `docs/agent-notes/content-recipes.md`. **`ROADMAP_V1.1.md`**: the plan after V1 (animation revamp with Blender skeletons, steps A0–A8).
 
@@ -183,7 +182,7 @@ ProjectQuarium/
    ├─ shared/                Code + config used by both sides (ReplicatedStorage)
    │  ├─ framework.ts        Lifecycle + bootstrap
    │  ├─ version.ts          GAME_VERSION (the top patch of RELEASE_NOTES.md: bump it with each patch), getVersionLabel
-   │  │                      ("Alpha V0.60.0" while ALPHA_ENABLED): App shows it small and faded, bottom-right
+   │  │                      ("V1.0.0"): App shows it small and faded, bottom-right
    │  ├─ format.ts           formatNumber ("1,234,567", from 1e12 "1.23T") / formatShort ("25K", "1.5M", "1.8T", "1Qa"):
    │  │                      UI and server messages (Luau's tostring breaks from 1e14); Panel.tsx re-exports them
    │  ├─ network.ts          Remote contracts + getRemoteEvent(name) (Remotes folder in ReplicatedStorage), FishView / FishMessage
@@ -251,16 +250,10 @@ ProjectQuarium/
    │     │                   meal feeds (perks' satiety bonus), the more filling the food looks
    │     ├─ oceanRewards.ts  OCEAN_MILESTONES (id, points, title, description, reward: Companion / CompanionSlot /
    │     │                   CompanionUpgrade {companion, multiplier} / Capacity {capacity} / Incubator {count} /
-   │     │                   VariantLuck {multiplier} / Cosmetic {cosmetics}), getOceanMilestone, getAvailableOceanMilestones (the
-   │     │                   alpha's), hasClaimableOceanReward,
+   │     │                   VariantLuck {multiplier} / Cosmetic {cosmetics}), getOceanMilestone, hasClaimableOceanReward,
    │     │                   getCompanionMultiplier (Snail: speed, Pelican: feeding rate), getVariantLuck (from the claimed list)
    │     ├─ features.ts      Feature ("Ocean" and "Rebirth", unlocked by quests), FEATURES (drawn `image` per feature),
    │     │                   MIN_FISH_KEPT
-   │     ├─ alpha.ts         The alpha's limits (§3.4 Alpha): ALPHA_ENABLED (off = the full game), ALPHA_MAX_REBIRTHS (2),
-   │     │                   ALPHA_LAST_EGG (NeonCoral), ALPHA_MAX_OCEAN_POINTS (5,000), ALPHA_STORY_QUESTS, ALPHA_TITLE,
-   │     │                   ALPHA_SPECIES; isAlphaLimited(rebirths) (a save past the alpha keeps the whole game),
-   │     │                   isRebirthAvailable / isNextRebirthAvailable, isEggAvailable, isSpeciesAvailable,
-   │     │                   isOceanMilestoneAvailable, isStoryQuestAvailable, arePassesOnSale, hasFinishedAlpha
    │     ├─ admin.ts         ADMIN_PANEL_ATTRIBUTE (player: may open the admin panel), AdminTab / ADMIN_TABS (one
    │     │                   tab per admin tool: Events, Aquariums, Servers), AdminTankInfo / AdminTankFish (the Aquariums
    │     │                   tab's data), ADMIN_TANKS_REFRESH (3 s), AdminServerInfo / AdminServersSync (the Servers tab's)
@@ -305,7 +298,7 @@ ProjectQuarium/
    │  ├─ saveData.ts         SaveData (profile: PlayerData + saved tank + stats + leaderboardBanned), SavedFish,
    │  │                      SAVE_TEMPLATE, sanitizeSave
    │  ├─ playerStats.ts      PlayerStats (server only, never synced): sessions, days, play / tending seconds, milestones
-   │  │                      {tending, play, days, at} ("Onboarding:<step>", "Rebirth<n>", "Species:<type>", "AlphaComplete", "AllSpecies",
+   │  │                      {tending, play, days, at} ("Onboarding:<step>", "Rebirth<n>", "Species:<type>", "AllSpecies",
    │  │                      "Ocean:<id>", "Quest:<id>"; tending -1 = reached before the stats existed: `legacy`), coins
    │  │                      dropped / clicked / by a companion, meals by hand, quests claimed, boost minutes, likes given,
    │  │                      platforms, per-device fps / memory / swim budget, testSpeed / testSpeedUsed, testNoPasses,
@@ -420,9 +413,6 @@ ProjectQuarium/
    │     │                   "BuyGamePass" intent → PromptGamePassPurchase; a lost slot pass unequips the extra companion;
    │     │                   setTestPass ("/pass"), setTestNoPasses ("/passes"). The game's creator owns every pass (Studio
    │     │                   shows OWNED)
-   │     ├─ AlphaService     The end of the alpha: every alpha species hatched (onFishSpawned, and at join without a popup)
-   │     │                   → the ALPHA_TITLE and the "ALPHA COMPLETE!" thank-you Reward inviting feedback; only while
-   │     │                   ALPHA_ENABLED
    │     ├─ LikeService      Places a like board beside each tank, GiveLike (range / own tank / cooldown), onLikeGiven,
    │     │                   onLikeSent (giver, owner: after the notices),
    │     │                   keeps each owner's boost in memory (getCoinMultiplier), publishes likes + boost as attributes
@@ -850,8 +840,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   in parallel** (STORY_LINES): each open line has one current quest; claiming one starts its line's next quest (the
   last one stays, claimed; a quest added later to the line starts on the next join) and opens the lines that
   `requires` it (`refreshStoryLines`, also run on load and every 5 s, so a `requiresCompanion` line shows up within
-  5 s). During the alpha a line stops, finished, at its first quest out of `ALPHA_STORY_QUESTS` (`isStoryQuestAvailable`,
-  in `refreshStoryLines` and the claim). Start (Story1 "Coin Collector" → the Snail) opens Ocean (Story2 "Full House" → the Ocean feature), Rebirth
+  5 s). Start (Story1 "Coin Collector" → the Snail) opens Ocean (Story2 "Full House" → the Ocean feature), Rebirth
   (Story9 "Saving Up": gauge MoneyHeld = REBIRTHS[0].price, written out because rebirths.ts can't be imported by
   quests.ts → the "Rebirth" feature, then the 16 Voyage quests: a signature species or a rebirth per aquarium, to
   "Master Aquarist") and Hatchery; the Snail / Pelican lines give perks; the paid lines (`requiresPass`) count nothing
@@ -929,17 +918,6 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   lists are re-sorted and cut to 100, and each client gets `LeaderboardSync` with its own scores. A profile with
   `SaveData.leaderboardBanned` (moderation) or `testSpeedUsed` (the owner's `/speed`) is left out and its entries
   removed from the stores.
-- **Alpha** (`shared/types/alpha.ts`, while `ALPHA_ENABLED`). The limits apply to a save with at most
-  `ALPHA_MAX_REBIRTHS` (2) rebirths (`isAlphaLimited`): a save already past them (made before the alpha, e.g. the
-  owner's test profile) keeps the whole game, the alpha never takes back what a save has. `getNextRebirth` returns
-  nothing after rebirth 2 (RebirthPanel: "Last aquarium of the alpha!"); `isEggUnlocked` refuses the eggs after the Neon
-  Coral Egg (the shelf shows the six alpha eggs, its arrows hidden); OceanService refuses the milestones past 5,000
-  points and the Ocean panel lists the alpha's with "More Ocean rewards arrive with the full game!" under them (the
-  points keep counting); the Fish Index lists the alpha species (+ any already hatched) and their alpha eggs only;
-  Customize lists the alpha themes; the weekly tab says weekly quests arrive with the full game. AlphaService grants
-  `ALPHA_TITLE` ("Alpha Pioneer", kept forever) with an "ALPHA COMPLETE!" Reward inviting feedback (never naming an
-  off-platform place: Roblox forbids it) the first time every alpha species is hatched; StatsService stamps
-  `AlphaComplete`. For the release: `ALPHA_ENABLED = false`, nothing else to undo.
 - **Leaderboard titles.** Every minute each server checks the UTC day. Without today's snapshot in memory it reads the
   DataStore key (`LeaderboardTitles_v1` / `Daily`: `{day, ranks: {board: UserIds best first}}`); if that one is
   older, the server takes a new one from the stores' top 10 (`GetSortedAsync(false, 10)`, all three boards or nothing)
@@ -962,8 +940,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   Feed (the food reserve appears, the card above it) → Done (+300 $). Menus (side buttons) appear only once the onboarding is Done.
   `STORY_QUEST_HINT_DELAY` later, a coach bubble on the Quests button points at the Snail quest (client-only: shows only
   if the onboarding was played in this session and Story1 is still to claim; ends when the book is opened).
-- **Gamepasses.** None is sold during the alpha (`arePassesOnSale`: the shop cards say SOON, GamePassService refuses the
-  prompt; passes already owned keep working). Shop card → `BuyGamePass` → GamePassService checks the pass has an id and isn't owned, then
+- **Gamepasses.** Shop card → `BuyGamePass` → GamePassService checks the pass has an id and isn't owned, then
   `MarketplaceService.PromptGamePassPurchase`; Roblox fires `PromptGamePassPurchaseFinished` on the server, which adds
   the pass to `PlayerData.passes`, syncs and sends a thank-you Reward. Passes are asked again from Roblox at each join
   (a refund takes it away; an outage keeps the save). Effects are read live where they act: coin value x1.5 (every
@@ -1014,9 +991,9 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
 - **Studio captures** don't show BillboardGuis parented to PlayerGui (hunger badges, popups): check them by script.
 - **Roblox moderation**: a "Firefighter" fish was dropped, its icon got the account a warning (a nozzle in its mouth,
   read as a cigarette). Rules in CLAUDE.md §7.
-- **Gamepasses in the alpha**: the code sells none, but a pass on sale on the Creator Dashboard can still be bought from
-  the game's Roblox page (and works at the next join): keep them off sale there until the release.
-- **Left before V1** (the owner's): gamepass prices at the release, then the calibration with real players
+- **Gamepasses on sale**: the code offers every pass with an id, but Roblox only sells the ones put on sale (with a
+  price) on the Creator Dashboard; the shop card of one off sale there says SOON.
+- **After the release** (the owner's): the calibration with real players
   (`npm run stats` vs BALANCE.md §2). Kpop is the only admin-only
   event (its flat beat coins give a 30 s fish x14 for a minute); the UFO night's track is `musicId` 87373069356270.
 - **Starfall**: its track is `musicId` 88076339607645 (the owner's choice). The stars are a ★ text glyph on a billboard

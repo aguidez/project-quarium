@@ -11,6 +11,27 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.0.0 — 2026-11-05
+
+The release: the alpha is over, the whole game is open.
+
+**New**
+- **The whole ocean**: all 8 aquariums (Pirate Wreck, Atlantis, Mariana Trench, Volcanic Temple, Crystal Caverns,
+  Cosmic Sanctuary after the Neon Coral Lagoon), the 12 eggs and the 18 species, every Ocean milestone (up to the
+  25-fish tank, the Water Hen, the Swordfish, the Jellyfish, the Pearl rims and the Ocean Guardian title), the rest of the
+  story quests (the Voyage to "Master Aquarist", Hatchery, Collector, the companions' lines) and the weekly quests from
+  rebirth 3.
+- **Gamepasses on sale** in the fisherman's shop: Third Companion Slot, x2 Ocean Points, Lucky, +50% Coins and the
+  Water Hen / Swordfish / Jellyfish passes.
+
+**Changes**
+- The version in the corner reads "V1.0.0" (no more "Alpha").
+- The **Alpha Pioneer** title can no longer be earned: the testers who found every fish of the alpha keep it forever.
+- A story line that stopped at the end of the alpha goes on with its next quest at the next join.
+- The Fish Index lists every species with all its eggs; the Customize menu shows every aquarium theme.
+
+---
+
 ## V0.60.20 — 2026-11-05
 
 **Changes**

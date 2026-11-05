@@ -1,7 +1,6 @@
 import { bootstrap } from "shared/framework";
 import { AbyssService } from "./services/AbyssService";
 import { AdminService } from "./services/AdminService";
-import { AlphaService } from "./services/AlphaService";
 import { AquariumService } from "./services/AquariumService";
 import { CoinService } from "./services/CoinService";
 import { CompanionService } from "./services/CompanionService";
@@ -50,7 +49,6 @@ else bootstrap([
 	LikeService,
 	RebirthService,
 	GamePassService,
-	AlphaService,
 	TitleService,
 	CustomizationService,
 	StatsService,

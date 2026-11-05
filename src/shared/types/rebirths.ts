@@ -1,4 +1,3 @@
-import { isNextRebirthAvailable } from "./alpha";
 import { FISH_TYPES, FishType } from "./fish";
 import { getPassOceanMultiplier } from "./gamepasses";
 import { getLivingVariant, PlayerData } from "./playerData";
@@ -72,9 +71,9 @@ export const REBIRTHS: readonly RebirthConfig[] = [
 	{ price: 2.2e12, multiplier: 8000, startMoney: 300, theme: "CosmicSanctuary" },
 ];
 
-/** The rebirth a player who has done `rebirths` of them can do next (undefined once all are done, or the alpha's). */
+/** The rebirth a player who has done `rebirths` of them can do next (undefined once all are done). */
 export function getNextRebirth(rebirths: number): RebirthConfig | undefined {
-	return isNextRebirthAvailable(rebirths) ? REBIRTHS[rebirths] : undefined;
+	return REBIRTHS[rebirths];
 }
 
 /** Permanent coin multiplier after `rebirths` rebirths. */

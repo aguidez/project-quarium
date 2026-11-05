@@ -3,7 +3,7 @@
 > The game's balance: what an average player reaches after how long, and why. **Update it in the same task whenever a
 > number of the economy changes** (fish income, eggs, odds, rebirths, Ocean milestones, variants, food, capacity,
 > companions…): run the simulators, copy their results here, add a line to the history (§6).
-> Last updated: 2026-11-03 (V0.60.6: food is free, a reserve of 5 portions instead; the early game is faster, §6).
+> Last updated: 2026-11-05 (V1.0.0: the release, the alpha's limits gone, no number changed; §6, §7).
 
 
 **Where the numbers live**: `src/shared/types/fish.ts` (species), `eggs.ts` (eggs), `rebirths.ts` (rebirths),
@@ -633,10 +633,14 @@ content (species, eggs, aquariums, capacity, companions themselves) away from fr
 | V0.60.6 | Food is free (was 10 $ a pellet; the beta's players spent all their money on it); the food reserve (5 portions, each back 10 s after use) limits the pace instead, not simulated (§4). Simulator `P.food` 10 → 0; nothing re-tuned (the owner: a faster start is fine) | Faster early game, the same end: rebirth 1 ~25 → **~19 min** (15–23), first six species ~55 → ~46 min, rebirth 2 ~1h32 → ~1h24, the alpha's end (Imperial Discus) ~2h15 → **~2h04** (1h43–2h29), rebirth 3 ~2h46 → ~2h40, rebirth 8 ~11h03 → ~10h56, all eighteen species ~12h32 → **~12h18** (11h35–13h01). The cost was ~0.29 $/s per fish: it weighed on the first half-hour, nothing later |
 | V0.60.9 | On joining, each fish's first coin falls at a random time between 1 and 2 of its intervals (was exactly 1), then the usual pace: the coins no longer drop in chorus. Not simulated (the simulator's income is continuous) | One coin per fish later on average, half an interval of its income per session: 2–15 s of a fish's income an hour (4–30 s intervals), under 0.5 % of a 1 h session. Timeline unchanged |
 | V0.60.14 | Sugar, easter egg of the likes: 1 % of the likes a player gives, into the giver's tank (even a full one, one per tank), a sugar cube as often as the best fish's coin, worth 1.1 x it, 500 Ocean Points, stays. Not simulated (likes are not modelled) | Timeline unchanged; +1.1 / N of a tank of N similar fish while she stays (+4 % for 25 fish, +11 % for 10, more early) |
+| V1.0.0 | The release: the alpha's limits removed (all 8 rebirths and 12 eggs, every Ocean milestone and story quest, the weekly quests from rebirth 3, the gamepasses on sale); no number changed | Unchanged: the timeline of §2 (rebirth 8 ~10h56, all eighteen species ~12h18) is now every player's; the gamepasses stay outside the balance (§5.10) |
 
 ---
 
-## 7. The alpha (V0.60.0, `shared/types/alpha.ts`)
+## 7. The alpha (V0.60.0 – V0.60.20, ended with V1.0.0)
+
+**Over since V1.0.0 (2026-11-05)**: the whole game is open and `shared/types/alpha.ts` is gone. Kept as the record of
+what the testers played; its "Alpha Pioneer" title stays with those who earned it, nobody earns it any more.
 
 A short version for the first testers, decided by the owner (2026-11-03): **~2 h of play**, the content the
 reference player reaches in that time, then feedback for V1. Nothing in the economy changes: the alpha only stops the
@@ -655,4 +659,4 @@ since the free food (V0.60.6, 2,000 players) the Imperial Discus comes at **~2h0
 A player who stops at the cut-off can keep farming the Neon Coral Egg for the variants (36 Fish Index entries) and
 Ocean Points; nothing else opens. Stopping at rebirth 1 would have given ~1h10, at rebirth 3 + the Catfish ~3h40.
 Gamepasses are not sold: the +50 % Coins pass alone would bring the end to ~1h34 (1h22–1h49, simulator `{"P":{"coinBoost":1.5}}`) and skew the feedback.
-`tools/player-stats.js` expects the `AlphaComplete` milestone at ~125 min.
+The `AlphaComplete` stats milestone went with the alpha (V1.0.0).

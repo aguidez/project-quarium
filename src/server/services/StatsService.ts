@@ -1,7 +1,6 @@
 import { AnalyticsService, Players, Workspace } from "@rbxts/services";
 import { t } from "@rbxts/t";
 import { Lifecycle } from "shared/framework";
-import { ALPHA_TITLE } from "shared/types/alpha";
 import { FISH_TYPES, FishType, isEasterEgg } from "shared/types/fish";
 import { isOnboardingDone, ONBOARDING_STEPS } from "shared/types/onboarding";
 import { QuestConfig } from "shared/types/quests";
@@ -197,7 +196,6 @@ class StatsServiceSingleton implements Lifecycle {
 			}
 		}
 		if (speciesFound >= species) reached.push("AllSpecies");
-		if (data.cosmetics.includes(ALPHA_TITLE)) reached.push("AlphaComplete"); // AlphaService
 		for (const id of data.oceanRewardsClaimed) reached.push(`Ocean:${id}`);
 		for (const id of reached) this.stamp(player, save.stats, id, unknownTime);
 	}

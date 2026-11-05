@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "@rbxts/react";
 import { MarketplaceService } from "@rbxts/services";
-import { arePassesOnSale } from "shared/types/alpha";
 import { GAME_PASSES, GamePass, getShopPasses } from "shared/types/gamepasses";
 import { Button3D, Chip, ItemSlot, Plate, TextStroke } from "./kit";
 import { Panel } from "./Panel";
@@ -65,7 +64,7 @@ export interface ShopPanelProps {
 function PassCard(props: { order: number; pass: GamePass; owned: boolean; price?: PassPrice; onBuy: () => void }) {
 	const config = GAME_PASSES[props.pass];
 	const palette = PASS_PALETTES[props.pass] ?? PALETTES.blue;
-	const onSale = config.id > 0 && props.price !== "OffSale" && arePassesOnSale(); // none during the alpha
+	const onSale = config.id > 0 && props.price !== "OffSale";
 	const label = props.owned ? "OWNED" : !onSale ? "SOON" : props.price !== undefined ? `R$ ${props.price}` : "BUY";
 	return (
 		<Plate
