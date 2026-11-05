@@ -11,6 +11,14 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V0.60.20 — 2026-11-05
+
+**Changes**
+- **Phones and tablets play in landscape only**: the screen no longer turns to portrait; it follows the device
+  between the two landscape sides.
+
+---
+
 ## V0.60.19 — 2026-11-05
 
 **New**

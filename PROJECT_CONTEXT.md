@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-05 (V0.60.19: PlayerListService, the player list shows each player's $/s and rebirth).
+> Last updated: 2026-11-05 (V0.60.20: mobile locked to landscape).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -52,7 +52,7 @@ How to add content: `docs/agent-notes/content-recipes.md`. **`ROADMAP_V1.1.md`**
 | Topic | Choice |
 |---|---|
 | Language | TypeScript compiled to Luau by **roblox-ts 3** (`noLib`: no Node/browser globals; use `task.*`, `math.random`, `os.clock`, `print/warn`, `.size()`) |
-| Sync | **Rojo 7.7.1** (aftman). `default.project.json` maps `out/server` → ServerScriptService.TS, `out/shared` → ReplicatedStorage.TS, `out/client` → StarterPlayerScripts.TS, `out/first` → ReplicatedFirst.TS (loading screen). Never edit those scripts in Studio. A change to `default.project.json` needs `rojo serve` restarted (and the plugin reconnected) |
+| Sync | **Rojo 7.7.1** (aftman). `default.project.json` maps `out/server` → ServerScriptService.TS, `out/shared` → ReplicatedStorage.TS, `out/client` → StarterPlayerScripts.TS, `out/first` → ReplicatedFirst.TS (loading screen); it also sets StarterGui `ScreenOrientation = LandscapeSensor` (mobile locked to landscape, set again on PlayerGui by the loading screen). Never edit those scripts in Studio. A change to `default.project.json` needs `rojo serve` restarted (and the plugin reconnected) |
 | Packages | `@rbxts/react` + `react-roblox` (UI), `@rbxts/t` (runtime validation), `@rbxts/janitor` (cleanup), `@rbxts/services`, `@rbxts/profile-store` (player saves, see §3.1) |
 | Build / check | `npx rbxtsc` after every change; it must report zero errors |
 | Workspace | Windows or macOS, set up from `SETUP.md`; `npm run doctor` checks a machine. Machine-specific values (install paths, GPU flags, API keys) only in the git-ignored `workspace.local.json` (via `tools/local-config.js`), never in committed files; scripts are cross-platform Node. npm scripts: `build`, `watch`, `serve` (rojo serve), `sim` (economy simulator), `stats` (real players), `share-assets`, `group-mesh-upload`, `doctor`. `jimp` 0.22 and `@resvg/resvg-js` 2.6 (SVG → PNG without FigCraft) are devDependencies for the image tools |
@@ -173,7 +173,7 @@ ProjectQuarium/
 │                            outline, rim, shadow, shiny sparkles; pipeline in its header)
 └─ src/
    ├─ first/
-   │  └─ LoadingScreen.client.ts  ReplicatedFirst loading screen: the owner's picture (ScaleType Crop) and,
+   │  └─ LoadingScreen.client.ts  ReplicatedFirst loading screen (also locks PlayerGui.ScreenOrientation to LandscapeSensor first): the owner's picture (ScaleType Crop) and,
    │                         laid exactly over its painted logo (LOGO_RECT scaled like the crop), the logo sheet: empty letters,
    │                         then the full logo revealed from the bottom by 40 ImageRectOffset slices (a moving wave; one full
    │                         image once filled); imports NOTHING (no ReplicatedStorage yet). Waits for its artwork (≤ 8 s) and

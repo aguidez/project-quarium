@@ -41,6 +41,11 @@ const SMOOTHING = 4; // how fast the water catches up with the real progress (pe
 const player = Players.LocalPlayer;
 const startedAt = os.clock();
 
+// Phones and tablets play in landscape only (either side, following the sensor): the UI is laid out for a wide
+// screen. StarterGui.ScreenOrientation (default.project.json) already asks for it on join; set here too, as early
+// as possible, in case the place's StarterGui says otherwise.
+(player.WaitForChild("PlayerGui") as PlayerGui).ScreenOrientation = Enum.ScreenOrientation.LandscapeSensor;
+
 // ---------------------------------------------------------------------
 // UI
 // ---------------------------------------------------------------------
