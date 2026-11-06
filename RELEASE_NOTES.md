@@ -11,6 +11,18 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.7 — 2026-11-06
+
+**New**
+- **Fish swim with a will of their own** (every fish with bones):
+  - **at rest** between two moves, they hover in place, beating slowly and paddling with their side fins;
+  - **rushing to food**, they beat faster and wider;
+  - **in a turn**, their body bends into the curve and the tail trails behind the head;
+  - **weak with hunger**, their side fins droop and their tail sags, on top of their slower swim.
+  Everything blends smoothly, following how fast each fish really swims.
+
+---
+
 ## V1.1.6 — 2026-11-06
 
 **New**

@@ -219,13 +219,19 @@ blender-pipeline.
 
 ### A6 — Behaviour animations (M)
 
+Owner, 2026-11-06: all of them, in two patches: the continuous ones (turn, sprint, rest, weak: **V1.1.7**, preview
+`design/previews/v1.1-behaviours-1.gif`, from the fish's real speed against its species' wandering speed) then the
+moments (bite, joy when fed, growth flourish, release flick, caught by the abyss lantern). The fish in its card waits
+(the reveal and the Index show stickers) and so does the idol's dance (its texture, ROADMAP_FIXES.md).
+
 Procedural layers on top of the swim, or clips made in Blender (A2 decides which). A first list, to review with the
 owner before building:
 
-- [ ] Turn: the body bends into the curve when the fish changes direction.
-- [ ] Dash: faster beats and a body snap when it chases a pellet; a mouth snap when it eats.
-- [ ] Hungry / weak: slow beats, drooping fins (V1's lazy swim, richer).
-- [ ] Rest: hovering with soft fin paddling when it waits between two wander steps.
+- [x] Turn: the body bends into the curve when the fish changes direction (V1.1.7).
+- [ ] Dash: faster beats and a body snap when it chases a pellet (faster, wider beats: V1.1.7); a mouth snap when it
+      eats (patch 2).
+- [x] Hungry / weak: slow beats, drooping fins (V1's lazy swim, richer) (V1.1.7: drooping pectorals, sagging tail).
+- [x] Rest: hovering with soft fin paddling when it waits between two wander steps (V1.1.7).
 - [ ] Happy wiggle when fed, a little flourish when a fish grows a stage.
 - [ ] Released: a strong tail flick as it darts up to the surface; eaten by the Abyss villain: a struggle.
 - [ ] Hatch reveal and Fish Index: the fish swims in its card (if the ViewportFrame renders bones, A2).

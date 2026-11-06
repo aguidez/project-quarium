@@ -56,8 +56,26 @@ def _bone_t(arm, name, nose, length):
     return min(max((nose - head.y) / length, 0.0), 1.0)
 
 
-def add_swim_action(arm, speed=1.0):
-    """Keys a looping "Swim" action on every frame of the loop (linear, cyclic)."""
+# Behaviours (ROADMAP_V1.1 A6), as FishRigController plays them: beat (× rate), amount (× amplitude), paddle (×
+# pectoral rate), bend (degrees over the spine, a turn: tail trailing), droop (0 .. 1, weak: fins hang, tail sags).
+BEHAVIOURS = {
+    "Cruise": {},
+    "Rest": {"beat": 0.4, "amount": 0.4, "paddle": 0.75},
+    "Sprint": {"beat": 1.7, "amount": 1.3, "paddle": 1.4},
+    "Turn": {"bend": -28.0},
+    "Weak": {"beat": 0.61, "amount": 0.61, "paddle": 0.75, "droop": 1.0},
+}
+WEAK_FIN_DROOP = 35.0
+WEAK_TAIL_SAG = 15.0
+WEAK_FLUTTER = 0.5
+
+
+def add_swim_action(arm, speed=1.0, behaviour=None):
+    """Keys a looping "Swim" action on every frame of the loop (linear, cyclic); `behaviour` = a BEHAVIOURS entry."""
+    b = behaviour or {}
+    beat, amount, paddle = b.get("beat", 1.0), b.get("amount", 1.0), b.get("paddle", 1.0)
+    bend, droop = b.get("bend", 0.0), b.get("droop", 0.0)
+    fin_amount = max(amount, 0.75)
     bones = arm.data.bones
     nose = max(b.head_local.y for b in bones)
     length = nose - min(b.tail_local.y for b in bones)
@@ -74,30 +92,37 @@ def add_swim_action(arm, speed=1.0):
     scene.frame_start, scene.frame_end = 1, LOOP_FRAMES
     for frame in range(1, LOOP_FRAMES + 2):  # one extra key so the loop closes exactly
         u = (frame - 1) / LOOP_FRAMES
-        swim = u * SWIM_CYCLES * math.tau * speed
-        fin = u * FIN_CYCLES * math.tau * speed
-        mouth = u * MOUTH_CYCLES * math.tau * speed
+        swim = u * SWIM_CYCLES * math.tau * speed * beat
+        fin = u * FIN_CYCLES * math.tau * speed * max(paddle, beat)
+        mouth = u * MOUTH_CYCLES * math.tau * speed * beat
         poses = {}
-        spine = [b.name for b in bones if is_spine(b.name)]
+        spine = [bn.name for bn in bones if is_spine(bn.name)]
+        t_sum = sum(_bone_t(arm, n, nose, length) for n in spine) or 1.0
         for name in spine:
             t = _bone_t(arm, name, nose, length)
-            poses[name] = ((0, 0, 1), spine_peak(t, len(spine)) * math.sin(swim - t * BODY_WAVE))
-        for b in bones:
-            if b.name.startswith("Ear"):
-                poses[b.name] = ((1, 0, 0), EAR_FLOP * math.sin(swim - 1.8))
+            share = t / t_sum
+            poses[name] = ((0, 0, 1), amount * spine_peak(t, len(spine)) * math.sin(swim - t * BODY_WAVE) + bend * share,
+                           (1, 0, 0), droop * WEAK_TAIL_SAG * share)
+        for bn in bones:
+            if bn.name.startswith("Ear"):
+                poses[bn.name] = ((1, 0, 0), amount * EAR_FLOP * math.sin(swim - 1.8))
         fin_bone = "FinTop" if "FinTop" in bones else "FinBottom" if "FinBottom" in bones else None
         t_fin = _bone_t(arm, fin_bone, nose, length) if fin_bone else 0.5
-        flutter = FIN_FLUTTER * math.sin(swim - t_fin * BODY_WAVE - 1.2)
+        flutter = amount * (1 - (1 - WEAK_FLUTTER) * droop) * FIN_FLUTTER * math.sin(swim - t_fin * BODY_WAVE - 1.2)
         poses["FinTop"] = ((0, 1, 0), flutter)
         poses["FinBottom"] = ((0, 1, 0), -flutter)
-        poses["FinR"] = ((0, 0, 1), PECTORAL_PADDLE * math.sin(fin))
-        poses["FinL"] = ((0, 0, 1), -PECTORAL_PADDLE * math.sin(fin + math.pi))
-        poses["Jaw"] = ((1, 0, 0), JAW_OPEN * max(0.0, math.sin(mouth)) ** 2)
-        for name, (axis, degrees) in poses.items():
+        # Blender's length axis (-Y toward the tail) is Roblox's +Z: the droop tilts around (0, -1, 0)
+        poses["FinR"] = ((0, 0, 1), fin_amount * PECTORAL_PADDLE * math.sin(fin), (0, -1, 0), -droop * WEAK_FIN_DROOP)
+        poses["FinL"] = ((0, 0, 1), -fin_amount * PECTORAL_PADDLE * math.sin(fin + math.pi), (0, -1, 0), droop * WEAK_FIN_DROOP)
+        poses["Jaw"] = ((1, 0, 0), -amount * JAW_OPEN * max(0.0, math.sin(mouth)) ** 2)  # opens downward, as in the game
+        for name, pose in poses.items():
             pb = arm.pose.bones.get(name)
             if not pb:
                 continue
-            pb.rotation_quaternion = _rotation(pb, axis, degrees)
+            q = _rotation(pb, pose[0], pose[1])
+            if len(pose) > 2 and pose[3]:
+                q = q @ _rotation(pb, pose[2], pose[3])
+            pb.rotation_quaternion = q
             pb.keyframe_insert("rotation_quaternion", frame=frame)
     return action
 

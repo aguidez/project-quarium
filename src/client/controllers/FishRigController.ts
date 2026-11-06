@@ -1,7 +1,7 @@
 import { CollectionService, RunService, Workspace } from "@rbxts/services";
 import { Lifecycle } from "shared/framework";
 import { TAGS } from "shared/tags";
-import { HungerState } from "shared/types/fish";
+import { FISH_TYPES, FishType, HungerState } from "shared/types/fish";
 
 /**
  * Template attribute of a fish whose `Mesh` is a skinned mesh made in Blender (tools/blender/rig_fish.py): it swims
@@ -19,8 +19,32 @@ const SWIM_FREQUENCY = 1.6; // tail beats per second
 const FIN_FREQUENCY = 2.4;
 const MOUTH_FREQUENCY = 1.1;
 const BODY_WAVE = 3; // radians of lag from nose to tail tip
-const SLOW_SPEED = 0.45; // weak (unfed), asleep or leaving: lazy beats
+const SLOW_SPEED = 0.45; // asleep (a UFO's mutation) or leaving: lazy beats
 const SLOW_AMOUNT = 0.6; // ... and smaller ones
+
+// Behaviours (ROADMAP_V1.1 A6), from what the fish does on screen, compared with its species' wandering speed (the
+// server's segments: a chase is 2×, a weak fish 0.35×, a wait 0):
+//   rest (still)   slow, small beats; the pectorals keep paddling to hover
+//   cruise (1×)    V1's swim
+//   sprint (2×)    faster, wider beats (rushing to food)
+// The wandering itself eases in and out, so the beats follow each push.
+const REST_BEAT = 0.4; // × beat rate and amplitude at a standstill
+const REST_PADDLE = 0.75; // × pectoral rate at a standstill
+const SPRINT_BEAT = 1.7; // × beat rate at 2× speed
+const SPRINT_AMOUNT = 1.3; // × amplitude at 2× speed
+const SPRINT_PADDLE = 1.4;
+const SPEED_SETTLE = 4; // per second: how fast the beats follow a change of speed
+const SPEED_MAX = 2.5; // × cruise, clamps a jump (a fish rebuilt elsewhere)
+// Turn: the body bends into the curve, the tail trailing the head (seconds of yaw rate turned into a bend, shared
+// over the spine by each bone's t)
+const TURN_BEND = 0.2;
+const TURN_BEND_MAX = math.rad(28);
+const TURN_SETTLE = 8;
+// Weak (unfed): its slower swim comes from its speed; on top, drooping pectorals and a sagging tail
+const WEAK_FIN_DROOP = math.rad(35);
+const WEAK_TAIL_SAG = math.rad(15); // in total over the spine
+const WEAK_FLUTTER = 0.5; // × dorsal / ventral flutter
+const DROOP_SETTLE = 1.5;
 
 // Peak angles (radians) of each bone, around the fish's own axes (mesh-local: Y up, Z nose -Z to tail +Z).
 // Spine yaw by the bone's t along the body: V1's 4 / 6 / 9 / 12° at the default joints 0.35 / 0.55 / 0.72 / 0.86,
@@ -52,23 +76,31 @@ const UP = new Vector3(0, 1, 0);
 const LENGTH = new Vector3(0, 0, 1);
 const SIDE = new Vector3(1, 0, 0);
 
-/** A bone this controller turns: its axis (in its own space) and how it moves. */
+/** A bone this controller turns: its axis (in its own space) and how it moves, plus an optional second rotation. */
 interface DrivenBone {
 	bone: Bone;
 	axis: Vector3;
 	drive: (fish: RiggedFish) => number; // angle (radians) at the fish's current phases
+	tiltAxis?: Vector3;
+	tilt?: (fish: RiggedFish) => number;
 }
 
 interface RiggedFish {
 	model: Model;
 	mesh: MeshPart;
 	bones: DrivenBone[];
-	yaw: number; // last heading (radians), for the ears' lean
+	yaw: number; // last heading (radians)
 	earLean: number; // radians, smoothed
+	bend: number; // turn bend over the whole spine (radians), smoothed
+	cruise: number; // its species' wandering speed (studs/s)
+	lastPosition?: Vector3;
+	pace: number; // speed / cruise, smoothed (0 still, 1 cruising, 2 rushing)
+	droop: number; // 0 .. 1 while weak, smoothed
 	swim: number; // phases (radians)
 	fin: number;
 	mouth: number;
-	amount: number; // 1, or SLOW_AMOUNT while lazy
+	amount: number; // beat amplitude (× V1's)
+	finAmount: number; // pectoral amplitude
 	onScreen: boolean;
 	checkedAt: number;
 	lastUpdate: number;
@@ -148,13 +180,25 @@ class FishRigControllerSingleton implements Lifecycle {
 				fin: math.random() * TAU,
 				mouth: math.random() * TAU,
 				amount: 1,
+				finAmount: 1,
 				yaw: 0,
 				earLean: 0,
+				bend: 0,
+				cruise: this.getCruise(model, mesh),
+				pace: 1,
+				droop: 0,
 				onScreen: true,
 				checkedAt: -math.huge,
 				lastUpdate: os.clock(),
 			});
 		});
+	}
+
+	/** Its species' wandering speed (FISH_TYPES); an event guest without one: about its length per second. */
+	private getCruise(model: Model, mesh: MeshPart): number {
+		const config = FISH_TYPES[model.GetAttribute("FishType") as FishType] as (typeof FISH_TYPES)[FishType] | undefined;
+		if (config) return (config.speedMin + config.speedMax) / 2;
+		return math.max(mesh.Size.Z * 0.8, 1);
 	}
 
 	/** The bones of the fish rig (tools/blender/rig_fish.py names), with their axis and motion. */
@@ -163,14 +207,24 @@ class FishRigControllerSingleton implements Lifecycle {
 		const finTop = mesh.FindFirstChild("FinTop", true);
 		const finT = finTop?.IsA("Bone") ? boneT(mesh, finTop) : 0.5;
 		const bones = mesh.GetDescendants().filter((d): d is Bone => d.IsA("Bone"));
-		const spineCount = bones.filter((b) => isSpine(b.Name)).size();
+		const spine = bones.filter((b) => isSpine(b.Name));
+		// The turn bend and the weak sag are shared over the spine by t: the tail end bends most
+		let tSum = 0;
+		for (const b of spine) tSum += boneT(mesh, b);
 		for (const bone of bones) {
 			const name = bone.Name;
 			if (isSpine(name)) {
 				const t = boneT(mesh, bone);
-				const peak = spinePeak(t, spineCount);
+				const peak = spinePeak(t, spine.size());
 				const lag = t * BODY_WAVE;
-				found.push({ bone, axis: boneAxis(mesh, bone, UP), drive: (f) => f.amount * peak * math.sin(f.swim - lag) });
+				const share = tSum > 0 ? t / tSum : 1 / spine.size();
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, UP),
+					drive: (f) => f.amount * peak * math.sin(f.swim - lag) + f.bend * share,
+					tiltAxis: boneAxis(mesh, bone, SIDE),
+					tilt: (f) => f.droop * WEAK_TAIL_SAG * share,
+				});
 			} else if (name.sub(1, 3) === "Ear") {
 				found.push({
 					bone,
@@ -183,7 +237,7 @@ class FishRigControllerSingleton implements Lifecycle {
 				found.push({
 					bone,
 					axis: boneAxis(mesh, bone, LENGTH),
-					drive: (f) => sign * f.amount * FIN_FLUTTER * math.sin(f.swim - lag),
+					drive: (f) => sign * f.amount * (1 - (1 - WEAK_FLUTTER) * f.droop) * FIN_FLUTTER * math.sin(f.swim - lag),
 				});
 			} else if (name === "FinR" || name === "FinL") {
 				const offset = name === "FinR" ? 0 : math.pi; // they paddle alternately
@@ -191,7 +245,10 @@ class FishRigControllerSingleton implements Lifecycle {
 				found.push({
 					bone,
 					axis: boneAxis(mesh, bone, UP),
-					drive: (f) => sign * f.amount * PECTORAL_PADDLE * math.sin(f.fin + offset),
+					drive: (f) => sign * f.finAmount * PECTORAL_PADDLE * math.sin(f.fin + offset),
+					// weak: the fins hang down (the right one turns down around the length axis, the left one the other way)
+					tiltAxis: boneAxis(mesh, bone, LENGTH),
+					tilt: (f) => -sign * f.droop * WEAK_FIN_DROOP,
 				});
 			} else if (name === "Jaw") {
 				// Only the lower lip drops a little: nothing ever comes out of the mouth (CLAUDE.md §7)
@@ -240,27 +297,53 @@ class FishRigControllerSingleton implements Lifecycle {
 
 	private animate(fish: RiggedFish, dt: number) {
 		const model = fish.model;
-		const lazy =
-			model.GetAttribute("Hunger") === HungerState.Weak ||
-			model.GetAttribute("Asleep") === true ||
-			model.GetAttribute("Dead") === true;
-		const advance = dt * TAU * (lazy ? SLOW_SPEED : 1);
-		fish.swim = (fish.swim + advance * SWIM_FREQUENCY) % TAU;
-		fish.fin = (fish.fin + advance * FIN_FREQUENCY) % TAU;
-		fish.mouth = (fish.mouth + advance * MOUTH_FREQUENCY) % TAU;
-		fish.amount = lazy ? SLOW_AMOUNT : 1;
-		// The ears trail the turns: lean against the yaw rate, smoothed (only fish with Ear* bones read it)
-		const [, yaw] = fish.mesh.CFrame.ToOrientation();
+		const mesh = fish.mesh;
+		// How fast it really moves, against its species' wandering speed
+		const position = mesh.Position;
+		if (dt > 0 && fish.lastPosition) {
+			const pace = math.min(position.sub(fish.lastPosition).Magnitude / dt / fish.cruise, SPEED_MAX);
+			fish.pace += (pace - fish.pace) * math.min(1, dt * SPEED_SETTLE);
+		}
+		fish.lastPosition = position;
+		const calm = math.clamp(1 - fish.pace, 0, 1);
+		const rush = math.clamp(fish.pace - 1, 0, 1);
+		let beat = 1 - (1 - REST_BEAT) * calm + (SPRINT_BEAT - 1) * rush;
+		let amount = 1 - (1 - REST_BEAT) * calm + (SPRINT_AMOUNT - 1) * rush;
+		const paddle = 1 - (1 - REST_PADDLE) * calm + (SPRINT_PADDLE - 1) * rush;
+		// Asleep (a UFO's mutation) or leaving: V1's lazy swim, whatever its speed
+		if (model.GetAttribute("Asleep") === true || model.GetAttribute("Dead") === true) {
+			beat = SLOW_SPEED;
+			amount = SLOW_AMOUNT;
+		}
+		const advance = dt * TAU;
+		fish.swim = (fish.swim + advance * SWIM_FREQUENCY * beat) % TAU;
+		fish.fin = (fish.fin + advance * FIN_FREQUENCY * math.max(paddle, beat)) % TAU;
+		fish.mouth = (fish.mouth + advance * MOUTH_FREQUENCY * beat) % TAU;
+		fish.amount = amount;
+		fish.finAmount = math.max(amount, REST_PADDLE);
+		// Weak with hunger: the fins and tail droop (fading in and out)
+		const weak = model.GetAttribute("Hunger") === HungerState.Weak ? 1 : 0;
+		fish.droop += (weak - fish.droop) * math.min(1, dt * DROOP_SETTLE);
+		// Turns: the body bends into the curve and the ears trail, against the yaw rate (smoothed)
+		const [, yaw] = mesh.CFrame.ToOrientation();
 		if (dt > 0) {
 			let turn = yaw - fish.yaw;
 			if (turn > math.pi) turn -= TAU;
 			if (turn < -math.pi) turn += TAU;
-			const target = math.clamp((-turn / dt) * EAR_TURN, -EAR_TURN_MAX, EAR_TURN_MAX);
-			fish.earLean += (target - fish.earLean) * math.min(1, dt * EAR_SETTLE);
+			const rate = turn / dt;
+			const bend = math.clamp(-rate * TURN_BEND, -TURN_BEND_MAX, TURN_BEND_MAX);
+			fish.bend += (bend - fish.bend) * math.min(1, dt * TURN_SETTLE);
+			const lean = math.clamp(-rate * EAR_TURN, -EAR_TURN_MAX, EAR_TURN_MAX);
+			fish.earLean += (lean - fish.earLean) * math.min(1, dt * EAR_SETTLE);
 		}
 		fish.yaw = yaw;
 		for (const driven of fish.bones) {
-			driven.bone.Transform = CFrame.fromAxisAngle(driven.axis, driven.drive(fish));
+			let pose = CFrame.fromAxisAngle(driven.axis, driven.drive(fish));
+			if (driven.tilt && driven.tiltAxis) {
+				const tilt = driven.tilt(fish);
+				if (tilt !== 0) pose = pose.mul(CFrame.fromAxisAngle(driven.tiltAxis, tilt));
+			}
+			driven.bone.Transform = pose;
 		}
 	}
 }
