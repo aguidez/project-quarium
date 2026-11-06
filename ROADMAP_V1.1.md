@@ -252,7 +252,9 @@ Each one gets a rig made by its own Blender script (not the fish one) and replac
 - [ ] Snail: the body stretches and contracts as it crawls, eye stalks sway.
 - [ ] Pelican: wings fold / open, beak scoop when it drops food.
 - [ ] Water Hen: feet paddle under the water, head nods, wings ruffle.
-- [ ] Jellyfish: the bell pulses through bones (not by scaling the whole mesh), the tentacles wave as a chain.
+- [x] Jellyfish: the bell pulses through bones (not by scaling the whole mesh), the tentacles wave as a chain
+      (**V1.1.11**: tools/blender/rig_jellyfish.py, 17 bones; the rim pivots near the dome's top, a first try with a
+      low pivot dented the bell).
 - [ ] The fisherman of the shop huts: idle breathing, head turn toward the player, a wave as they arrive (Studio's
       avatar auto-setup can be tried first: he is a humanoid shape).
 

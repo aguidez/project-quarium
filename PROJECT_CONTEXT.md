@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-07 (V1.1.10: the bone templates' skeletons fitted to their mesh size; the idol and the UFO still EditableMesh).
+> Last updated: 2026-11-07 (V1.1.11: the Jellyfish companion pulses with bones; the idol and the UFO still EditableMesh).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -150,7 +150,8 @@ ProjectQuarium/
 │                            convert_fish.py (one species: import → rig → swim → frames → GLB), rig_fish.py (auto-rig:
 │                            spine chain + fins + jaw, V1's weight rules), preview_swim.py (V1's beats as a bone loop,
 │                            EEVEE frames), export_fish.py (GLB for Roblox), frames-to-gif.js (one GIF / a batch sheet),
-│                            rgba-to-png.js (texture pull + tint); studio/export_fish.luau and studio/swap_template.luau
+│                            rig_jellyfish.py (the Jellyfish's own rig, picked by its settings' "rig"), rgba-to-png.js
+│                            (texture pull + tint); studio/export_fish.luau and studio/swap_template.luau
 │                            (Studio snippets the agent runs through the MCP, never game scripts)
 ├─ design/rigs/work/        Rig work files (exported textures, .blend, render frames): git-ignored
 ├─ tools/local-config.js     Reads workspace.local.json (+ UPPER_SNAKE env overrides), finds the Roblox fonts folder
@@ -496,10 +497,13 @@ ProjectQuarium/
       │  │                   pectorals hover), cruise (1×), sprint (2×: faster, wider); a turn bends the spine against
       │  │                   the yaw rate; Weak: fins droop, tail sags; Asleep: V1's lazy swim. Moments from the
       │  │                   local attributes: Hunger back to Satiated (bite + joy wiggle), GrowthStage up (fins flare,
-      │  │                   tail sweep), Exit "Released" (fast strong strokes) / "Eaten" / "Abducted" (struggle); every frame
+      │  │                   tail sweep), Exit "Released" (fast strong strokes) / "Eaten" / "Abducted" (struggle). The
+      │  │                   Jellyfish (rig_jellyfish.py): Bell (bob + sway), Rim<side> squeeze, Tent<side><1-3> trail,
+      │  │                   V1's 0.8 pulses/s; every frame
       │  │                   within 60 studs, every 2nd to 110, every 4th beyond, frozen off screen; no budget
       │  ├─ CompanionAnimationController  Local wobble of the Water Hen (its own copy of the Mesh placed on the server-moved
-      │  │                   Body every frame) and the Jellyfish's bell pulse
+      │  │                   Body every frame) and the Jellyfish's bell pulse; a companion with `Rig = "Bones"` (the
+      │  │                   Jellyfish since V1.1.11) is left to FishRigController
       │  ├─ PelicanChargesController  Charge gauge above the local player's on-demand Pelican / Jellyfish (BillboardGui): one
       │  │                   slot per charge, a pellet growing while it refills; hidden while MaxCharges is 0
       │  ├─ ChatTitleController  TextChatService.OnIncomingMessage: the sender's title as a coloured tag before their name in

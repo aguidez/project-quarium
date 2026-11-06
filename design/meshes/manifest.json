@@ -24,5 +24,6 @@
 	"EventLanternFish": { "path": "ServerStorage.Assets.EventFish.LanternFish.Mesh", "oldMeshId": 124852645344173, "files": "AbyssLantern", "staticMeshId": 111053770582422, "rigModelId": 90495914663707, "rigMeshId": 96473369207808 },
 	"KpopIdol": { "path": "ServerStorage.Assets.EventFish.KpopIdol.Mesh", "oldMeshId": 123631089443197 },
 	"Ufo": { "path": "ServerStorage.Assets.EventFish.Ufo.Mesh", "oldMeshId": 133018116229364 },
-	"Sugar": { "path": "ServerStorage.Assets.Fish.Sugar.Mesh", "oldMeshId": 76055235755410, "staticMeshId": 125369425045024, "rigModelId": 86816660266559, "rigMeshId": 110178113967801 }
+	"Sugar": { "path": "ServerStorage.Assets.Fish.Sugar.Mesh", "oldMeshId": 76055235755410, "staticMeshId": 125369425045024, "rigModelId": 86816660266559, "rigMeshId": 110178113967801 },
+	"Jellyfish": { "path": "ServerStorage.Assets.Companions.Jellyfish.Mesh", "staticMeshId": 128392427914355, "rigModelId": 106712647460004, "rigMeshId": 92352255191909 }
 }

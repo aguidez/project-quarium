@@ -11,6 +11,15 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.11 — 2026-11-07
+
+**New**
+- **The Jellyfish pulses with bones**: its bell squeezes in from the top like a real jellyfish, its tentacles trail
+  behind each pulse, and it still rises a little with each squeeze and sways slowly (its sway no longer jumps once a
+  cycle).
+
+---
+
 ## V1.1.10 — 2026-11-07
 
 **Fixes**
