@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-06 (V1.1.5: every species of the 8 aquariums swims with Blender bones; the special and event fish still EditableMesh).
+> Last updated: 2026-11-06 (V1.1.6: every fish but the K-pop idol swims with Blender bones; the idol, the UFO and the Swordfish still EditableMesh).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -643,8 +643,9 @@ ProjectQuarium/
   GoldenGuppy, BlueNeon, ZebraDanio, RedTetra, Clownfish, FlameGourami, SilverAngelfish, ImperialDiscus, FrenchFish,
   Catfish, PirateFish (a new model since V1.1.3, its tricorn rigid on the head), BlueTang, BabySunfish, Lanternfish,
   Lionfish, Dragonfish (7-bone spine), WolfDogfish (the Husky Dogfish), BunnyShark (EarL / EarR), MiniLeviathan (rigged
-  in its own space, the template keeps its -30° pitch): every species of the 8 aquariums; still EditableMesh: the
-  AlienFish and Sugar templates, the event fish and the Swordfish companion (rig settings per species in design/rigs/<Fish>.json; ids in design/meshes/manifest.json:
+  in its own space, the template keeps its -30° pitch): every species of the 8 aquariums, plus Sugar, AlienFish and the
+  abyss `LanternFish` (EventFish; work files `AbyssLantern`; its stalk rigid under the welded lit Lure, no jaw). Still
+  EditableMesh: the K-pop idol (its template lost its texture, see §4), the UFO and the Swordfish companion (rig settings per species in design/rigs/<Fish>.json; ids in design/meshes/manifest.json:
   `rigModelId`, `rigMeshId`, `staticMeshId`).
 - **`ServerStorage.Assets`**:
   - `Fish/` (tag `FishTemplate`, attr `FishType`): the 18 species + `FrenchFish`, `AlienFish` and `Sugar` (no
@@ -1008,6 +1009,10 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   server negligible. The swim animation costs per *species* on screen, not per fish; weak devices feel it first. Real
   mobile memory: to check with the first players (ROADMAP M7). Studio caps at 15 fps when its window loses focus:
   steady 66.7 ms frames are that cap, not load.
+- **K-pop idol without its texture** (found 2026-11-06): `EventFish.KpopIdol.Mesh` has no TextureID / SurfaceAppearance:
+  the guest has been plain grey since V0.60.5, whose group mesh swap (`ApplyMesh`) clears a TextureID (a
+  SurfaceAppearance survives it). Fix in progress (ROADMAP_V1.1 A5.9): find the texture in a place version from before
+  2026-11-03, put it back as a SurfaceAppearance ColorMap, then rig the idol.
 - **EditableMesh budget**: the client budget counts **triangles** (~81,000 on the owner's PC; a phone likely less);
   when full, `CreateEditableMeshAsync` returns **nil** (no error) and `Destroy()` frees it at once. Meshes range 2.5k
   (Golden Guppy) to 8.4k triangles (Husky Dogfish, Bunny Shark). FishAnimationController plans the rigs in triangles

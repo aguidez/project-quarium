@@ -11,6 +11,14 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.6 — 2026-11-06
+
+**New**
+- **Sugar, the Alien Fish and the abyss lantern fish swim with bones** too. The lantern fish's lit lure stays on the tip
+  of its stalk and its mouth stays shut on the coin it steals; the Alien Fish's antennae sway as it swims.
+
+---
+
 ## V1.1.5 — 2026-11-06
 
 **New**

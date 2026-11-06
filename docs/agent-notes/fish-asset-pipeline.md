@@ -78,4 +78,8 @@ The exported OBJ files stay as the source (design/meshes, manifest.json: templat
   serving base64 RGBA 512² for `HttpService:GetAsync`. `upload_image` reads from any local port (34998 worked). A
   model swap whose old variant textures no longer fit (new UVs) waits in an **untagged** staging folder
   (`ServerStorage._V11Staging`) until the variants, stickers and rig are ready, so a publish meanwhile breaks nothing.
+- **`ApplyMesh` clears `TextureID`** (2026-11-06): a template whose look is a TextureID loses it in a mesh swap (the K-pop
+  idol after V0.60.5's group swap: plain grey since). Before any `ApplyMesh` / mesh replacement, turn a TextureID into
+  a SurfaceAppearance ColorMap (it survives), and check the look afterwards with a capture. An Edit capture with
+  camera arguments needs `workspace.CurrentCamera.CameraType` Custom (after a Scriptable sticker sheet, put it back).
 

@@ -210,7 +210,10 @@ blender-pipeline.
       its welded lit ball); Sugar, AlienFish, AbyssLantern rigged, sheet `design/previews/v1.1-special-fish.gif`, the
       owner's go pending. **The K-pop idol is grey in the live game**: its template has no texture (it was a TextureID,
       wiped by ApplyMesh in the V0.60.5 group swap, which keeps a SurfaceAppearance only): owner's decision pending.
-      The UFO and the SaxCrab stay off the fish rig (not fish; the UFO is decided in A8)): Sugar, the Alien Fish (UFO night), the Abyss Lanternfish villain and the
+      The UFO and the SaxCrab stay off the fish rig (not fish; the UFO is decided in A8))
+      Shipped 2026-11-06 in **V1.1.6**: Sugar, AlienFish, LanternFish (3 uploads Approved, swapped; a server-built,
+      server-moved villain swims on bones on the client, its Lure 3.29 studs from the body at every frame). Left: the
+      K-pop idol (texture first, then rig + its beat dance).: Sugar, the Alien Fish (UFO night), the Abyss Lanternfish villain and the
       K-pop idol (its dance: bone moves on the beat). FishRigController then also tracks `EventFish`. **V1.1.6**.
 
 ### A6 — Behaviour animations (M)
