@@ -11,6 +11,15 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.2 — 2026-11-06
+
+**New**
+- **Four more fish swim with bones**: the Silver Angelfish, the Imperial Discus, the French Fish and the Catfish. The
+  French Fish's beret stays put on its head while its body swims, and the Catfish keeps its mouth and whiskers still.
+  The Pirate Fish keeps its old swim for now: it is getting a brand-new model.
+
+---
+
 ## V1.1.1 — 2026-11-06
 
 **New**

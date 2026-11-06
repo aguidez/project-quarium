@@ -3,7 +3,7 @@
 > The animation revamp: every fish, companion, event guest and NPC moves through a **skeleton made in Blender**
 > instead of the EditableMesh deformation of V1. It starts **once V1 is complete** (the owner's calibration with real players done). Tick the
 > boxes as tasks ship, and move what a step ships into `PROJECT_CONTEXT.md` / `RELEASE_NOTES.md` as usual.
-> Last updated: 2026-11-06 (A1–A4 done; A5.1–A5.2: batch 1 on bones, V1.1.1; next A5.3).
+> Last updated: 2026-11-06 (A1–A4 done; A5.1–A5.4: batches 1–2 on bones, V1.1.2; A5.4b: a new Pirate Fish).
 
 **V1.1 in one line**: Blender joins the toolchain (Windows and Mac) **as an MCP server**, like Roblox Studio and
 FigCraft, so the agent drives it itself; a script rigs every model by itself, the game
@@ -178,12 +178,16 @@ blender-pipeline.
       later (`design/previews/flame-gourami-light-compare.png`); nothing light is uploaded.
 - [x] **A5.2 — Batch 1 ship** (2026-11-06): 5 uploads as the group, all Approved at once; 5 swaps
       (`swap_template.luau` now takes a batch); playtest: the 5 on bones, none on V1; **V1.1.1**.
-- [ ] **A5.3 — Batch 2 prep** (prep done 2026-11-06, sheet `design/previews/v1.1-batch2.gif`, the owner's go pending;
-      new rig options: `fin_top` false + `rigid_top` for the Pirate Fish's tricorn and the French Fish's beret, `jaw`
-      false for the Catfish's whiskers; checked at 3× the bend, no tearing) (Neon Coral and Pirate Wreck): Silver Angelfish, Imperial Discus (~6.3k: same
-      decimation choice), Pirate Fish, French Fish, Catfish (barbels: nothing thin toward the mouth may move like a
-      stick). Sheet `v1.1-batch2.gif`.
-- [ ] **A5.4 — Batch 2 ship**: **V1.1.2**.
+- [x] **A5.3 — Batch 2 prep** (2026-11-06): sheet `design/previews/v1.1-batch2.gif`, approved except the Pirate Fish;
+      new rig options: `fin_top` false + `rigid_top` for the French Fish's beret, `jaw` false for the Catfish's
+      whiskers (design/rigs/<Fish>.json; checked at 3× the bend, no tearing).
+- [x] **A5.4 — Batch 2 ship** (2026-11-06): Silver Angelfish, Imperial Discus, French Fish, Catfish (4 uploads, all
+      Approved), swapped and playtested; **V1.1.2**.
+- [ ] **A5.4b — A new Pirate Fish** (owner, 2026-11-06: never liked the old model, its swim looked odd): a 100 % new
+      model, then straight onto bones. Pirates are a risky theme (CLAUDE.md §7): written brief approved by the owner
+      first, nothing generated before. Then the species recipe (agent note content-recipes): ≤ 3 generate_mesh
+      candidates side by side → owner pick → template (same `PirateFish` name, FishType, Size class) → Anomaly / Shiny
+      textures and 4 sticker icons (uploaded once, after a moderator's look) → rig → upload → swap; **V1.1.x**.
 - [ ] **A5.5 — Batch 3 prep + ship** (Atlantis and Mariana Trench, 3 fish): Blue Tang, Baby Sunfish (tall round body:
       check the joints), Lanternfish (its lure: kept on the head bone, never animated). **V1.1.3**.
 - [ ] **A5.6 — Rig extensions** (code only, no species shipped): `rig_fish.py` settings for more spine bones (Dragonfish
