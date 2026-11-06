@@ -264,11 +264,16 @@ Each one gets a rig made by its own Blender script (not the fish one) and replac
 
 ### A8 — Finish (M)
 
-- [ ] Remove the EditableMesh path once every template has `Rig = "Bones"` (or keep it only for a template without a
-      rig, warned in the output); remove `MAX_ANIMATED_SPECIES` and the rig budget code.
-- [ ] Load test with 18 species, 6 tanks x 25 fish, PC and mobile emulator: compare with A0's "before" numbers, and
-      write the results in PROJECT_CONTEXT §4.
-- [ ] Docs: PROJECT_CONTEXT (controllers, templates, tools/blender, the known limits), SETUP.md, the agent note,
+- [x] Remove the EditableMesh path once every template has `Rig = "Bones"` (or keep it only for a template without a
+      rig, warned in the output); remove `MAX_ANIMATED_SPECIES` and the rig budget code (**V1.1.14**: removed, with
+      CompanionAnimationController and the stats' swim budget; FishAnimationController keeps the beat puffs and a
+      warned sway for a fish without a rig. The UFO decided: no rig, it is a ship the server moves, never a fish. Only
+      the K-pop idol is left, ROADMAP_FIXES).
+- [x] Load test with 18 species, 6 tanks x 25 fish, PC and mobile emulator: compare with A0's "before" numbers, and
+      write the results in PROJECT_CONTEXT §4 (**2026-11-07**, Studio on the Mac: every fish posed, 1.15 ms script /
+      5.9 ms render CPU vs V1's 6.9 / 11.0 with 6 species animated; the bones cost no measurable render time. Mobile:
+      no emulator run, the owner's phone ran the bone swim smoothly in A4).
+- [x] Docs: PROJECT_CONTEXT (controllers, templates, tools/blender, the known limits), SETUP.md, the agent note,
       the species / companion recipes of `docs/agent-notes/content-recipes.md` with the rig step; release notes of the V1.1 version.
 - [ ] **Owner**: archive the old fish meshes on the Creator Dashboard once nothing uses them (optional).
 

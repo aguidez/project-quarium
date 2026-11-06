@@ -67,7 +67,7 @@ const STRUGGLE_WIGGLE = 1.5;
 const STRUGGLE_RATE = 7;
 
 // The Jellyfish companion (tools/blender/rig_jellyfish.py: Bell, Rim<side>, Tent<side><1..3>), V1's rhythm
-// (CompanionAnimationController): the rim swings in from a pivot near the dome's top, the tentacles trail behind, the
+// (its V1 CompanionAnimationController): the rim swings in from a pivot near the dome's top, the tentacles trail behind, the
 // whole jellyfish rises a little with each squeeze and sways slowly
 const JELLY_PULSE_FREQUENCY = 0.8; // pulses per second
 const JELLY_RIM_SQUEEZE = math.rad(12);
@@ -101,7 +101,7 @@ const PELICAN_LEAN_NECK = math.rad(14); // at a full lean
 const PELICAN_LEAN_BEAK = math.rad(14);
 const PELICAN_LEAN_WINGS = math.rad(25);
 const PELICAN_LEAN_SETTLE = 12; // per second
-// Water Hen, on the water (V1's CompanionAnimationController numbers, now on its Torso bone): rocks from side to side
+// Water Hen, on the water (V1's numbers, now on its Torso bone): rocks from side to side
 // and nods while it floats, faster and wider while it paddles; its head bobs, its wings ruffle, its tail flicks
 const HEN_ROCK_FREQUENCY = 0.9; // rocks per second at rest
 const HEN_PADDLE_FREQUENCY = 2.2; // waddles per second while paddling
@@ -236,8 +236,7 @@ function boneAxis(mesh: MeshPart, bone: Bone, meshAxis: Vector3): Vector3 {
 /**
  * Bone swimming (ROADMAP_V1.1 A4): the fish whose template says `Rig = "Bones"` swim by turning the bones of their
  * skinned mesh (a spine wave, fins, mouth), each fish at its own phase. The GPU deforms the mesh: no EditableMesh, no
- * memory budget, every species on screen swims. Purely visual and local, like FishAnimationController, which keeps
- * animating the species not converted yet.
+ * memory budget, every species on screen swims. Purely visual and local; FishAnimationController adds the beat puffs.
  */
 class FishRigControllerSingleton implements Lifecycle {
 	private fishes = new Map<Model, RiggedFish>();

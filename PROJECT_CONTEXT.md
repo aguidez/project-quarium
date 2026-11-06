@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-07 (V1.1.13: the Pelican, the Water Hen and the shop fisherman on bones; the idol and the UFO still EditableMesh).
+> Last updated: 2026-11-07 (V1.1.14: V1.1 done, the EditableMesh swim removed; every species and companion on bones, the idol waits for its texture).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -73,7 +73,7 @@ ProjectQuarium/
 ├─ PROJECT_CONTEXT.md        This file
 ├─ RELEASE_NOTES.md          Every change of the game, patch by patch, newest on top, never deleted
 ├─ BALANCE.md                The balance: expected progression, live numbers, design rules, V1 design, history
-├─ ROADMAP_V1.1.md           After V1: the animation revamp (Blender skeletons instead of EditableMesh), steps A0–A8
+├─ ROADMAP_V1.1.md           After V1: the animation revamp (Blender skeletons instead of EditableMesh), steps A0–A8 (done but the idol)
 ├─ ROADMAP_FIXES.md         Small fixes to plan, outside the big roadmaps (the K-pop idol's texture, the other tanks' fish
 │                            badges)
 ├─ default.project.json      Rojo mapping (see §1)
@@ -404,8 +404,8 @@ ProjectQuarium/
    │     ├─ StatsService     Play statistics (calibration, ROADMAP M7): every 1 s counts play / tending time (tending =
    │     │                   AquariumService.isTending + onboarding done: the simulator's play time) and stamps the
    │     │                   milestones; counts coins (CoinService callbacks), meals (onFishFed), quests (onQuestClaimed),
-   │     │                   likes (onLikeGiven); "ReportClientStats" action (once a minute: platform, fps, memory, swim
-   │     │                   budget; validated, ≥ 45 s apart). Creator Dashboard (AnalyticsService, all in pcall):
+   │     │                   likes (onLikeGiven); "ReportClientStats" action (once a minute: platform, fps, memory;
+   │     │                   validated, ≥ 45 s apart). Creator Dashboard (AnalyticsService, all in pcall):
    │     │                   onboarding funnel, one-time "Progression" funnel (Onboarding:Done, Rebirth1–8, AllSpecies),
    │     │                   custom events MilestoneMinutes, SessionMinutes / SessionMinutesInGame, CoinPickupPercent,
    │     │                   DailyQuestClaimed / WeeklyQuestClaimed; legacy saves stay out of the funnels, the owner's test
@@ -488,10 +488,9 @@ ProjectQuarium/
       │  │                   playExit sets "Dead" and "Exit" (the cause) for the bones' exit moves
       │  ├─ FishIndicatorController  Hunger / AFK badges above fish (from attributes), none over a sleeping fish;
       │  │                   BillboardGuis straight in PlayerGui, ResetOnSpawn off
-      │  ├─ FishAnimationController  EditableMesh swim deformation shared per species (also the Swordfish companion), camera
-      │  │                   LOD (own tank in 2.5D; else tanks on screen within 110 studs), rigs planned in triangles
-      │  │                   (§4 EditableMesh budget), visible fish without a rig sway on a local Weld; beat puffs
-      │  │                   (bone fish too); skips the fish with a bone rig
+      │  ├─ FishAnimationController  The beat puffs of the music events (every fish, event guest and the Swordfish), and the
+      │  │                   fallback of a template without `Rig = "Bones"` (warned once): a local fish sways as a whole
+      │  │                   on a local Weld, an event guest (the K-pop idol for now) only puffs
       │  ├─ FishRigController  Bone swim (V1.1) of the fish whose template has `Rig = "Bones"`: turns the bones of
       │  │                   their skinned `Mesh` (rig_fish.py names: Head, Spine<n>, Tail1/2, FinTop/Bottom, FinL/R, Jaw,
       │  │                   Ear*) with V1's beats, the spine's yaw by each bone's t shared out over the chain, Ear* bones
@@ -509,14 +508,11 @@ ProjectQuarium/
       │  │                   tilt / PELICAN_LEAN) stretches the neck, dips the beak, opens the wings; the Hen rocks /
       │  │                   nods / bobs on its Torso, faster while it paddles (> 0.4 studs/s on the flat); every frame
       │  │                   within 60 studs, every 2nd to 110, every 4th beyond, frozen off screen; no budget
-      │  ├─ CompanionAnimationController  V1's local wobble of the Water Hen and the Jellyfish's bell pulse, now only for a
-      │  │                   template without `Rig = "Bones"` (every companion has one since V1.1.13: they move in
-      │  │                   FishRigController); goes with ROADMAP_V1.1 A8
       │  ├─ PelicanChargesController  Charge gauge above the local player's on-demand Pelican / Jellyfish (BillboardGui): one
       │  │                   slot per charge, a pellet growing while it refills; hidden while MaxCharges is 0
       │  ├─ ChatTitleController  TextChatService.OnIncomingMessage: the sender's title as a coloured tag before their name in
       │  │                   the chat window ("[OCEAN LEGEND #1]", tier colour; earned titles gold), from the Player attributes
-      │  ├─ StatsReportController  Once a minute sends "ReportClientStats" (platform, average fps, memory, SwimTriangleBudget)
+      │  ├─ StatsReportController  Once a minute sends "ReportClientStats" (platform, average fps, memory)
       │  ├─ ShopKeeperController  The fisherman's shop (tag ShopKeeper): isNearby / onNearbyChanged (opens on a ShopZone,
       │  │                   closes 2 studs past its edges; without any ShopZone in the place, the old rule: within 9 studs
       │  │                   of the fisherman, closes beyond 12) → App `shopNearby` opens / closes the Shop panel (closed by hand
@@ -669,7 +665,8 @@ ProjectQuarium/
   Lionfish, Dragonfish (7-bone spine), WolfDogfish (the Husky Dogfish), BunnyShark (EarL / EarR), MiniLeviathan (rigged
   in its own space, the template keeps its -30° pitch): every species of the 8 aquariums, plus Sugar, AlienFish and the
   abyss `LanternFish` (EventFish; work files `AbyssLantern`; its stalk rigid under the welded lit Lure, no jaw). Still
-  EditableMesh: the K-pop idol (its template lost its texture, see §4) and the UFO. The Swordfish companion too
+  without bones: the K-pop idol (its template lost its texture, see §4: it only puffs on the beat until it is rigged)
+  and the UFO (a ship the server glides, spins and tilts: no rig needed, tag `Ufo`, never a fish). The Swordfish companion too
   (`Assets.Companions`, no jaw: its bill; FishRigController tracks `Companion` models with `Rig`), and every other
   companion on its own rig: Jellyfish, Snail, Pelican, WaterHen; the shop's Fisherman (both huts' `body_geom`, no
   `Rig` attribute: ShopKeeperController finds his bones) (rig settings per species in design/rigs/<Fish>.json; ids in design/meshes/manifest.json:
@@ -680,7 +677,7 @@ ProjectQuarium/
     Copied on demand into `ReplicatedStorage.Assets.Fish` (server/fishAssets); `ReplicatedStorage.Assets` is an empty
     folder in the place, filled at runtime. Oddities: the Golden Guppy's ColorMap is a 1024² copy (the generated one
     was 4096²); `MiniLeviathan` is pitched −30° about X inside its template (the mesh came out upright; never yaw a
-    mesh in its template: FishAnimationController deforms in mesh-local Z); `Dragonfish` is tinted gold
+    mesh in its template: the rigs work in mesh-local Z, nose −Z); `Dragonfish` is tinted gold
     (SurfaceAppearance Color 1/0.85/0.45); the `Lanternfish` species (photophores, no lure) is not the Abyss event's
     `LanternFish`.
   - `FishVariants/` (tag `FishVariantAppearance`, attrs `FishType` + `Variant`): one SurfaceAppearance per species for
@@ -790,7 +787,7 @@ ProjectQuarium/
 | | `SetFocus` (boolean) | AquariumService |
 | | `RequestSync` | DataService |
 | | `ClaimQuest` (quest id) | QuestService |
-| | `ReportClientStats` ({platform, fps, memoryMb, swimBudget}, once a minute) | StatsService (statistics only) |
+| | `ReportClientStats` ({platform, fps, memoryMb}, once a minute) | StatsService (statistics only) |
 | | `SetAquariumTheme` (theme or "Auto"), `SetCosmeticShown` ({id, shown}), `SetTitle` (title, "Auto" or "None"), `SetSoundVolume` (0–1) | CustomizationService |
 | | `EquipCompanion` / `UnequipCompanion` (CompanionType) | CompanionService |
 | | `ReleaseFish` ({fishType, variant}), `FinishTutorial` (Feature), `ClaimOceanReward` (milestone id) | OceanService |
@@ -1040,15 +1037,13 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   the guest has been plain grey since V0.60.5, whose group mesh swap (`ApplyMesh`) clears a TextureID (a
   SurfaceAppearance survives it). Fix in progress (ROADMAP_V1.1 A5.9): find the texture in a place version from before
   2026-11-03, put it back as a SurfaceAppearance ColorMap, then rig the idol.
-- **EditableMesh budget**: the client budget counts **triangles** (~81,000 on the owner's PC; a phone likely less);
-  when full, `CreateEditableMeshAsync` returns **nil** (no error) and `Destroy()` frees it at once. Meshes range 2.5k
-  (Golden Guppy) to 8.4k triangles (Husky Dogfish, Bunny Shark). FishAnimationController plans the rigs in triangles
-  (`INITIAL_TRIANGLE_BUDGET` 72k, `MAX_ANIMATED_SPECIES` 6 as a CPU cap), builds them one at a time under one lock,
-  lowers its budget to what is built the first time the device refuses (local attribute `SwimTriangleBudget`), frees
-  idle rigs when another species needs the room, and visible fish left without a rig **sway** (yaw + a little roll on
-  a local Weld). Simulated phone (~30k free): every visible fish animated or swaying. The fix is under way
-  (`ROADMAP_V1.1.md`): a bone fish (FishRigController) takes no EditableMesh budget at all (180 Guppies × 10 bones:
-  ~1 ms of script a frame, measured in a playtest on the Mac). Keep new fish meshes ≤ ~4k triangles, textures 512².
+- **Swim animation on bones** (V1.1, since V1.1.14 the only one): no EditableMesh, no memory budget, every fish on
+  screen swims, its cost per *fish* and small. Load test 2026-11-07 (Studio on the Mac, 6 tanks x 25 bone fish of the
+  18 species, client clones held still, aisle view): every fish posed, script 1.15 ms a frame, render CPU 5.9 ms with
+  the bones vs 6.2 ms without (noise: the GPU skins them); posing the 1,508 bones once costs 0.46 ms of script. V1's
+  "before" (V0.46, fish moving): 6.9 ms scripts / 11.0 ms render, 6 species animated, the rest swaying. A real phone
+  ran the bone swim smoothly (the owner, A4). Keep new fish meshes ≤ ~4k triangles, textures 512²; an EditableMesh
+  (the Studio export snippet only) counts triangles against a client budget (~81k on the owner's PC).
 - **Many species** (goal: dozens): server, network and saves only pay per fish; templates load on demand
   (server/fishAssets), so clients only download the species present. Production (mesh + icon + config + balance per
   species) is the real limit: colour variants of a mesh cost almost nothing.

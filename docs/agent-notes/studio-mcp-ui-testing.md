@@ -23,6 +23,12 @@ Playtesting UI through the Roblox Studio MCP:
 - **Saves (ProfileStore)**: Studio API access is on for this place (ProfileStore prints "Roblox API services available"). Check the saved profile with `DataStoreService:GetDataStore("PlayerData_v1"):GetAsync("Player_<UserId>")` (`.Data.player`, `.Data.tank`, `.MetaData.ActiveSession`); GetAsync is cached ~4 s, so re-read after a wait before concluding a save failed. Stop/start play = leave/rejoin test; the test account's progress persists between playtests.
 - To get the 2.5D view back after execute_luau broke the camera: click LocalPlayer.PlayerGui.FocusUi.Back, then teleport out of / back into the zone with task.delay inside a script that returns immediately.
 
+- **Load test of the bone swim (V1.1.14, no code change)**: from the Server datamodel copy the templates of
+  `ServerStorage.Assets.Fish` (tags removed) into a `ReplicatedStorage` folder; from the Client clone 25 per tank into
+  each Aquarium's `Water` box (anchored, tag `Fish`: FishRigController poses them). Hold the camera with a RenderStepped
+  loop inside the same execute_luau (the Assistant resets a Scriptable camera after each call), 4–8 s to settle, then
+  5 s of `HeartbeatTimeMs` / `RenderCPUFrameTime`; compare by removing the `Fish` tag (they stop) and resetting the
+  bones' Transform. A first sample that gets 1 frame in 5 s is a stalled render: run it again.
 - **Load test recipe (V0.46)**: TEMP harness = `STORE_NAME` to a test store, an optional `testAquarium` param on
   FishService.spawnFish and a `/loadtest` TextChatCommand filling every tank (`AquariumService.getAquariums()`) with
   25 fish; send it from a Client execute_luau (`RBXGeneral:SendAsync` in task.spawn). Measure each view with a

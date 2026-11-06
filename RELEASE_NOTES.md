@@ -11,6 +11,22 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.14 — 2026-11-07
+
+**The animation revamp (V1.1) is complete**: since V1.1.1 every species, the special fish, the abyss lantern fish and
+every companion moved over to skeletons made in Blender, and the shop's fisherman came to life. Every fish on screen
+now swims, however many species there are, on PC as on phones.
+
+**Changes**
+- The old way of animating fish (deforming each mesh on the device, a few species at a time, the others only
+  swaying) is gone, with the old companion wobble.
+- Performance: with 6 full tanks of the 18 species, every fish swims and a frame costs about a sixth of the script
+  time and half the render time of V1, when only 6 species could swim.
+- The K-pop idol, the last guest without a skeleton, glides without wiggling (it still dances on the beat) until it
+  gets its own.
+
+---
+
 ## V1.1.13 — 2026-11-07
 
 **New**

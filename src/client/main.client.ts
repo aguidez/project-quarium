@@ -19,7 +19,6 @@ import { LikeBoardController } from "./controllers/LikeBoardController";
 import { MusicEventController } from "./controllers/MusicEventController";
 import { OnboardingController } from "./controllers/OnboardingController";
 import { PelicanChargesController } from "./controllers/PelicanChargesController";
-import { CompanionAnimationController } from "./controllers/CompanionAnimationController";
 import { ShopKeeperController } from "./controllers/ShopKeeperController";
 import { StatsReportController } from "./controllers/StatsReportController";
 import { UiController } from "./controllers/UiController";
@@ -46,7 +45,6 @@ bootstrap([
 	LikeBoardController,
 	LeaderboardController,
 	PelicanChargesController,
-	CompanionAnimationController,
 	ShopKeeperController,
 	StatsReportController,
 	ChatTitleController,

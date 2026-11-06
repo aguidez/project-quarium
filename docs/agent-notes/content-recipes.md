@@ -12,10 +12,10 @@ BALANCE.md is updated (CLAUDE.md §0c). Asset quirks: [[fish-asset-pipeline]].
 
 **Every new mesh, sound or music** generated or uploaded from Studio belongs to the owner's user account, while the
 game belongs to their group (since V0.60.3). A private sound stays silent for the players until `npm run share-assets
-<assetId...>` grants the game its use. A mesh the clients animate (fish, Swordfish, event guests: EditableMesh) must
-**belong to the group**: sharing it with the universe is not enough (V0.60.4 tried; "not allowed to be forked", the
-fish only sway for everyone but the owner). Re-upload it as the group: [[fish-asset-pipeline]] "Meshes the group
-owns". Static meshes (decor, coins, the Snail, the Pelican) and images show anyway.
+<assetId...>` grants the game its use. Every rig (fish, companions, event guests,
+the fisherman) is uploaded **as the group** by the batch checklist of [[blender-pipeline]]. Since V1.1.14 a template
+without a bone rig doesn't swim at all (a warning in the output; a local fish sways): rig every new fish or guest.
+Static meshes (decor, coins) and images show whoever owns them.
 
 ## A new species
 
@@ -36,8 +36,8 @@ owns". Static meshes (decor, coins, the Snail, the Pelican) and images show anyw
 6. Config: `FishType`, `FISH_TYPES`, its egg's odds, Fish Index order; remind the owner to **save the place**.
 7. Playtest: hatch it (`forceNextHatch`), swim animation, growth, variants, icon in the reveal / index.
 8. Bones (V1.1): once the mesh is final, run it through the batch checklist of [[blender-pipeline]] (export, rig,
-   preview GIF to the owner, upload as the group, swap the template, `Rig = "Bones"`): a new species then swims with
-   FishRigController from the start instead of taking EditableMesh budget.
+   preview GIF to the owner, upload as the group, swap the template, `Rig = "Bones"`): without it the species doesn't
+   swim (FishRigController only drives bones). A companion or a prop that isn't a fish: `"rig": "boxes"`.
 
 ## A new aquarium theme
 

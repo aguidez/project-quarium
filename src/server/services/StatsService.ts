@@ -25,7 +25,6 @@ const isClientReport = t.interface({
 	platform: t.literal(...PLATFORMS),
 	fps: t.number,
 	memoryMb: t.number,
-	swimBudget: t.number,
 });
 
 /** The one-time "Progression" funnel of the Creator Dashboard: its steps, in order. */
@@ -250,7 +249,7 @@ class StatsServiceSingleton implements Lifecycle {
 	/** Once a minute from each client: its platform and performance (stats only, never trusted for the game). */
 	private onClientReport(
 		player: Player,
-		report: { platform: Platform; fps: number; memoryMb: number; swimBudget: number },
+		report: { platform: Platform; fps: number; memoryMb: number },
 	) {
 		const stats = this.getStats(player);
 		const session = this.sessions.get(player);
@@ -267,14 +266,11 @@ class StatsServiceSingleton implements Lifecycle {
 			fpsSum: 0,
 			lowFps: 0,
 			memoryMaxMb: 0,
-			swimBudgetMin: 0,
 		});
 		device.samples += 1;
 		device.fpsSum += fps;
 		if (fps < 30) device.lowFps += 1;
 		device.memoryMaxMb = math.max(device.memoryMaxMb, math.clamp(report.memoryMb, 0, 100000));
-		const budget = math.clamp(report.swimBudget, 0, 1e6);
-		if (budget > 0 && (device.swimBudgetMin === 0 || budget < device.swimBudgetMin)) device.swimBudgetMin = budget;
 	}
 
 	// ---------------------------------------------------------------------

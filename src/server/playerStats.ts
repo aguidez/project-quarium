@@ -22,8 +22,6 @@ export interface DeviceStats {
 	/** Samples below 30 fps. */
 	lowFps: number;
 	memoryMaxMb: number;
-	/** Lowest swim animation budget the device settled on (FishAnimationController), 0 if never lowered. */
-	swimBudgetMin: number;
 }
 
 export interface PlayerStats {
@@ -158,7 +156,6 @@ export function sanitizePlayerStats(stats: Partial<PlayerStats> | undefined): Pl
 					fpsSum: d.fpsSum,
 					lowFps: d.lowFps,
 					memoryMaxMb: d.memoryMaxMb,
-					swimBudgetMin: isNumber(d.swimBudgetMin) ? d.swimBudgetMin : 0,
 				};
 			}
 		}
