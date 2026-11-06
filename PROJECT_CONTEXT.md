@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-06 (V1.1.9: the Swordfish companion on bones too; the idol and the UFO still EditableMesh).
+> Last updated: 2026-11-07 (V1.1.10: the bone templates' skeletons fitted to their mesh size; the idol and the UFO still EditableMesh).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -647,7 +647,9 @@ ProjectQuarium/
   **Bone fish** (V1.1, ROADMAP_V1.1): model attribute `Rig = "Bones"`; its `Mesh` is the skinned MeshPart of a Blender
   rig (tools/blender/, agent note blender-pipeline: export → rig → GLB → Open Cloud as the group), the 10 Bones under
   it, same Size / CFrame / SurfaceAppearance / WeldConstraint to `Body` as the static mesh it replaced. `ScaleTo`
-  scales the bones too; a change of `Size` alone (beat puff) leaves them, fine for a short puff. Converted so far:
+  scales the bones too; a change of `Size` alone leaves them where they were, so a template's bones must match its
+  `Size` (swap_template.luau's `fitBones` places them at mesh-space position x Size / MeshSize; without it the mesh
+  crumples, V1.1.1 to V1.1.9); the beat puff's short Size change is fine. Converted so far:
   GoldenGuppy, BlueNeon, ZebraDanio, RedTetra, Clownfish, FlameGourami, SilverAngelfish, ImperialDiscus, FrenchFish,
   Catfish, PirateFish (a new model since V1.1.3, its tricorn rigid on the head), BlueTang, BabySunfish, Lanternfish,
   Lionfish, Dragonfish (7-bone spine), WolfDogfish (the Husky Dogfish), BunnyShark (EarL / EarR), MiniLeviathan (rigged

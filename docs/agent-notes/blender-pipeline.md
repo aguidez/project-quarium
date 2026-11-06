@@ -77,6 +77,11 @@ Blender already open. Blender stays open after the session. `get_screenshot_of_w
    mesh with a swim skeleton (V1.1 animations).","creationContext":{"creator":{"groupId":"815548702"}}}}`, files
    `[{name: "fileContent", path: "<repo>/design/rigs/work/<Fish>.glb"}]`, scopes asset:read / asset:write; poll
    `GET /assets/v1/operations/<id>` until `done`; `moderationState` must be Approved (pending: wait, never re-upload).
+   **Bones don't follow a Size change** (2026-11-07, every swap of V1.1.1 to V1.1.9 crumpled but the Guppy's x1.3):
+   the imported skeleton fits `MeshSize`; `swap_template.luau` sets the template's `Size` and must then move every
+   bone to its mesh-space position x Size / MeshSize (`fitBones`, done since). Check a swapped template **up close in
+   a playtest** (a row of small fish in front of the tank hid it). In Edit, a fresh skinned mesh can stay invisible
+   until displayed once (the Flame Gourami): look in a playtest before suspecting it.
 6. *Swap* (Studio, Edit): `tools/blender/studio/swap_template.luau` once for the batch, `SWAPS` = { Template = modelId }; record the ids in
    `design/meshes/manifest.json` (`staticMeshId`, `rigModelId`, `rigMeshId`).
    Roblox's import drops a bone no vertex follows (the Dragonfish's FinBottom): a bone count lower than Blender's is

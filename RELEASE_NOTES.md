@@ -11,6 +11,15 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.10 — 2026-11-07
+
+**Fixes**
+- **Fish no longer look crumpled**: since V1.1.1, every fish swimming with bones but the Golden Guppy looked squeezed
+  and out of shape. Their skeleton had kept the size of the imported model while the fish itself was enlarged to its
+  usual size, so the bones pulled the whole body toward its middle. Every skeleton now matches its fish's size again.
+
+---
+
 ## V1.1.9 — 2026-11-06
 
 **New**

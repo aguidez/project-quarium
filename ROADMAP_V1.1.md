@@ -238,6 +238,10 @@ owner before building:
 - [ ] Hatch reveal and Fish Index: the fish swims in its card (if the ViewportFrame renders bones, A2). Not now: both
       show stickers; a WorldModel would be needed (A2).
 
+> **Fix 2026-11-07 (V1.1.10)**: the swaps of V1.1.1 to V1.1.9 set the templates' `Size` without moving their bones,
+> so every bone fish but the Golden Guppy looked crumpled (seen by the owner). All 23 skinned templates fitted
+> (`fitBones`, now in `swap_template.luau`), checked in a playtest.
+
 ### A7 — Companions (M)
 
 Each one gets a rig made by its own Blender script (not the fish one) and replaces its V1 wobble
