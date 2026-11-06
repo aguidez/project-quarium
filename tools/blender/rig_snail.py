@@ -146,7 +146,9 @@ def add_preview_action(arm, speed=1.0):
     for frame in range(1, LOOP_FRAMES + 2):
         u = (frame - 1) / LOOP_FRAMES
         p = u * math.tau * speed
-        q = u * math.tau * speed * 0.75
+        # whole cycles over the loop, or the stalks jump when the GIF starts over: 1 sway, 2 tilts
+        q = u * math.tau
+        q_tilt = u * math.tau * 2
         for pb in arm.pose.bones:
             rest = pb.bone.matrix_local.to_3x3()
 
@@ -165,6 +167,6 @@ def add_preview_action(arm, speed=1.0):
                 pb.keyframe_insert("rotation_quaternion", frame=frame)
             elif name in ("EyeL", "EyeR"):
                 lag = 0.0 if name == "EyeL" else 1.3
-                pb.rotation_quaternion = rot((1, 0, 0), EYE_SWAY * math.sin(q - lag)) @ rot((0, 1, 0), 0.5 * EYE_SWAY * math.sin(q * 1.3 + lag))
+                pb.rotation_quaternion = rot((1, 0, 0), EYE_SWAY * math.sin(q - lag)) @ rot((0, 1, 0), 0.5 * EYE_SWAY * math.sin(q_tilt + lag))
                 pb.keyframe_insert("rotation_quaternion", frame=frame)
     return action

@@ -85,6 +85,7 @@ const SNAIL_TAIL_LAG = 1.4; // radians: the tail gathers after the head has reac
 const SNAIL_SHELL_ROCK = math.rad(3);
 const SNAIL_EYE_SWAY = math.rad(12);
 const SNAIL_EYE_FREQUENCY = 0.6;
+const SNAIL_EYE_TILT_RATE = 1.3; // × the sway: the two stalk motions never line up
 // Side letter of a rim / tentacle bone -> its direction from the axis, in mesh space (front -Z, right +X)
 const JELLY_SIDES: Record<string, Vector3> = {
 	F: new Vector3(0, 0, -1),
@@ -156,6 +157,7 @@ interface RiggedFish {
 	sway: number;
 	crawl: number; // the Snail's crawl and eye phases (radians), and how much it crawls (0 still .. 1)
 	eyes: number;
+	eyeTilt: number; // a phase of its own: derived from `eyes` (× 1.3), it jumped each time `eyes` wrapped
 	crawlAmount: number;
 	swim: number; // phases (radians)
 	fin: number;
@@ -259,6 +261,7 @@ class FishRigControllerSingleton implements Lifecycle {
 				sway: math.random() * TAU,
 				crawl: math.random() * TAU,
 				eyes: math.random() * TAU,
+				eyeTilt: math.random() * TAU,
 				crawlAmount: 0,
 				onScreen: true,
 				checkedAt: -math.huge,
@@ -353,7 +356,7 @@ class FishRigControllerSingleton implements Lifecycle {
 					axis: boneAxis(mesh, bone, SIDE),
 					drive: (f) => SNAIL_EYE_SWAY * math.sin(f.eyes - lag),
 					tiltAxis: boneAxis(mesh, bone, LENGTH),
-					tilt: (f) => 0.5 * SNAIL_EYE_SWAY * math.sin(f.eyes * 1.3 + lag),
+					tilt: (f) => 0.5 * SNAIL_EYE_SWAY * math.sin(f.eyeTilt + lag),
 				});
 			} else if (name.sub(1, 3) === "Ear") {
 				found.push({
@@ -502,6 +505,7 @@ class FishRigControllerSingleton implements Lifecycle {
 		fish.crawl = (fish.crawl + dt * TAU * SNAIL_CRAWL_FREQUENCY * math.min(fish.pace, 3)) % TAU;
 		fish.crawlAmount = math.min(fish.pace, 1);
 		fish.eyes = (fish.eyes + dt * TAU * SNAIL_EYE_FREQUENCY) % TAU;
+		fish.eyeTilt = (fish.eyeTilt + dt * TAU * SNAIL_EYE_FREQUENCY * SNAIL_EYE_TILT_RATE) % TAU;
 		fish.sway = (fish.sway + dt * TAU * JELLY_PULSE_FREQUENCY * JELLY_SWAY_RATE) % TAU;
 		const advance = dt * TAU;
 		fish.swim = (fish.swim + advance * SWIM_FREQUENCY * beat) % TAU;
