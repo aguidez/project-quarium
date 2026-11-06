@@ -11,6 +11,14 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.4 — 2026-11-06
+
+**New**
+- **Three more fish swim with bones**: the Blue Tang, the Baby Sunfish and the Lanternfish, the fish of Atlantis and
+  the Mariana Trench. 14 species now swim this way.
+
+---
+
 ## V1.1.3 — 2026-11-06
 
 **New**

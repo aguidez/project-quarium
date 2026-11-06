@@ -3,7 +3,7 @@
 > The animation revamp: every fish, companion, event guest and NPC moves through a **skeleton made in Blender**
 > instead of the EditableMesh deformation of V1. It starts **once V1 is complete** (the owner's calibration with real players done). Tick the
 > boxes as tasks ship, and move what a step ships into `PROJECT_CONTEXT.md` / `RELEASE_NOTES.md` as usual.
-> Last updated: 2026-11-06 (A1–A4 done; A5.1–A5.4b: batches 1–2 on bones and a new Pirate Fish, V1.1.3; next A5.5).
+> Last updated: 2026-11-06 (A1–A4 done; A5.1–A5.5: batches 1–3 on bones and a new Pirate Fish, V1.1.4; next A5.6).
 
 **V1.1 in one line**: Blender joins the toolchain (Windows and Mac) **as an MCP server**, like Roblox Studio and
 FigCraft, so the agent drives it itself; a script rigs every model by itself, the game
@@ -189,8 +189,9 @@ blender-pipeline.
       all after the owner's look. Old assets the owner may archive: ball meshes 111915158254959 / 78117520516696,
       texture 76837327495535, variants 106089869843984 / 75123395235665, stickers 140042928133697 / 110288096561899 /
       134728004078355 / 107412512620557; dropped candidates B 139716735464675 and C 88927581992980.
-- [ ] **A5.5 — Batch 3 prep + ship** (Atlantis and Mariana Trench, 3 fish): Blue Tang, Baby Sunfish (tall round body:
-      check the joints), Lanternfish (its lure: kept on the head bone, never animated). **V1.1.4**.
+- [x] **A5.5 — Batch 3 prep + ship** (2026-11-06, **V1.1.4**): Blue Tang, Baby Sunfish, Lanternfish (the species
+      Lanternfish has no lure), rigged with the defaults, sheet `design/previews/v1.1-batch3.gif` approved, 3 uploads
+      Approved, swapped and playtested.
 - [ ] **A5.6 — Rig extensions** (code only, no species shipped): `rig_fish.py` settings for more spine bones (Dragonfish
       6, Mini Leviathan 8+), extra bone chains (the Bunny Shark's ears, a soft follow in FishRigController), the Mini
       Leviathan's 30° template pitch baked in Blender; FishRigController drives any number of spine bones by name.
