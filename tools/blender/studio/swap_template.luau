@@ -7,7 +7,11 @@
 -- Assets.Companions (the Swordfish).
 -- Usage: set SWAPS below (template name -> uploaded Model id), run, then ask the owner to save + publish the place.
 -- A template that pitches its mesh (the Mini Leviathan) keeps that pitch: the rig was made in the mesh's own space.
+-- MESH_SWAPS does the same for a MeshPart placed in the world (the shop's Fisherman, both huts): full path -> Model
+-- id; it keeps its name and parent, and stays its model's PrimaryPart; no Body weld, no Rig attribute (its controller
+-- looks for the bones by name).
 local SWAPS = { GoldenGuppy = 93278084123107 }
+local MESH_SWAPS = {}
 
 -- A skinned mesh resized through Size (not ScaleTo) keeps its bones where the import put them, for its MeshSize: the
 -- skeleton then sits too small inside the mesh and the deformation crumples it (every swap of V1.1.1 to V1.1.9 but
@@ -27,12 +31,11 @@ local function fitBones(mesh)
 	end
 end
 
-local function swapOne(FISH, MODEL)
-	local template = (game:GetService("ServerStorage").Assets.Fish:FindFirstChild(FISH) or game:GetService("ServerStorage").Assets.EventFish:FindFirstChild(FISH) or game:GetService("ServerStorage").Assets.Companions:FindFirstChild(FISH))
-	assert(template, "no template " .. FISH)
-	local old = template:FindFirstChild("Mesh")
-	assert(old and old:IsA("MeshPart"), FISH .. " has no Mesh MeshPart")
-	assert(not old.HasSkinnedMesh, FISH .. " is already rigged")
+-- Puts the uploaded skinned mesh in place of `old` (same name, parent, Size, CFrame, look, attributes; the PrimaryPart
+-- of the models that pointed at it) and fits its bones. Returns the new MeshPart and the old mesh id.
+local function swapMesh(old, MODEL)
+	assert(old and old:IsA("MeshPart"), "not a MeshPart")
+	assert(not old.HasSkinnedMesh, old:GetFullName() .. " is already rigged")
 	local loaded = game:GetObjects("rbxassetid://" .. MODEL)[1]
 	local rigged = loaded:FindFirstChildWhichIsA("MeshPart", true)
 	rigged.Parent = nil -- out before the Model is destroyed, or its Parent gets locked
@@ -43,7 +46,7 @@ local function swapOne(FISH, MODEL)
 	for _, p in { "Anchored", "CanCollide", "CanQuery", "CanTouch", "Massless", "CastShadow", "Transparency", "Material", "Color", "RenderFidelity", "DoubleSided", "Locked", "TextureID" } do
 		pcall(function() rigged[p] = old[p] end)
 	end
-	rigged.Name = "Mesh"
+	rigged.Name = old.Name
 	rigged.Size = old.Size
 	rigged.CFrame = old.CFrame
 	for k, v in old:GetAttributes() do
@@ -51,24 +54,58 @@ local function swapOne(FISH, MODEL)
 	end
 	local appearance = old:FindFirstChildWhichIsA("SurfaceAppearance")
 	if appearance then appearance:Clone().Parent = rigged end
+	local parent = old.Parent
+	local primaryOf = {}
+	local a = parent
+	while a and a ~= game do
+		if a:IsA("Model") and a.PrimaryPart == old then table.insert(primaryOf, a) end
+		a = a.Parent
+	end
+	local oldId = old.MeshId
+	old:Destroy()
+	rigged.Parent = parent
+	for _, m in primaryOf do m.PrimaryPart = rigged end
+	fitBones(rigged) -- after the resize: the bones follow the mesh's new size
+	return rigged, oldId
+end
+
+local function countBones(mesh)
+	local bones = 0
+	for _, d in mesh:GetDescendants() do if d:IsA("Bone") then bones += 1 end end
+	return bones
+end
+
+local function swapOne(FISH, MODEL)
+	local template = (game:GetService("ServerStorage").Assets.Fish:FindFirstChild(FISH) or game:GetService("ServerStorage").Assets.EventFish:FindFirstChild(FISH) or game:GetService("ServerStorage").Assets.Companions:FindFirstChild(FISH))
+	assert(template, "no template " .. FISH)
+	local rigged, oldId = swapMesh(template:FindFirstChild("Mesh"), MODEL)
 	local weld = Instance.new("WeldConstraint")
 	weld.Part0 = template:FindFirstChild("Body")
 	weld.Part1 = rigged
 	weld.Parent = rigged
-	local oldId = old.MeshId
-	old:Destroy()
-	rigged.Parent = template
-	fitBones(rigged) -- after the resize: the bones follow the mesh's new size
 	template:SetAttribute("Rig", "Bones")
-	local bones = 0
-	for _, d in rigged:GetDescendants() do if d:IsA("Bone") then bones += 1 end end
-	return string.format("%s: static %s -> skinned %s, %d bones, Size %s, weld %s->Mesh", FISH, oldId, rigged.MeshId, bones, tostring(rigged.Size), weld.Part0 and weld.Part0.Name or "NONE")
+	return string.format("%s: static %s -> skinned %s, %d bones, Size %s, weld %s->Mesh", FISH, oldId, rigged.MeshId, countBones(rigged), tostring(rigged.Size), weld.Part0 and weld.Part0.Name or "NONE")
+end
+
+local function find(path)
+	local node = game
+	for _, name in path:split(".") do
+		node = node and (node == game and game:GetService(name) or node:FindFirstChild(name))
+	end
+	return node
 end
 
 local report = {}
 for fish, model in SWAPS do
 	local ok, line = pcall(swapOne, fish, model)
 	table.insert(report, ok and line or (fish .. " FAILED: " .. tostring(line)))
+end
+for path, model in MESH_SWAPS do
+	local ok, line = pcall(function()
+		local rigged, oldId = swapMesh(find(path), model)
+		return string.format("%s: static %s -> skinned %s, %d bones, Size %s", path, oldId, rigged.MeshId, countBones(rigged), tostring(rigged.Size))
+	end)
+	table.insert(report, ok and line or (path .. " FAILED: " .. tostring(line)))
 end
 game:GetService("ChangeHistoryService"):SetWaypoint("Fish templates on skinned meshes (V1.1)")
 table.sort(report)

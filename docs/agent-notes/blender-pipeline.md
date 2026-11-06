@@ -70,6 +70,11 @@ Blender already open. Blender stays open after the session. `get_screenshot_of_w
    **Long bodies**: more `"joints"` (one spine bone each; the swim is shared out over the chain). **Appendages**
    (ears...): `"extras"`, boxes in normalised space found with a height / side / t scan of the vertices above the body;
    bones named `Ear*` flop in the game. A mesh its template pitches (the Mini Leviathan) is rigged in its own space.
+   **Not a fish** (birds, the shop's Fisherman, 2026-11-07): `"rig": "boxes"` (rig_boxes.py), bones + one vertex box
+   each in the settings, a later box taking from the earlier ones. Find the boxes with a side x height histogram of
+   the vertices (`int(h / 0.04)` bins): an extremity that pokes out of its limb's box stays behind and stretches
+   (the Fisherman's hand lay below the sleeve's box: a `HandR` child box fixed it). Look at a raised limb from the
+   front *and* the side (the "front" view of preview_swim.py).
 4. *Owner preview*: `node tools/blender/frames-to-gif.js design/previews/v1.1-batch<N>.gif design/rigs/work/<Fish>_frames
    ...` (one labelled tile per fish), linked in the reply. **Wait for the owner's go before any upload.**
 5. *Upload* (Studio MCP, once per fish, never again for the same file): `open_cloud_invoke` POST `/assets/v1/assets`
@@ -117,6 +122,10 @@ Edit too. Permissions it relies on (Studio's Assistant Settings → MCP Permissi
 - An agent-driven playtest runs with Studio unfocused: frames are capped at 15 fps (66.7 ms), so read our own script
   time (`os.clock` around the work) and `Stats.RenderCPUFrameTime` instead of the frame time; GPU time reads 0.
 - A ViewportFrame shows bone deformations only inside a WorldModel.
+- The Assistant puts the camera back to Custom after each `execute_luau`: a Scriptable camera set in a playtest does
+  not hold until the next `screen_capture` (it shows the player's own view). Frame the shot by moving the character,
+  and hide the ScreenGuis (`Enabled = false`) when a panel (the Shop) covers it.
+- The shop's Fisherman stands behind his counter: a forward-raised arm (60°) shows only its hand above it.
 
 **Rules.**
 - Real work goes in versioned scripts in `tools/blender/` (rig, preview render, export) that the MCP runs or that run

@@ -1,0 +1,18 @@
+{
+	"//": "The Water Hen companion (Assets.Companions), a box rig (tools/blender/rig_boxes.py): no feet in its mesh (it sits on the water), so its paddling stays V1's rock and bob (on the root) with a nodding head, ruffling wings and a flicking tail.",
+	"rig": "boxes",
+	"root": { "name": "Torso", "head": [0, 0.55, 0.2], "tail": [0, 0.55, 0.5] },
+	"bones": [
+		{ "name": "Head", "head": [0, 0.35, 0.52], "tail": [0, 0.35, 1.0], "box": { "t": [-0.05, 0.55], "h": [0.5, 1.05] } },
+		{ "name": "WingL", "head": [-0.45, 0.45, 0.5], "tail": [-0.75, 0.8, 0.45], "box": { "side": [-1.1, -0.4], "t": [0.3, 0.82], "h": [0.28, 0.66] } },
+		{ "name": "WingR", "head": [0.45, 0.45, 0.5], "tail": [0.75, 0.8, 0.45], "box": { "side": [0.4, 1.1], "t": [0.3, 0.82], "h": [0.28, 0.66] } },
+		{ "name": "TailFan", "head": [0, 0.82, 0.5], "tail": [0, 1.0, 0.75], "box": { "t": [0.8, 1.05], "h": [0.4, 0.95] } }
+	],
+	"preview": [
+		{ "bone": "Torso", "axis": [0, 1, 0], "deg": 7, "cycles": 2 },
+		{ "bone": "Head", "axis": [1, 0, 0], "deg": 6, "cycles": 2, "phase": 0.8 },
+		{ "bone": "WingL", "axis": [0, 1, 0], "deg": 8, "cycles": 3 },
+		{ "bone": "WingR", "axis": [0, 1, 0], "deg": -8, "cycles": 3 },
+		{ "bone": "TailFan", "axis": [1, 0, 0], "deg": 10, "cycles": 2, "phase": 1.5 }
+	]
+}

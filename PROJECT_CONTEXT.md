@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-07 (V1.1.12: the Snail companion crawls with bones; the idol and the UFO still EditableMesh).
+> Last updated: 2026-11-07 (V1.1.13: the Pelican, the Water Hen and the shop fisherman on bones; the idol and the UFO still EditableMesh).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -150,10 +150,12 @@ ProjectQuarium/
 │                            convert_fish.py (one species: import → rig → swim → frames → GLB), rig_fish.py (auto-rig:
 │                            spine chain + fins + jaw, V1's weight rules), preview_swim.py (V1's beats as a bone loop,
 │                            EEVEE frames), export_fish.py (GLB for Roblox), frames-to-gif.js (one GIF / a batch sheet),
-│                            rig_jellyfish.py / rig_snail.py (companions' own rigs, picked by their settings' "rig"),
+│                            rig_jellyfish.py / rig_snail.py / rig_boxes.py (companions' and the fisherman's own
+│                            rigs, picked by their settings' "rig"; rig_boxes: bones + vertex boxes in the settings),
 │                            rgba-to-png.js
 │                            (texture pull + tint); studio/export_fish.luau and studio/swap_template.luau
-│                            (Studio snippets the agent runs through the MCP, never game scripts)
+│                            (Studio snippets the agent runs through the MCP, never game scripts; MESH_SWAPS swaps a
+│                            MeshPart placed in the world by its path)
 ├─ design/rigs/work/        Rig work files (exported textures, .blend, render frames): git-ignored
 ├─ tools/local-config.js     Reads workspace.local.json (+ UPPER_SNAKE env overrides), finds the Roblox fonts folder
 ├─ tools/check-setup.js      `npm run doctor`: checks Node, packages, Rojo version, Studio MCP, fonts, FigCraft, Blender, uv, Blender MCP
@@ -501,11 +503,15 @@ ProjectQuarium/
       │  │                   tail sweep), Exit "Released" (fast strong strokes) / "Eaten" / "Abducted" (struggle). The
       │  │                   Jellyfish (rig_jellyfish.py): Bell (bob + sway), Rim<side> squeeze, Tent<side><1-3> trail,
       │  │                   V1's 0.8 pulses/s. The Snail (rig_snail.py): SnailHead / SnailTail stretch the body from
-      │  │                   its pace, Shell rocks, EyeL / EyeR sway (each motion on a phase of its own); every frame
+      │  │                   its pace, Shell rocks, EyeL / EyeR sway (each motion on a phase of its own). The Pelican
+      │  │                   and the Water Hen (rig_boxes.py: Torso, Head, WingL / R, TailFan; the Pelican's Neck, Beak,
+      │  │                   LegL / R): breath, nod, wing ruffle, tail flick; the Pelican's lean (its Body's forward
+      │  │                   tilt / PELICAN_LEAN) stretches the neck, dips the beak, opens the wings; the Hen rocks /
+      │  │                   nods / bobs on its Torso, faster while it paddles (> 0.4 studs/s on the flat); every frame
       │  │                   within 60 studs, every 2nd to 110, every 4th beyond, frozen off screen; no budget
-      │  ├─ CompanionAnimationController  Local wobble of the Water Hen (its own copy of the Mesh placed on the server-moved
-      │  │                   Body every frame) and the Jellyfish's bell pulse; a companion with `Rig = "Bones"` (the
-      │  │                   Jellyfish since V1.1.11) is left to FishRigController
+      │  ├─ CompanionAnimationController  V1's local wobble of the Water Hen and the Jellyfish's bell pulse, now only for a
+      │  │                   template without `Rig = "Bones"` (every companion has one since V1.1.13: they move in
+      │  │                   FishRigController); goes with ROADMAP_V1.1 A8
       │  ├─ PelicanChargesController  Charge gauge above the local player's on-demand Pelican / Jellyfish (BillboardGui): one
       │  │                   slot per charge, a pellet growing while it refills; hidden while MaxCharges is 0
       │  ├─ ChatTitleController  TextChatService.OnIncomingMessage: the sender's title as a coloured tag before their name in
@@ -515,7 +521,9 @@ ProjectQuarium/
       │  │                   closes 2 studs past its edges; without any ShopZone in the place, the old rule: within 9 studs
       │  │                   of the fisherman, closes beyond 12) → App `shopNearby` opens / closes the Shop panel (closed by hand
       │  │                   it stays closed until the player comes back); turns him toward a player nearby and makes him
-      │  │                   breathe (local PivotTo). Draws each ShopZone's pad, local: a SurfaceGui (in PlayerGui,
+      │  │                   breathe (local PivotTo); his bones (rig_boxes.py, found by name in his skinned
+      │  │                   body_geom, retried each second): Chest breathes, Head takes 40% of the turn (up to 30°, so
+      │  │                   he follows to 85°) and looks around while idle, ArmR waves 2.4 s when a player steps up. Draws each ShopZone's pad, local: a SurfaceGui (in PlayerGui,
       │  │                   Adornee the zone, top face) gold with an orange outline and a white inner line, pulsing, lit
       │  │                   while stood on; gold sparkles rising from the zone (more while stood on)
       │  ├─ IncomePopupController  Floating "+X$" / "-X$" / "+X Ocean" billboards (MoneyPopup remote), straight in
@@ -662,7 +670,9 @@ ProjectQuarium/
   in its own space, the template keeps its -30° pitch): every species of the 8 aquariums, plus Sugar, AlienFish and the
   abyss `LanternFish` (EventFish; work files `AbyssLantern`; its stalk rigid under the welded lit Lure, no jaw). Still
   EditableMesh: the K-pop idol (its template lost its texture, see §4) and the UFO. The Swordfish companion too
-  (`Assets.Companions`, no jaw: its bill; FishRigController tracks `Companion` models with `Rig`) (rig settings per species in design/rigs/<Fish>.json; ids in design/meshes/manifest.json:
+  (`Assets.Companions`, no jaw: its bill; FishRigController tracks `Companion` models with `Rig`), and every other
+  companion on its own rig: Jellyfish, Snail, Pelican, WaterHen; the shop's Fisherman (both huts' `body_geom`, no
+  `Rig` attribute: ShopKeeperController finds his bones) (rig settings per species in design/rigs/<Fish>.json; ids in design/meshes/manifest.json:
   `rigModelId`, `rigMeshId`, `staticMeshId`).
 - **`ServerStorage.Assets`**:
   - `Fish/` (tag `FishTemplate`, attr `FishType`): the 18 species + `FrenchFish`, `AlienFish` and `Sugar` (no

@@ -1,0 +1,226 @@
+{
+	"//": "The shop's Fisherman (Workspace.Lobby.FishingHut*.Fisherman.body.body_geom, his look a TextureID), a box rig (tools/blender/rig_boxes.py): the chest breathes, the head turns toward the player, the right arm waves (HandL / HandR: the bottom of each hand, below the sleeve's box, follows its arm) (an empty hand, slow and friendly: ROADMAP_V1.1 section 4).",
+	"rig": "boxes",
+	"root": {
+		"name": "Hips",
+		"head": [
+			0,
+			0.5,
+			0.1
+		],
+		"tail": [
+			0,
+			0.5,
+			0.35
+		]
+	},
+	"bones": [
+		{
+			"name": "Chest",
+			"head": [
+				0,
+				0.5,
+				0.35
+			],
+			"tail": [
+				0,
+				0.5,
+				0.6
+			],
+			"box": {
+				"t": [
+					-0.05,
+					1.05
+				],
+				"h": [
+					0.3,
+					0.62
+				]
+			}
+		},
+		{
+			"name": "Head",
+			"parent": "Chest",
+			"head": [
+				0,
+				0.5,
+				0.6
+			],
+			"tail": [
+				0,
+				0.5,
+				1.0
+			],
+			"box": {
+				"t": [
+					-0.05,
+					1.05
+				],
+				"h": [
+					0.58,
+					1.05
+				]
+			}
+		},
+		{
+			"name": "ArmL",
+			"parent": "Chest",
+			"head": [
+				-0.62,
+				0.5,
+				0.56
+			],
+			"tail": [
+				-0.75,
+				0.2,
+				0.36
+			],
+			"box": {
+				"side": [
+					-1.1,
+					-0.66
+				],
+				"t": [
+					-0.05,
+					1.05
+				],
+				"h": [
+					0.28,
+					0.6
+				]
+			},
+			"fade": 0.04
+		},
+		{
+			"name": "ArmR",
+			"parent": "Chest",
+			"head": [
+				0.62,
+				0.5,
+				0.56
+			],
+			"tail": [
+				0.75,
+				0.2,
+				0.36
+			],
+			"box": {
+				"side": [
+					0.66,
+					1.1
+				],
+				"t": [
+					-0.05,
+					1.05
+				],
+				"h": [
+					0.28,
+					0.6
+				]
+			},
+			"fade": 0.04
+		},
+		{
+			"name": "HandR",
+			"parent": "ArmR",
+			"head": [
+				0.85,
+				0.3,
+				0.32
+			],
+			"tail": [
+				0.88,
+				0.25,
+				0.2
+			],
+			"box": {
+				"side": [
+					0.72,
+					1.1
+				],
+				"t": [
+					-0.05,
+					1.05
+				],
+				"h": [
+					0.14,
+					0.36
+				]
+			},
+			"fade": 0.03
+		},
+		{
+			"name": "HandL",
+			"parent": "ArmL",
+			"head": [
+				-0.85,
+				0.3,
+				0.32
+			],
+			"tail": [
+				-0.88,
+				0.25,
+				0.2
+			],
+			"box": {
+				"side": [
+					-1.1,
+					-0.72
+				],
+				"t": [
+					-0.05,
+					1.05
+				],
+				"h": [
+					0.14,
+					0.36
+				]
+			},
+			"fade": 0.03
+		}
+	],
+	"preview": [
+		{
+			"bone": "Chest",
+			"axis": [
+				1,
+				0,
+				0
+			],
+			"deg": 2.5,
+			"cycles": 1
+		},
+		{
+			"bone": "Head",
+			"axis": [
+				0,
+				0,
+				1
+			],
+			"deg": 18,
+			"cycles": 1,
+			"phase": 1.0
+		},
+		{
+			"bone": "ArmR",
+			"axis": [
+				1,
+				0,
+				0
+			],
+			"deg": 60,
+			"cycles": 1,
+			"positive": true
+		},
+		{
+			"bone": "ArmR",
+			"axis": [
+				0,
+				1,
+				0
+			],
+			"deg": 12,
+			"cycles": 3
+		}
+	]
+}

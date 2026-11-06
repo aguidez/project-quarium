@@ -69,6 +69,8 @@ export const SWORDFISH_REACH = 2;
 export const SNAIL_STROLL_SPEED = 1.2;
 /** Studs/s the Swordfish swims at when there is nothing to grab (CompanionService; FishRigController reads its pace). */
 export const SWORDFISH_CRUISE_SPEED = 2;
+/** Radians the Pelican leans forward over the water to throw (CompanionService; FishRigController dips its beak by it). */
+export const PELICAN_LEAN = math.rad(32);
 export const JELLYFISH_CHARGES = 2;
 export const JELLYFISH_PELLETS = 2;
 

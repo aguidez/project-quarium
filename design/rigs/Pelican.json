@@ -1,0 +1,286 @@
+{
+	"//": "The Pelican companion (Assets.Companions), a box rig (tools/blender/rig_boxes.py): the neck and head nod, the whole beak dips to scoop (it is too thin to split), the wings fold / open, the tail flicks, the legs shift.",
+	"rig": "boxes",
+	"root": {
+		"name": "Torso",
+		"head": [
+			0,
+			0.65,
+			0.3
+		],
+		"tail": [
+			0,
+			0.65,
+			0.55
+		]
+	},
+	"bones": [
+		{
+			"name": "Neck",
+			"head": [
+				0,
+				0.45,
+				0.5
+			],
+			"tail": [
+				0,
+				0.42,
+				0.78
+			],
+			"box": {
+				"t": [
+					0.3,
+					0.62
+				],
+				"h": [
+					0.5,
+					0.7
+				]
+			}
+		},
+		{
+			"name": "Head",
+			"parent": "Neck",
+			"head": [
+				0,
+				0.42,
+				0.78
+			],
+			"tail": [
+				0,
+				0.42,
+				1.0
+			],
+			"box": {
+				"t": [
+					-0.05,
+					0.82
+				],
+				"h": [
+					0.64,
+					1.05
+				]
+			}
+		},
+		{
+			"name": "Beak",
+			"parent": "Head",
+			"head": [
+				0,
+				0.33,
+				0.76
+			],
+			"tail": [
+				0,
+				0.0,
+				0.74
+			],
+			"box": {
+				"t": [
+					-0.05,
+					0.32
+				],
+				"h": [
+					0.6,
+					0.88
+				]
+			},
+			"fade": 0.04
+		},
+		{
+			"name": "WingL",
+			"head": [
+				-0.55,
+				0.45,
+				0.45
+			],
+			"tail": [
+				-0.75,
+				0.95,
+				0.4
+			],
+			"box": {
+				"side": [
+					-1.1,
+					-0.45
+				],
+				"t": [
+					0.4,
+					1.05
+				],
+				"h": [
+					0.25,
+					0.58
+				]
+			}
+		},
+		{
+			"name": "WingR",
+			"head": [
+				0.55,
+				0.45,
+				0.45
+			],
+			"tail": [
+				0.75,
+				0.95,
+				0.4
+			],
+			"box": {
+				"side": [
+					0.45,
+					1.1
+				],
+				"t": [
+					0.4,
+					1.05
+				],
+				"h": [
+					0.25,
+					0.58
+				]
+			}
+		},
+		{
+			"name": "TailFan",
+			"head": [
+				0,
+				0.85,
+				0.45
+			],
+			"tail": [
+				0,
+				1.0,
+				0.5
+			],
+			"box": {
+				"t": [
+					0.88,
+					1.05
+				],
+				"h": [
+					0.35,
+					0.62
+				]
+			}
+		},
+		{
+			"name": "LegL",
+			"head": [
+				-0.2,
+				0.55,
+				0.15
+			],
+			"tail": [
+				-0.2,
+				0.5,
+				0.0
+			],
+			"box": {
+				"side": [
+					-1.1,
+					0
+				],
+				"t": [
+					0.35,
+					0.8
+				],
+				"h": [
+					-0.05,
+					0.13
+				]
+			}
+		},
+		{
+			"name": "LegR",
+			"head": [
+				0.2,
+				0.55,
+				0.15
+			],
+			"tail": [
+				0.2,
+				0.5,
+				0.0
+			],
+			"box": {
+				"side": [
+					0,
+					1.1
+				],
+				"t": [
+					0.35,
+					0.8
+				],
+				"h": [
+					-0.05,
+					0.13
+				]
+			}
+		}
+	],
+	"preview": [
+		{
+			"bone": "Neck",
+			"axis": [
+				1,
+				0,
+				0
+			],
+			"deg": 4,
+			"cycles": 1
+		},
+		{
+			"bone": "Head",
+			"axis": [
+				1,
+				0,
+				0
+			],
+			"deg": 5,
+			"cycles": 2,
+			"phase": 0.6
+		},
+		{
+			"bone": "Beak",
+			"axis": [
+				1,
+				0,
+				0
+			],
+			"deg": 10,
+			"cycles": 1,
+			"positive": true
+		},
+		{
+			"bone": "WingL",
+			"axis": [
+				0,
+				1,
+				0
+			],
+			"deg": 12,
+			"cycles": 2
+		},
+		{
+			"bone": "WingR",
+			"axis": [
+				0,
+				1,
+				0
+			],
+			"deg": -12,
+			"cycles": 2
+		},
+		{
+			"bone": "TailFan",
+			"axis": [
+				0,
+				0,
+				1
+			],
+			"deg": 8,
+			"cycles": 2
+		}
+	]
+}

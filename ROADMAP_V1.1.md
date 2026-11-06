@@ -251,13 +251,16 @@ Each one gets a rig made by its own Blender script (not the fish one) and replac
       `SWORDFISH_CRUISE_SPEED` shared so FishRigController reads its pace; checked on the owner's equipped Swordfish).
 - [x] Snail: the body stretches and contracts as it crawls, eye stalks sway (**V1.1.12**: tools/blender/rig_snail.py,
       6 bones; its TextureID carried by the snippets; the stalks' tilt on its own phase after the owner saw a jump).
-- [ ] Pelican: wings fold / open, beak scoop when it drops food.
-- [ ] Water Hen: feet paddle under the water, head nods, wings ruffle.
+- [x] Pelican: wings fold / open, beak scoop when it drops food (**V1.1.13**: tools/blender/rig_boxes.py, 9 bones; the
+      beak dips as one piece, too thin to split; the lean read from the Body's forward tilt, `PELICAN_LEAN` shared).
+- [x] Water Hen: feet paddle under the water, head nods, wings ruffle (**V1.1.13**: rig_boxes.py, 5 bones; its mesh
+      has no feet, so the paddle stays V1's rock / nod / bob, now on its Torso bone).
 - [x] Jellyfish: the bell pulses through bones (not by scaling the whole mesh), the tentacles wave as a chain
       (**V1.1.11**: tools/blender/rig_jellyfish.py, 17 bones; the rim pivots near the dome's top, a first try with a
       low pivot dented the bell).
-- [ ] The fisherman of the shop huts: idle breathing, head turn toward the player, a wave as they arrive (Studio's
-      avatar auto-setup can be tried first: he is a humanoid shape).
+- [x] The fisherman of the shop huts: idle breathing, head turn toward the player, a wave as they arrive
+      (**V1.1.13**: rig_boxes.py, 7 bones, both huts' `body_geom` swapped in place; HandL / HandR boxes after the
+      owner saw the hand stretch: the bottom of the hand lay below the sleeve's box).
 
 ### A8 — Finish (M)
 

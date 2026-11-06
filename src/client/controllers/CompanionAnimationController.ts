@@ -61,7 +61,7 @@ class CompanionAnimationControllerSingleton implements Lifecycle {
 	private track(model: Instance) {
 		const animation = ANIMATIONS[model.GetAttribute("CompanionType") as string];
 		if (!model.IsA("Model") || animation === undefined || this.companions.has(model)) return;
-		if (hasBoneRig(model)) return; // a companion with a bone rig (the Jellyfish) moves in FishRigController
+		if (hasBoneRig(model)) return; // a companion with a bone rig (all of them since V1.1.13) moves in FishRigController
 		task.spawn(() => {
 			const body = model.WaitForChild("Body", 10);
 			const mesh = model.WaitForChild("Mesh", 10);

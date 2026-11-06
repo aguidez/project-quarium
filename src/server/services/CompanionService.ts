@@ -9,6 +9,7 @@ import {
 	JELLYFISH_FEED_INTERVAL,
 	JELLYFISH_PELLETS,
 	PELICAN_FEED_INTERVAL,
+	PELICAN_LEAN,
 	SWORDFISH_REACH,
 	SNAIL_STROLL_SPEED,
 	SWORDFISH_CRUISE_SPEED,
@@ -49,7 +50,6 @@ const PELICAN_LOOK_ANGLE = math.rad(28); // turns its head (whole body) this far
 const PELICAN_LOOK_TIME = 0.6;
 const PELICAN_LOOK_PAUSE_MIN = 1.2;
 const PELICAN_LOOK_PAUSE_MAX = 3;
-const PELICAN_LEAN = math.rad(32); // leans forward to throw
 const PELICAN_LEAN_TIME = 0.25;
 const PELICAN_PELLET_SPREAD = 1.6; // studs between the pellets of one throw (Double serving)
 const PELICAN_PELLET_DELAY = 0.15;

@@ -1,7 +1,7 @@
 import { CollectionService, RunService, Workspace } from "@rbxts/services";
 import { Lifecycle } from "shared/framework";
 import { TAGS } from "shared/tags";
-import { SNAIL_STROLL_SPEED, SWORDFISH_CRUISE_SPEED } from "shared/types/companions";
+import { PELICAN_LEAN, SNAIL_STROLL_SPEED, SWORDFISH_CRUISE_SPEED } from "shared/types/companions";
 import { FISH_TYPES, FishType, HungerState } from "shared/types/fish";
 
 /**
@@ -86,6 +86,35 @@ const SNAIL_SHELL_ROCK = math.rad(3);
 const SNAIL_EYE_SWAY = math.rad(12);
 const SNAIL_EYE_FREQUENCY = 0.6;
 const SNAIL_EYE_TILT_RATE = 1.3; // × the sway: the two stalk motions never line up
+// The birds (tools/blender/rig_boxes.py, design/rigs/Pelican.json / WaterHen.json: Torso the root, Head, WingL/R,
+// TailFan; the Pelican also has Neck, Beak, LegL/R). Their Body is moved by the server, the bones only add life.
+// Pelican, on its perch: breathes, nods, ruffles its wings and flicks its tail; when it leans over the water to throw
+// (the server tilts its Body by PELICAN_LEAN), its neck reaches, its whole beak dips and its wings open.
+const BIRD_BREATH_FREQUENCY = 0.5; // per second
+const BIRD_NOD_FREQUENCY = 0.85; // head nods and tail flicks
+const BIRD_RUFFLE_FREQUENCY = 1.1; // wings
+const PELICAN_NECK_BREATH = math.rad(3);
+const PELICAN_HEAD_NOD = math.rad(4);
+const PELICAN_WING_RUFFLE = math.rad(4);
+const PELICAN_TAIL_FLICK = math.rad(6);
+const PELICAN_LEAN_NECK = math.rad(14); // at a full lean
+const PELICAN_LEAN_BEAK = math.rad(14);
+const PELICAN_LEAN_WINGS = math.rad(25);
+const PELICAN_LEAN_SETTLE = 12; // per second
+// Water Hen, on the water (V1's CompanionAnimationController numbers, now on its Torso bone): rocks from side to side
+// and nods while it floats, faster and wider while it paddles; its head bobs, its wings ruffle, its tail flicks
+const HEN_ROCK_FREQUENCY = 0.9; // rocks per second at rest
+const HEN_PADDLE_FREQUENCY = 2.2; // waddles per second while paddling
+const HEN_ROCK_ANGLE = math.rad(5); // roll at rest
+const HEN_PADDLE_ANGLE = math.rad(9); // roll while paddling
+const HEN_NOD_ANGLE = math.rad(4); // the body leans forward a little with each paddle
+const HEN_BOB = 0.06; // studs: a small extra bob on top of the server's
+const HEN_MOVING_SPEED = 0.4; // studs/s on the flat: faster than this, it is paddling
+const HEN_BLEND_RATE = 4; // per second: eases between resting and paddling
+const HEN_HEAD_NOD = math.rad(6);
+const HEN_WING_RUFFLE = math.rad(3); // at rest, + HEN_WING_PADDLE while paddling
+const HEN_WING_PADDLE = math.rad(5);
+const HEN_TAIL_FLICK = math.rad(10);
 // Side letter of a rim / tentacle bone -> its direction from the axis, in mesh space (front -Z, right +X)
 const JELLY_SIDES: Record<string, Vector3> = {
 	F: new Vector3(0, 0, -1),
@@ -159,6 +188,11 @@ interface RiggedFish {
 	eyes: number;
 	eyeTilt: number; // a phase of its own: derived from `eyes` (× 1.3), it jumped each time `eyes` wrapped
 	crawlAmount: number;
+	breath: number; // the birds' phases (radians): breathing / rocking, nodding, wings
+	nod: number;
+	ruffle: number;
+	paddle: number; // the Water Hen: 0 floating .. 1 paddling, eased
+	lean: number; // the Pelican: 0 upright .. 1 leaning over the water to throw, smoothed
 	swim: number; // phases (radians)
 	fin: number;
 	mouth: number;
@@ -230,7 +264,7 @@ class FishRigControllerSingleton implements Lifecycle {
 		task.spawn(() => {
 			const mesh = model.WaitForChild("Mesh", 10);
 			if (!mesh || !mesh.IsA("MeshPart") || !model.Parent) return;
-			const bones = this.findBones(mesh);
+			const bones = this.findBones(mesh, model.GetAttribute("CompanionType"));
 			if (bones.size() === 0) {
 				warn(`[Client] ${model.Name} says Rig = "Bones" but its Mesh has no bones: it won't swim.`);
 				return;
@@ -263,6 +297,11 @@ class FishRigControllerSingleton implements Lifecycle {
 				eyes: math.random() * TAU,
 				eyeTilt: math.random() * TAU,
 				crawlAmount: 0,
+				breath: math.random() * TAU,
+				nod: math.random() * TAU,
+				ruffle: math.random() * TAU,
+				paddle: 0,
+				lean: 0,
 				onScreen: true,
 				checkedAt: -math.huge,
 				lastUpdate: os.clock(),
@@ -281,7 +320,8 @@ class FishRigControllerSingleton implements Lifecycle {
 	}
 
 	/** The bones of the fish rig (tools/blender/rig_fish.py names), with their axis and motion. */
-	private findBones(mesh: MeshPart): DrivenBone[] {
+	private findBones(mesh: MeshPart, companion: unknown): DrivenBone[] {
+		if (companion === "Pelican" || companion === "WaterHen") return this.findBirdBones(mesh, companion);
 		const found = new Array<DrivenBone>();
 		const finTop = mesh.FindFirstChild("FinTop", true);
 		const finT = finTop?.IsA("Bone") ? boneT(mesh, finTop) : 0.5;
@@ -400,6 +440,52 @@ class FishRigControllerSingleton implements Lifecycle {
 		return found;
 	}
 
+	/** The birds' bones (tools/blender/rig_boxes.py, design/rigs/Pelican.json / WaterHen.json). */
+	private findBirdBones(mesh: MeshPart, companion: "Pelican" | "WaterHen"): DrivenBone[] {
+		const found = new Array<DrivenBone>();
+		const pelican = companion === "Pelican";
+		for (const bone of mesh.GetDescendants()) {
+			if (!bone.IsA("Bone")) continue;
+			const name = bone.Name;
+			// Mesh-local axes: a negative turn around SIDE leans the front (−Z) down; around LENGTH, + lifts the right
+			if (name === "Torso" && !pelican) {
+				const up = boneAxis(mesh, bone, UP);
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, LENGTH),
+					drive: (f) => math.sin(f.breath) * (HEN_ROCK_ANGLE + (HEN_PADDLE_ANGLE - HEN_ROCK_ANGLE) * f.paddle),
+					tiltAxis: boneAxis(mesh, bone, SIDE),
+					tilt: (f) => -math.abs(math.sin(f.breath)) * HEN_NOD_ANGLE * f.paddle,
+					offset: (f) => up.mul(HEN_BOB * math.sin(f.breath * 2)),
+				});
+			} else if (name === "Neck") {
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, SIDE),
+					drive: (f) => PELICAN_NECK_BREATH * math.sin(f.breath) - PELICAN_LEAN_NECK * f.lean,
+				});
+			} else if (name === "Head") {
+				const nod = pelican ? PELICAN_HEAD_NOD : HEN_HEAD_NOD;
+				found.push({ bone, axis: boneAxis(mesh, bone, SIDE), drive: (f) => nod * math.sin(f.nod) });
+			} else if (name === "Beak") {
+				found.push({ bone, axis: boneAxis(mesh, bone, SIDE), drive: (f) => -PELICAN_LEAN_BEAK * f.lean });
+			} else if (name === "WingL" || name === "WingR") {
+				const sign = name === "WingR" ? 1 : -1;
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, LENGTH),
+					drive: pelican
+						? (f) => sign * (PELICAN_WING_RUFFLE * math.sin(f.ruffle) + PELICAN_LEAN_WINGS * f.lean)
+						: (f) => sign * (HEN_WING_RUFFLE + HEN_WING_PADDLE * f.paddle) * math.sin(f.ruffle),
+				});
+			} else if (name === "TailFan") {
+				const flick = pelican ? PELICAN_TAIL_FLICK : HEN_TAIL_FLICK;
+				found.push({ bone, axis: boneAxis(mesh, bone, SIDE), drive: (f) => flick * math.sin(f.nod - 1.5) });
+			}
+		}
+		return found;
+	}
+
 	private update() {
 		const camera = Workspace.CurrentCamera;
 		if (!camera) return;
@@ -441,6 +527,12 @@ class FishRigControllerSingleton implements Lifecycle {
 		if (dt > 0 && fish.lastPosition) {
 			const pace = math.min(position.sub(fish.lastPosition).Magnitude / dt / fish.cruise, SPEED_MAX);
 			fish.pace += (pace - fish.pace) * math.min(1, dt * SPEED_SETTLE);
+		}
+		// The Water Hen paddles when it moves on the flat (the server bobs it up and down as it floats)
+		if (dt > 0 && fish.lastPosition) {
+			const flat = position.sub(fish.lastPosition);
+			const target = new Vector3(flat.X, 0, flat.Z).Magnitude / dt > HEN_MOVING_SPEED ? 1 : 0;
+			fish.paddle += (target - fish.paddle) * math.min(1, dt * HEN_BLEND_RATE);
 		}
 		fish.lastPosition = position;
 		const calm = math.clamp(1 - fish.pace, 0, 1);
@@ -506,6 +598,16 @@ class FishRigControllerSingleton implements Lifecycle {
 		fish.crawlAmount = math.min(fish.pace, 1);
 		fish.eyes = (fish.eyes + dt * TAU * SNAIL_EYE_FREQUENCY) % TAU;
 		fish.eyeTilt = (fish.eyeTilt + dt * TAU * SNAIL_EYE_FREQUENCY * SNAIL_EYE_TILT_RATE) % TAU;
+		// The birds: the Water Hen rocks faster while it paddles; the Pelican's lean is its Body's forward tilt
+		const rock = HEN_ROCK_FREQUENCY + (HEN_PADDLE_FREQUENCY - HEN_ROCK_FREQUENCY) * fish.paddle;
+		const hen = model.GetAttribute("CompanionType") === "WaterHen";
+		fish.breath = (fish.breath + dt * TAU * (hen ? rock : BIRD_BREATH_FREQUENCY)) % TAU;
+		fish.nod = (fish.nod + dt * TAU * BIRD_NOD_FREQUENCY) % TAU;
+		fish.ruffle = (fish.ruffle + dt * TAU * BIRD_RUFFLE_FREQUENCY * (1 + fish.paddle)) % TAU;
+		const body = model.FindFirstChild("Body");
+		const look = (body?.IsA("BasePart") ? body : mesh).CFrame.LookVector;
+		const lean = math.clamp(-look.Y / math.sin(PELICAN_LEAN), 0, 1);
+		fish.lean += (lean - fish.lean) * math.min(1, dt * PELICAN_LEAN_SETTLE);
 		fish.sway = (fish.sway + dt * TAU * JELLY_PULSE_FREQUENCY * JELLY_SWAY_RATE) % TAU;
 		const advance = dt * TAU;
 		fish.swim = (fish.swim + advance * SWIM_FREQUENCY * beat) % TAU;

@@ -11,6 +11,19 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.13 — 2026-11-07
+
+**New**
+- **The Pelican moves with bones**: on its perch it breathes, nods, ruffles its wings and flicks its tail; when it
+  leans over the water to throw food, its neck reaches out, its beak dips and its wings open.
+- **The Water Hen moves with bones**: it still rocks and nods on the water (faster and wider while it paddles), and
+  now its head bobs, its wings ruffle and its tail flicks.
+- **The shop's fisherman comes to life**: his chest breathes, he looks around while nobody is there, his head
+  finishes the turn toward a player who comes close, and he waves (an empty hand) when a player steps on the shop's
+  zone. Both huts.
+
+---
+
 ## V1.1.12 — 2026-11-07
 
 **New**

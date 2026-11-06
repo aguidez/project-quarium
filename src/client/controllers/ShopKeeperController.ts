@@ -15,6 +15,20 @@ const MAX_TURN = math.rad(55); // never turns his back to the counter
 // Idle: breathes (a slow up and down) so he never looks frozen
 const BREATH_HEIGHT = 0.08;
 const BREATH_FREQUENCY = 0.35;
+// His bones (tools/blender/rig_boxes.py, design/rigs/Fisherman.json: Hips the root, Chest, Head, ArmL, ArmR), once
+// his body_geom is the skinned mesh: the chest breathes with the bob, the head looks around while idle and finishes
+// the turn toward the player, and he waves (right arm, empty hand: CLAUDE.md §7) when a player steps up
+const CHEST_BREATH = math.rad(2.5);
+const HEAD_SHARE = 0.4; // of the turn toward the player done by the head, the rest by the whole body
+const HEAD_MAX_TURN = math.rad(30);
+const HEAD_IDLE_LOOK = math.rad(8); // a slow look around while nobody is there ...
+const HEAD_IDLE_FREQUENCY = 0.12; // ... looks per second
+const WAVE_TIME = 2.4; // seconds of a wave
+const WAVE_RAISE = math.rad(60); // the right arm comes up in front of him ...
+const WAVE_SWING = math.rad(12); // ... and waves from side to side
+const WAVE_FREQUENCY = 2.4; // swings per second
+const WAVE_EASE = 0.4; // seconds to raise / lower the arm
+const RIG_RETRY = 1; // seconds between two looks for his bones (they may stream in after him)
 // The zone's glowing pad (a SurfaceGui on the zone's top face): gold, its outline pulsing, brighter while stood on
 const PAD_PIXELS_PER_STUD = 40;
 const PAD_CORNER = 0.9; // studs
@@ -31,6 +45,44 @@ interface Keeper {
 	model: Model;
 	rest: CFrame; // the pivot built in Studio, facing out of the counter
 	yaw: number; // current turn from the rest pose (radians)
+	rig?: KeeperRig;
+	rigCheckedAt: number;
+	waveStart?: number; // os.clock() of the current wave
+}
+
+/** His bones and their axes (bone space), from the skinned mesh's rest pose; any of them may be missing. */
+interface KeeperRig {
+	chest?: { bone: Bone; side: Vector3 };
+	head?: { bone: Bone; up: Vector3 };
+	arm?: { bone: Bone; side: Vector3; length: Vector3 };
+}
+
+/** The bone-space axis matching a mesh-local axis (front −Z, up +Y, right +X), from the bone's rest pose. */
+function boneAxis(mesh: BasePart, bone: Bone, meshAxis: Vector3): Vector3 {
+	return mesh.CFrame.ToObjectSpace(bone.WorldCFrame).VectorToObjectSpace(meshAxis).Unit;
+}
+
+function findRig(model: Model): KeeperRig | undefined {
+	for (const mesh of model.GetDescendants()) {
+		if (!mesh.IsA("MeshPart")) continue;
+		const bone = (name: string) => {
+			const found = mesh.FindFirstChild(name, true);
+			return found?.IsA("Bone") ? found : undefined;
+		};
+		const chest = bone("Chest");
+		const head = bone("Head");
+		const arm = bone("ArmR");
+		if (!chest && !head && !arm) continue;
+		const side = new Vector3(1, 0, 0);
+		const up = new Vector3(0, 1, 0);
+		const length = new Vector3(0, 0, 1);
+		return {
+			chest: chest && { bone: chest, side: boneAxis(mesh, chest, side) },
+			head: head && { bone: head, up: boneAxis(mesh, head, up) },
+			arm: arm && { bone: arm, side: boneAxis(mesh, arm, side), length: boneAxis(mesh, arm, length) },
+		};
+	}
+	return undefined;
 }
 
 interface Zone {
@@ -45,7 +97,7 @@ interface Zone {
  * The fisherman of the beach hut sells the gamepasses: the Shop panel opens when the local player steps on the
  * glowing zone in front of his counter (tag ShopZone) and closes when they walk away (the side menu has no Shop
  * button). Purely local: purchases still go through the "BuyGamePass" intent. He also turns toward a player who comes
- * close, and breathes while idle.
+ * close (body and head), waves when they step up, and breathes while idle (his bones, once his mesh has them).
  */
 class ShopKeeperControllerSingleton implements Lifecycle {
 	private keepers = new Map<Instance, Keeper>();
@@ -83,7 +135,7 @@ class ShopKeeperControllerSingleton implements Lifecycle {
 
 	private track(instance: Instance) {
 		if (!instance.IsA("Model") || this.keepers.has(instance)) return;
-		this.keepers.set(instance, { model: instance, rest: instance.GetPivot(), yaw: 0 });
+		this.keepers.set(instance, { model: instance, rest: instance.GetPivot(), yaw: 0, rigCheckedAt: -math.huge });
 	}
 
 	/** Draws the zone's pad (local only): a rounded gold plate with a light outline, and sparkles rising from it. */
@@ -207,22 +259,59 @@ class ShopKeeperControllerSingleton implements Lifecycle {
 		}
 		if (nearby === this.nearby) return;
 		this.nearby = nearby;
+		if (nearby) for (const [, keeper] of this.keepers) keeper.waveStart = os.clock();
 		for (const [, zone] of this.zones) zone.sparkles.Rate = nearby ? SPARKLE_RATE * 3 : SPARKLE_RATE;
 		for (const listener of this.listeners) task.spawn(listener, nearby);
 	}
 
 	private animate(dt: number) {
 		const root = this.getRootPart();
-		const breath = math.sin(os.clock() * BREATH_FREQUENCY * math.pi * 2) * BREATH_HEIGHT;
+		const now = os.clock();
+		const wave = math.sin(now * BREATH_FREQUENCY * math.pi * 2);
+		const breath = wave * BREATH_HEIGHT;
 		for (const [, keeper] of this.keepers) {
+			if (!keeper.rig && now - keeper.rigCheckedAt >= RIG_RETRY) {
+				keeper.rigCheckedAt = now;
+				keeper.rig = findRig(keeper.model);
+			}
+			const rig = keeper.rig;
+			// The player's direction in the keeper's rest frame (he faces −Z, like every model here): with bones the
+			// head takes a share of the turn, so he can follow a little further without turning his back to the counter
 			let target = 0;
 			if (root && this.nearby) {
-				// The player's direction in the keeper's rest frame (he faces −Z, like every model here)
 				const offset = keeper.rest.PointToObjectSpace(root.Position);
-				target = math.clamp(math.atan2(-offset.X, -offset.Z), -MAX_TURN, MAX_TURN);
+				const reach = rig?.head ? MAX_TURN + HEAD_MAX_TURN : MAX_TURN;
+				target = math.clamp(math.atan2(-offset.X, -offset.Z), -reach, reach);
 			}
 			keeper.yaw += (target - keeper.yaw) * math.min(1, dt * TURN_RATE);
-			keeper.model.PivotTo(keeper.rest.mul(new CFrame(0, breath, 0)).mul(CFrame.Angles(0, keeper.yaw, 0)));
+			// (at the far reach the head is at HEAD_MAX_TURN and the body at MAX_TURN)
+			const headYaw = rig?.head ? math.clamp(keeper.yaw * HEAD_SHARE, -HEAD_MAX_TURN, HEAD_MAX_TURN) : 0;
+			const bodyYaw = keeper.yaw - headYaw;
+			keeper.model.PivotTo(keeper.rest.mul(new CFrame(0, breath, 0)).mul(CFrame.Angles(0, bodyYaw, 0)));
+			if (!rig) continue;
+			if (rig.chest?.bone.Parent) rig.chest.bone.Transform = CFrame.fromAxisAngle(rig.chest.side, CHEST_BREATH * wave);
+			if (rig.head?.bone.Parent) {
+				const idle = (1 - math.min(1, math.abs(keeper.yaw) / math.rad(10))) * HEAD_IDLE_LOOK;
+				const look = headYaw + idle * math.sin(now * HEAD_IDLE_FREQUENCY * math.pi * 2);
+				rig.head.bone.Transform = CFrame.fromAxisAngle(rig.head.up, look);
+			}
+			if (rig.arm?.bone.Parent) {
+				let raise = 0;
+				let swing = 0;
+				if (keeper.waveStart !== undefined) {
+					const t = now - keeper.waveStart;
+					if (t >= WAVE_TIME) keeper.waveStart = undefined;
+					else {
+						const ease = math.min(1, t / WAVE_EASE, (WAVE_TIME - t) / WAVE_EASE);
+						const k = ease * ease * (3 - 2 * ease);
+						raise = WAVE_RAISE * k;
+						swing = WAVE_SWING * k * math.sin(t * WAVE_FREQUENCY * math.pi * 2);
+					}
+				}
+				rig.arm.bone.Transform = CFrame.fromAxisAngle(rig.arm.side, raise).mul(
+					CFrame.fromAxisAngle(rig.arm.length, swing),
+				);
+			}
 		}
 		// The pad breathes; stood on, it lights up
 		const pulse = (math.sin(os.clock() * PULSE_SPEED) + 1) / 2;

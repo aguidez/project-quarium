@@ -73,7 +73,9 @@ def convert(repo, fish, render=True):
         weights = [sum(1 for g in v.groups if g.weight > 0) for v in obj.data.vertices]
         summary["max_influences"] = max(weights)
         summary["unweighted"] = sum(1 for w in weights if w == 0)
-        if special:
+        if special and kind == "boxes":
+            special["add_preview_action"](arm, speed, settings.get("preview", []))
+        elif special:
             special["add_preview_action"](arm, speed)
         else:
             preview["add_swim_action"](arm, speed)
