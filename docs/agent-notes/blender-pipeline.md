@@ -53,9 +53,9 @@ Blender already open. Blender stays open after the session. `get_screenshot_of_w
 `search_manual_docs` (offline Blender docs: use them before guessing a `bpy` API).
 
 **Batch checklist (one species = a few calls; ROADMAP_V1.1 A5).** Paths from the repo root.
-1. *Export* (Studio, Edit): `node tools/obj-receiver.js design/rigs/work` in the background; for each fish, run
-   `tools/blender/studio/export_fish.luau` with its `FISH` line set (execute_luau takes the text: copy the file with
-   the line changed); then `node tools/blender/rgba-to-png.js design/rigs/work/<Fish>_color.b64` (PNG + `<Fish>.json`
+1. *Export* (Studio, Edit): `node tools/obj-receiver.js design/rigs/work` in the background; run
+   `tools/blender/studio/export_fish.luau` once for the batch with its `FISHES` list set (execute_luau takes the
+   text: copy the file with the line changed; template names: the Husky Dogfish is `WolfDogfish`); then `node tools/blender/rgba-to-png.js design/rigs/work/<Fish>_color.b64` (PNG + `<Fish>.json`
    with the tint) and `mv design/rigs/work/<Fish>.obj design/meshes/`. Stop the receiver after the batch.
 2. *Rig + preview + GLB* (Blender MCP): `ns = {}; exec(open("<repo>/tools/blender/convert_fish.py").read(), ns);
    ns["convert"]("<repo>", "<Fish>")` (~7 s a fish on the Mac). Read its summary: `unweighted` must be 0,
@@ -70,11 +70,17 @@ Blender already open. Blender stays open after the session. `get_screenshot_of_w
    mesh with a swim skeleton (V1.1 animations).","creationContext":{"creator":{"groupId":"815548702"}}}}`, files
    `[{name: "fileContent", path: "<repo>/design/rigs/work/<Fish>.glb"}]`, scopes asset:read / asset:write; poll
    `GET /assets/v1/operations/<id>` until `done`; `moderationState` must be Approved (pending: wait, never re-upload).
-6. *Swap* (Studio, Edit): `tools/blender/studio/swap_template.luau` with `FISH` and `MODEL` set; record the ids in
+6. *Swap* (Studio, Edit): `tools/blender/studio/swap_template.luau` once for the batch, `SWAPS` = { Template = modelId }; record the ids in
    `design/meshes/manifest.json` (`staticMeshId`, `rigModelId`, `rigMeshId`).
-7. *Playtest*: the fish on bones (`Rig` attribute, a bone's Transform changing), no V1 rig on it, variants, growth.
+7. *Playtest*: the fish on bones (`Rig` attribute, a bone's Transform changing), no V1 rig on it. No dev command
+   brings a species into a tank: from the Server datamodel, clone the templates (tag `FishTemplate` removed, parts
+   anchored) in a row in front of the player and tag them `Fish`; the client's FishRigController animates them.
 8. *Ship*: a patch (RELEASE_NOTES, `GAME_VERSION`), PROJECT_CONTEXT's "Converted so far", the roadmap box; ask the
    owner to **save + publish** the place (the templates live in it).
+
+Lighter copy of a heavy mesh (spare, owner-approved for the Flame Gourami): Decimate modifier, Collapse, ratio
+target / triangles, `delimit = {"UV", "SEAM", "SHARP"}`, `use_collapse_triangulate`: 6,950 → 3,999 with no visible
+change. Before / after renders to the owner, never uploaded unless asked.
 
 Axes and tricks behind the steps: OBJ imported forward −Z / up Y, so in Blender **nose +Y, tail −Y, back +Z, right
 +X**; after `read_homefile(use_empty=True)` operators need `bpy.context.temp_override(window=...)`. Preview colours:

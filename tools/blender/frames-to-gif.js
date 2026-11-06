@@ -1,7 +1,9 @@
 // Turns the PNG frames rendered by tools/blender/preview_swim.py into a looping GIF for the owner (opens in VS Code).
 // Several frame folders make one sheet (a batch of species side by side, each tile labelled with its folder's fish
 // name), so the owner approves a whole batch in one look.
-// Usage: node tools/blender/frames-to-gif.js <out.gif> <framesDir...> [--fps 24] [--cols 3]
+// Usage: node tools/blender/frames-to-gif.js <out.gif> <framesDir...> [--fps 24] [--cols 3] [--tile 360]
+// (--tile: width of a tile in a sheet, px; a single fish keeps its render size). Each frame is quantised on its own:
+// all of a sheet's frames at once run Node out of memory.
 const fs = require("fs");
 const path = require("path");
 const Jimp = require("jimp");
@@ -19,9 +21,10 @@ async function main() {
 	const args = process.argv.slice(2);
 	const fps = option(args, "--fps", 24);
 	const colsWanted = option(args, "--cols", 3);
+	const tileWanted = option(args, "--tile", 360);
 	const [out, ...dirs] = args;
 	if (!out || dirs.length === 0) {
-		console.error("Usage: node tools/blender/frames-to-gif.js <out.gif> <framesDir...> [--fps 24] [--cols 3]");
+		console.error("Usage: node tools/blender/frames-to-gif.js <out.gif> <framesDir...> [--fps 24] [--cols 3] [--tile 360]");
 		process.exit(1);
 	}
 	const cols = Math.min(colsWanted, dirs.length);
@@ -29,8 +32,8 @@ async function main() {
 	const count = Math.min(...lists.map((list) => list.length));
 	if (count === 0) throw new Error("no frame_*.png in one of the folders");
 	const first = await Jimp.read(path.join(dirs[0], lists[0][0]));
-	const tileW = first.bitmap.width;
-	const tileH = first.bitmap.height;
+	const tileW = dirs.length > 1 ? Math.min(tileWanted, first.bitmap.width) : first.bitmap.width;
+	const tileH = Math.round((first.bitmap.height * tileW) / first.bitmap.width);
 	const rows = Math.ceil(dirs.length / cols);
 	const font = dirs.length > 1 ? await Jimp.loadFont(Jimp.FONT_SANS_16_WHITE) : undefined;
 	const names = dirs.map((dir) => path.basename(path.resolve(dir)).replace(/_frames.*$/, ""));
@@ -40,14 +43,16 @@ async function main() {
 		const sheet = new Jimp(tileW * cols, tileH * rows, 0x0d3850ff);
 		for (let i = 0; i < dirs.length; i++) {
 			const tile = await Jimp.read(path.join(dirs[i], lists[i][f]));
+			if (tile.bitmap.width !== tileW) tile.resize(tileW, tileH);
 			const x = (i % cols) * tileW;
 			const y = Math.floor(i / cols) * tileH;
 			sheet.composite(tile, x, y);
 			if (font) sheet.print(font, x + 8, y + 6, names[i]);
 		}
-		frames.push(new GifFrame(new BitmapImage(sheet.bitmap), { delayCentisecs: delay }));
+		const frame = new GifFrame(new BitmapImage(sheet.bitmap), { delayCentisecs: delay });
+		GifUtil.quantizeDekker([frame], 256);
+		frames.push(frame);
 	}
-	GifUtil.quantizeDekker(frames, 256);
 	await GifUtil.write(out, frames, { loops: 0 });
 	console.log(`wrote ${out} (${frames.length} frames, ${dirs.length} fish)`);
 }

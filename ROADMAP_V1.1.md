@@ -3,7 +3,7 @@
 > The animation revamp: every fish, companion, event guest and NPC moves through a **skeleton made in Blender**
 > instead of the EditableMesh deformation of V1. It starts **once V1 is complete** (the owner's calibration with real players done). Tick the
 > boxes as tasks ship, and move what a step ships into `PROJECT_CONTEXT.md` / `RELEASE_NOTES.md` as usual.
-> Last updated: 2026-11-06 (A1 done on the Mac; A2 GO; A4: FishRigController and the Golden Guppy on bones, V1.1.0).
+> Last updated: 2026-11-06 (A1–A4 done; A5.1–A5.2: batch 1 on bones, V1.1.1; next A5.3).
 
 **V1.1 in one line**: Blender joins the toolchain (Windows and Mac) **as an MCP server**, like Roblox Studio and
 FigCraft, so the agent drives it itself; a script rigs every model by itself, the game
@@ -165,16 +165,19 @@ The whole pipeline on one fish, to settle the open questions (§5) before conver
 
 ### A5 — Convert every species (L, in batches)
 
-Order of the aquariums. Each sub-step fits one session and ends on something the owner looks at: a **prep** ends on
+Versions: one sub-patch per ship, **V1.1.1, V1.1.2, V1.1.3...** (owner, 2026-11-06). Order of the aquariums. Each
+sub-step fits one session and ends on something the owner looks at: a **prep** ends on
 the batch's GIF sheet (nothing uploaded), a **ship** uploads the approved batch, swaps the templates, playtests and
 opens a patch (the owner then saves + publishes the place). Each species follows the batch checklist of the agent note
 blender-pipeline.
 
-- [ ] **A5.1 — Batch 1 prep** (Basic and Lagoon): Blue Neon (exported 2026-11-06), Zebra Danio, Red Tetra, Clownfish,
-      Flame Gourami. Export, rig, sheet `design/previews/v1.1-batch1.gif`. **Owner decision** first: decimate the heavy
-      ones (Flame Gourami ~7.0k, Red Tetra ~5.8k, Clownfish ~5.7k triangles) to ≤ ~4k in Blender, UVs kept, with a
-      before / after render for the owner (moderation: no part may change how it reads), or keep them as they are.
-- [ ] **A5.2 — Batch 1 ship**: 5 uploads, 5 swaps, playtest, **V1.1.1**.
+- [x] **A5.1 — Batch 1 prep** (Basic and Lagoon, 2026-11-06): Blue Neon, Zebra Danio, Red Tetra, Clownfish, Flame
+      Gourami, rigged with the defaults (0 unweighted vertex, ≤ 4 influences), sheet `design/previews/v1.1-batch1.gif`
+      approved by the owner. The heavy ones ship as they are (owner). Lighter copy test: the Flame Gourami at 3,999
+      triangles (Decimate Collapse, delimit UV / seam / sharp) looks the same, approved by the owner as a spare for
+      later (`design/previews/flame-gourami-light-compare.png`); nothing light is uploaded.
+- [x] **A5.2 — Batch 1 ship** (2026-11-06): 5 uploads as the group, all Approved at once; 5 swaps
+      (`swap_template.luau` now takes a batch); playtest: the 5 on bones, none on V1; **V1.1.1**.
 - [ ] **A5.3 — Batch 2 prep** (Neon Coral and Pirate Wreck): Silver Angelfish, Imperial Discus (~6.3k: same
       decimation choice), Pirate Fish, French Fish, Catfish (barbels: nothing thin toward the mouth may move like a
       stick). Sheet `v1.1-batch2.gif`.

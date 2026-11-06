@@ -11,6 +11,16 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.1 — 2026-11-06
+
+**New**
+- **Five more fish swim with bones**: the Blue Neon, the Zebra Danio, the Red Tetra, the Clownfish and the Flame
+  Gourami, like the Golden Guppy since V1.1.0. The first two aquariums' fish all wave their body, flutter their fins
+  and go "blub", each at its own rhythm, on every device; the Flame Gourami, the Red Tetra and the Clownfish, the
+  heaviest of them, never fall back to the whole-body sway anymore.
+
+---
+
 ## V1.1.0 — 2026-11-06
 
 The start of the animation revamp (V1.1): fish get a real skeleton, made in Blender.

@@ -111,13 +111,16 @@ def render_preview(obj, arm, out_dir, view="top", size=(480, 320)):
         scene.collection.objects.link(cam)
     cam_data.type = "ORTHO"
     length = max(v.co.y for v in obj.data.vertices) - min(v.co.y for v in obj.data.vertices)
-    cam_data.ortho_scale = length * 1.35
+    height = max(v.co.z for v in obj.data.vertices) - min(v.co.z for v in obj.data.vertices)
+    # ortho_scale spans the image's width: a tall fish (Flame Gourami, Red Tetra) needs its height to fit too
+    aspect = size[0] / size[1]
+    cam_data.ortho_scale = max(length, height * aspect) * 1.35
     if view == "top":  # looking down, nose to the right: the swim wave shows as the body bending sideways
         cam.matrix_world = Matrix.Translation((0, 0, 10)) @ Matrix.Rotation(math.radians(90), 4, "Z")
     elif view == "three_quarter":  # from above the fish's right side, a little ahead: the look for the owner
         eye = Vector((7.0, 2.5, 6.0))
         cam.matrix_world = Matrix.Translation(eye) @ (-eye).to_track_quat("-Z", "Y").to_matrix().to_4x4()
-        cam_data.ortho_scale = length * 1.5
+        cam_data.ortho_scale = max(length, height * aspect) * 1.5
     else:  # side view from the fish's right, nose to the right: fins and mouth
         cam.matrix_world = (Matrix.Translation((10, 0, 0)) @ Matrix.Rotation(math.radians(90), 4, "Z")
                             @ Matrix.Rotation(math.radians(90), 4, "X"))

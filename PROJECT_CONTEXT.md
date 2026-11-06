@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-06 (V1.1.0: the Golden Guppy swims with Blender bones, FishRigController; the others still EditableMesh).
+> Last updated: 2026-11-06 (V1.1.1: 6 species swim with Blender bones, FishRigController; the 12 others still EditableMesh).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -639,7 +639,8 @@ ProjectQuarium/
   rig (tools/blender/, agent note blender-pipeline: export → rig → GLB → Open Cloud as the group), the 10 Bones under
   it, same Size / CFrame / SurfaceAppearance / WeldConstraint to `Body` as the static mesh it replaced. `ScaleTo`
   scales the bones too; a change of `Size` alone (beat puff) leaves them, fine for a short puff. Converted so far:
-  GoldenGuppy (Model 93278084123107, mesh 75509197673995; the static one was 122699620875505).
+  GoldenGuppy, BlueNeon, ZebraDanio, RedTetra, Clownfish, FlameGourami (ids in design/meshes/manifest.json:
+  `rigModelId`, `rigMeshId`, `staticMeshId`).
 - **`ServerStorage.Assets`**:
   - `Fish/` (tag `FishTemplate`, attr `FishType`): the 18 species + `FrenchFish`, `AlienFish` and `Sugar` (no
     FishVariants).
