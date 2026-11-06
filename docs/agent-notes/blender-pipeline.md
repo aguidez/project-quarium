@@ -86,6 +86,9 @@ Blender already open. Blender stays open after the session. `get_screenshot_of_w
    `design/meshes/manifest.json` (`staticMeshId`, `rigModelId`, `rigMeshId`).
    Roblox's import drops a bone no vertex follows (the Dragonfish's FinBottom): a bone count lower than Blender's is
    fine when only such a bone is missing; FishRigController drives the bones it finds.
+   **Every periodic motion on a phase of its own** (2026-11-07, the Snail's eyes): a motion computed as
+   `sin(phase * k)` with `phase` wrapping at 2π jumps at each wrap unless k is a whole number; give it its own phase.
+   Preview loops: whole cycles of every motion over the 30 frames (check frame 1 against frame 31).
 7. *Playtest*: the fish on bones (`Rig` attribute, a bone's Transform changing), no V1 rig on it. No dev command
    brings a species into a tank: from the Server datamodel, clone the templates (tag `FishTemplate` removed, parts
    anchored) in a row in front of the player and tag them `Fish`; the client's FishRigController animates them.

@@ -11,6 +11,15 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.12 — 2026-11-07
+
+**New**
+- **The Snail crawls with bones**: its head reaches forward and the back of its foot follows, so its body stretches
+  and gathers as it crawls (faster when it fetches a coin, still when it rests), its shell rocks a little and its eye
+  stalks sway.
+
+---
+
 ## V1.1.11 — 2026-11-07
 
 **New**

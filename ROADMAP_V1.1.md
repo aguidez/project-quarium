@@ -249,7 +249,8 @@ Each one gets a rig made by its own Blender script (not the fish one) and replac
 
 - [x] Swordfish: the fish rig (it swims like a fish today) (**V1.1.9**: no jaw for its bill; its cruise speed
       `SWORDFISH_CRUISE_SPEED` shared so FishRigController reads its pace; checked on the owner's equipped Swordfish).
-- [ ] Snail: the body stretches and contracts as it crawls, eye stalks sway.
+- [x] Snail: the body stretches and contracts as it crawls, eye stalks sway (**V1.1.12**: tools/blender/rig_snail.py,
+      6 bones; its TextureID carried by the snippets; the stalks' tilt on its own phase after the owner saw a jump).
 - [ ] Pelican: wings fold / open, beak scoop when it drops food.
 - [ ] Water Hen: feet paddle under the water, head nods, wings ruffle.
 - [x] Jellyfish: the bell pulses through bones (not by scaling the whole mesh), the tentacles wave as a chain
