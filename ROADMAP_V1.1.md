@@ -204,7 +204,7 @@ blender-pipeline.
 - [x] **A5.8 — Batch 4 ship** (2026-11-06, **V1.1.5**): 5 uploads Approved, swapped (the Mini Leviathan keeps its
       -30° template pitch), playtested (the Bunny Shark's ears trail its turns). Roblox's import drops a bone that no
       vertex follows (the Dragonfish's FinBottom: 11 bones in Roblox, 12 in Blender): harmless.
-- [ ] **A5.9 — Special and event fish** (prep 2026-11-06: FishRigController also tracks `EventFish`; the Studio
+- [x] **A5.9 — Special and event fish** (prep 2026-11-06: FishRigController also tracks `EventFish`; the Studio
       snippets look in `Assets.EventFish` too and take "Template:FileName" (the abyss `LanternFish` vs the species
       `Lanternfish` on a case-blind disk: files `AbyssLantern`); new rig option `rigid_boxes` (the lantern's stalk under
       its welded lit ball); Sugar, AlienFish, AbyssLantern rigged, sheet `design/previews/v1.1-special-fish.gif`, the
@@ -213,7 +213,8 @@ blender-pipeline.
       The UFO and the SaxCrab stay off the fish rig (not fish; the UFO is decided in A8))
       Shipped 2026-11-06 in **V1.1.6**: Sugar, AlienFish, LanternFish (3 uploads Approved, swapped; a server-built,
       server-moved villain swims on bones on the client, its Lure 3.29 studs from the body at every frame). Left: the
-      K-pop idol (texture first, then rig + its beat dance).: Sugar, the Alien Fish (UFO night), the Abyss Lanternfish villain and the
+      K-pop idol (texture first, then rig + its beat dance): moved to `ROADMAP_FIXES.md` (its original texture is on the
+      Windows PC); A5 is done otherwise.: Sugar, the Alien Fish (UFO night), the Abyss Lanternfish villain and the
       K-pop idol (its dance: bone moves on the beat). FishRigController then also tracks `EventFish`. **V1.1.6**.
 
 ### A6 — Behaviour animations (M)

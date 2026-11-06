@@ -42,7 +42,7 @@ coins. Around that core loop:
 the release (V1.0.0). The testers who finished the alpha (V0.60) keep its "Alpha Pioneer" title; nobody earns it
 any more. **`BALANCE.md`** holds the expected progression
 (rebirth 1 ~19 min … all eighteen species ~12h20 for a player of 1 h a day), every number and the design rules.
-How to add content: `docs/agent-notes/content-recipes.md`. **`ROADMAP_V1.1.md`**: the plan after V1 (animation revamp with Blender skeletons, steps A0–A8).
+How to add content: `docs/agent-notes/content-recipes.md`. **`ROADMAP_V1.1.md`**: the plan after V1 (animation revamp with Blender skeletons, steps A0–A8). **`ROADMAP_FIXES.md`**: small fixes noted along the way.
 
 ---
 
@@ -74,6 +74,8 @@ ProjectQuarium/
 ├─ RELEASE_NOTES.md          Every change of the game, patch by patch, newest on top, never deleted
 ├─ BALANCE.md                The balance: expected progression, live numbers, design rules, V1 design, history
 ├─ ROADMAP_V1.1.md           After V1: the animation revamp (Blender skeletons instead of EditableMesh), steps A0–A8
+├─ ROADMAP_FIXES.md         Small fixes to plan, outside the big roadmaps (the K-pop idol's texture, the other tanks' fish
+│                            badges)
 ├─ default.project.json      Rojo mapping (see §1)
 ├─ .mcp.json                 Project MCP servers (Roblox_Studio, FigCraft, Blender), started by `node tools/mcp/*.js` on any OS
 ├─ workspace.local.example.json  Template of workspace.local.json (git-ignored): FigCraft folder / port, wgpu backend,
