@@ -145,8 +145,11 @@ ProjectQuarium/
 ├─ tools/blender/            V1.1 animations (agent note blender-pipeline): blender-config.js (pinned Blender 5.2 LTS and
 │                            Blender Lab MCP 1.0.3 + SHA-256, paths), setup.js (`npm run blender-setup`, Blender closed:
 │                            downloads, installs + enables the add-on, online access, uv sync); vendor/ git-ignored;
-│                            rig_fish.py (auto-rig: spine chain + fins + jaw, V1's weight rules), preview_swim.py
-│                            (V1's beats as a bone loop, EEVEE frames), frames-to-gif.js, rgba-to-png.js (texture pull)
+│                            convert_fish.py (one species: import → rig → swim → frames → GLB), rig_fish.py (auto-rig:
+│                            spine chain + fins + jaw, V1's weight rules), preview_swim.py (V1's beats as a bone loop,
+│                            EEVEE frames), export_fish.py (GLB for Roblox), frames-to-gif.js (one GIF / a batch sheet),
+│                            rgba-to-png.js (texture pull + tint); studio/export_fish.luau and studio/swap_template.luau
+│                            (Studio snippets the agent runs through the MCP, never game scripts)
 ├─ design/rigs/work/        Rig work files (exported textures, .blend, render frames): git-ignored
 ├─ tools/local-config.js     Reads workspace.local.json (+ UPPER_SNAKE env overrides), finds the Roblox fonts folder
 ├─ tools/check-setup.js      `npm run doctor`: checks Node, packages, Rojo version, Studio MCP, fonts, FigCraft, Blender, uv, Blender MCP

@@ -52,31 +52,39 @@ Blender already open. Blender stays open after the session. `get_screenshot_of_w
 `render_thumbnail_to_path`, `jump_to_*` (focus an object / tab), `search_api_docs`, `get_python_api_docs`,
 `search_manual_docs` (offline Blender docs: use them before guessing a `bpy` API).
 
-**Fish pipeline (A2, Golden Guppy first).**
-1. Export from Studio (Edit): `node tools/obj-receiver.js <folder>` in the background, then the agent note
-   fish-asset-pipeline recipe (EditableMesh → OBJ, V flipped; texture → 512 RGBA base64 as `<Name>.b64`, then
-   `node tools/blender/rgba-to-png.js`). OBJ in `design/meshes/`, texture and work files in `design/rigs/work/`.
-2. In Blender (MCP): `exec(open(".../tools/blender/rig_fish.py").read(), ns)`; `ns["import_fish"](path, name)` (OBJ
-   forward −Z / up Y, axes baked: **nose +Y, tail −Y, back +Z, right +X** in Blender); `ns["rig_fish"](obj)`. After
-   `read_homefile(use_empty=True)` operators need `bpy.context.temp_override(window=...)` (the context is gone).
-3. Preview: `preview_swim.py` `add_swim_action(arm)` (V1's beats as bone rotations, 30-frame loop at 24 fps) and
-   `render_preview(obj, arm, dir, view="three_quarter" | "top" | "side")` (EEVEE, ~0.3 s a frame on the Mac);
-   `node tools/blender/frames-to-gif.js <dir> design/previews/<name>.gif`. Check a contact sheet yourself first.
-   Preview colours: "Standard" view transform (AgX dulls the gold) and a backdrop that doesn't light the fish
-   (Light Path "Is Camera Ray"), the template's SurfaceAppearance.Color multiplied over the texture.
+**Batch checklist (one species = a few calls; ROADMAP_V1.1 A5).** Paths from the repo root.
+1. *Export* (Studio, Edit): `node tools/obj-receiver.js design/rigs/work` in the background; for each fish, run
+   `tools/blender/studio/export_fish.luau` with its `FISH` line set (execute_luau takes the text: copy the file with
+   the line changed); then `node tools/blender/rgba-to-png.js design/rigs/work/<Fish>_color.b64` (PNG + `<Fish>.json`
+   with the tint) and `mv design/rigs/work/<Fish>.obj design/meshes/`. Stop the receiver after the batch.
+2. *Rig + preview + GLB* (Blender MCP): `ns = {}; exec(open("<repo>/tools/blender/convert_fish.py").read(), ns);
+   ns["convert"]("<repo>", "<Fish>")` (~7 s a fish on the Mac). Read its summary: `unweighted` must be 0,
+   `max_influences` ≤ 4, `export.triangles` = the mesh's. Per-species settings in `design/rigs/<Fish>.json`
+   (rig_fish.py DEFAULTS keys + `"speed"`), committed.
+3. *Check* yourself: a contact sheet of a few frames (weights bleeding into the head, fins tearing, a thin part
+   reading as a stick near the mouth: CLAUDE.md §7); the GLB's JSON (skin joints, POSITION min / max, Head node at +Z).
+4. *Owner preview*: `node tools/blender/frames-to-gif.js design/previews/v1.1-batch<N>.gif design/rigs/work/<Fish>_frames
+   ...` (one labelled tile per fish), linked in the reply. **Wait for the owner's go before any upload.**
+5. *Upload* (Studio MCP, once per fish, never again for the same file): `open_cloud_invoke` POST `/assets/v1/assets`
+   with body `{"request":{"assetType":"Model","displayName":"<Fish> Rig","description":"Project Quarium: <Fish> fish
+   mesh with a swim skeleton (V1.1 animations).","creationContext":{"creator":{"groupId":"815548702"}}}}`, files
+   `[{name: "fileContent", path: "<repo>/design/rigs/work/<Fish>.glb"}]`, scopes asset:read / asset:write; poll
+   `GET /assets/v1/operations/<id>` until `done`; `moderationState` must be Approved (pending: wait, never re-upload).
+6. *Swap* (Studio, Edit): `tools/blender/studio/swap_template.luau` with `FISH` and `MODEL` set; record the ids in
+   `design/meshes/manifest.json` (`staticMeshId`, `rigModelId`, `rigMeshId`).
+7. *Playtest*: the fish on bones (`Rig` attribute, a bone's Transform changing), no V1 rig on it, variants, growth.
+8. *Ship*: a patch (RELEASE_NOTES, `GAME_VERSION`), PROJECT_CONTEXT's "Converted so far", the roadmap box; ask the
+   owner to **save + publish** the place (the templates live in it).
 
-4. Export: `export_fish.py` `export_fish(obj, arm, "<repo>/design/rigs/work/<Name>.glb")`: copies turned 180° around
-   Blender Z (Roblox's glTF import turns meshes 180°), rest pose, **no material / image / animation** (nothing but
-   the Model gets uploaded; the template keeps its SurfaceAppearance). Check the GLB's JSON: skin joints, POSITION
-   min / max, the Head node at +Z (it lands at −Z in Roblox).
-5. Upload with the Studio MCP: `open_cloud_invoke` POST `/assets/v1/assets` (Model, `creator.groupId` 815548702, file
-   in `design/rigs/work/`, scopes asset:read / asset:write), poll the operation. Needs, in Studio's Assistant Settings
-   → MCP Permissions: asset:read / asset:write and `design/rigs/work` as an approved upload directory (both set on
-   the Mac 2026-11-06). Studio's MCP skill `rbx-import-asset` describes the route. Then
-   `game:GetObjects("rbxassetid://<id>")[1]`: a Model holding the skinned MeshPart (Bones as its children),
-   `InitialPoses` (CFrameValues) and an `AnimationController`.
-6. Drive a bone: `bone.Transform = CFrame.fromAxisAngle(bone.WorldCFrame:VectorToObjectSpace(worldAxis), angle)`.
-   Bone.Transform shows in Edit too (no playtest needed for a visual check).
+Axes and tricks behind the steps: OBJ imported forward −Z / up Y, so in Blender **nose +Y, tail −Y, back +Z, right
++X**; after `read_homefile(use_empty=True)` operators need `bpy.context.temp_override(window=...)`. Preview colours:
+"Standard" view transform (AgX dulls the gold), a backdrop that doesn't light the fish (Light Path "Is Camera Ray"),
+the SurfaceAppearance tint multiplied over the texture. The GLB copies are turned 180° around Blender Z (Roblox's glTF
+import turns meshes 180°), rest pose, no material / image / animation. The uploaded Model holds the skinned MeshPart
+(Bones as its children), `InitialPoses` (CFrameValues) and an `AnimationController`. Driving a bone:
+`bone.Transform = CFrame.fromAxisAngle(<bone-space axis>, angle)` (FishRigController's `boneAxis`); it shows in
+Edit too. Permissions it relies on (Studio's Assistant Settings → MCP Permissions, per place, set on the Mac
+2026-11-06): HTTP allow list `127.0.0.1:34999`, asset:read / asset:write, upload directory `design/rigs/work`.
 
 **Testing a rig in Studio (2026-11-06).**
 - `game:GetObjects(...)[1]`: take the MeshPart out (`Parent = nil`) **before** destroying the loaded Model, or its

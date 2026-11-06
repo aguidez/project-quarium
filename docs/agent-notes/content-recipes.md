@@ -35,6 +35,9 @@ owns". Static meshes (decor, coins, the Snail, the Pelican) and images show anyw
 5. Coin model in `ServerStorage.Assets.Coins` (+ `CoinType`), front facing the glass.
 6. Config: `FishType`, `FISH_TYPES`, its egg's odds, Fish Index order; remind the owner to **save the place**.
 7. Playtest: hatch it (`forceNextHatch`), swim animation, growth, variants, icon in the reveal / index.
+8. Bones (V1.1): once the mesh is final, run it through the batch checklist of [[blender-pipeline]] (export, rig,
+   preview GIF to the owner, upload as the group, swap the template, `Rig = "Bones"`): a new species then swims with
+   FishRigController from the start instead of taking EditableMesh budget.
 
 ## A new aquarium theme
 

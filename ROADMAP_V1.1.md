@@ -136,13 +136,16 @@ The whole pipeline on one fish, to settle the open questions (§5) before conver
         with real players' devices (an agent-driven playtest can't read them).
       - Kept as is: the template's SurfaceAppearance (and the variant looks), its Size (the bones follow).
 
-### A3 — Upload route (S)
+### A3 — Upload route (S) — done 2026-11-06
 
-- [ ] Choose between the Studio 3D Importer (**Owner** imports each model by hand, a checklist per batch) and
-      **Open Cloud** (`tools/blender/upload.js`: Assets API, the model uploaded from the command line; then inserted
-      into ServerStorage by MCP). Open Cloud needs an **Owner**-created API key, stored only in
-      `workspace.local.json` (key `robloxOpenCloudKey`, never committed; documented in the template and SETUP.md).
-- [ ] The species recipe (`docs/agent-notes/content-recipes.md`) gets its rig step; a one-page checklist per batch in the agent note.
+- [x] Route: **Open Cloud through the Studio MCP** (`open_cloud_invoke`, which authenticates by itself: no API key,
+      no `tools/blender/upload.js`), GLB as the group, then the template swap by MCP. No Studio 3D Importer clicks.
+      Needs the MCP Permissions set once per place (agent note blender-pipeline).
+- [x] The species recipe (`docs/agent-notes/content-recipes.md`) has its rig step (8); the batch checklist is in the
+      agent note blender-pipeline, built on versioned tools: `tools/blender/studio/export_fish.luau` (mesh + 512
+      texture + tint in one call), `tools/blender/convert_fish.py` (import → rig → swim → frames → GLB, ~7 s a fish),
+      `frames-to-gif.js` (a labelled sheet: one approval per batch), `tools/blender/studio/swap_template.luau`.
+      Checked on the Golden Guppy (same GLB, byte for byte in size) and the Blue Neon's export.
 
 ### A4 — The runtime: bones in the game (M)
 
@@ -162,18 +165,30 @@ The whole pipeline on one fish, to settle the open questions (§5) before conver
 
 ### A5 — Convert every species (L, in batches)
 
-Order of the aquariums, so each batch is a coherent patch. Each species: export → rig → preview (owner) → upload →
-template → playtest (hatch it, swim, weak, variants, reveal, index).
+Order of the aquariums. Each sub-step fits one session and ends on something the owner looks at: a **prep** ends on
+the batch's GIF sheet (nothing uploaded), a **ship** uploads the approved batch, swaps the templates, playtests and
+opens a patch (the owner then saves + publishes the place). Each species follows the batch checklist of the agent note
+blender-pipeline.
 
-- [ ] Batch 1, Basic and Lagoon: Golden Guppy (A2), Blue Neon, Red Tetra, Clownfish, Zebra Danio, Flame Gourami.
-- [ ] Batch 2, Neon Coral and Pirate Wreck: Silver Angelfish, Imperial Discus, Pirate Fish, French Fish, Catfish.
-- [ ] Batch 3, Atlantis and Mariana Trench: Blue Tang, Baby Sunfish, Lanternfish.
-- [ ] Batch 4, Volcanic Temple to Cosmic Sanctuary: Lionfish, Dragonfish (long body: more spine bones), Husky
-      Dogfish, Bunny Shark (the ears: their own bones, a soft follow), Mini Leviathan (serpent: 8+ spine bones, the
-      30° pitch of its template baked in Blender).
-- [ ] **Lighter meshes on the way**: the heavy ones (Husky Dogfish, Bunny Shark, Flame Gourami, Imperial Discus, Red
-      Tetra, Clownfish) decimated in Blender to ≤ ~4k triangles, UVs kept; the owner compares before / after renders.
-- [ ] Event fish: the Abyss Lanternfish villain and the K-pop idol (the idol's dance becomes bone moves on the beat).
+- [ ] **A5.1 — Batch 1 prep** (Basic and Lagoon): Blue Neon (exported 2026-11-06), Zebra Danio, Red Tetra, Clownfish,
+      Flame Gourami. Export, rig, sheet `design/previews/v1.1-batch1.gif`. **Owner decision** first: decimate the heavy
+      ones (Flame Gourami ~7.0k, Red Tetra ~5.8k, Clownfish ~5.7k triangles) to ≤ ~4k in Blender, UVs kept, with a
+      before / after render for the owner (moderation: no part may change how it reads), or keep them as they are.
+- [ ] **A5.2 — Batch 1 ship**: 5 uploads, 5 swaps, playtest, **V1.1.1**.
+- [ ] **A5.3 — Batch 2 prep** (Neon Coral and Pirate Wreck): Silver Angelfish, Imperial Discus (~6.3k: same
+      decimation choice), Pirate Fish, French Fish, Catfish (barbels: nothing thin toward the mouth may move like a
+      stick). Sheet `v1.1-batch2.gif`.
+- [ ] **A5.4 — Batch 2 ship**: **V1.1.2**.
+- [ ] **A5.5 — Batch 3 prep + ship** (Atlantis and Mariana Trench, 3 fish): Blue Tang, Baby Sunfish (tall round body:
+      check the joints), Lanternfish (its lure: kept on the head bone, never animated). **V1.1.3**.
+- [ ] **A5.6 — Rig extensions** (code only, no species shipped): `rig_fish.py` settings for more spine bones (Dragonfish
+      6, Mini Leviathan 8+), extra bone chains (the Bunny Shark's ears, a soft follow in FishRigController), the Mini
+      Leviathan's 30° template pitch baked in Blender; FishRigController drives any number of spine bones by name.
+- [ ] **A5.7 — Batch 4 prep** (Volcanic Temple to Cosmic Sanctuary): Lionfish (spines stay soft and rounded),
+      Dragonfish, Husky Dogfish (~8.4k), Bunny Shark (~8.3k), Mini Leviathan. Sheet `v1.1-batch4.gif`.
+- [ ] **A5.8 — Batch 4 ship**: **V1.1.4**.
+- [ ] **A5.9 — Special and event fish**: Sugar, the Alien Fish (UFO night), the Abyss Lanternfish villain and the
+      K-pop idol (its dance: bone moves on the beat). FishRigController then also tracks `EventFish`. **V1.1.5**.
 
 ### A6 — Behaviour animations (M)
 
