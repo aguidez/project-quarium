@@ -1,5 +1,5 @@
 {
-	"//": "Its tricorn hat sits on top of the body: no dorsal fin bone, the hat follows the head rigidly (height above 0.35-0.45).",
+	"//": "New model (V1.1, 2026-11-06): its tricorn covers the back from t 0.15 to 0.78 above height 0.4 (width-per-slice scan). No dorsal fin bone, the hat follows the head rigidly.",
 	"fin_top": false,
-	"rigid_top": [0.35, 0.45]
+	"rigid_top": [0.33, 0.43]
 }

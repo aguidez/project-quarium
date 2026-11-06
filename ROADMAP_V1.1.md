@@ -183,7 +183,12 @@ blender-pipeline.
       whiskers (design/rigs/<Fish>.json; checked at 3× the bend, no tearing).
 - [x] **A5.4 — Batch 2 ship** (2026-11-06): Silver Angelfish, Imperial Discus, French Fish, Catfish (4 uploads, all
       Approved), swapped and playtested; **V1.1.2**.
-- [ ] **A5.4b — A new Pirate Fish** (owner, 2026-11-06: never liked the old model, its swim looked odd): a 100 % new
+- [ ] **A5.4b — A new Pirate Fish** (2026-11-06: owner picked candidate A of 3 (generate_mesh, owner's account: A
+      80403505636985 kept, B 139716735464675 and C 88927581992980 dropped, archivable); built at 5.4 studs long in
+      `ServerStorage._V11Staging.PirateFish_New` (untagged: the live template keeps the old look until the swap, its old
+      variant textures don't fit the new UVs); rigged (`design/rigs/PirateFish.json`: fin_top false, rigid_top for the
+      tricorn); Anomaly / Shiny recoloured with the old angles (tools/textures/out, not uploaded); previews
+      `pirate-fish-new-swim.gif`, `pirate-fish-new-variants.png`. **Next**: owner's go, stickers, uploads, swap) (owner, 2026-11-06: never liked the old model, its swim looked odd): a 100 % new
       model, then straight onto bones. Pirates are a risky theme (CLAUDE.md §7): written brief approved by the owner
       first, nothing generated before. Then the species recipe (agent note content-recipes): ≤ 3 generate_mesh
       candidates side by side → owner pick → template (same `PirateFish` name, FishType, Size class) → Anomaly / Shiny
