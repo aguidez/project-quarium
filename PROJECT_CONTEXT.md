@@ -480,8 +480,8 @@ ProjectQuarium/
       │  │                   sucked into the UFO); UFO mutations (green / red tint + sparkles + glow, a "z Z z" bubble and
       │  │                   the "Asleep" attribute); the alien's scream (green ForceField wave + puff); a fish whose model
       │  │                   (or rare variant texture) hasn't arrived waits in `pending`, built when the asset arrives, in
-      │  │                   its normal look after 5 s; getPose blends a late segment from the old one's current pose
-      │  │                   ; playExit sets "Dead" and "Exit" (the cause) for the bones' exit moves
+      │  │                   its normal look after 5 s; getPose blends a late segment from the old one's current pose;
+      │  │                   playExit sets "Dead" and "Exit" (the cause) for the bones' exit moves
       │  ├─ FishIndicatorController  Hunger / AFK badges above fish (from attributes), none over a sleeping fish;
       │  │                   BillboardGuis straight in PlayerGui, ResetOnSpawn off
       │  ├─ FishAnimationController  EditableMesh swim deformation shared per species (also the Swordfish companion), camera
