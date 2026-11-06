@@ -9,6 +9,24 @@
 -- A template that pitches its mesh (the Mini Leviathan) keeps that pitch: the rig was made in the mesh's own space.
 local SWAPS = { GoldenGuppy = 93278084123107 }
 
+-- A skinned mesh resized through Size (not ScaleTo) keeps its bones where the import put them, for its MeshSize: the
+-- skeleton then sits too small inside the mesh and the deformation crumples it (every swap of V1.1.1 to V1.1.9 but
+-- the Golden Guppy's x1.3, fixed 2026-11-07). Move each bone to its mesh-space position x (Size / MeshSize), parents
+-- first, keeping its orientation.
+local function fitBones(mesh)
+	local r = mesh.Size / mesh.MeshSize
+	local bones = {}
+	for _, b in mesh:GetDescendants() do
+		if b:IsA("Bone") then
+			table.insert(bones, { bone = b, pos = mesh.CFrame:PointToObjectSpace(b.WorldPosition), depth = #b:GetFullName():split(".") })
+		end
+	end
+	table.sort(bones, function(a, b) return a.depth < b.depth end)
+	for _, e in bones do
+		e.bone.WorldPosition = mesh.CFrame:PointToWorldSpace(e.pos * r)
+	end
+end
+
 local function swapOne(FISH, MODEL)
 	local template = (game:GetService("ServerStorage").Assets.Fish:FindFirstChild(FISH) or game:GetService("ServerStorage").Assets.EventFish:FindFirstChild(FISH) or game:GetService("ServerStorage").Assets.Companions:FindFirstChild(FISH))
 	assert(template, "no template " .. FISH)
@@ -39,6 +57,7 @@ local function swapOne(FISH, MODEL)
 	local oldId = old.MeshId
 	old:Destroy()
 	rigged.Parent = template
+	fitBones(rigged) -- after the resize: the bones follow the mesh's new size
 	template:SetAttribute("Rig", "Bones")
 	local bones = 0
 	for _, d in rigged:GetDescendants() do if d:IsA("Bone") then bones += 1 end end
