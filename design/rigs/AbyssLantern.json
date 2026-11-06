@@ -1,0 +1,7 @@
+{
+	"//": "The abyss villain (EventFish template LanternFish; files named AbyssLantern so they never clash with the species Lanternfish on a case-blind disk). It carries the stolen coin welded in its mouth: no jaw. Its lit Lure ball is a Part welded to Body, over the mesh's own stalk (height 0.55-1.0, t 0.06-0.26): that stalk follows the head rigidly so the ball stays on its tip.",
+	"jaw": false,
+	"rigid_boxes": [
+		{ "t": [0.0, 0.3], "height": [0.5, 1.1], "side": [-0.4, 0.4], "fade": 0.05 }
+	]
+}

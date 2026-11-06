@@ -3,12 +3,13 @@
 -- mesh of an uploaded rig (Model asset) in place of a fish template's static `Mesh`: same name, Size, CFrame, physics
 -- flags, attributes (not Roblox's RBX_* marks), SurfaceAppearance and WeldConstraint to `Body`; then `Rig = "Bones"`
 -- on the template (FishRigController). Undo with Ctrl+Z, or put the static mesh id back (design/meshes/manifest.json).
+-- Templates are looked up in Assets.Fish, then Assets.EventFish (the K-pop idol, the abyss LanternFish).
 -- Usage: set SWAPS below (template name -> uploaded Model id), run, then ask the owner to save + publish the place.
 -- A template that pitches its mesh (the Mini Leviathan) keeps that pitch: the rig was made in the mesh's own space.
 local SWAPS = { GoldenGuppy = 93278084123107 }
 
 local function swapOne(FISH, MODEL)
-	local template = game:GetService("ServerStorage").Assets.Fish:FindFirstChild(FISH)
+	local template = (game:GetService("ServerStorage").Assets.Fish:FindFirstChild(FISH) or game:GetService("ServerStorage").Assets.EventFish:FindFirstChild(FISH))
 	assert(template, "no template " .. FISH)
 	local old = template:FindFirstChild("Mesh")
 	assert(old and old:IsA("MeshPart"), FISH .. " has no Mesh MeshPart")

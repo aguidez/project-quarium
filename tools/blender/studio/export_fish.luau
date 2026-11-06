@@ -2,6 +2,9 @@
 -- Studio snippet (Edit, run by the agent through the Studio MCP's execute_luau; never a game script): exports a fish
 -- template's mesh as OBJ (V flipped) and its colour texture at 512 as "W H R G B\n" + base64 RGBA, where R G B is the
 -- SurfaceAppearance tint, to tools/obj-receiver.js on 127.0.0.1:34999 (the address in Studio's MCP HTTP allowlist).
+-- Templates are looked up in Assets.Fish, then Assets.EventFish (the K-pop idol, the abyss LanternFish). An entry
+-- "Template:FileName" writes under another name: the file system of a Mac (and Windows) ignores case, and the abyss
+-- "LanternFish" would overwrite the species "Lanternfish" (use "LanternFish:AbyssLantern").
 -- Usage: set FISHES below (template names), start `node tools/obj-receiver.js design/rigs/work`, run, then for each
 -- `node tools/blender/rgba-to-png.js design/rigs/work/<Fish>_color.b64` and move <Fish>.obj to design/meshes/.
 local FISHES = { "BlueNeon" }
@@ -22,8 +25,11 @@ local function post(name, text)
 	end
 end
 
-local function exportOne(FISH)
-	local template = game:GetService("ServerStorage").Assets.Fish:FindFirstChild(FISH)
+local function exportOne(entry)
+	local FISH, FILE = entry:match("^(.-):(.+)$")
+	FISH = FISH or entry
+	FILE = FILE or entry
+	local template = (game:GetService("ServerStorage").Assets.Fish:FindFirstChild(FISH) or game:GetService("ServerStorage").Assets.EventFish:FindFirstChild(FISH))
 	assert(template, "no template " .. FISH)
 	local part = template:FindFirstChild("Mesh")
 	assert(part and part:IsA("MeshPart"), FISH .. " has no Mesh MeshPart")
@@ -103,8 +109,8 @@ local function exportOne(FISH)
 	local c = sa.Color
 	local texture = string.format("%d %d %d %d %d\n", OUT, OUT, math.round(c.R * 255), math.round(c.G * 255), math.round(c.B * 255)) .. table.concat(parts)
 
-	post(FISH .. ".obj", obj)
-	post(FISH .. "_color.b64", texture)
+	post(FILE .. ".obj", obj)
+	post(FILE .. "_color.b64", texture)
 	return string.format("%s verts=%d tris=%d texture=%d tint=%s", FISH, nv, #faces, OUT, tostring(c))
 end
 

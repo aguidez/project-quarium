@@ -115,9 +115,13 @@ class FishRigControllerSingleton implements Lifecycle {
 	private frame = 0;
 
 	public onInit() {
-		CollectionService.GetInstanceAddedSignal(TAGS.Fish).Connect((fish) => this.track(fish));
-		CollectionService.GetInstanceRemovedSignal(TAGS.Fish).Connect((fish) => this.fishes.delete(fish as Model));
-		for (const fish of CollectionService.GetTagged(TAGS.Fish)) this.track(fish);
+		// The tanks' fish (built by FishRenderController) and the event guests with a bone rig (the K-pop idol, the
+		// abyss lantern fish: server models, their bones turned locally like the fish's)
+		for (const tag of [TAGS.Fish, TAGS.EventFish]) {
+			CollectionService.GetInstanceAddedSignal(tag).Connect((fish) => this.track(fish));
+			CollectionService.GetInstanceRemovedSignal(tag).Connect((fish) => this.fishes.delete(fish as Model));
+			for (const fish of CollectionService.GetTagged(tag)) this.track(fish);
+		}
 	}
 
 	public onStart() {

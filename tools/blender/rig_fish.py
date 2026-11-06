@@ -47,6 +47,9 @@ DEFAULTS = {
     # "height": [base, top] (-1 belly .. 1 back), "side": [lo, hi] (-1 left .. 1 right), "fade" (soft edge, 0.08)}.
     # The bone stands from the base to the top; the box's vertices follow it (full weight from base + 2 fade).
     "extras": [],
+    # Boxes (same keys as an extra, no name) whose vertices follow the head rigidly: a part of the mesh that something
+    # welded to the body lines up with (the abyss lantern's lure stalk under its lit ball), or a bow on a head.
+    "rigid_boxes": [],
 }
 # A mesh its template pitches (the Mini Leviathan, -30° about X) is rigged in its own space, unpitched, like V1
 # deformed it in mesh-local space: the bones then turn around the mesh's axes and the template keeps its pitch.
@@ -201,7 +204,7 @@ def assign_weights(obj, arm, m, s):
             if rigid > 0.001:
                 weights = {name: w * (1 - rigid) for name, w in weights.items()}
                 weights["Head"] = weights.get("Head", 0.0) + rigid
-        for box in s["extras"]:
+        for box in s["rigid_boxes"] + s["extras"]:
             f = box.get("fade", 0.08)
             base, top = box["height"]
             inside = (smoothstep(box["t"][0] - f, box["t"][0] + f, t) * (1 - smoothstep(box["t"][1] - f, box["t"][1] + f, t))
@@ -209,8 +212,9 @@ def assign_weights(obj, arm, m, s):
                       * (1 - smoothstep(box["side"][1] - f, box["side"][1] + f, side))
                       * smoothstep(base, base + 2 * f, height) * (1 - smoothstep(top - f, top + f, height)))
             if inside > 0.001:
+                target = box.get("name", "Head")
                 weights = {name: w * (1 - inside) for name, w in weights.items()}
-                weights[box["name"]] = weights.get(box["name"], 0.0) + inside
+                weights[target] = weights.get(target, 0.0) + inside
         # Roblox: at most 4 influences, normalised
         top = sorted(weights.items(), key=lambda kv: -kv[1])[:4]
         total = sum(w for _, w in top) or 1.0
