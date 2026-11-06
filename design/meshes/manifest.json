@@ -21,7 +21,7 @@
 	"FrenchFish": { "path": "ServerStorage.Assets.Fish.FrenchFish.Mesh", "oldMeshId": 74941474618163, "staticMeshId": 119097424317455, "rigModelId": 81261164683251, "rigMeshId": 134778623871623 },
 	"AlienFish": { "path": "ServerStorage.Assets.Fish.AlienFish.Mesh", "oldMeshId": 120222418064825, "staticMeshId": 102181887473450, "rigModelId": 118894273522138, "rigMeshId": 133809572330297 },
 	"Swordfish": { "path": "ServerStorage.Assets.Companions.Swordfish.Mesh", "oldMeshId": 130405239802447 },
-	"EventLanternFish": { "path": "ServerStorage.Assets.EventFish.LanternFish.Mesh", "oldMeshId": 124852645344173 },
+	"EventLanternFish": { "path": "ServerStorage.Assets.EventFish.LanternFish.Mesh", "oldMeshId": 124852645344173, "files": "AbyssLantern", "staticMeshId": 111053770582422, "rigModelId": 90495914663707, "rigMeshId": 96473369207808 },
 	"KpopIdol": { "path": "ServerStorage.Assets.EventFish.KpopIdol.Mesh", "oldMeshId": 123631089443197 },
 	"Ufo": { "path": "ServerStorage.Assets.EventFish.Ufo.Mesh", "oldMeshId": 133018116229364 },
 	"Sugar": { "path": "ServerStorage.Assets.Fish.Sugar.Mesh", "oldMeshId": 76055235755410, "staticMeshId": 125369425045024, "rigModelId": 86816660266559, "rigMeshId": 110178113967801 }
