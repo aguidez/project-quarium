@@ -67,6 +67,9 @@ Blender already open. Blender stays open after the session. `get_screenshot_of_w
    `"fin_top": false` and `"rigid_top": [lo, hi]` (heights from a width-per-height-slice scan: the hat widens again
    above the body's round) in `design/rigs/<Fish>.json`; **whiskers / barbels under the mouth**: `"jaw": false`.
    Check such fish at 3× the bend (pose the spine bones by hand, no action) from the side and from above.
+   **Long bodies**: more `"joints"` (one spine bone each; the swim is shared out over the chain). **Appendages**
+   (ears...): `"extras"`, boxes in normalised space found with a height / side / t scan of the vertices above the body;
+   bones named `Ear*` flop in the game. A mesh its template pitches (the Mini Leviathan) is rigged in its own space.
 4. *Owner preview*: `node tools/blender/frames-to-gif.js design/previews/v1.1-batch<N>.gif design/rigs/work/<Fish>_frames
    ...` (one labelled tile per fish), linked in the reply. **Wait for the owner's go before any upload.**
 5. *Upload* (Studio MCP, once per fish, never again for the same file): `open_cloud_invoke` POST `/assets/v1/assets`

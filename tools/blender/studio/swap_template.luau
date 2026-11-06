@@ -4,6 +4,7 @@
 -- flags, attributes (not Roblox's RBX_* marks), SurfaceAppearance and WeldConstraint to `Body`; then `Rig = "Bones"`
 -- on the template (FishRigController). Undo with Ctrl+Z, or put the static mesh id back (design/meshes/manifest.json).
 -- Usage: set SWAPS below (template name -> uploaded Model id), run, then ask the owner to save + publish the place.
+-- A template that pitches its mesh (the Mini Leviathan) keeps that pitch: the rig was made in the mesh's own space.
 local SWAPS = { GoldenGuppy = 93278084123107 }
 
 local function swapOne(FISH, MODEL)

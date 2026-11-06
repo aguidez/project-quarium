@@ -1,0 +1,4 @@
+{
+	"//": "A long body (2.7 x 0.76 x 1.2 in mesh units): 6 joints, a supple 7-bone spine (Head, Spine1-4, Tail1-2); the swim is shared out over the chain.",
+	"joints": [0.3, 0.44, 0.57, 0.69, 0.8, 0.9]
+}

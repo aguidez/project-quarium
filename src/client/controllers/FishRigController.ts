@@ -22,13 +22,20 @@ const BODY_WAVE = 3; // radians of lag from nose to tail tip
 const SLOW_SPEED = 0.45; // weak (unfed), asleep or leaving: lazy beats
 const SLOW_AMOUNT = 0.6; // ... and smaller ones
 
-// Peak angles (radians) of each bone, around the fish's own axes (mesh-local: Y up, Z nose -Z to tail +Z)
-const SPINE_YAW = new Map<string, number>([
-	["Spine1", math.rad(4)],
-	["Spine2", math.rad(6)],
-	["Tail1", math.rad(9)],
-	["Tail2", math.rad(12)],
-]);
+// Peak angles (radians) of each bone, around the fish's own axes (mesh-local: Y up, Z nose -Z to tail +Z).
+// Spine yaw by the bone's t along the body: V1's 4 / 6 / 9 / 12° at the default joints 0.35 / 0.55 / 0.72 / 0.86,
+// linear in between and beyond (never under 1°), shared out over the chain (× 4 / spine bones) so a long chain
+// (Dragonfish, Mini Leviathan) bends the same in total. Same curve as tools/blender/preview_swim.py.
+const SPINE_CURVE: Array<[number, number]> = [
+	[0.35, 4],
+	[0.55, 6],
+	[0.72, 9],
+	[0.86, 12],
+];
+const EAR_FLOP = math.rad(10); // Ear* bones (the Bunny Shark's ears): a soft flop behind the swim beat ...
+const EAR_TURN = 0.35; // ... and they trail the fish's turns: seconds of yaw rate turned into lean
+const EAR_TURN_MAX = math.rad(25);
+const EAR_SETTLE = 6; // per second: how fast the lean follows the turns
 const FIN_FLUTTER = math.rad(12); // FinTop / FinBottom, sideways
 const PECTORAL_PADDLE = math.rad(20); // FinL / FinR, alternately
 const JAW_OPEN = math.rad(10);
@@ -56,6 +63,8 @@ interface RiggedFish {
 	model: Model;
 	mesh: MeshPart;
 	bones: DrivenBone[];
+	yaw: number; // last heading (radians), for the ears' lean
+	earLean: number; // radians, smoothed
 	swim: number; // phases (radians)
 	fin: number;
 	mouth: number;
@@ -63,6 +72,23 @@ interface RiggedFish {
 	onScreen: boolean;
 	checkedAt: number;
 	lastUpdate: number;
+}
+
+function spinePeak(t: number, count: number): number {
+	let [t0, a0] = SPINE_CURVE[0];
+	let [t1, a1] = SPINE_CURVE[1];
+	for (let i = 0; i < SPINE_CURVE.size() - 1; i++) {
+		if (t >= SPINE_CURVE[i][0]) {
+			[t0, a0] = SPINE_CURVE[i];
+			[t1, a1] = SPINE_CURVE[i + 1];
+		}
+	}
+	const peak = a0 + ((a1 - a0) * (t - t0)) / (t1 - t0);
+	return (math.rad(math.max(1, peak)) * 4) / count;
+}
+
+function isSpine(name: string): boolean {
+	return string.match(name, "^Spine%d+$")[0] !== undefined || string.match(name, "^Tail%d+$")[0] !== undefined;
 }
 
 /** t of a bone (0 nose .. 1 tail tip) from its rest position along the mesh's Z. */
@@ -118,6 +144,8 @@ class FishRigControllerSingleton implements Lifecycle {
 				fin: math.random() * TAU,
 				mouth: math.random() * TAU,
 				amount: 1,
+				yaw: 0,
+				earLean: 0,
 				onScreen: true,
 				checkedAt: -math.huge,
 				lastUpdate: os.clock(),
@@ -130,14 +158,21 @@ class FishRigControllerSingleton implements Lifecycle {
 		const found = new Array<DrivenBone>();
 		const finTop = mesh.FindFirstChild("FinTop", true);
 		const finT = finTop?.IsA("Bone") ? boneT(mesh, finTop) : 0.5;
-		for (const descendant of mesh.GetDescendants()) {
-			if (!descendant.IsA("Bone")) continue;
-			const bone = descendant;
+		const bones = mesh.GetDescendants().filter((d): d is Bone => d.IsA("Bone"));
+		const spineCount = bones.filter((b) => isSpine(b.Name)).size();
+		for (const bone of bones) {
 			const name = bone.Name;
-			const spine = SPINE_YAW.get(name);
-			if (spine !== undefined) {
-				const lag = boneT(mesh, bone) * BODY_WAVE;
-				found.push({ bone, axis: boneAxis(mesh, bone, UP), drive: (f) => f.amount * spine * math.sin(f.swim - lag) });
+			if (isSpine(name)) {
+				const t = boneT(mesh, bone);
+				const peak = spinePeak(t, spineCount);
+				const lag = t * BODY_WAVE;
+				found.push({ bone, axis: boneAxis(mesh, bone, UP), drive: (f) => f.amount * peak * math.sin(f.swim - lag) });
+			} else if (name.sub(1, 3) === "Ear") {
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, SIDE),
+					drive: (f) => f.amount * EAR_FLOP * math.sin(f.swim - 1.8) + f.earLean,
+				});
 			} else if (name === "FinTop" || name === "FinBottom") {
 				const sign = name === "FinTop" ? 1 : -1;
 				const lag = finT * BODY_WAVE + 1.2;
@@ -210,6 +245,16 @@ class FishRigControllerSingleton implements Lifecycle {
 		fish.fin = (fish.fin + advance * FIN_FREQUENCY) % TAU;
 		fish.mouth = (fish.mouth + advance * MOUTH_FREQUENCY) % TAU;
 		fish.amount = lazy ? SLOW_AMOUNT : 1;
+		// The ears trail the turns: lean against the yaw rate, smoothed (only fish with Ear* bones read it)
+		const [, yaw] = fish.mesh.CFrame.ToOrientation();
+		if (dt > 0) {
+			let turn = yaw - fish.yaw;
+			if (turn > math.pi) turn -= TAU;
+			if (turn < -math.pi) turn += TAU;
+			const target = math.clamp((-turn / dt) * EAR_TURN, -EAR_TURN_MAX, EAR_TURN_MAX);
+			fish.earLean += (target - fish.earLean) * math.min(1, dt * EAR_SETTLE);
+		}
+		fish.yaw = yaw;
 		for (const driven of fish.bones) {
 			driven.bone.Transform = CFrame.fromAxisAngle(driven.axis, driven.drive(fish));
 		}

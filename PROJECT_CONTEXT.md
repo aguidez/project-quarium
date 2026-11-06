@@ -486,8 +486,9 @@ ProjectQuarium/
       │  │                   (§4 EditableMesh budget), visible fish without a rig sway on a local Weld; beat puffs
       │  │                   (bone fish too); skips the fish with a bone rig
       │  ├─ FishRigController  Bone swim (V1.1) of the fish whose template has `Rig = "Bones"`: turns the bones of
-      │  │                   their skinned `Mesh` (rig_fish.py names: Head, Spine1/2, Tail1/2, FinTop/Bottom, FinL/R, Jaw)
-      │  │                   with V1's beats, each fish at its own phase; lazy while Weak / Asleep / Dead; every frame
+      │  │                   their skinned `Mesh` (rig_fish.py names: Head, Spine<n>, Tail1/2, FinTop/Bottom, FinL/R, Jaw,
+      │  │                   Ear*) with V1's beats, the spine's yaw by each bone's t shared out over the chain, Ear* bones
+      │  │                   flopping and trailing the turns, each fish at its own phase; lazy while Weak / Asleep / Dead; every frame
       │  │                   within 60 studs, every 2nd to 110, every 4th beyond, frozen off screen; no budget
       │  ├─ CompanionAnimationController  Local wobble of the Water Hen (its own copy of the Mesh placed on the server-moved
       │  │                   Body every frame) and the Jellyfish's bell pulse

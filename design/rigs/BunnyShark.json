@@ -1,0 +1,7 @@
+{
+	"//": "Its two long bunny ears stand on the head (height 0.35-1.0, t 0.28-0.44, one on each side of x = 0): each gets its own bone (EarL / EarR) that FishRigController lets flop and trail the turns.",
+	"extras": [
+		{ "name": "EarL", "parent": "Head", "t": [0.28, 0.44], "height": [0.35, 1.05], "side": [-0.9, -0.08], "fade": 0.05 },
+		{ "name": "EarR", "parent": "Head", "t": [0.28, 0.44], "height": [0.35, 1.05], "side": [0.08, 0.9], "fade": 0.05 }
+	]
+}

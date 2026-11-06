@@ -16,7 +16,28 @@ SWIM_CYCLES, FIN_CYCLES, MOUTH_CYCLES = 2, 3, 1
 BODY_WAVE = 3.0  # radians of lag from nose to tail tip (V1)
 
 # Peak angles (degrees). The spine angles add up along the chain: the tail tip sways ~0.09 x length, like V1.
-SPINE_YAW = {"Spine1": 4.0, "Spine2": 6.0, "Tail1": 9.0, "Tail2": 12.0}
+# Spine yaw peak (degrees) by the bone's t along the body: V1's 4 / 6 / 9 / 12 at the default joints 0.35 / 0.55 /
+# 0.72 / 0.86, linear in between and beyond (never under 1°), shared out over the chain (× 4 / spine bones) so a
+# longer chain bends the same in total. FishRigController uses the same curve.
+SPINE_CURVE = [(0.35, 4.0), (0.55, 6.0), (0.72, 9.0), (0.86, 12.0)]
+EAR_FLOP = 10.0  # Ear* bones: a soft flop behind the swim beat
+
+
+def spine_peak(t, count):
+    pts = SPINE_CURVE
+    if t <= pts[0][0]:
+        (t0, a0), (t1, a1) = pts[0], pts[1]
+    elif t >= pts[-1][0]:
+        (t0, a0), (t1, a1) = pts[-2], pts[-1]
+    else:
+        i = next(i for i in range(len(pts) - 1) if pts[i][0] <= t <= pts[i + 1][0])
+        (t0, a0), (t1, a1) = pts[i], pts[i + 1]
+    peak = a0 + (a1 - a0) * (t - t0) / (t1 - t0)
+    return max(1.0, peak) * 4 / count
+
+
+def is_spine(name):
+    return name not in ("Head",) and (name.startswith("Spine") or name.startswith("Tail")) and name[-1].isdigit()
 FIN_FLUTTER = 12.0  # FinTop / FinBottom, sideways
 PECTORAL_PADDLE = 20.0  # FinL / FinR, back and forth, alternately
 JAW_OPEN = 10.0
@@ -57,9 +78,13 @@ def add_swim_action(arm, speed=1.0):
         fin = u * FIN_CYCLES * math.tau * speed
         mouth = u * MOUTH_CYCLES * math.tau * speed
         poses = {}
-        for name, peak in SPINE_YAW.items():
+        spine = [b.name for b in bones if is_spine(b.name)]
+        for name in spine:
             t = _bone_t(arm, name, nose, length)
-            poses[name] = ((0, 0, 1), peak * math.sin(swim - t * BODY_WAVE))
+            poses[name] = ((0, 0, 1), spine_peak(t, len(spine)) * math.sin(swim - t * BODY_WAVE))
+        for b in bones:
+            if b.name.startswith("Ear"):
+                poses[b.name] = ((1, 0, 0), EAR_FLOP * math.sin(swim - 1.8))
         fin_bone = "FinTop" if "FinTop" in bones else "FinBottom" if "FinBottom" in bones else None
         t_fin = _bone_t(arm, fin_bone, nose, length) if fin_bone else 0.5
         flutter = FIN_FLUTTER * math.sin(swim - t_fin * BODY_WAVE - 1.2)

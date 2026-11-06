@@ -7,9 +7,12 @@
 #
 # Bones (all deforming):
 #   Head -> Spine1 -> Spine2 -> Tail1 -> Tail2   spine chain, pointing tailward; the swim bends at each bone's head
+#                                                (one bone per joint: more joints, more Spine<n> before Tail1 / Tail2)
 #   FinTop, FinBottom (children of Spine1)       dorsal / ventral fins, lateral flutter
 #   FinL, FinR (children of Head)                pectoral fins, paddling
 #   Jaw (child of Head)                          the lower lip, a small "blub"
+#   extras (settings "extras")                   per-species appendages, e.g. the Bunny Shark's ears (EarL / EarR):
+#                                                FishRigController lets bones named Ear* flop
 # At most 4 influences per vertex (Roblox's limit), weights normalised.
 #
 # Use from the Blender MCP:  exec(open("<repo>/tools/blender/rig_fish.py").read()); rig_fish(obj, settings)
@@ -40,9 +43,19 @@ DEFAULTS = {
     "fin_bottom": True,
     "jaw": True,
     "rigid_top": None,
+    # Extra bones, each a box in the mesh's normalised space: {"name", "parent" (default "Head"), "t": [lo, hi],
+    # "height": [base, top] (-1 belly .. 1 back), "side": [lo, hi] (-1 left .. 1 right), "fade" (soft edge, 0.08)}.
+    # The bone stands from the base to the top; the box's vertices follow it (full weight from base + 2 fade).
+    "extras": [],
 }
+# A mesh its template pitches (the Mini Leviathan, -30° about X) is rigged in its own space, unpitched, like V1
+# deformed it in mesh-local space: the bones then turn around the mesh's axes and the template keeps its pitch.
 
-SPINE = ["Head", "Spine1", "Spine2", "Tail1", "Tail2"]
+
+def spine_names(joints):
+    """Head, Spine1 .. Spine<n-2>, Tail1, Tail2 for n joints (the 4 default joints: Head, Spine1, Spine2, Tail1, Tail2)."""
+    middle = ["Spine%d" % (i + 1) for i in range(len(joints) - 2)]
+    return ["Head"] + middle + ["Tail1", "Tail2"]
 
 
 def smoothstep(e0, e1, x):
@@ -86,14 +99,14 @@ def measure(obj):
 
 
 def spine_weights(t, joints, blend):
-    """Weights of the 5 spine bones for a vertex at t: 1 inside a bone, smooth blend across each joint."""
-    w = [0.0] * len(SPINE)
-    # index of the bone whose segment holds t
+    """Weights of the spine bones (one more than joints) for a vertex at t: 1 inside a bone, smooth blend across joints."""
+    count = len(joints) + 1
+    w = [0.0] * count
     bounds = [0.0] + list(joints) + [1.0]
-    for i in range(len(SPINE)):
+    for i in range(count):
         lo, hi = bounds[i], bounds[i + 1]
         rise = 1.0 if i == 0 else smoothstep(lo - blend / 2, lo + blend / 2, t)
-        fall = 1.0 if i == len(SPINE) - 1 else 1 - smoothstep(hi - blend / 2, hi + blend / 2, t)
+        fall = 1.0 if i == count - 1 else 1 - smoothstep(hi - blend / 2, hi + blend / 2, t)
         w[i] = max(0.0, min(rise, fall))
     total = sum(w) or 1.0
     return [x / total for x in w]
@@ -120,19 +133,20 @@ def build_armature(obj, m, s):
             b.use_connect = False
         return b
 
+    spine = spine_names(s["joints"])
     starts = [0.05] + list(s["joints"])
     ends = list(s["joints"]) + [1.0]
-    for i, name in enumerate(SPINE):
-        bone(name, (0, y_at(starts[i]), mz), (0, y_at(ends[i]), mz), SPINE[i - 1] if i else None)
+    for i, name in enumerate(spine):
+        bone(name, (0, y_at(starts[i]), mz), (0, y_at(ends[i]), mz), spine[i - 1] if i else None)
         if i:
             eb[name].use_connect = True
 
     dt = s["dorsal"]
     t_fin = (dt["t_in"][1] + dt["t_out"][0]) / 2
     if s["fin_top"]:
-        bone("FinTop", (0, y_at(t_fin), mz + dt["height"][0] * hh), (0, y_at(t_fin), mz + hh), "Spine1")
+        bone("FinTop", (0, y_at(t_fin), mz + dt["height"][0] * hh), (0, y_at(t_fin), mz + hh), spine[1])
     if s["fin_bottom"]:
-        bone("FinBottom", (0, y_at(t_fin), mz - dt["height"][0] * hh), (0, y_at(t_fin), mz - hh), "Spine1")
+        bone("FinBottom", (0, y_at(t_fin), mz - dt["height"][0] * hh), (0, y_at(t_fin), mz - hh), spine[1])
 
     pc = s["pectoral"]
     t_pec = (pc["t_in"][1] + pc["t_out"][0]) / 2
@@ -142,6 +156,12 @@ def build_armature(obj, m, s):
     lp = s["lips"]["t"]
     if s["jaw"]:
         bone("Jaw", (0, y_at(lp[1] * 2), mz - 0.15 * hh), (0, y_at(0.0), mz - 0.15 * hh), "Head")
+
+    for extra in s["extras"]:
+        x = (extra["side"][0] + extra["side"][1]) / 2 * hw
+        y = y_at((extra["t"][0] + extra["t"][1]) / 2)
+        base, top = extra["height"]
+        bone(extra["name"], (x, y, mz + base * hh), (x, y, mz + top * hh), extra.get("parent", "Head"))
 
     bpy.ops.object.mode_set(mode="OBJECT")
     return arm
@@ -154,6 +174,7 @@ def assign_weights(obj, arm, m, s):
     obj.vertex_groups.clear()
     groups = {n: obj.vertex_groups.new(name=n) for n in names}
     d, p, lp = s["dorsal"], s["pectoral"], s["lips"]["t"]
+    spine = spine_names(s["joints"])
     stats = {n: 0 for n in names}
     for v in obj.data.vertices:
         t = min(max((nose - v.co.y) / L, 0.0), 1.0)
@@ -172,7 +193,7 @@ def assign_weights(obj, arm, m, s):
             extra["Jaw"] = jaw
         rest = max(0.0, 1.0 - sum(extra.values()))
         weights = dict(extra)
-        for name, w in zip(SPINE, spine_weights(t, s["joints"], s["blend"])):
+        for name, w in zip(spine, spine_weights(t, s["joints"], s["blend"])):
             if w > 0.001:
                 weights[name] = weights.get(name, 0.0) + w * rest
         if s["rigid_top"]:
@@ -180,6 +201,16 @@ def assign_weights(obj, arm, m, s):
             if rigid > 0.001:
                 weights = {name: w * (1 - rigid) for name, w in weights.items()}
                 weights["Head"] = weights.get("Head", 0.0) + rigid
+        for box in s["extras"]:
+            f = box.get("fade", 0.08)
+            base, top = box["height"]
+            inside = (smoothstep(box["t"][0] - f, box["t"][0] + f, t) * (1 - smoothstep(box["t"][1] - f, box["t"][1] + f, t))
+                      * smoothstep(box["side"][0] - f, box["side"][0] + f, side)
+                      * (1 - smoothstep(box["side"][1] - f, box["side"][1] + f, side))
+                      * smoothstep(base, base + 2 * f, height) * (1 - smoothstep(top - f, top + f, height)))
+            if inside > 0.001:
+                weights = {name: w * (1 - inside) for name, w in weights.items()}
+                weights[box["name"]] = weights.get(box["name"], 0.0) + inside
         # Roblox: at most 4 influences, normalised
         top = sorted(weights.items(), key=lambda kv: -kv[1])[:4]
         total = sum(w for _, w in top) or 1.0
@@ -214,9 +245,9 @@ def _main():
     fish = argv[0]
     root = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
     bpy.ops.wm.read_homefile(use_empty=True)
-    obj = import_fish(os.path.join(root, "design", "meshes", fish + ".obj"), fish)
     settings_path = os.path.join(root, "design", "rigs", fish + ".json")
     overrides = json.load(open(settings_path)) if os.path.exists(settings_path) else None
+    obj = import_fish(os.path.join(root, "design", "meshes", fish + ".obj"), fish)
     print(json.dumps(rig_fish(obj, overrides)))
     os.makedirs(os.path.join(root, "design", "rigs", "work"), exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(root, "design", "rigs", "work", fish + ".blend"))
