@@ -79,6 +79,8 @@ Blender already open. Blender stays open after the session. `get_screenshot_of_w
    `GET /assets/v1/operations/<id>` until `done`; `moderationState` must be Approved (pending: wait, never re-upload).
 6. *Swap* (Studio, Edit): `tools/blender/studio/swap_template.luau` once for the batch, `SWAPS` = { Template = modelId }; record the ids in
    `design/meshes/manifest.json` (`staticMeshId`, `rigModelId`, `rigMeshId`).
+   Roblox's import drops a bone no vertex follows (the Dragonfish's FinBottom): a bone count lower than Blender's is
+   fine when only such a bone is missing; FishRigController drives the bones it finds.
 7. *Playtest*: the fish on bones (`Rig` attribute, a bone's Transform changing), no V1 rig on it. No dev command
    brings a species into a tank: from the Server datamodel, clone the templates (tag `FishTemplate` removed, parts
    anchored) in a row in front of the player and tag them `Fish`; the client's FishRigController animates them.

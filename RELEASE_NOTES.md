@@ -11,6 +11,15 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.5 — 2026-11-06
+
+**New**
+- **The deep-sea fish swim with bones**: the Lionfish, the Dragonfish (its long body now waves from head to tail),
+  the Husky Dogfish, the Bunny Shark (its bunny ears flop as it swims and trail behind when it turns) and the Mini
+  Leviathan (its curled tail undulates). Every species of the 8 aquariums now swims with bones.
+
+---
+
 ## V1.1.4 — 2026-11-06
 
 **New**
