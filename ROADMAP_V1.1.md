@@ -3,7 +3,7 @@
 > The animation revamp: every fish, companion, event guest and NPC moves through a **skeleton made in Blender**
 > instead of the EditableMesh deformation of V1. It starts **once V1 is complete** (the owner's calibration with real players done). Tick the
 > boxes as tasks ship, and move what a step ships into `PROJECT_CONTEXT.md` / `RELEASE_NOTES.md` as usual.
-> Last updated: 2026-11-06 (A1–A4 done; A5.1–A5.4: batches 1–2 on bones, V1.1.2; A5.4b: a new Pirate Fish).
+> Last updated: 2026-11-06 (A1–A4 done; A5.1–A5.4b: batches 1–2 on bones and a new Pirate Fish, V1.1.3; next A5.5).
 
 **V1.1 in one line**: Blender joins the toolchain (Windows and Mac) **as an MCP server**, like Roblox Studio and
 FigCraft, so the agent drives it itself; a script rigs every model by itself, the game
@@ -183,26 +183,22 @@ blender-pipeline.
       whiskers (design/rigs/<Fish>.json; checked at 3× the bend, no tearing).
 - [x] **A5.4 — Batch 2 ship** (2026-11-06): Silver Angelfish, Imperial Discus, French Fish, Catfish (4 uploads, all
       Approved), swapped and playtested; **V1.1.2**.
-- [ ] **A5.4b — A new Pirate Fish** (2026-11-06: owner picked candidate A of 3 (generate_mesh, owner's account: A
-      80403505636985 kept, B 139716735464675 and C 88927581992980 dropped, archivable); built at 5.4 studs long in
-      `ServerStorage._V11Staging.PirateFish_New` (untagged: the live template keeps the old look until the swap, its old
-      variant textures don't fit the new UVs); rigged (`design/rigs/PirateFish.json`: fin_top false, rigid_top for the
-      tricorn); Anomaly / Shiny recoloured with the old angles (tools/textures/out, not uploaded); previews
-      `pirate-fish-new-swim.gif`, `pirate-fish-new-variants.png`. **Next**: owner's go, stickers, uploads, swap) (owner, 2026-11-06: never liked the old model, its swim looked odd): a 100 % new
-      model, then straight onto bones. Pirates are a risky theme (CLAUDE.md §7): written brief approved by the owner
-      first, nothing generated before. Then the species recipe (agent note content-recipes): ≤ 3 generate_mesh
-      candidates side by side → owner pick → template (same `PirateFish` name, FishType, Size class) → Anomaly / Shiny
-      textures and 4 sticker icons (uploaded once, after a moderator's look) → rig → upload → swap; **V1.1.x**.
+- [x] **A5.4b — A new Pirate Fish** (2026-11-06, **V1.1.3**): owner picked candidate A of 3 (same details, a real
+      fish body instead of a ball); 5.4 studs long; rig `design/rigs/PirateFish.json` (fin_top false, the tricorn rigid);
+      Anomaly / Shiny recoloured with the old hues; 4 stickers; uploads: 6 images (owner's account) + the rig (group),
+      all after the owner's look. Old assets the owner may archive: ball meshes 111915158254959 / 78117520516696,
+      texture 76837327495535, variants 106089869843984 / 75123395235665, stickers 140042928133697 / 110288096561899 /
+      134728004078355 / 107412512620557; dropped candidates B 139716735464675 and C 88927581992980.
 - [ ] **A5.5 — Batch 3 prep + ship** (Atlantis and Mariana Trench, 3 fish): Blue Tang, Baby Sunfish (tall round body:
-      check the joints), Lanternfish (its lure: kept on the head bone, never animated). **V1.1.3**.
+      check the joints), Lanternfish (its lure: kept on the head bone, never animated). **V1.1.4**.
 - [ ] **A5.6 — Rig extensions** (code only, no species shipped): `rig_fish.py` settings for more spine bones (Dragonfish
       6, Mini Leviathan 8+), extra bone chains (the Bunny Shark's ears, a soft follow in FishRigController), the Mini
       Leviathan's 30° template pitch baked in Blender; FishRigController drives any number of spine bones by name.
 - [ ] **A5.7 — Batch 4 prep** (Volcanic Temple to Cosmic Sanctuary): Lionfish (spines stay soft and rounded),
       Dragonfish, Husky Dogfish (~8.4k), Bunny Shark (~8.3k), Mini Leviathan. Sheet `v1.1-batch4.gif`.
-- [ ] **A5.8 — Batch 4 ship**: **V1.1.4**.
+- [ ] **A5.8 — Batch 4 ship**: **V1.1.5**.
 - [ ] **A5.9 — Special and event fish**: Sugar, the Alien Fish (UFO night), the Abyss Lanternfish villain and the
-      K-pop idol (its dance: bone moves on the beat). FishRigController then also tracks `EventFish`. **V1.1.5**.
+      K-pop idol (its dance: bone moves on the beat). FishRigController then also tracks `EventFish`. **V1.1.6**.
 
 ### A6 — Behaviour animations (M)
 

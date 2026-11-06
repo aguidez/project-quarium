@@ -157,10 +157,10 @@ export const FISH_ICONS: Record<FishType, Record<FishVariant, string>> = {
 		Shiny: "rbxassetid://109331093351123",
 	},
 	PirateFish: {
-		Normal: "rbxassetid://140042928133697",
-		Anomaly: "rbxassetid://110288096561899",
-		Ghost: "rbxassetid://134728004078355",
-		Shiny: "rbxassetid://107412512620557",
+		Normal: "rbxassetid://104113182127697",
+		Anomaly: "rbxassetid://87343122073363",
+		Ghost: "rbxassetid://89533035670236",
+		Shiny: "rbxassetid://75278429179620",
 	},
 	ImperialDiscus: {
 		Normal: "rbxassetid://139654199951383",

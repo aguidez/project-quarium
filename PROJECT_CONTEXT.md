@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-06 (V1.1.2: 10 fish templates swim with Blender bones, FishRigController; the others still EditableMesh).
+> Last updated: 2026-11-06 (V1.1.3: a new Pirate Fish; 11 fish templates swim with Blender bones, the others still EditableMesh).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -640,7 +640,7 @@ ProjectQuarium/
   it, same Size / CFrame / SurfaceAppearance / WeldConstraint to `Body` as the static mesh it replaced. `ScaleTo`
   scales the bones too; a change of `Size` alone (beat puff) leaves them, fine for a short puff. Converted so far:
   GoldenGuppy, BlueNeon, ZebraDanio, RedTetra, Clownfish, FlameGourami, SilverAngelfish, ImperialDiscus, FrenchFish,
-  Catfish (rig settings per species in design/rigs/<Fish>.json; ids in design/meshes/manifest.json:
+  Catfish, PirateFish (a new model since V1.1.3, its tricorn rigid on the head) (rig settings per species in design/rigs/<Fish>.json; ids in design/meshes/manifest.json:
   `rigModelId`, `rigMeshId`, `staticMeshId`).
 - **`ServerStorage.Assets`**:
   - `Fish/` (tag `FishTemplate`, attr `FishType`): the 18 species + `FrenchFish`, `AlienFish` and `Sugar` (no

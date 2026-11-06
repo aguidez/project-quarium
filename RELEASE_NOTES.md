@@ -11,6 +11,17 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.3 — 2026-11-06
+
+**New**
+- **A brand-new Pirate Fish**: the round ball is gone. The little captain is now a real fish, striped like a sailor
+  shirt, with its tricorn hat, its eye patch and its red scarf, and it swims with bones like the others (its hat stays
+  on its head). Its Anomaly, Ghost and Shiny looks and its stickers in the Fish Index, the Ocean and the hatch reveal
+  are new too. Same rarity, same rubies, same place in the Pirate Wreck: the Pirate Fish players own simply get the new
+  look.
+
+---
+
 ## V1.1.2 — 2026-11-06
 
 **New**

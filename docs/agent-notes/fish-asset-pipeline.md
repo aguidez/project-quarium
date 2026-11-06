@@ -70,3 +70,12 @@ The exported OBJ files stay as the source (design/meshes, manifest.json: templat
   two grants (asset-permissions-api, same body as tools/group-mesh-upload.js) instead of uploading again. Sugar's sugar
   cube coin (generate_mesh, "a single pastel pink sugar cube ... a small white heart shape on its front face") showed the
   heart on mesh-local +Z: the template's Mesh is turned 180° about Y so it faces the glass.
+- **2026-11-06 (V1.1.3, the new Pirate Fish)**: a sticker sheet through `screen_capture` with `camera_position` keeps
+  Studio's 70° camera: set `workspace.CurrentCamera` yourself (Scriptable, FieldOfView 20, CFrame.lookAt) and capture
+  **without** camera arguments, then put the camera back (FieldOfView 70, CameraType Fixed). A tall fish (hat) at
+  10 studs long overlaps the next row: scale each by `4.5 / GetExtentsSize().Y` instead. Variant textures reach Studio
+  without an upload through a scratchpad server on **127.0.0.1:34999** (the only address in the MCP HTTP allow list)
+  serving base64 RGBA 512² for `HttpService:GetAsync`. `upload_image` reads from any local port (34998 worked). A
+  model swap whose old variant textures no longer fit (new UVs) waits in an **untagged** staging folder
+  (`ServerStorage._V11Staging`) until the variants, stickers and rig are ready, so a publish meanwhile breaks nothing.
+

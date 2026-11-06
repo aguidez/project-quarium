@@ -7,7 +7,7 @@
 	"ZebraDanio": { "path": "ServerStorage.Assets.Fish.ZebraDanio.Mesh", "oldMeshId": 121703944410359, "staticMeshId": 105709129535063, "rigModelId": 139188993017267, "rigMeshId": 129093474115816 },
 	"FlameGourami": { "path": "ServerStorage.Assets.Fish.FlameGourami.Mesh", "oldMeshId": 70687527130262, "staticMeshId": 83743548845081, "rigModelId": 114952894502692, "rigMeshId": 86744174749918 },
 	"SilverAngelfish": { "path": "ServerStorage.Assets.Fish.SilverAngelfish.Mesh", "oldMeshId": 74682932830478, "staticMeshId": 122588300948762, "rigModelId": 115133331550826, "rigMeshId": 109495039259262 },
-	"PirateFish": { "path": "ServerStorage.Assets.Fish.PirateFish.Mesh", "oldMeshId": 111915158254959 },
+	"PirateFish": { "path": "ServerStorage.Assets.Fish.PirateFish.Mesh", "note": "new model V1.1.3 (the ball before: user mesh 111915158254959, group mesh 78117520516696)", "staticMeshId": 70844000096615, "rigModelId": 107554501620733, "rigMeshId": 125809681595825 },
 	"ImperialDiscus": { "path": "ServerStorage.Assets.Fish.ImperialDiscus.Mesh", "oldMeshId": 102084746385035, "staticMeshId": 121575029167436, "rigModelId": 93184604181324, "rigMeshId": 134861818057692 },
 	"Catfish": { "path": "ServerStorage.Assets.Fish.Catfish.Mesh", "oldMeshId": 78909321291558, "staticMeshId": 129128813296216, "rigModelId": 126747987896463, "rigMeshId": 113027844714902 },
 	"BlueTang": { "path": "ServerStorage.Assets.Fish.BlueTang.Mesh", "oldMeshId": 87774755333242 },
