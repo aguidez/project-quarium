@@ -66,6 +66,24 @@ const RELEASE_AMOUNT = 1.6; // ... and amplitude while it darts out
 const STRUGGLE_WIGGLE = 1.5;
 const STRUGGLE_RATE = 7;
 
+// The Jellyfish companion (tools/blender/rig_jellyfish.py: Bell, Rim<side>, Tent<side><1..3>), V1's rhythm
+// (CompanionAnimationController): the rim swings in from a pivot near the dome's top, the tentacles trail behind, the
+// whole jellyfish rises a little with each squeeze and sways slowly
+const JELLY_PULSE_FREQUENCY = 0.8; // pulses per second
+const JELLY_RIM_SQUEEZE = math.rad(12);
+const JELLY_TENTACLE_TRAIL = math.rad(14);
+const JELLY_TENTACLE_LAG = 0.9; // radians per chain bone
+const JELLY_BOB = 0.15; // studs at its template's height (4.6)
+const JELLY_SWAY = math.rad(5);
+const JELLY_SWAY_RATE = 0.25; // × the pulse
+// Side letter of a rim / tentacle bone -> its direction from the axis, in mesh space (front -Z, right +X)
+const JELLY_SIDES: Record<string, Vector3> = {
+	F: new Vector3(0, 0, -1),
+	B: new Vector3(0, 0, 1),
+	L: new Vector3(-1, 0, 0),
+	R: new Vector3(1, 0, 0),
+};
+
 // Peak angles (radians) of each bone, around the fish's own axes (mesh-local: Y up, Z nose -Z to tail +Z).
 // Spine yaw by the bone's t along the body: V1's 4 / 6 / 9 / 12° at the default joints 0.35 / 0.55 / 0.72 / 0.86,
 // linear in between and beyond (never under 1°), shared out over the chain (× 4 / spine bones) so a long chain
@@ -103,6 +121,7 @@ interface DrivenBone {
 	drive: (fish: RiggedFish) => number; // angle (radians) at the fish's current phases
 	tiltAxis?: Vector3;
 	tilt?: (fish: RiggedFish) => number;
+	offset?: (fish: RiggedFish) => Vector3; // a translation (bone space), for the Jellyfish's bob
 }
 
 interface RiggedFish {
@@ -124,6 +143,8 @@ interface RiggedFish {
 	bite: number; // 0 .. 1, the jaw snap
 	jerk: number; // radians over the spine, the bite's head jerk
 	flare: number; // 0 .. 1, fins spread
+	pulse: number; // the Jellyfish's pulse and sway phases (radians)
+	sway: number;
 	swim: number; // phases (radians)
 	fin: number;
 	mouth: number;
@@ -222,6 +243,8 @@ class FishRigControllerSingleton implements Lifecycle {
 				bite: 0,
 				jerk: 0,
 				flare: 0,
+				pulse: math.random() * TAU,
+				sway: math.random() * TAU,
 				onScreen: true,
 				checkedAt: -math.huge,
 				lastUpdate: os.clock(),
@@ -263,6 +286,31 @@ class FishRigControllerSingleton implements Lifecycle {
 						(f.bend + f.jerk) * share,
 					tiltAxis: boneAxis(mesh, bone, SIDE),
 					tilt: (f) => f.droop * WEAK_TAIL_SAG * share,
+				});
+			} else if (name === "Bell") {
+				// the root: the whole jellyfish rises with each squeeze and sways slowly
+				const up = boneAxis(mesh, bone, UP);
+				const bob = (JELLY_BOB * mesh.Size.Y) / 4.6;
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, LENGTH),
+					drive: (f) => JELLY_SWAY * math.sin(f.sway),
+					offset: (f) => up.mul(bob * 0.5 * (1 + math.sin(f.pulse))),
+				});
+			} else if (name.sub(1, 3) === "Rim" && JELLY_SIDES[name.sub(4, 4)]) {
+				const tangent = UP.Cross(JELLY_SIDES[name.sub(4, 4)]);
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, tangent),
+					drive: (f) => -JELLY_RIM_SQUEEZE * 0.5 * (1 + math.sin(f.pulse)),
+				});
+			} else if (name.sub(1, 4) === "Tent" && JELLY_SIDES[name.sub(5, 5)]) {
+				const tangent = UP.Cross(JELLY_SIDES[name.sub(5, 5)]);
+				const lag = (tonumber(name.sub(6, 6)) ?? 1) * JELLY_TENTACLE_LAG;
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, tangent),
+					drive: (f) => JELLY_TENTACLE_TRAIL * math.sin(f.pulse - lag),
 				});
 			} else if (name.sub(1, 3) === "Ear") {
 				found.push({
@@ -407,6 +455,8 @@ class FishRigControllerSingleton implements Lifecycle {
 			} else fish.moment = undefined;
 		}
 		fish.wiggle = (fish.wiggle + dt * TAU * wiggleRate) % TAU;
+		fish.pulse = (fish.pulse + dt * TAU * JELLY_PULSE_FREQUENCY) % TAU;
+		fish.sway = (fish.sway + dt * TAU * JELLY_PULSE_FREQUENCY * JELLY_SWAY_RATE) % TAU;
 		const advance = dt * TAU;
 		fish.swim = (fish.swim + advance * SWIM_FREQUENCY * beat) % TAU;
 		fish.fin = (fish.fin + advance * FIN_FREQUENCY * math.max(paddle, beat)) % TAU;
@@ -435,6 +485,7 @@ class FishRigControllerSingleton implements Lifecycle {
 				const tilt = driven.tilt(fish);
 				if (tilt !== 0) pose = pose.mul(CFrame.fromAxisAngle(driven.tiltAxis, tilt));
 			}
+			if (driven.offset) pose = new CFrame(driven.offset(fish)).mul(pose);
 			driven.bone.Transform = pose;
 		}
 	}

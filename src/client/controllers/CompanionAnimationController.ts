@@ -2,6 +2,7 @@ import { Janitor } from "@rbxts/janitor";
 import { CollectionService, RunService } from "@rbxts/services";
 import { Lifecycle } from "shared/framework";
 import { TAGS } from "shared/tags";
+import { hasBoneRig } from "./FishRigController";
 
 // Water Hen: rocks from side to side and nods while it floats, faster and wider while it paddles
 const HEN_ROCK_FREQUENCY = 0.9; // rocks per second at rest
@@ -60,6 +61,7 @@ class CompanionAnimationControllerSingleton implements Lifecycle {
 	private track(model: Instance) {
 		const animation = ANIMATIONS[model.GetAttribute("CompanionType") as string];
 		if (!model.IsA("Model") || animation === undefined || this.companions.has(model)) return;
+		if (hasBoneRig(model)) return; // a companion with a bone rig (the Jellyfish) moves in FishRigController
 		task.spawn(() => {
 			const body = model.WaitForChild("Body", 10);
 			const mesh = model.WaitForChild("Mesh", 10);

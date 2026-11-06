@@ -1,4 +1,4 @@
-# One species through the whole Blender side of the bone pipeline (ROADMAP_V1.1 A5), in one call from the Blender MCP:
+# One species (or companion) through the whole Blender side of the bone pipeline (ROADMAP_V1.1 A5), in one call from the Blender MCP:
 #   ns = {}; exec(open("<repo>/tools/blender/convert_fish.py").read(), ns); ns["convert"]("<repo>", "BlueNeon")
 # Needs design/meshes/<Fish>.obj and design/rigs/work/<Fish>_color.png + <Fish>.json (tools/blender/studio/
 # export_fish.luau, then rgba-to-png.js). Settings: design/rigs/<Fish>.json if present (rig_fish.py DEFAULTS
@@ -57,6 +57,9 @@ def convert(repo, fish, render=True):
     settings_path = os.path.join(repo, "design", "rigs", fish + ".json")
     settings = json.load(open(settings_path)) if os.path.exists(settings_path) else {}
     speed = settings.pop("speed", 1.0)
+    # A companion that isn't a fish has its own rig script ("rig": "jellyfish" -> rig_jellyfish.py)
+    kind = settings.pop("rig", "fish")
+    special = _load(repo, "rig_%s.py" % kind) if kind != "fish" else None
     side_path = os.path.join(work, fish + ".json")
     tint = json.load(open(side_path)).get("tint", [255, 255, 255]) if os.path.exists(side_path) else [255, 255, 255]
 
@@ -64,12 +67,15 @@ def convert(repo, fish, render=True):
     with _window_override():
         obj = rig["import_fish"](os.path.join(repo, "design", "meshes", fish + ".obj"), fish)
         _preview_material(obj, os.path.join(work, fish + "_color.png"), tint)
-        summary = rig["rig_fish"](obj, settings)
+        summary = special["rig_" + kind](obj, settings) if special else rig["rig_fish"](obj, settings)
         arm = bpy.data.objects[summary["armature"]]
         weights = [sum(1 for g in v.groups if g.weight > 0) for v in obj.data.vertices]
         summary["max_influences"] = max(weights)
         summary["unweighted"] = sum(1 for w in weights if w == 0)
-        preview["add_swim_action"](arm, speed)
+        if special:
+            special["add_pulse_action"](arm, speed)
+        else:
+            preview["add_swim_action"](arm, speed)
         if render:
             preview["render_preview"](obj, arm, os.path.join(work, fish + "_frames"), view="three_quarter",
                                       size=(480, 300))
