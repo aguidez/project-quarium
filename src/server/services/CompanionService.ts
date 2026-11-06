@@ -10,6 +10,7 @@ import {
 	JELLYFISH_PELLETS,
 	PELICAN_FEED_INTERVAL,
 	SWORDFISH_REACH,
+	SNAIL_STROLL_SPEED,
 	SWORDFISH_CRUISE_SPEED,
 	SWORDFISH_SPEED,
 } from "shared/types/companions";
@@ -35,7 +36,6 @@ const EDGE_MARGIN = 1.5;
 
 // Snail: crawls on the sand, slower than most fish, and picks up its owner's coins without stopping
 const SNAIL_SPEED = 3.6; // studs/s while fetching a coin (fish swim at 3-8)
-const SNAIL_STROLL_SPEED = 1.2; // studs/s when there is nothing to pick up
 const SNAIL_STEP_TIME = 0.2; // re-targets this often, so it follows falling / new coins
 const SNAIL_TURN = 0.35; // fraction of the way to the target direction turned per step (no spinning on the spot)
 const SNAIL_REACH = 1.8; // horizontal studs from the coin to pick it up

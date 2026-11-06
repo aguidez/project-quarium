@@ -57,7 +57,8 @@ def convert(repo, fish, render=True):
     settings_path = os.path.join(repo, "design", "rigs", fish + ".json")
     settings = json.load(open(settings_path)) if os.path.exists(settings_path) else {}
     speed = settings.pop("speed", 1.0)
-    # A companion that isn't a fish has its own rig script ("rig": "jellyfish" -> rig_jellyfish.py)
+    # A companion that isn't a fish has its own rig script ("rig": "jellyfish" -> rig_jellyfish.py, with
+    # rig_<kind>(obj, settings) and add_preview_action(arm, speed))
     kind = settings.pop("rig", "fish")
     special = _load(repo, "rig_%s.py" % kind) if kind != "fish" else None
     side_path = os.path.join(work, fish + ".json")
@@ -73,7 +74,7 @@ def convert(repo, fish, render=True):
         summary["max_influences"] = max(weights)
         summary["unweighted"] = sum(1 for w in weights if w == 0)
         if special:
-            special["add_pulse_action"](arm, speed)
+            special["add_preview_action"](arm, speed)
         else:
             preview["add_swim_action"](arm, speed)
         if render:

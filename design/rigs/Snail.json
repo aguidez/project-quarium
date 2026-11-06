@@ -1,0 +1,4 @@
+{
+	"//": "The Snail companion (Assets.Companions): its own skeleton (tools/blender/rig_snail.py: Foot, Shell, SnailHead, SnailTail, EyeL, EyeR). Its look is a TextureID (no SurfaceAppearance): swap_template.luau copies it.",
+	"rig": "snail"
+}

@@ -137,7 +137,7 @@ SWAY = 5.0
 FPS, LOOP_FRAMES = 24, 30
 
 
-def add_pulse_action(arm, speed=1.0):
+def add_preview_action(arm, speed=1.0):
     """A looping preview of the pulse (30 frames: one pulse = 1.25 s)."""
     from mathutils import Quaternion
 

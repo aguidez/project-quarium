@@ -69,9 +69,11 @@ local function exportOne(entry)
 	local obj = table.concat(lines, "\n") .. "\n"
 
 	-- Texture -> 512 RGBA (box downsample by strips) -> base64, with the tint in the header
+	-- the colour texture: a SurfaceAppearance's ColorMap, else the MeshPart's TextureID (the Snail)
 	local sa = part:FindFirstChildWhichIsA("SurfaceAppearance")
-	assert(sa and sa.ColorMap ~= "", FISH .. " has no SurfaceAppearance ColorMap")
-	local img = AssetService:CreateEditableImageAsync(Content.fromUri(sa.ColorMap))
+	local colorMap = sa and sa.ColorMap ~= "" and sa.ColorMap or part.TextureID
+	assert(colorMap ~= "", FISH .. " has no texture (SurfaceAppearance ColorMap or TextureID)")
+	local img = AssetService:CreateEditableImageAsync(Content.fromUri(colorMap))
 	local W = img.Size.X
 	local OUT = math.min(512, W)
 	local k = W // OUT
@@ -107,7 +109,7 @@ local function exportOne(entry)
 		if #piece >= 4096 then table.insert(parts, table.concat(piece)); piece = {} end
 	end
 	table.insert(parts, table.concat(piece))
-	local c = sa.Color
+	local c = sa and sa.Color or Color3.new(1, 1, 1)
 	local texture = string.format("%d %d %d %d %d\n", OUT, OUT, math.round(c.R * 255), math.round(c.G * 255), math.round(c.B * 255)) .. table.concat(parts)
 
 	post(FILE .. ".obj", obj)

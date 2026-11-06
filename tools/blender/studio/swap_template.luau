@@ -39,7 +39,8 @@ local function swapOne(FISH, MODEL)
 	loaded:Destroy()
 	assert(rigged.HasSkinnedMesh, "the uploaded model's mesh is not skinned")
 
-	for _, p in { "Anchored", "CanCollide", "CanQuery", "CanTouch", "Massless", "CastShadow", "Transparency", "Material", "Color", "RenderFidelity", "DoubleSided", "Locked" } do
+	-- TextureID too: a template whose look is a TextureID (the Snail) would come out grey otherwise (the K-pop idol)
+	for _, p in { "Anchored", "CanCollide", "CanQuery", "CanTouch", "Massless", "CastShadow", "Transparency", "Material", "Color", "RenderFidelity", "DoubleSided", "Locked", "TextureID" } do
 		pcall(function() rigged[p] = old[p] end)
 	end
 	rigged.Name = "Mesh"

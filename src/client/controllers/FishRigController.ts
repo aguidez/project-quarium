@@ -1,7 +1,7 @@
 import { CollectionService, RunService, Workspace } from "@rbxts/services";
 import { Lifecycle } from "shared/framework";
 import { TAGS } from "shared/tags";
-import { SWORDFISH_CRUISE_SPEED } from "shared/types/companions";
+import { SNAIL_STROLL_SPEED, SWORDFISH_CRUISE_SPEED } from "shared/types/companions";
 import { FISH_TYPES, FishType, HungerState } from "shared/types/fish";
 
 /**
@@ -76,6 +76,15 @@ const JELLY_TENTACLE_LAG = 0.9; // radians per chain bone
 const JELLY_BOB = 0.15; // studs at its template's height (4.6)
 const JELLY_SWAY = math.rad(5);
 const JELLY_SWAY_RATE = 0.25; // × the pulse
+// The Snail companion (tools/blender/rig_snail.py: Foot, Shell, SnailHead, SnailTail, EyeL, EyeR): as it crawls, its
+// head reaches forward and the back of its foot follows (the body stretches and gathers), its shell rocks a little;
+// its eye stalks sway all the time. The crawl follows its pace (still at rest, faster when it fetches a coin).
+const SNAIL_CRAWL_FREQUENCY = 0.8; // stretches per second at its strolling speed
+const SNAIL_STRETCH = 0.06; // × its length
+const SNAIL_TAIL_LAG = 1.4; // radians: the tail gathers after the head has reached
+const SNAIL_SHELL_ROCK = math.rad(3);
+const SNAIL_EYE_SWAY = math.rad(12);
+const SNAIL_EYE_FREQUENCY = 0.6;
 // Side letter of a rim / tentacle bone -> its direction from the axis, in mesh space (front -Z, right +X)
 const JELLY_SIDES: Record<string, Vector3> = {
 	F: new Vector3(0, 0, -1),
@@ -145,6 +154,9 @@ interface RiggedFish {
 	flare: number; // 0 .. 1, fins spread
 	pulse: number; // the Jellyfish's pulse and sway phases (radians)
 	sway: number;
+	crawl: number; // the Snail's crawl and eye phases (radians), and how much it crawls (0 still .. 1)
+	eyes: number;
+	crawlAmount: number;
 	swim: number; // phases (radians)
 	fin: number;
 	mouth: number;
@@ -245,6 +257,9 @@ class FishRigControllerSingleton implements Lifecycle {
 				flare: 0,
 				pulse: math.random() * TAU,
 				sway: math.random() * TAU,
+				crawl: math.random() * TAU,
+				eyes: math.random() * TAU,
+				crawlAmount: 0,
 				onScreen: true,
 				checkedAt: -math.huge,
 				lastUpdate: os.clock(),
@@ -254,7 +269,9 @@ class FishRigControllerSingleton implements Lifecycle {
 
 	/** Its species' wandering speed (FISH_TYPES), the Swordfish's cruise; an event guest: about its length per second. */
 	private getCruise(model: Model, mesh: MeshPart): number {
-		if (model.GetAttribute("CompanionType") === "Swordfish") return SWORDFISH_CRUISE_SPEED;
+		const companion = model.GetAttribute("CompanionType");
+		if (companion === "Swordfish") return SWORDFISH_CRUISE_SPEED;
+		if (companion === "Snail") return SNAIL_STROLL_SPEED;
 		const config = FISH_TYPES[model.GetAttribute("FishType") as FishType] as (typeof FISH_TYPES)[FishType] | undefined;
 		if (config) return (config.speedMin + config.speedMax) / 2;
 		return math.max(mesh.Size.Z * 0.8, 1);
@@ -311,6 +328,32 @@ class FishRigControllerSingleton implements Lifecycle {
 					bone,
 					axis: boneAxis(mesh, bone, tangent),
 					drive: (f) => JELLY_TENTACLE_TRAIL * math.sin(f.pulse - lag),
+				});
+			} else if (name === "SnailHead" || name === "SnailTail") {
+				// reaching forward (the head), then gathering after it (the back of the foot)
+				const forward = boneAxis(mesh, bone, LENGTH.mul(-1));
+				const reach = SNAIL_STRETCH * mesh.Size.Z;
+				const lag = name === "SnailTail" ? SNAIL_TAIL_LAG : 0;
+				found.push({
+					bone,
+					axis: forward,
+					drive: () => 0,
+					offset: (f) => forward.mul(f.crawlAmount * reach * 0.5 * (1 + math.sin(f.crawl - lag))),
+				});
+			} else if (name === "Shell") {
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, LENGTH),
+					drive: (f) => f.crawlAmount * SNAIL_SHELL_ROCK * math.sin(f.crawl),
+				});
+			} else if (name === "EyeL" || name === "EyeR") {
+				const lag = name === "EyeL" ? 0 : 1.3;
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, SIDE),
+					drive: (f) => SNAIL_EYE_SWAY * math.sin(f.eyes - lag),
+					tiltAxis: boneAxis(mesh, bone, LENGTH),
+					tilt: (f) => 0.5 * SNAIL_EYE_SWAY * math.sin(f.eyes * 1.3 + lag),
 				});
 			} else if (name.sub(1, 3) === "Ear") {
 				found.push({
@@ -456,6 +499,9 @@ class FishRigControllerSingleton implements Lifecycle {
 		}
 		fish.wiggle = (fish.wiggle + dt * TAU * wiggleRate) % TAU;
 		fish.pulse = (fish.pulse + dt * TAU * JELLY_PULSE_FREQUENCY) % TAU;
+		fish.crawl = (fish.crawl + dt * TAU * SNAIL_CRAWL_FREQUENCY * math.min(fish.pace, 3)) % TAU;
+		fish.crawlAmount = math.min(fish.pace, 1);
+		fish.eyes = (fish.eyes + dt * TAU * SNAIL_EYE_FREQUENCY) % TAU;
 		fish.sway = (fish.sway + dt * TAU * JELLY_PULSE_FREQUENCY * JELLY_SWAY_RATE) % TAU;
 		const advance = dt * TAU;
 		fish.swim = (fish.swim + advance * SWIM_FREQUENCY * beat) % TAU;
