@@ -10,6 +10,7 @@ import {
 	JELLYFISH_PELLETS,
 	PELICAN_FEED_INTERVAL,
 	SWORDFISH_REACH,
+	SWORDFISH_CRUISE_SPEED,
 	SWORDFISH_SPEED,
 } from "shared/types/companions";
 import { getCompanionMultiplier } from "shared/types/oceanRewards";
@@ -67,7 +68,6 @@ const HEN_REST_MAX = 4;
 // Swordfish: swims through the water and grabs its owner's coins while they sink (BALANCE.md §5.8: free, as a maxed
 // Snail; its pass quests make it faster with a wider reach, perks.ts)
 const SWORDFISH_DIVE_SPEED = 6; // studs/s up or down: keeps up with a sinking coin (4 studs/s)
-const SWORDFISH_CRUISE_SPEED = 2; // studs/s when there is nothing to grab
 const SWORDFISH_STEP_TIME = 0.15;
 const SWORDFISH_TURN = 0.45;
 const SWORDFISH_REST_MIN = 0.5;

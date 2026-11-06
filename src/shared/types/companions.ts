@@ -65,6 +65,8 @@ export const JELLYFISH_FEED_INTERVAL = 7.5;
 /** The free Swordfish (BALANCE.md §5.8: a maxed Snail): x the Snail's speed, and its reach in studs (perks.ts raise them). */
 export const SWORDFISH_SPEED = 0.95;
 export const SWORDFISH_REACH = 2;
+/** Studs/s the Swordfish swims at when there is nothing to grab (CompanionService; FishRigController reads its pace). */
+export const SWORDFISH_CRUISE_SPEED = 2;
 export const JELLYFISH_CHARGES = 2;
 export const JELLYFISH_PELLETS = 2;
 

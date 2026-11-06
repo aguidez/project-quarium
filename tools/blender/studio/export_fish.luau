@@ -2,7 +2,8 @@
 -- Studio snippet (Edit, run by the agent through the Studio MCP's execute_luau; never a game script): exports a fish
 -- template's mesh as OBJ (V flipped) and its colour texture at 512 as "W H R G B\n" + base64 RGBA, where R G B is the
 -- SurfaceAppearance tint, to tools/obj-receiver.js on 127.0.0.1:34999 (the address in Studio's MCP HTTP allowlist).
--- Templates are looked up in Assets.Fish, then Assets.EventFish (the K-pop idol, the abyss LanternFish). An entry
+-- Templates are looked up in Assets.Fish, then Assets.EventFish (the K-pop idol, the abyss LanternFish), then
+-- Assets.Companions (the Swordfish). An entry
 -- "Template:FileName" writes under another name: the file system of a Mac (and Windows) ignores case, and the abyss
 -- "LanternFish" would overwrite the species "Lanternfish" (use "LanternFish:AbyssLantern").
 -- Usage: set FISHES below (template names), start `node tools/obj-receiver.js design/rigs/work`, run, then for each
@@ -29,7 +30,7 @@ local function exportOne(entry)
 	local FISH, FILE = entry:match("^(.-):(.+)$")
 	FISH = FISH or entry
 	FILE = FILE or entry
-	local template = (game:GetService("ServerStorage").Assets.Fish:FindFirstChild(FISH) or game:GetService("ServerStorage").Assets.EventFish:FindFirstChild(FISH))
+	local template = (game:GetService("ServerStorage").Assets.Fish:FindFirstChild(FISH) or game:GetService("ServerStorage").Assets.EventFish:FindFirstChild(FISH) or game:GetService("ServerStorage").Assets.Companions:FindFirstChild(FISH))
 	assert(template, "no template " .. FISH)
 	local part = template:FindFirstChild("Mesh")
 	assert(part and part:IsA("MeshPart"), FISH .. " has no Mesh MeshPart")

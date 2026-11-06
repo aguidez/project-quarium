@@ -1,6 +1,7 @@
 import { CollectionService, RunService, Workspace } from "@rbxts/services";
 import { Lifecycle } from "shared/framework";
 import { TAGS } from "shared/tags";
+import { SWORDFISH_CRUISE_SPEED } from "shared/types/companions";
 import { FISH_TYPES, FishType, HungerState } from "shared/types/fish";
 
 /**
@@ -174,9 +175,9 @@ class FishRigControllerSingleton implements Lifecycle {
 	private frame = 0;
 
 	public onInit() {
-		// The tanks' fish (built by FishRenderController) and the event guests with a bone rig (the K-pop idol, the
-		// abyss lantern fish: server models, their bones turned locally like the fish's)
-		for (const tag of [TAGS.Fish, TAGS.EventFish]) {
+		// The tanks' fish (built by FishRenderController), the event guests and the companions with a bone rig (the
+		// abyss lantern fish, the Swordfish: server models, their bones turned locally like the fish's)
+		for (const tag of [TAGS.Fish, TAGS.EventFish, TAGS.Companion]) {
 			CollectionService.GetInstanceAddedSignal(tag).Connect((fish) => this.track(fish));
 			CollectionService.GetInstanceRemovedSignal(tag).Connect((fish) => this.fishes.delete(fish as Model));
 			for (const fish of CollectionService.GetTagged(tag)) this.track(fish);
@@ -228,8 +229,9 @@ class FishRigControllerSingleton implements Lifecycle {
 		});
 	}
 
-	/** Its species' wandering speed (FISH_TYPES); an event guest without one: about its length per second. */
+	/** Its species' wandering speed (FISH_TYPES), the Swordfish's cruise; an event guest: about its length per second. */
 	private getCruise(model: Model, mesh: MeshPart): number {
+		if (model.GetAttribute("CompanionType") === "Swordfish") return SWORDFISH_CRUISE_SPEED;
 		const config = FISH_TYPES[model.GetAttribute("FishType") as FishType] as (typeof FISH_TYPES)[FishType] | undefined;
 		if (config) return (config.speedMin + config.speedMax) / 2;
 		return math.max(mesh.Size.Z * 0.8, 1);
