@@ -33,6 +33,13 @@ DEFAULTS = {
     "dorsal": {"height": [0.45, 0.9], "t_in": [0.25, 0.4], "t_out": [0.75, 0.85]},
     "pectoral": {"side": [0.62, 0.95], "t_in": [0.12, 0.25], "t_out": [0.5, 0.65]},
     "lips": {"t": [0.02, 0.1]},
+    # Per-species switches: a hat or a bag on the back is not a dorsal fin (fin_top false), whiskers under the mouth
+    # must not move with it (jaw false, CLAUDE.md §7); rigid_top [lo, hi] = smoothstep edges on height above which
+    # everything follows the head rigidly (a hat), with a soft transition so nothing tears.
+    "fin_top": True,
+    "fin_bottom": True,
+    "jaw": True,
+    "rigid_top": None,
 }
 
 SPINE = ["Head", "Spine1", "Spine2", "Tail1", "Tail2"]
@@ -122,8 +129,10 @@ def build_armature(obj, m, s):
 
     dt = s["dorsal"]
     t_fin = (dt["t_in"][1] + dt["t_out"][0]) / 2
-    bone("FinTop", (0, y_at(t_fin), mz + dt["height"][0] * hh), (0, y_at(t_fin), mz + hh), "Spine1")
-    bone("FinBottom", (0, y_at(t_fin), mz - dt["height"][0] * hh), (0, y_at(t_fin), mz - hh), "Spine1")
+    if s["fin_top"]:
+        bone("FinTop", (0, y_at(t_fin), mz + dt["height"][0] * hh), (0, y_at(t_fin), mz + hh), "Spine1")
+    if s["fin_bottom"]:
+        bone("FinBottom", (0, y_at(t_fin), mz - dt["height"][0] * hh), (0, y_at(t_fin), mz - hh), "Spine1")
 
     pc = s["pectoral"]
     t_pec = (pc["t_in"][1] + pc["t_out"][0]) / 2
@@ -131,7 +140,8 @@ def build_armature(obj, m, s):
         bone(name, (side * pc["side"][0] * hw, y_at(t_pec), mz), (side * hw, y_at(t_pec), mz), "Head")
 
     lp = s["lips"]["t"]
-    bone("Jaw", (0, y_at(lp[1] * 2), mz - 0.15 * hh), (0, y_at(0.0), mz - 0.15 * hh), "Head")
+    if s["jaw"]:
+        bone("Jaw", (0, y_at(lp[1] * 2), mz - 0.15 * hh), (0, y_at(0.0), mz - 0.15 * hh), "Head")
 
     bpy.ops.object.mode_set(mode="OBJECT")
     return arm
@@ -153,17 +163,23 @@ def assign_weights(obj, arm, m, s):
         pectoral = smoothstep(*p["side"], abs(side)) * smoothstep(*p["t_in"], t) * (1 - smoothstep(*p["t_out"], t))
         jaw = (1 - smoothstep(lp[0], lp[1], t)) * min(max(-height * 2, 0.0), 1.0)
         extra = {}
-        if dorsal > 0.001:
-            extra["FinTop" if height > 0 else "FinBottom"] = dorsal
+        fin = "FinTop" if height > 0 else "FinBottom"
+        if dorsal > 0.001 and fin in groups:
+            extra[fin] = dorsal
         if pectoral > 0.001:
             extra["FinR" if side >= 0 else "FinL"] = pectoral
-        if jaw > 0.001:
+        if jaw > 0.001 and "Jaw" in groups:
             extra["Jaw"] = jaw
         rest = max(0.0, 1.0 - sum(extra.values()))
         weights = dict(extra)
         for name, w in zip(SPINE, spine_weights(t, s["joints"], s["blend"])):
             if w > 0.001:
                 weights[name] = weights.get(name, 0.0) + w * rest
+        if s["rigid_top"]:
+            rigid = smoothstep(*s["rigid_top"], height)
+            if rigid > 0.001:
+                weights = {name: w * (1 - rigid) for name, w in weights.items()}
+                weights["Head"] = weights.get("Head", 0.0) + rigid
         # Roblox: at most 4 influences, normalised
         top = sorted(weights.items(), key=lambda kv: -kv[1])[:4]
         total = sum(w for _, w in top) or 1.0

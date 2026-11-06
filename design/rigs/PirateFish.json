@@ -1,0 +1,5 @@
+{
+	"//": "Its tricorn hat sits on top of the body: no dorsal fin bone, the hat follows the head rigidly (height above 0.35-0.45).",
+	"fin_top": false,
+	"rigid_top": [0.35, 0.45]
+}

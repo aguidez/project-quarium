@@ -1,0 +1,5 @@
+{
+	"//": "Its beret and the bag on its back are not a dorsal fin: no FinTop bone; the beret follows the head rigidly (height above 0.6-0.7).",
+	"fin_top": false,
+	"rigid_top": [0.6, 0.7]
+}

@@ -63,6 +63,10 @@ Blender already open. Blender stays open after the session. `get_screenshot_of_w
    (rig_fish.py DEFAULTS keys + `"speed"`), committed.
 3. *Check* yourself: a contact sheet of a few frames (weights bleeding into the head, fins tearing, a thin part
    reading as a stick near the mouth: CLAUDE.md §7); the GLB's JSON (skin joints, POSITION min / max, Head node at +Z).
+   **Anything on top that isn't a fin** (a hat, a beret, a bag) lands in the dorsal zone and would flap: set
+   `"fin_top": false` and `"rigid_top": [lo, hi]` (heights from a width-per-height-slice scan: the hat widens again
+   above the body's round) in `design/rigs/<Fish>.json`; **whiskers / barbels under the mouth**: `"jaw": false`.
+   Check such fish at 3× the bend (pose the spine bones by hand, no action) from the side and from above.
 4. *Owner preview*: `node tools/blender/frames-to-gif.js design/previews/v1.1-batch<N>.gif design/rigs/work/<Fish>_frames
    ...` (one labelled tile per fish), linked in the reply. **Wait for the owner's go before any upload.**
 5. *Upload* (Studio MCP, once per fish, never again for the same file): `open_cloud_invoke` POST `/assets/v1/assets`

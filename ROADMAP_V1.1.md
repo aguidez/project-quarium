@@ -178,7 +178,9 @@ blender-pipeline.
       later (`design/previews/flame-gourami-light-compare.png`); nothing light is uploaded.
 - [x] **A5.2 — Batch 1 ship** (2026-11-06): 5 uploads as the group, all Approved at once; 5 swaps
       (`swap_template.luau` now takes a batch); playtest: the 5 on bones, none on V1; **V1.1.1**.
-- [ ] **A5.3 — Batch 2 prep** (Neon Coral and Pirate Wreck): Silver Angelfish, Imperial Discus (~6.3k: same
+- [ ] **A5.3 — Batch 2 prep** (prep done 2026-11-06, sheet `design/previews/v1.1-batch2.gif`, the owner's go pending;
+      new rig options: `fin_top` false + `rigid_top` for the Pirate Fish's tricorn and the French Fish's beret, `jaw`
+      false for the Catfish's whiskers; checked at 3× the bend, no tearing) (Neon Coral and Pirate Wreck): Silver Angelfish, Imperial Discus (~6.3k: same
       decimation choice), Pirate Fish, French Fish, Catfish (barbels: nothing thin toward the mouth may move like a
       stick). Sheet `v1.1-batch2.gif`.
 - [ ] **A5.4 — Batch 2 ship**: **V1.1.2**.

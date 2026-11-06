@@ -60,7 +60,8 @@ def add_swim_action(arm, speed=1.0):
         for name, peak in SPINE_YAW.items():
             t = _bone_t(arm, name, nose, length)
             poses[name] = ((0, 0, 1), peak * math.sin(swim - t * BODY_WAVE))
-        t_fin = _bone_t(arm, "FinTop", nose, length)
+        fin_bone = "FinTop" if "FinTop" in bones else "FinBottom" if "FinBottom" in bones else None
+        t_fin = _bone_t(arm, fin_bone, nose, length) if fin_bone else 0.5
         flutter = FIN_FLUTTER * math.sin(swim - t_fin * BODY_WAVE - 1.2)
         poses["FinTop"] = ((0, 1, 0), flutter)
         poses["FinBottom"] = ((0, 1, 0), -flutter)
