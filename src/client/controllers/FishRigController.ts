@@ -45,6 +45,25 @@ const WEAK_FIN_DROOP = math.rad(35);
 const WEAK_TAIL_SAG = math.rad(15); // in total over the spine
 const WEAK_FLUTTER = 0.5; // × dorsal / ventral flutter
 const DROOP_SETTLE = 1.5;
+// Moments (ROADMAP_V1.1 A6, patch 2), short overlays on the swim, from the fish's local attributes:
+//   Feed     Hunger back to Satiated (it just ate): a bite (jaw snap, head jerk), then a happy wiggle
+//   Grow     GrowthStage up: fins flare, a slow sweep of the tail
+//   Released Exit = "Released": strong fast tail strokes up to the surface
+//   Struggle Exit = "Eaten" / "Abducted": a fast, wild wriggle
+const BITE_TIME = 0.3;
+const BITE_JAW = math.rad(18); // the lower lip only, as ever (CLAUDE.md §7)
+const BITE_JERK = math.rad(10); // the head snaps toward the food: a quick bend of the spine
+const JOY_TIME = 0.8; // after the bite
+const JOY_WIGGLE = 1.3; // × spine peak, at JOY_RATE
+const JOY_RATE = 5; // wiggles per second
+const GROW_TIME = 1.2;
+const GROW_FLARE = math.rad(30); // pectorals lifted, dorsal / ventral flutter × (1 + flare)
+const GROW_SWEEP = 0.7; // × spine peak, at GROW_RATE
+const GROW_RATE = 2.5;
+const RELEASE_BEAT = 3; // × beat rate ...
+const RELEASE_AMOUNT = 1.6; // ... and amplitude while it darts out
+const STRUGGLE_WIGGLE = 1.5;
+const STRUGGLE_RATE = 7;
 
 // Peak angles (radians) of each bone, around the fish's own axes (mesh-local: Y up, Z nose -Z to tail +Z).
 // Spine yaw by the bone's t along the body: V1's 4 / 6 / 9 / 12° at the default joints 0.35 / 0.55 / 0.72 / 0.86,
@@ -96,6 +115,14 @@ interface RiggedFish {
 	lastPosition?: Vector3;
 	pace: number; // speed / cruise, smoothed (0 still, 1 cruising, 2 rushing)
 	droop: number; // 0 .. 1 while weak, smoothed
+	hunger?: unknown; // last Hunger / GrowthStage seen, to catch the moments they change
+	stage?: unknown;
+	moment?: { kind: "Feed" | "Grow"; start: number };
+	wiggle: number; // phase of a moment's extra wiggle (radians)
+	wiggleAmount: number; // × spine peak
+	bite: number; // 0 .. 1, the jaw snap
+	jerk: number; // radians over the spine, the bite's head jerk
+	flare: number; // 0 .. 1, fins spread
 	swim: number; // phases (radians)
 	fin: number;
 	mouth: number;
@@ -187,6 +214,13 @@ class FishRigControllerSingleton implements Lifecycle {
 				cruise: this.getCruise(model, mesh),
 				pace: 1,
 				droop: 0,
+				hunger: model.GetAttribute("Hunger"),
+				stage: model.GetAttribute("GrowthStage"),
+				wiggle: 0,
+				wiggleAmount: 0,
+				bite: 0,
+				jerk: 0,
+				flare: 0,
 				onScreen: true,
 				checkedAt: -math.huge,
 				lastUpdate: os.clock(),
@@ -221,7 +255,10 @@ class FishRigControllerSingleton implements Lifecycle {
 				found.push({
 					bone,
 					axis: boneAxis(mesh, bone, UP),
-					drive: (f) => f.amount * peak * math.sin(f.swim - lag) + f.bend * share,
+					drive: (f) =>
+						f.amount * peak * math.sin(f.swim - lag) +
+						f.wiggleAmount * peak * math.sin(f.wiggle - lag) +
+						(f.bend + f.jerk) * share,
 					tiltAxis: boneAxis(mesh, bone, SIDE),
 					tilt: (f) => f.droop * WEAK_TAIL_SAG * share,
 				});
@@ -237,7 +274,12 @@ class FishRigControllerSingleton implements Lifecycle {
 				found.push({
 					bone,
 					axis: boneAxis(mesh, bone, LENGTH),
-					drive: (f) => sign * f.amount * (1 - (1 - WEAK_FLUTTER) * f.droop) * FIN_FLUTTER * math.sin(f.swim - lag),
+					drive: (f) =>
+						sign *
+						f.amount *
+						(1 - (1 - WEAK_FLUTTER) * f.droop + f.flare) *
+						FIN_FLUTTER *
+						math.sin(f.swim - lag),
 				});
 			} else if (name === "FinR" || name === "FinL") {
 				const offset = name === "FinR" ? 0 : math.pi; // they paddle alternately
@@ -248,14 +290,14 @@ class FishRigControllerSingleton implements Lifecycle {
 					drive: (f) => sign * f.finAmount * PECTORAL_PADDLE * math.sin(f.fin + offset),
 					// weak: the fins hang down (the right one turns down around the length axis, the left one the other way)
 					tiltAxis: boneAxis(mesh, bone, LENGTH),
-					tilt: (f) => -sign * f.droop * WEAK_FIN_DROOP,
+					tilt: (f) => -sign * (f.droop * WEAK_FIN_DROOP - f.flare * GROW_FLARE),
 				});
 			} else if (name === "Jaw") {
 				// Only the lower lip drops a little: nothing ever comes out of the mouth (CLAUDE.md §7)
 				found.push({
 					bone,
 					axis: boneAxis(mesh, bone, SIDE),
-					drive: (f) => -f.amount * JAW_OPEN * math.max(0, math.sin(f.mouth)) ** 2,
+					drive: (f) => -(f.amount * JAW_OPEN * math.max(0, math.sin(f.mouth)) ** 2 + f.bite * BITE_JAW),
 				});
 			}
 		}
@@ -310,11 +352,59 @@ class FishRigControllerSingleton implements Lifecycle {
 		let beat = 1 - (1 - REST_BEAT) * calm + (SPRINT_BEAT - 1) * rush;
 		let amount = 1 - (1 - REST_BEAT) * calm + (SPRINT_AMOUNT - 1) * rush;
 		const paddle = 1 - (1 - REST_PADDLE) * calm + (SPRINT_PADDLE - 1) * rush;
-		// Asleep (a UFO's mutation) or leaving: V1's lazy swim, whatever its speed
-		if (model.GetAttribute("Asleep") === true || model.GetAttribute("Dead") === true) {
+		// Asleep (a UFO's mutation): V1's lazy swim, whatever its speed
+		if (model.GetAttribute("Asleep") === true) {
 			beat = SLOW_SPEED;
 			amount = SLOW_AMOUNT;
 		}
+		// Moments: just fed (back to Satiated), grown a stage; leaving the tank
+		const hunger = model.GetAttribute("Hunger");
+		if (hunger !== fish.hunger) {
+			if (hunger === HungerState.Satiated && fish.hunger !== undefined) fish.moment = { kind: "Feed", start: os.clock() };
+			fish.hunger = hunger;
+		}
+		const stage = model.GetAttribute("GrowthStage");
+		if (stage !== fish.stage) {
+			if (typeIs(stage, "number") && typeIs(fish.stage, "number") && stage > fish.stage) {
+				fish.moment = { kind: "Grow", start: os.clock() };
+			}
+			fish.stage = stage;
+		}
+		fish.jerk = 0;
+		fish.wiggleAmount = 0;
+		fish.bite = 0;
+		fish.flare = 0;
+		let wiggleRate = 0;
+		const exit = model.GetAttribute("Exit");
+		if (exit === "Released") {
+			beat = RELEASE_BEAT;
+			amount = RELEASE_AMOUNT;
+		} else if (exit === "Eaten" || exit === "Abducted") {
+			fish.wiggleAmount = STRUGGLE_WIGGLE;
+			fish.flare = 0.5 * math.abs(math.sin(fish.wiggle));
+			wiggleRate = STRUGGLE_RATE;
+		} else if (model.GetAttribute("Dead") === true) {
+			beat = SLOW_SPEED;
+			amount = SLOW_AMOUNT;
+		} else if (fish.moment) {
+			const t = os.clock() - fish.moment.start;
+			if (fish.moment.kind === "Feed") {
+				if (t < BITE_TIME) {
+					const k = math.sin((t / BITE_TIME) * math.pi);
+					fish.bite = k;
+					fish.jerk = BITE_JERK * k;
+				} else if (t < BITE_TIME + JOY_TIME) {
+					fish.wiggleAmount = JOY_WIGGLE * (1 - (t - BITE_TIME) / JOY_TIME);
+					wiggleRate = JOY_RATE;
+				} else fish.moment = undefined;
+			} else if (t < GROW_TIME) {
+				const k = math.sin((t / GROW_TIME) * math.pi);
+				fish.flare = k;
+				fish.wiggleAmount = GROW_SWEEP * k;
+				wiggleRate = GROW_RATE;
+			} else fish.moment = undefined;
+		}
+		fish.wiggle = (fish.wiggle + dt * TAU * wiggleRate) % TAU;
 		const advance = dt * TAU;
 		fish.swim = (fish.swim + advance * SWIM_FREQUENCY * beat) % TAU;
 		fish.fin = (fish.fin + advance * FIN_FREQUENCY * math.max(paddle, beat)) % TAU;

@@ -7,7 +7,8 @@ export const TAGS = {
 	/**
 	 * A fish model, built locally by each client (FishRenderController): the server has none.
 	 * Attributes (local): "FishId", "FishType", "Hunger" (HungerState), "GrowthStage" (index in the fish
-	 * type's growth stages), "Variant" (FishVariant), "Paused" (owner AFK: no hunger, growth or coins), "Dead" (leaving the tank),
+	 * type's growth stages), "Variant" (FishVariant), "Paused" (owner AFK: no hunger, growth or coins), "Dead" (leaving the tank), "Exit" (why: "Released",
+	 * "Eaten", "Abducted"),
 	 * "Animated" (FishAnimationController debugging aid), "Asleep" (a UFO night mutation: idles, "z Z z" bubble).
 	 */
 	Fish: "Fish",

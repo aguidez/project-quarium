@@ -65,6 +65,14 @@ BEHAVIOURS = {
     "Turn": {"bend": -28.0},
     "Weak": {"beat": 0.61, "amount": 0.61, "paddle": 0.75, "droop": 1.0},
 }
+# Moments (patch 2), one-shots timed in seconds over the 1.25 s loop, as FishRigController plays them
+MOMENTS = {"Feed": {"moment": "Feed"}, "Grow": {"moment": "Grow"}, "Released": {"moment": "Released"},
+           "Struggle": {"moment": "Struggle"}}
+BITE_TIME, BITE_JAW, BITE_JERK = 0.3, 18.0, 10.0
+JOY_TIME, JOY_WIGGLE, JOY_RATE = 0.8, 1.3, 5.0
+GROW_TIME, GROW_FLARE, GROW_SWEEP, GROW_RATE = 1.2, 30.0, 0.7, 2.5
+RELEASE_BEAT, RELEASE_AMOUNT = 3.0, 1.6
+STRUGGLE_WIGGLE, STRUGGLE_RATE = 1.5, 7.0
 WEAK_FIN_DROOP = 35.0
 WEAK_TAIL_SAG = 15.0
 WEAK_FLUTTER = 0.5
@@ -75,6 +83,9 @@ def add_swim_action(arm, speed=1.0, behaviour=None):
     b = behaviour or {}
     beat, amount, paddle = b.get("beat", 1.0), b.get("amount", 1.0), b.get("paddle", 1.0)
     bend, droop = b.get("bend", 0.0), b.get("droop", 0.0)
+    moment = b.get("moment")
+    if moment == "Released":
+        beat, amount = RELEASE_BEAT, RELEASE_AMOUNT
     fin_amount = max(amount, 0.75)
     bones = arm.data.bones
     nose = max(b.head_local.y for b in bones)
@@ -95,26 +106,46 @@ def add_swim_action(arm, speed=1.0, behaviour=None):
         swim = u * SWIM_CYCLES * math.tau * speed * beat
         fin = u * FIN_CYCLES * math.tau * speed * max(paddle, beat)
         mouth = u * MOUTH_CYCLES * math.tau * speed * beat
+        sec = (frame - 1) / FPS
+        bite = jerk = wiggle_amount = flare = wiggle_rate = 0.0
+        if moment == "Feed":
+            if sec < BITE_TIME:
+                bite = math.sin(sec / BITE_TIME * math.pi)
+                jerk = BITE_JERK * bite
+            elif sec < BITE_TIME + JOY_TIME:
+                wiggle_amount, wiggle_rate = JOY_WIGGLE * (1 - (sec - BITE_TIME) / JOY_TIME), JOY_RATE
+        elif moment == "Grow" and sec < GROW_TIME:
+            k = math.sin(sec / GROW_TIME * math.pi)
+            flare, wiggle_amount, wiggle_rate = k, GROW_SWEEP * k, GROW_RATE
+        elif moment == "Struggle":
+            wiggle_amount, wiggle_rate = STRUGGLE_WIGGLE, STRUGGLE_RATE
+        wiggle = sec * math.tau * wiggle_rate
+        if moment == "Struggle":
+            flare = 0.5 * abs(math.sin(wiggle))
         poses = {}
         spine = [bn.name for bn in bones if is_spine(bn.name)]
         t_sum = sum(_bone_t(arm, n, nose, length) for n in spine) or 1.0
         for name in spine:
             t = _bone_t(arm, name, nose, length)
             share = t / t_sum
-            poses[name] = ((0, 0, 1), amount * spine_peak(t, len(spine)) * math.sin(swim - t * BODY_WAVE) + bend * share,
+            peak = spine_peak(t, len(spine))
+            poses[name] = ((0, 0, 1), amount * peak * math.sin(swim - t * BODY_WAVE)
+                           + wiggle_amount * peak * math.sin(wiggle - t * BODY_WAVE) + (bend + jerk) * share,
                            (1, 0, 0), droop * WEAK_TAIL_SAG * share)
         for bn in bones:
             if bn.name.startswith("Ear"):
                 poses[bn.name] = ((1, 0, 0), amount * EAR_FLOP * math.sin(swim - 1.8))
         fin_bone = "FinTop" if "FinTop" in bones else "FinBottom" if "FinBottom" in bones else None
         t_fin = _bone_t(arm, fin_bone, nose, length) if fin_bone else 0.5
-        flutter = amount * (1 - (1 - WEAK_FLUTTER) * droop) * FIN_FLUTTER * math.sin(swim - t_fin * BODY_WAVE - 1.2)
+        flutter = amount * (1 - (1 - WEAK_FLUTTER) * droop + flare) * FIN_FLUTTER * math.sin(swim - t_fin * BODY_WAVE - 1.2)
         poses["FinTop"] = ((0, 1, 0), flutter)
         poses["FinBottom"] = ((0, 1, 0), -flutter)
         # Blender's length axis (-Y toward the tail) is Roblox's +Z: the droop tilts around (0, -1, 0)
-        poses["FinR"] = ((0, 0, 1), fin_amount * PECTORAL_PADDLE * math.sin(fin), (0, -1, 0), -droop * WEAK_FIN_DROOP)
-        poses["FinL"] = ((0, 0, 1), -fin_amount * PECTORAL_PADDLE * math.sin(fin + math.pi), (0, -1, 0), droop * WEAK_FIN_DROOP)
-        poses["Jaw"] = ((1, 0, 0), -amount * JAW_OPEN * max(0.0, math.sin(mouth)) ** 2)  # opens downward, as in the game
+        lift = droop * WEAK_FIN_DROOP - flare * GROW_FLARE
+        poses["FinR"] = ((0, 0, 1), fin_amount * PECTORAL_PADDLE * math.sin(fin), (0, -1, 0), -lift)
+        poses["FinL"] = ((0, 0, 1), -fin_amount * PECTORAL_PADDLE * math.sin(fin + math.pi), (0, -1, 0), lift)
+        # opens downward, as in the game
+        poses["Jaw"] = ((1, 0, 0), -(amount * JAW_OPEN * max(0.0, math.sin(mouth)) ** 2 + bite * BITE_JAW))
         for name, pose in poses.items():
             pb = arm.pose.bones.get(name)
             if not pb:

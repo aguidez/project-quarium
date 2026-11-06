@@ -228,13 +228,15 @@ Procedural layers on top of the swim, or clips made in Blender (A2 decides which
 owner before building:
 
 - [x] Turn: the body bends into the curve when the fish changes direction (V1.1.7).
-- [ ] Dash: faster beats and a body snap when it chases a pellet (faster, wider beats: V1.1.7); a mouth snap when it
-      eats (patch 2).
+- [x] Dash: faster beats and a body snap when it chases a pellet (faster, wider beats: V1.1.7); a mouth snap when it
+      eats (V1.1.8: the bite, at the meal).
 - [x] Hungry / weak: slow beats, drooping fins (V1's lazy swim, richer) (V1.1.7: drooping pectorals, sagging tail).
 - [x] Rest: hovering with soft fin paddling when it waits between two wander steps (V1.1.7).
-- [ ] Happy wiggle when fed, a little flourish when a fish grows a stage.
-- [ ] Released: a strong tail flick as it darts up to the surface; eaten by the Abyss villain: a struggle.
-- [ ] Hatch reveal and Fish Index: the fish swims in its card (if the ViewportFrame renders bones, A2).
+- [x] Happy wiggle when fed, a little flourish when a fish grows a stage (V1.1.8).
+- [x] Released: a strong tail flick as it darts up to the surface; eaten by the Abyss villain: a struggle (V1.1.8;
+      the UFO's abduction and a cannibal's bite too).
+- [ ] Hatch reveal and Fish Index: the fish swims in its card (if the ViewportFrame renders bones, A2). Not now: both
+      show stickers; a WorldModel would be needed (A2).
 
 ### A7 — Companions (M)
 

@@ -458,6 +458,7 @@ class FishRenderControllerSingleton implements Lifecycle {
 	private playExit(fish: LocalFish, cause: "Eaten" | "Released" | "Abducted", predatorId?: number) {
 		fish.leaving = true;
 		fish.model.SetAttribute("Dead", true);
+		fish.model.SetAttribute("Exit", cause); // its bones play the exit (FishRigController: a flick, a struggle)
 		for (const look of fish.effectLook ?? []) look.Destroy();
 		const body = fish.body;
 		let goal: CFrame;

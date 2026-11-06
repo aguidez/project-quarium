@@ -11,6 +11,17 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.8 — 2026-11-06
+
+**New**
+- **Fish react to what happens to them** (every fish with bones):
+  - **a meal**: it snaps at the food (the head jerks, the lower lip drops) and then wiggles with joy;
+  - **growing a stage**: its fins flare and its tail sweeps slowly;
+  - **released to the Ocean**: it darts out with big, fast tail strokes;
+  - **caught** by the abyss lantern fish, another fish or the UFO: it wriggles wildly before it is gone.
+
+---
+
 ## V1.1.7 — 2026-11-06
 
 **New**

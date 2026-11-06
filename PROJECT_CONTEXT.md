@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-06 (V1.1.7: bone fish rest, sprint, bend into turns and droop when weak; the idol, the UFO and the Swordfish still EditableMesh).
+> Last updated: 2026-11-06 (V1.1.8: bone fish behaviours and moments (meal, growth, release, caught); the idol, the UFO and the Swordfish still EditableMesh).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -481,6 +481,7 @@ ProjectQuarium/
       │  │                   the "Asleep" attribute); the alien's scream (green ForceField wave + puff); a fish whose model
       │  │                   (or rare variant texture) hasn't arrived waits in `pending`, built when the asset arrives, in
       │  │                   its normal look after 5 s; getPose blends a late segment from the old one's current pose
+      │  │                   ; playExit sets "Dead" and "Exit" (the cause) for the bones' exit moves
       │  ├─ FishIndicatorController  Hunger / AFK badges above fish (from attributes), none over a sleeping fish;
       │  │                   BillboardGuis straight in PlayerGui, ResetOnSpawn off
       │  ├─ FishAnimationController  EditableMesh swim deformation shared per species (also the Swordfish companion), camera
@@ -493,7 +494,9 @@ ProjectQuarium/
       │  │                   flopping and trailing the turns, each fish at its own phase. Behaviours from its real speed
       │  │                   against its species' wandering speed (FISH_TYPES speedMin / Max): rest (0×: slow small beats,
       │  │                   pectorals hover), cruise (1×), sprint (2×: faster, wider); a turn bends the spine against
-      │  │                   the yaw rate; Weak: fins droop, tail sags; Asleep / Dead: V1's lazy swim; every frame
+      │  │                   the yaw rate; Weak: fins droop, tail sags; Asleep: V1's lazy swim. Moments from the
+      │  │                   local attributes: Hunger back to Satiated (bite + joy wiggle), GrowthStage up (fins flare,
+      │  │                   tail sweep), Exit "Released" (fast strong strokes) / "Eaten" / "Abducted" (struggle); every frame
       │  │                   within 60 studs, every 2nd to 110, every 4th beyond, frozen off screen; no budget
       │  ├─ CompanionAnimationController  Local wobble of the Water Hen (its own copy of the Mesh placed on the server-moved
       │  │                   Body every frame) and the Jellyfish's bell pulse
