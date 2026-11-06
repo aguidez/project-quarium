@@ -11,6 +11,22 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.0 — 2026-11-06
+
+The start of the animation revamp (V1.1): fish get a real skeleton, made in Blender.
+
+**New**
+- **The Golden Guppy swims with bones**: its body waves from the head to the tail, its fins flutter and paddle, its
+  mouth goes "blub", each Guppy at its own rhythm. It looks like before, but it no longer uses the memory the old swim
+  shared between species: every Golden Guppy on screen swims, on every device, and never has to fall back to the
+  whole-body sway. The other species keep the old swim until they are converted.
+
+**Changes**
+- A weak (unfed), sleeping or leaving Guppy swims lazily with its bones, as before; it still puffs on the music's beat
+  during Island Breeze.
+
+---
+
 ## V1.0.1 — 2026-11-05
 
 **Fixes**

@@ -1,6 +1,6 @@
 {
 	"_about": "Meshes exported from the place (EditableMesh -> OBJ, V flipped for OBJ) on 2026-11-03, to re-upload them as the owner's group. file -> the template's MeshPart, its old mesh id (owner's user account) and its Size.",
-	"GoldenGuppy": { "path": "ServerStorage.Assets.Fish.GoldenGuppy.Mesh", "oldMeshId": 129484041476253 },
+	"GoldenGuppy": { "path": "ServerStorage.Assets.Fish.GoldenGuppy.Mesh", "oldMeshId": 129484041476253, "staticMeshId": 122699620875505, "rigModelId": 93278084123107, "rigMeshId": 75509197673995 },
 	"BlueNeon": { "path": "ServerStorage.Assets.Fish.BlueNeon.Mesh", "oldMeshId": 109583695393358 },
 	"RedTetra": { "path": "ServerStorage.Assets.Fish.RedTetra.Mesh", "oldMeshId": 110391004970071 },
 	"Clownfish": { "path": "ServerStorage.Assets.Fish.Clownfish.Mesh", "oldMeshId": 86308496478464 },

@@ -4,6 +4,7 @@ import { Lifecycle } from "shared/framework";
 import { TAGS } from "shared/tags";
 import { HungerState } from "shared/types/fish";
 import { FocusController } from "./FocusController";
+import { hasBoneRig } from "./FishRigController";
 
 // Each animated mesh is updated every FRAMES_PER_UPDATE frames (≈30 Hz at 60 fps), the
 // meshes taking turns so the cost is spread over consecutive frames
@@ -131,6 +132,7 @@ interface TrackedFish {
 	current?: Variant;
 	attaching: boolean; // a rig build is in flight
 	sway?: Sway; // set up the first time it sways (local fish only)
+	bones: boolean; // a skinned mesh swimming with its bones (FishRigController): only its beat puffs are done here
 	swaying: boolean;
 	janitor: Janitor;
 }
@@ -163,6 +165,8 @@ function findAquarium(fish: Instance): Model | undefined {
  * otherwise those of the tanks near the camera and on screen, nearest first, the most common species
  * first, as long as they fit the triangle budget (and MAX_ANIMATED_SPECIES). The other visible fish sway
  * as a whole (see updateSways); the rest keep their static mesh (still moved by FishRenderController).
+ * Species converted to bones (template attribute Rig = "Bones") swim in FishRigController instead: here they only
+ * puff on the beat.
  */
 class FishAnimationControllerSingleton implements Lifecycle {
 	private rigs = new Map<string, Rig | "loading">(); // by MeshId
@@ -250,6 +254,7 @@ class FishAnimationControllerSingleton implements Lifecycle {
 				wanted: false,
 				attaching: false,
 				swaying: false,
+				bones: hasBoneRig(model),
 				janitor,
 			};
 			this.fishes.set(model, fish);
@@ -315,7 +320,7 @@ class FishAnimationControllerSingleton implements Lifecycle {
 
 		const byAquarium = new Map<Model, TrackedFish[]>();
 		for (const [, fish] of this.fishes) {
-			if (!fish) continue;
+			if (!fish || fish.bones) continue;
 			fish.visible = false; // tanks out of sight, or fish outside any tank
 			fish.wanted = false;
 			if (!fish.aquarium) continue;
@@ -361,7 +366,7 @@ class FishAnimationControllerSingleton implements Lifecycle {
 		// Detach first: the rigs they leave can make room for the new ones
 		for (const [, fish] of this.fishes) if (fish && !fish.wanted && fish.rig) this.detach(fish, true);
 		for (const [, fish] of this.fishes) {
-			if (!fish) continue;
+			if (!fish || fish.bones) continue;
 			if (fish.wanted && !fish.rig) this.attach(fish);
 			this.setSwaying(fish, fish.visible && !fish.rig);
 		}

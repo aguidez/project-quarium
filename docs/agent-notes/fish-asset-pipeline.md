@@ -48,6 +48,10 @@ re-upload them as the group. What works (V0.60.5, the 24 animated meshes):
    part.MeshId))`, write `v` / `vt` (**1 - V**) / `vn` / `f v/vt/vn` lines (ids mapped to 1-based indices) and POST
    them to `http://127.0.0.1:34999/<Name>.obj` in ~500 KB pieces (header `x-append: 1` after the first). Windows
    file names ignore case: two meshes named Lanternfish / LanternFish overwrite each other, rename one.
+   **Since 2026-11 (Studio MCP permissions)**: HTTP from an MCP `execute_luau` is refused ("domain 127.0.0.1:34999 is
+   not in the Assistant HTTP allowlist") until the owner adds the address in Studio's **Assistant Settings → MCP
+   Permissions → Connect to the internet → HTTP domain allow list** (per place; the `Network` toggle alone is not
+   enough). Studio's own guide: the Studio MCP skill `rbx-permissions`. Never get around it with a playtest script.
 2. **Upload**: `npm run group-mesh-upload design/meshes/<Name>.obj ...` (OBJ to GLB pre-rotated 180° around Y, upload as
    a group Model, grants to DOT_Pinpin and to the universe with dependencies); it prints { name: modelId }.
 3. **Swap** (Edit): `game:GetObjects("rbxassetid://<modelId>")[1]` holds one MeshPart with the group's mesh; check it

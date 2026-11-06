@@ -34,6 +34,8 @@ sourcemap.json
 # ---- Tool scratch output (re-creatable) ----
 /tools/icons/
 /tools/textures/
+/tools/blender/vendor/
+/design/rigs/work/
 /design/ui/redesign-v2.json
 /design/ui/admin-panel.json
 /design/ui/passes/_sheet.png

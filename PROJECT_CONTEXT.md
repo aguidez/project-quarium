@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-05 (V1.0.1: coins land in front of the decor that would hide them).
+> Last updated: 2026-11-06 (V1.1.0: the Golden Guppy swims with Blender bones, FishRigController; the others still EditableMesh).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -54,7 +54,7 @@ How to add content: `docs/agent-notes/content-recipes.md`. **`ROADMAP_V1.1.md`**
 | Sync | **Rojo 7.7.1** (aftman). `default.project.json` maps `out/server` → ServerScriptService.TS, `out/shared` → ReplicatedStorage.TS, `out/client` → StarterPlayerScripts.TS, `out/first` → ReplicatedFirst.TS (loading screen); it also sets StarterGui `ScreenOrientation = LandscapeSensor` (mobile locked to landscape, set again on PlayerGui by the loading screen). Never edit those scripts in Studio. A change to `default.project.json` needs `rojo serve` restarted (and the plugin reconnected) |
 | Packages | `@rbxts/react` + `react-roblox` (UI), `@rbxts/t` (runtime validation), `@rbxts/janitor` (cleanup), `@rbxts/services`, `@rbxts/profile-store` (player saves, see §3.1) |
 | Build / check | `npx rbxtsc` after every change; it must report zero errors |
-| Workspace | Windows or macOS, set up from `SETUP.md`; `npm run doctor` checks a machine. Machine-specific values (install paths, GPU flags, API keys) only in the git-ignored `workspace.local.json` (via `tools/local-config.js`), never in committed files; scripts are cross-platform Node. npm scripts: `build`, `watch`, `serve` (rojo serve), `sim` (economy simulator), `stats` (real players), `share-assets`, `group-mesh-upload`, `doctor`. `jimp` 0.22 and `@resvg/resvg-js` 2.6 (SVG → PNG without FigCraft) are devDependencies for the image tools |
+| Workspace | Windows or macOS, set up from `SETUP.md`; `npm run doctor` checks a machine. Machine-specific values (install paths, GPU flags, API keys) only in the git-ignored `workspace.local.json` (via `tools/local-config.js`), never in committed files; scripts are cross-platform Node. npm scripts: `build`, `watch`, `serve` (rojo serve), `sim` (economy simulator), `stats` (real players), `share-assets`, `group-mesh-upload`, `blender-setup` (installs the Blender MCP), `doctor`. `jimp` 0.22 and `@resvg/resvg-js` 2.6 (SVG → PNG without FigCraft) are devDependencies for the image tools |
 | Framework | `shared/framework.ts`: singletons implementing `Lifecycle { onInit (sync), onStart (task.spawn) }`, registered in order in `server/main.server.ts` / `client/main.client.ts` |
 | Server authority | The client only sends **intents**. The server validates each one with `t`, reads prices and odds from shared config, and owns money, inventory, timers and every gameplay state. Even fish positions are server-computed (swim segments): clients only render them, never report them |
 | World ↔ code | Studio models are found by **CollectionService tags** (`shared/tags.ts`) and attributes, never by deep paths. Templates live in `ServerStorage.Assets` in the place file, which Rojo does not manage: **remind the user to save the place** after MCP edits |
@@ -75,9 +75,10 @@ ProjectQuarium/
 ├─ BALANCE.md                The balance: expected progression, live numbers, design rules, V1 design, history
 ├─ ROADMAP_V1.1.md           After V1: the animation revamp (Blender skeletons instead of EditableMesh), steps A0–A8
 ├─ default.project.json      Rojo mapping (see §1)
-├─ .mcp.json                 Project MCP servers (Roblox_Studio, FigCraft), started by `node tools/mcp/*.js` on any OS
+├─ .mcp.json                 Project MCP servers (Roblox_Studio, FigCraft, Blender), started by `node tools/mcp/*.js` on any OS
 ├─ workspace.local.example.json  Template of workspace.local.json (git-ignored): FigCraft folder / port, wgpu backend,
-│                            Studio MCP and Roblox fonts overrides, Open Cloud key; read by tools/local-config.js
+│                            Blender path / MCP port / uv, Studio MCP and Roblox fonts overrides, Open Cloud key;
+│                            read by tools/local-config.js
 ├─ .gitattributes            LF everywhere (CRLF for .bat/.cmd), binaries marked; .gitignore keeps local config out
 ├─ docs/agent-notes/         The agent's shared working knowledge (owner preferences, asset pipeline, Studio MCP
 │                            testing, lobby decor, moderation, player stats), index in its README
@@ -138,9 +139,17 @@ ProjectQuarium/
 │                            tools/loading-art.js; ids in src/first/LoadingScreen.client.ts
 ├─ tools/mcp/                MCP launchers (Node, any OS; nothing on stdout): figcraft.js starts the FigCraft app with
 │                            its control port if needed then `figcraft-cli mcp --attach`; roblox-studio.js finds Studio's
-│                            MCP server (Windows mcp.bat / macOS StudioMCP / override); run-stdio.js shared stdio pass-through
+│                            MCP server (Windows mcp.bat / macOS StudioMCP / override); blender.js starts Blender if its
+│                            add-on's bridge (127.0.0.1:9876) isn't listening, then the Blender Lab MCP server with uv;
+│                            run-stdio.js shared stdio pass-through
+├─ tools/blender/            V1.1 animations (agent note blender-pipeline): blender-config.js (pinned Blender 5.2 LTS and
+│                            Blender Lab MCP 1.0.3 + SHA-256, paths), setup.js (`npm run blender-setup`, Blender closed:
+│                            downloads, installs + enables the add-on, online access, uv sync); vendor/ git-ignored;
+│                            rig_fish.py (auto-rig: spine chain + fins + jaw, V1's weight rules), preview_swim.py
+│                            (V1's beats as a bone loop, EEVEE frames), frames-to-gif.js, rgba-to-png.js (texture pull)
+├─ design/rigs/work/        Rig work files (exported textures, .blend, render frames): git-ignored
 ├─ tools/local-config.js     Reads workspace.local.json (+ UPPER_SNAKE env overrides), finds the Roblox fonts folder
-├─ tools/check-setup.js      `npm run doctor`: checks Node, packages, Rojo version, Studio MCP, fonts, FigCraft
+├─ tools/check-setup.js      `npm run doctor`: checks Node, packages, Rojo version, Studio MCP, fonts, FigCraft, Blender, uv, Blender MCP
 ├─ tools/economy-sim.js      Monte Carlo balance simulator (`npm run sim`): mirrors the economy config (keep it in sync);
 │                            reports each step's median / p10 / p90, species discovery, Ocean milestones, income and Ocean
 │                            Points per checkpoint. Options: `--players n`, JSON overrides (coinBoost / oceanBoost /
@@ -156,7 +165,8 @@ ProjectQuarium/
 │                            an animated mesh)
 ├─ tools/group-mesh-upload.js  `npm run group-mesh-upload <file.obj...>`: OBJ to GLB, uploaded as the group's Model
 │                            (group key), granted to the owner's account and the universe; prints the model ids
-├─ tools/obj-receiver.js     Local receiver of the OBJ files a Studio script exports (agent note fish-asset-pipeline)
+├─ tools/obj-receiver.js     Local receiver of the OBJ (and .b64 texture) files a Studio script exports, on
+│                            127.0.0.1:34999, the address in Studio's MCP HTTP allowlist (agent note fish-asset-pipeline)
 ├─ tools/player-stats.js     Real players vs the simulator (`npm run stats`): reads every profile of PlayerData_v1 through
 │                            Open Cloud (read-only key in workspace.local.json; universe 10774507209), prints attendance,
 │                            play time at each milestone (vs BALANCE.md §2), coin pickup share, dailies / weeklies
@@ -471,6 +481,11 @@ ProjectQuarium/
       │  ├─ FishAnimationController  EditableMesh swim deformation shared per species (also the Swordfish companion), camera
       │  │                   LOD (own tank in 2.5D; else tanks on screen within 110 studs), rigs planned in triangles
       │  │                   (§4 EditableMesh budget), visible fish without a rig sway on a local Weld; beat puffs
+      │  │                   (bone fish too); skips the fish with a bone rig
+      │  ├─ FishRigController  Bone swim (V1.1) of the fish whose template has `Rig = "Bones"`: turns the bones of
+      │  │                   their skinned `Mesh` (rig_fish.py names: Head, Spine1/2, Tail1/2, FinTop/Bottom, FinL/R, Jaw)
+      │  │                   with V1's beats, each fish at its own phase; lazy while Weak / Asleep / Dead; every frame
+      │  │                   within 60 studs, every 2nd to 110, every 4th beyond, frozen off screen; no budget
       │  ├─ CompanionAnimationController  Local wobble of the Water Hen (its own copy of the Mesh placed on the server-moved
       │  │                   Body every frame) and the Jellyfish's bell pulse
       │  ├─ PelicanChargesController  Charge gauge above the local player's on-demand Pelican / Jellyfish (BillboardGui): one
@@ -617,6 +632,11 @@ ProjectQuarium/
 - **Template layout** (every model below): invisible root (`Body`; `Hitbox` x1.25 for coins) + welded `Mesh`
   MeshPart, head / front toward −Z, texture in a **SurfaceAppearance** (tinted by its `Color` when needed), built at
   the right size (never `ScaleTo`: CompanionService tweens back to scale 1). Generated meshes, ≤ ~4k triangles.
+  **Bone fish** (V1.1, ROADMAP_V1.1): model attribute `Rig = "Bones"`; its `Mesh` is the skinned MeshPart of a Blender
+  rig (tools/blender/, agent note blender-pipeline: export → rig → GLB → Open Cloud as the group), the 10 Bones under
+  it, same Size / CFrame / SurfaceAppearance / WeldConstraint to `Body` as the static mesh it replaced. `ScaleTo`
+  scales the bones too; a change of `Size` alone (beat puff) leaves them, fine for a short puff. Converted so far:
+  GoldenGuppy (Model 93278084123107, mesh 75509197673995; the static one was 122699620875505).
 - **`ServerStorage.Assets`**:
   - `Fish/` (tag `FishTemplate`, attr `FishType`): the 18 species + `FrenchFish`, `AlienFish` and `Sugar` (no
     FishVariants).
@@ -985,8 +1005,9 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   (`INITIAL_TRIANGLE_BUDGET` 72k, `MAX_ANIMATED_SPECIES` 6 as a CPU cap), builds them one at a time under one lock,
   lowers its budget to what is built the first time the device refuses (local attribute `SwimTriangleBudget`), frees
   idle rigs when another species needs the room, and visible fish left without a rig **sway** (yaw + a little roll on
-  a local Weld). Simulated phone (~30k free): every visible fish animated or swaying. The real fix is
-  `ROADMAP_V1.1.md` (bones). Keep new fish meshes ≤ ~4k triangles, textures 512².
+  a local Weld). Simulated phone (~30k free): every visible fish animated or swaying. The fix is under way
+  (`ROADMAP_V1.1.md`): a bone fish (FishRigController) takes no EditableMesh budget at all (180 Guppies × 10 bones:
+  ~1 ms of script a frame, measured in a playtest on the Mac). Keep new fish meshes ≤ ~4k triangles, textures 512².
 - **Many species** (goal: dozens): server, network and saves only pay per fish; templates load on demand
   (server/fishAssets), so clients only download the species present. Production (mesh + icon + config + balance per
   species) is the real limit: colour variants of a mesh cost almost nothing.

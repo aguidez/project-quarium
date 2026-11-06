@@ -1,5 +1,5 @@
 // Checks that this machine has what the workspace needs (SETUP.md): Node, the npm packages, Rojo at the version
-// of aftman.toml, the machine config and the two MCP servers. Run: npm run doctor
+// of aftman.toml, the machine config and the MCP servers (Studio, FigCraft, Blender). Run: npm run doctor
 const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
@@ -91,6 +91,27 @@ const figDir = config.get("figcraftDir");
 const figCli = config.get("figcraftCli", figDir && path.join(figDir, `figcraft-cli${exe}`));
 if (figCli && fs.existsSync(figCli)) report(true, `FigCraft CLI (${figCli})`);
 else warn("FigCraft not configured (optional, UI design only)", "set figcraftDir in workspace.local.json");
+
+// Blender + the Blender Lab MCP (V1.1 animations: tools/blender/, npm run blender-setup)
+const bl = require("./blender/blender-config");
+const blender = bl.blenderPath();
+if (fs.existsSync(blender)) {
+	const version = ((run(blender, ["--version"]) || "").match(/Blender \d+\.\d+\S*( LTS)?/) || [])[0];
+	report(
+		!!version && version.includes(` ${bl.BLENDER_VERSION}`),
+		`${version || "Blender (version unreadable)"} (project pins ${bl.BLENDER_VERSION} LTS)`,
+		`install Blender ${bl.BLENDER_VERSION} LTS from https://www.blender.org/download/`,
+	);
+	const uv = run(bl.uvPath(), ["--version"]);
+	report(!!uv, `${uv || "uv"} (runs the Blender MCP server)`, "install uv: https://docs.astral.sh/uv/ (macOS: brew install uv)");
+	report(
+		fs.existsSync(path.join(bl.SERVER_DIR, ".venv")),
+		`Blender Lab MCP ${bl.MCP_VERSION} installed`,
+		"close Blender, then run: npm run blender-setup",
+	);
+} else {
+	warn(`Blender not found (${blender}; only needed for the V1.1 animations)`, "install Blender or set blenderPath in workspace.local.json");
+}
 
 // Open Cloud key (optional: the real players' statistics, npm run stats)
 if (config.get("robloxOpenCloudKey")) report(true, "Open Cloud key set (npm run stats)");

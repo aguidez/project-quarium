@@ -3,8 +3,7 @@
 > The animation revamp: every fish, companion, event guest and NPC moves through a **skeleton made in Blender**
 > instead of the EditableMesh deformation of V1. It starts **once V1 is complete** (the owner's calibration with real players done). Tick the
 > boxes as tasks ship, and move what a step ships into `PROJECT_CONTEXT.md` / `RELEASE_NOTES.md` as usual.
-> Last updated: 2026-11-01 (A0 stopgap shipped in V0.45; Blender driven by the agent through an MCP server, A1; first version, decided by the
-> owner: V1 first, then this whole roadmap).
+> Last updated: 2026-11-06 (A1 done on the Mac; A2 GO; A4: FishRigController and the Golden Guppy on bones, V1.1.0).
 
 **V1.1 in one line**: Blender joins the toolchain (Windows and Mac) **as an MCP server**, like Roblox Studio and
 FigCraft, so the agent drives it itself; a script rigs every model by itself, the game
@@ -70,46 +69,55 @@ Sizes: S = a session, M = a few sessions, L = a big chunk. Owner actions are mar
 
 ### A1 — Blender in the project, as an MCP server (S–M)
 
-- [ ] **Owner**: install Blender (pinned LTS version, same on both machines) on the Windows PC and the Mac.
-- [ ] `workspace.local.json` key `blenderPath` (Windows `C:/Program Files/Blender Foundation/Blender 4.x/blender.exe`,
+- [ ] **Owner**: install Blender (pinned LTS version, same on both machines) on the Windows PC and the Mac. Pinned:
+      **5.2 LTS**; Mac done (5.2.3, 2026-11-06), Windows PC to do.
+- [x] `workspace.local.json` key `blenderPath` (Windows `C:/Program Files/Blender Foundation/Blender 5.2/blender.exe`,
       macOS `/Applications/Blender.app/Contents/MacOS/Blender`), documented in `workspace.local.example.json` and
       SETUP.md (both OS); `tools/check-setup.js` checks it and the version.
-- [ ] **Choose the Blender MCP server**, in this order: (1) an official Blender MCP if the Blender Foundation ships
+- [x] **Choose the Blender MCP server** (2026-11-06: the official **Blender Lab MCP 1.0.3**, Blender 5.1+, add-on
+      bridge + Python server run by `uv`; its code reviewed: local only, no asset features; agent note blender-pipeline), in this order: (1) an official Blender MCP if the Blender Foundation ships
       one (to verify on blender.org: only a reseller page claims it); (2) the community `ahujasid/blender-mcp` (a
       Blender add-on opening a local socket + a Python MCP server run by `uvx`: adds Python / `uv` as prerequisites);
       (3) our own minimal one (a small add-on in `tools/blender/addon/` + a Node MCP server: run a versioned script,
       scene / object info, viewport screenshot, render a preview, import / export). Criteria: works on Windows and
       macOS, runs our versioned scripts, returns images the agent can look at, nothing else exposed.
-- [ ] **Turn off every third-party asset feature** of the chosen server (Poly Haven, Sketchfab, Hyper3D / AI
+- [x] **Turn off every third-party asset feature** of the chosen server (the official one has none) (Poly Haven, Sketchfab, Hyper3D / AI
       generation...): no outside asset ever enters a model we upload (licences, CLAUDE.md §7). Local only
       (127.0.0.1).
-- [ ] `tools/mcp/blender.js` (cross-platform Node, the FigCraft launcher's pattern): starts Blender with the add-on's
+- [x] `tools/mcp/blender.js` (cross-platform Node, the FigCraft launcher's pattern): starts Blender with the add-on's
       server if its port isn't listening (`blenderPath`, port in `workspace.local.json` key `blenderMcpPort`), waits
       for it, then runs the MCP server on stdio; the `Blender` entry in `.mcp.json`. The add-on is installed and
       enabled by a script, not by hand.
 - [ ] `tools/blender/`: the versioned Python scripts (rig, preview render, export) that the MCP runs, and a headless
       runner (`npm run blender -- <script> <args>`, `--background --python`) for batches without a window.
-- [ ] `.gitignore`: the work folder of exported / rigged meshes (`design/rigs/work/`); only the scripts, the
+- [x] `.gitignore`: the work folder of exported / rigged meshes (`design/rigs/work/`); only the scripts, the
       settings per species and the final small files are committed.
-- [ ] Check: from a fresh session, the agent opens Blender through the MCP, imports a test mesh, takes a screenshot,
+- [ ] Check (Mac done 2026-11-06: from a Claude Code session, Blender opened by the launcher, a test OBJ imported
+      with Blender's OBJ importer, window screenshot seen; the Windows PC to do): from a fresh session, the agent opens Blender through the MCP, imports a test mesh, takes a screenshot,
       on both machines. `npm run doctor` checks Blender, the add-on and the MCP prerequisites.
-- [ ] Agent note `docs/agent-notes/blender-pipeline.md` (MCP tools, quirks, the batch checklist) + its index line.
+- [x] Agent note `docs/agent-notes/blender-pipeline.md` (MCP tools, quirks, the batch checklist) + its index line.
 
 ### A2 — Proof of concept: the Golden Guppy end to end (M, go / no-go)
 
 The whole pipeline on one fish, to settle the open questions (§5) before converting anything else.
 
-- [ ] **Export from Studio**: read the template's mesh with an EditableMesh in Edit (positions, normals, UVs,
+- [x] **Export from Studio** (2026-11-06: `design/meshes/GoldenGuppy.obj`, 1,586 vertices / 2,484 triangles, + its texture
+      pulled at 512 into `design/rigs/work/`; Studio's MCP HTTP allowlist must hold 127.0.0.1:34999): read the template's mesh with an EditableMesh in Edit (positions, normals, UVs,
       faces; no budget in Edit) and POST it to a scratchpad Node server (same pattern as the texture pull,
       HttpEnabled on only during the call), written as `.obj` / `.glb` in the work folder. Texture pulled at 512 for
       the Blender preview only.
-- [ ] **Auto-rig** (`tools/blender/rig_fish.py`): armature along the fish's Z (head toward −Z): a spine chain of 4–6
+- [x] **Auto-rig** (`tools/blender/rig_fish.py`; Golden Guppy 2026-11-06: 10 bones, every vertex weighted, ≤ 3
+      influences): armature along the fish's Z (head toward −Z): a spine chain of 4–6
       bones (root → tail tip), 2 pectoral bones, 1 dorsal, 1 jaw; weights from the vertex positions (V1's rules),
       smoothed, max 4 influences per vertex. Settings per species in `design/rigs/<FishType>.json` (bone count,
       fin zones), defaults for an ordinary fish.
-- [ ] **Preview**: through the MCP, Blender renders a short swim loop as PNGs (local, never uploaded); the agent
+- [x] **Preview** (`tools/blender/preview_swim.py` + `frames-to-gif.js`; Golden Guppy approved by the owner on
+      2026-11-06, `design/previews/golden-guppy-bones-swim.gif`): through the MCP, Blender renders a short swim loop as PNGs (local, never uploaded); the agent
       checks them (weights bleeding into the head, fins tearing) before the owner sees them.
-- [ ] **Import into Roblox**: FBX or glTF through the Studio 3D Importer (**Owner**, a few clicks), or through Open
+- [x] **Import into Roblox** (2026-11-06, no owner click: `tools/blender/export_fish.py` → GLB without material /
+      image, uploaded as the group by the Studio MCP's `open_cloud_invoke` → Model **93278084123107**, moderation
+      Approved at once; the MeshPart arrives `HasSkinnedMesh`, same MeshSize, the 10 Bones under it, nose at −Z; resized
+      to the template's Size the bones follow; the template's SurfaceAppearance applies unchanged): FBX or glTF through the Studio 3D Importer (**Owner**, a few clicks), or through Open
       Cloud (see A3); the new MeshPart keeps its Bones. Check: size, orientation (head −Z), UVs (the existing
       SurfaceAppearance and the 3 variant looks apply unchanged).
 - [ ] **Drive it**: (a) procedural, Luau sets `Bone.Transform` (V1's sine wave, per-fish phase); (b) an animation
@@ -117,8 +125,16 @@ The whole pipeline on one fish, to settle the open questions (§5) before conver
       emulator) and pick the base mode (expected: procedural swim + clips for the special moves).
 - [ ] Check in the places that show fish: tank (2.5D view), lobby, the hatch reveal and the Fish Index (ViewportFrame:
       does it render the bones? a WorldModel may be needed), beat puffs (K-pop), weak tint, growth stages.
-- [ ] **Go / no-go** written here: owner time per species, upload route, drive mode, numbers. A "no-go" falls back to
-      the V1 stopgap of A0 plus lighter meshes.
+- [x] **Go / no-go** (2026-11-06, Golden Guppy): **GO**.
+      - Owner time per species: none at the mesh level (export, rig, preview, export, upload and test all run by the
+        agent); the owner only judges the preview GIF and the result in the game.
+      - Upload route: Open Cloud through the Studio MCP (`open_cloud_invoke`), GLB without material, as the group;
+        moderation Approved at once. No Studio 3D Importer clicks. (A3 is mostly settled.)
+      - Drive mode: **procedural** `Bone.Transform` from Luau (0.32 ms Edit / 1.02 ms playtest for 180 fish × 10 bones,
+        root CFrame included); Animator clips kept for later special moves if ever needed.
+      - Rendering: no visible render-CPU cost for 180 rigged fish on the Mac, no jitter; GPU and phone to measure in A4
+        with real players' devices (an agent-driven playtest can't read them).
+      - Kept as is: the template's SurfaceAppearance (and the variant looks), its Size (the bones follow).
 
 ### A3 — Upload route (S)
 
@@ -130,16 +146,19 @@ The whole pipeline on one fish, to settle the open questions (§5) before conver
 
 ### A4 — The runtime: bones in the game (M)
 
-- [ ] `FishRigController` (client, registered in main.client.ts): finds the bones of a fish built by
+- [x] `FishRigController` (client, registered in main.client.ts; V1.1.0): finds the bones of a fish built by
       FishRenderController, animates them (swim wave, fins, mouth) with a per-fish phase and speed; reads the same
       states as today (Hunger Weak / Dead → lazy swim, swim speed from the server's segments).
-- [ ] **LOD without a budget**: full rate for the watched tank, lower rate far away, frozen off screen; no species
+- [x] **LOD without a budget** (every frame ≤ 60 studs, every 2nd ≤ 110, every 4th beyond, frozen off screen; the
+      6 tanks × 25 fish view still to measure once more species are converted): full rate for the watched tank, lower rate far away, frozen off screen; no species
       cap anymore. Measure the 6 tanks x 25 fish view.
-- [ ] Templates: `Assets.Fish.<Type>` with a skinned `Mesh` and attribute `Rig = "Bones"`; FishAnimationController
+- [x] Templates: `Assets.Fish.<Type>` with a skinned `Mesh` and attribute `Rig = "Bones"` (GoldenGuppy 2026-11-06); FishAnimationController
       skips them, the others keep the EditableMesh path. `server/fishAssets` replication unchanged.
-- [ ] Beat puff, weak tint, variant SurfaceAppearance swap, growth: unchanged or adapted (a puff can become a bone
+- [x] Beat puff, weak tint, variant SurfaceAppearance swap, growth (ScaleTo scales the bones; the puff's Size
+      change leaves them, checked visually: fine for a short puff): unchanged or adapted (a puff can become a bone
       scale).
-- [ ] Ship the Golden Guppy alone in a patch (first release of the system).
+- [x] Ship the Golden Guppy alone in a patch (first release of the system): **V1.1.0**, published by the owner and
+      checked on a phone (2026-11-06: "impeccable, même sur le tel").
 
 ### A5 — Convert every species (L, in batches)
 
@@ -208,10 +227,20 @@ Each one gets a rig made by its own Blender script (not the fish one) and replac
 
 ## 5. Open questions (answered by A2)
 
-- Studio 3D Importer vs Open Cloud for skinned models: can the whole route run without the owner's clicks?
-- Does a ViewportFrame (reveal, Fish Index) render skinned deformations, with or without a WorldModel?
-- Procedural `Bone.Transform` cost for ~180 fish x ~10 bones in Luau, vs Animator clips run by the engine.
+- Studio 3D Importer vs Open Cloud for skinned models: can the whole route run without the owner's clicks? (Lead:
+  the Studio MCP now has `open_cloud_invoke`, which uploads FBX / glTF through Open Cloud, and its `rbx-import-asset`
+  skill; it needs `asset:read` / `asset:write` and an approved upload folder in MCP Permissions.)
+- Does a ViewportFrame (reveal, Fish Index) render skinned deformations, with or without a WorldModel? (Answered
+  2026-11-06: only inside a **WorldModel**; without one the fish stays straight. Today's reveal and Index show sticker
+  images, so nothing depends on it; only A6's "fish swims in its card" would need a WorldModel.)
+- Procedural `Bone.Transform` cost for ~180 fish x ~10 bones in Luau, vs Animator clips run by the engine. (Measured
+  2026-11-06, Edit on the Mac: setting 10 `Bone.Transform` on 180 Guppies takes **0.32 ms** a frame, against V1's 6.9 ms of
+  scripts: the procedural swim is the expected base mode; render cost still to measure in a playtest.)
 - Bone animation on fish whose root is anchored and moved by CFrame every frame (FishRenderController): any jitter?
-- glTF or FBX out of Blender: which one keeps the UVs and the bone weights through the Roblox importer.
+  (Playtest 2026-11-06, Mac: 180 rigged Guppies, root CFrame + 10 bones set every RenderStepped: our script 1.02 ms a
+  frame; render CPU 4.8–6.5 ms with them vs 5.8 ms without, inside the noise; Studio unfocused caps the frame at
+  15 fps, so frame time can't be read from an agent-driven playtest. Jitter: none, seen by the owner.)
+- glTF or FBX out of Blender: which one keeps the UVs and the bone weights through the Roblox importer. (The UVs
+  survive the Studio → OBJ → Blender leg: the Guppy shows its texture unchanged.)
 - Blender version pinned on both machines; headless rendering on the Mac (Metal) and the PC.
 - (A1) Which Blender MCP server: official, community or ours; how big are the meshes and images it can pass back.

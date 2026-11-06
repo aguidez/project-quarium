@@ -7,6 +7,10 @@
     "FigCraft": {
       "command": "node",
       "args": ["tools/mcp/figcraft.js"]
+    },
+    "Blender": {
+      "command": "node",
+      "args": ["tools/mcp/blender.js"]
     }
   }
 }

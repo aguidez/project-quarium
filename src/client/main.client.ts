@@ -10,6 +10,7 @@ import { IncomePlaqueController } from "./controllers/IncomePlaqueController";
 import { FishAnimationController } from "./controllers/FishAnimationController";
 import { FishIndicatorController } from "./controllers/FishIndicatorController";
 import { FishRenderController } from "./controllers/FishRenderController";
+import { FishRigController } from "./controllers/FishRigController";
 import { FocusController } from "./controllers/FocusController";
 import { HudController } from "./controllers/HudController";
 import { IncomePopupController } from "./controllers/IncomePopupController";
@@ -32,6 +33,7 @@ bootstrap([
 	FishRenderController,
 	FishIndicatorController,
 	FishAnimationController,
+	FishRigController,
 	IncomePopupController,
 	AudioController,
 	OnboardingController,

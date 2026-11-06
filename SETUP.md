@@ -15,6 +15,8 @@ simulators, but not test in Studio). Run `npm run doctor` at the end: it checks 
 | **Rojo Studio plugin** | matching Rojo 7.7 | connects Studio to `rojo serve` | `rojo plugin install`, or the Creator Store |
 | **VS Code** | latest | editor; accept the recommended extensions (roblox-ts, ESLint, Rojo, Claude Code) | https://code.visualstudio.com |
 | **Claude Code** | latest | the AI agent (CLI or VS Code extension) | https://claude.com/claude-code |
+| **Blender** | 5.2 LTS (pinned, the same on every machine) | *V1.1 animations*: rigs the meshes, driven by the agent through the official Blender Lab MCP | https://www.blender.org/download/ (macOS: the Apple Silicon `.dmg`, into `/Applications`; Windows: the installer, default folder). Not `brew install --cask blender`: it installs the newest version, not the LTS |
+| **uv** | latest | *V1.1 animations*: runs the Blender MCP server (Python; uv fetches its own Python 3.10+) | macOS: `brew install uv`; Windows: `winget install astral-sh.uv` (or https://docs.astral.sh/uv/) |
 | **FigCraft** | 0.11–0.12 | *optional*: UI design (`design/ui/*.figcraft`, FigCraft MCP); needs **both** the app and `figcraft-cli` (the MCP attaches to the running app) | Windows: portable build (both side by side), unzip it anywhere outside the repo. macOS: the `.dmg` holds the app only, the CLI is a separate download (e.g. `/Applications/FigCraft CLI/figcraft-cli`) |
 
 Accounts: the **Roblox account that owns the game** (or Team Create access to it) to open the place and publish.
@@ -45,6 +47,9 @@ cp workspace.local.example.json workspace.local.json      # Windows PowerShell: 
 | `figcraftApp`, `figcraftCli` | the FigCraft executables have other names / places (macOS: always) | exact paths, e.g. `/Applications/FigCraft.app/Contents/MacOS/FigCraft` and `/Applications/FigCraft CLI/figcraft-cli` |
 | `figcraftPort` | port 7979 is taken | the FigCraft control port |
 | `wgpuBackend` | FigCraft crashes at startup ("Shader translation error") | `"vulkan"` (the old Windows PC needed it), `"dx12"`, `"metal"`... or remove the key |
+| `blenderPath` | Blender isn't in its default folder (`/Applications/Blender.app`, or `C:/Program Files/Blender Foundation/Blender 5.2/`) | the Blender executable: `/Applications/Blender.app/Contents/MacOS/Blender` (macOS), `.../blender.exe` (Windows) |
+| `blenderMcpPort` | port 9876 is taken | the port of the Blender add-on's bridge (re-run `npm run blender-setup` after changing it) |
+| `uvPath` | `uv` isn't on the PATH | the uv executable |
 | `robloxStudioMcp` | the Studio MCP server isn't found automatically | path of `StudioMCP` (macOS) or `mcp.bat` / `StudioMCP.exe` (Windows) |
 | `robloxFontsDir` | the Roblox fonts aren't found (FigCraft V2 build script) | Studio's `content/fonts` folder |
 | `robloxOpenCloudKey` | you read the real players' statistics (`npm run stats`) | an Open Cloud API key, see below. **Secret**: only in this file, never in git |
@@ -74,6 +79,14 @@ group, so it needs a key created with the **group** picked as the creator on the
 `npm run stats`. Copy it into `robloxGroupOpenCloudKey`. A personal key can't create assets as a group ("unauthorized
 to create an Model asset as Group").
 
+**Blender MCP (V1.1 animations, optional otherwise).** With Blender **closed**, run `npm run blender-setup`
+(`tools/blender/setup.js`): it downloads the official Blender Lab MCP release pinned in `tools/blender/blender-config.js`
+(add-on + MCP server, SHA-256 checked) into `tools/blender/vendor/` (git-ignored), installs and enables the add-on,
+turns on Blender's *Allow Online Access* (the add-on refuses to open its socket without it; it only listens on
+127.0.0.1), binds the bridge to `blenderMcpPort`, and installs the server's Python packages with uv. Blender must be
+closed because a running Blender rewrites its preferences when it quits. Run it again after a Blender or MCP version
+change. The Blender MCP launcher then starts Blender by itself when Claude Code needs it.
+
 ## 4. Roblox Studio
 
 1. Open the game's place **from Roblox** (File > Open from Roblox / the Creator Dashboard): the map, the 3D templates
@@ -88,7 +101,7 @@ to create an Model asset as Group").
 
 - Open the repo folder in VS Code (or run `claude` in it). The project's MCP servers come from `.mcp.json`; they start
   through `node tools/mcp/*.js`, which work on every OS and read `workspace.local.json`. Approve them on first launch,
-  then check with `/mcp` that **Roblox_Studio** (Studio open) and **FigCraft** are connected.
+  then check with `/mcp` that **Roblox_Studio** (Studio open), **FigCraft** and **Blender** (after `npm run blender-setup`) are connected.
 - Rules and context the agent reads: `CLAUDE.md`, `PROJECT_CONTEXT.md`, `BALANCE.md`, `ROADMAP_V1.1.md`,
   `RELEASE_NOTES.md` and the notes in `docs/agent-notes/` (the working knowledge that used to live in the old
   machine's Claude memory).
@@ -98,7 +111,8 @@ to create an Model asset as Group").
 ## 6. Check
 
 ```sh
-npm run doctor        # Node, packages, Rojo version, Studio MCP, fonts, FigCraft
+npm run doctor        # Node, packages, Rojo version, Studio MCP, fonts, FigCraft, Blender + uv + Blender MCP
+npm run blender-setup # (Blender closed) installs the Blender Lab MCP add-on + server
 npx rbxtsc            # zero errors
 npm run sim           # economy simulator (BALANCE.md)
 npm run stats         # real players' statistics vs the simulator (needs robloxOpenCloudKey)
@@ -113,7 +127,7 @@ npm run group-mesh-upload <file.obj...>  # uploads meshes as the group, for the 
 | `src/`, `tools/`, `design/`, the `.md` docs, `docs/agent-notes/` | `node_modules/`, `out/`, `include/` (rebuilt) |
 | `package.json` + `package-lock.json`, `aftman.toml`, `tsconfig.json`, `default.project.json` | `workspace.local.json` (install paths) |
 | `.mcp.json`, `.vscode/settings.json` + `extensions.json`, `.eslintrc`, `.prettierrc`, `.gitattributes` | `.claude/settings.local.json`, `CLAUDE.local.md`, other `.vscode/*` files |
-| | Claude's auto-memory (`~/.claude/projects/...`), the FigCraft and Roblox Studio installs, local `.rbxl` copies |
+| | Claude's auto-memory (`~/.claude/projects/...`), the FigCraft, Blender and Roblox Studio installs, `tools/blender/vendor/` (the Blender MCP), local `.rbxl` copies |
 
 ## Moving from the old machine
 
