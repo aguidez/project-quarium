@@ -11,6 +11,14 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.9 — 2026-11-06
+
+**New**
+- **The Swordfish swims with bones**, like the fish: its body waves, it rests between two dives and it sprints after
+  the coins it fetches.
+
+---
+
 ## V1.1.8 — 2026-11-06
 
 **New**

@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-06 (V1.1.8: bone fish behaviours and moments (meal, growth, release, caught); the idol, the UFO and the Swordfish still EditableMesh).
+> Last updated: 2026-11-06 (V1.1.9: the Swordfish companion on bones too; the idol and the UFO still EditableMesh).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -653,7 +653,8 @@ ProjectQuarium/
   Lionfish, Dragonfish (7-bone spine), WolfDogfish (the Husky Dogfish), BunnyShark (EarL / EarR), MiniLeviathan (rigged
   in its own space, the template keeps its -30° pitch): every species of the 8 aquariums, plus Sugar, AlienFish and the
   abyss `LanternFish` (EventFish; work files `AbyssLantern`; its stalk rigid under the welded lit Lure, no jaw). Still
-  EditableMesh: the K-pop idol (its template lost its texture, see §4), the UFO and the Swordfish companion (rig settings per species in design/rigs/<Fish>.json; ids in design/meshes/manifest.json:
+  EditableMesh: the K-pop idol (its template lost its texture, see §4) and the UFO. The Swordfish companion too
+  (`Assets.Companions`, no jaw: its bill; FishRigController tracks `Companion` models with `Rig`) (rig settings per species in design/rigs/<Fish>.json; ids in design/meshes/manifest.json:
   `rigModelId`, `rigMeshId`, `staticMeshId`).
 - **`ServerStorage.Assets`**:
   - `Fish/` (tag `FishTemplate`, attr `FishType`): the 18 species + `FrenchFish`, `AlienFish` and `Sugar` (no
