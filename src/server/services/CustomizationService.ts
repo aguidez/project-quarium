@@ -1,6 +1,6 @@
 import { t } from "@rbxts/t";
 import { Lifecycle } from "shared/framework";
-import { COSMETICS, isCosmeticId } from "shared/types/cosmetics";
+import { COSMETICS, getGroupMates, isCosmeticId } from "shared/types/cosmetics";
 import { getOwnedTitles, getUnlockedThemes, isHideable, isThemeChoice } from "shared/types/customization";
 import { DataService } from "./DataService";
 
@@ -27,6 +27,10 @@ class CustomizationServiceSingleton implements Lifecycle {
 			const index = data.hiddenCosmetics.indexOf(id);
 			if (change.shown && index >= 0) data.hiddenCosmetics.remove(index);
 			else if (!change.shown && index < 0) data.hiddenCosmetics.push(id);
+			// One spot, one piece: showing a trophy hides the other one (hiding both is fine)
+			if (change.shown)
+				for (const mate of getGroupMates(id))
+					if (data.cosmetics.includes(mate) && !data.hiddenCosmetics.includes(mate)) data.hiddenCosmetics.push(mate);
 			DataService.sync(player);
 		});
 		DataService.registerAction("SetTitle", t.string, (player, title) => {

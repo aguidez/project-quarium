@@ -11,6 +11,15 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.18 — 2026-11-07
+
+**Changes**
+- The Titan Trophy now stands where the Golden Trophy does: the two share one spot of the aquarium. In the Customize
+  menu, showing one hides the other, and both can be hidden. A newly earned Titan Trophy takes the spot; the Golden
+  Trophy is one click away.
+
+---
+
 ## V1.1.17 — 2026-11-07
 
 **New**

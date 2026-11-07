@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-07 (V1.1.17: the Titan Trophy decor; V1.1.16 the Size score and the Big Catch line, ROADMAP_V1.2 M2b done).
+> Last updated: 2026-11-07 (V1.1.18: the two trophies share one spot, one or none shows; V1.1.17 the Titan Trophy decor; V1.1.16 the Size score and the Big Catch line, ROADMAP_V1.2 M2b done).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -727,7 +727,7 @@ ProjectQuarium/
   - `LikeBoards/LikeBoard` (tag `LikeBoardTemplate`): driftwood lectern, PrimaryPart `Root` at ground level, front
     −Z, invisible `Board` part whose Front face carries the counter (SurfaceGui density = BOARD_CANVAS_WIDTH / the
     Board's width, so it can be rescaled). LikeService clones it at `aquarium frame × LIKE_BOARD_OFFSET`.
-  - `Decor/` (tag `DecorTemplate`, attr `Cosmetic`, PrimaryPart Mesh): `WhaleStatue`, `GoldenTrophy`, `Incubator`, `TitanTrophy` (a copy of the golden one, SurfaceAppearance tint rose gold: no upload)
+  - `Decor/` (tag `DecorTemplate`, attr `Cosmetic`, PrimaryPart Mesh): `WhaleStatue`, `GoldenTrophy`, `Incubator`, `TitanTrophy` (a copy of the golden one, SurfaceAppearance tint rose gold: no upload; same spot as the golden one, CosmeticConfig `group` "Trophy": at most one of a group shows, `getGroupMates`; showing one hides its owned mates (CustomizationService), a new one takes the spot (DataService.addCosmetic), sanitizeSave keeps the latest earned)
     (the Golden Incubator).
   - `AquariumThemes/<Theme>` (tag `AquariumThemeTemplate`, attr `Theme`): PrimaryPart `Origin` = the tank frame,
     `Style/` parts named like the tank's (Sand, Backdrop, Base, Plinth, Rim*, `Water`: every theme has one, so a tank

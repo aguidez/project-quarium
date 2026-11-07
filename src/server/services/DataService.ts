@@ -3,7 +3,7 @@ import { Players, Workspace } from "@rbxts/services";
 import { t } from "@rbxts/t";
 import { Lifecycle } from "shared/framework";
 import { getRemoteEvent, NotifyKind } from "shared/network";
-import { CosmeticId } from "shared/types/cosmetics";
+import { CosmeticId, getGroupMates } from "shared/types/cosmetics";
 import { EggType } from "shared/types/eggs";
 import { Feature } from "shared/types/features";
 import { FishType } from "shared/types/fish";
@@ -326,6 +326,11 @@ class DataServiceController implements Lifecycle {
 		const data = this.getData(player);
 		if (!data || data.cosmetics.includes(cosmetic)) return;
 		data.cosmetics.push(cosmetic);
+		// A new decor of a shared spot takes it (the Titan Trophy over the golden one); the player can switch back
+		const hidden = data.hiddenCosmetics.indexOf(cosmetic);
+		if (hidden >= 0) data.hiddenCosmetics.remove(hidden);
+		for (const mate of getGroupMates(cosmetic))
+			if (data.cosmetics.includes(mate) && !data.hiddenCosmetics.includes(mate)) data.hiddenCosmetics.push(mate);
 		this.sync(player);
 	}
 

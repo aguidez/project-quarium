@@ -36,6 +36,11 @@ export interface CosmeticConfig {
 	description: string;
 	/** A leaderboard title: held by the top 10 of this board, for a day. */
 	leaderboard?: LeaderboardId;
+	/**
+	 * Decor sharing one spot of the tank (the same DECOR_SLOTS position): at most one of a group shows, the player
+	 * picks which or none (CustomizationService, DataService.addCosmetic, sanitizeSave: getGroupMates).
+	 */
+	group?: string;
 }
 
 export const COSMETICS: Record<CosmeticId, CosmeticConfig> = {
@@ -100,12 +105,14 @@ export const COSMETICS: Record<CosmeticId, CosmeticConfig> = {
 	DecorGoldenTrophy: {
 		kind: "Decor",
 		displayName: "Golden Trophy",
-		description: "A golden trophy for your aquarium.",
+		description: "A golden trophy for your aquarium. It shares its spot with the Titan Trophy: show one or the other.",
+		group: "Trophy",
 	},
 	DecorTitanTrophy: {
 		kind: "Decor",
 		displayName: "Titan Trophy",
-		description: "A rose-gold trophy for those who hatched a Titan, a perfect fish.",
+		description: "A rose-gold trophy for those who hatched a Titan. It shares its spot with the Golden Trophy: show one or the other.",
+		group: "Trophy",
 	},
 	DecorIncubator: {
 		kind: "Decor",
@@ -163,8 +170,17 @@ export const DECOR_SLOTS: Partial<Record<CosmeticId, Vector3>> = {
 	DecorWhaleStatue: new Vector3(-18.5, 4, -6),
 	DecorGoldenTrophy: new Vector3(19, 4, -6),
 	DecorIncubator: new Vector3(15.2, 4, -5.6), // next to the trophy (Hatchery line, ROADMAP M7)
-	DecorTitanTrophy: new Vector3(-14.4, 4, -5.6), // next to the whale statue (Big Catch line, V1.1.17)
+	DecorTitanTrophy: new Vector3(19, 4, -6), // the golden trophy's spot: one or the other shows (group "Trophy")
 };
+
+/** The other cosmetics of the same group (one spot of the tank), none for a cosmetic without a group. */
+export function getGroupMates(cosmetic: CosmeticId): CosmeticId[] {
+	const group = COSMETICS[cosmetic].group;
+	const mates = new Array<CosmeticId>();
+	if (group === undefined) return mates;
+	for (const [id, config] of pairs(COSMETICS)) if (id !== cosmetic && config.group === group) mates.push(id);
+	return mates;
+}
 
 export function isDecor(cosmetic: CosmeticId): boolean {
 	return COSMETICS[cosmetic].kind === "Decor";

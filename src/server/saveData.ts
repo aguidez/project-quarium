@@ -1,6 +1,6 @@
 import { Workspace } from "@rbxts/services";
 import { COMPANION_TYPES, CompanionType } from "shared/types/companions";
-import { isCosmeticId, isLeaderboardTitle } from "shared/types/cosmetics";
+import { getGroupMates, isCosmeticId, isLeaderboardTitle } from "shared/types/cosmetics";
 import { LEADERBOARD_IDS, LEADERBOARD_TITLE_RANKS, LeaderboardId } from "shared/types/leaderboards";
 import { isThemeChoice } from "shared/types/customization";
 import { EGG_TYPES, EggType } from "shared/types/eggs";
@@ -243,6 +243,13 @@ export function sanitizeSave(save: SaveData) {
 	data.hiddenCosmetics = (typeIs(data.hiddenCosmetics, "table") ? data.hiddenCosmetics : []).filter(
 		(c, i) => isCosmeticId(c) && data.hiddenCosmetics.indexOf(c) === i,
 	);
+	// One piece per shared spot (cosmetics.ts group): the latest earned one shows, its mates are hidden
+	for (let i = data.cosmetics.size() - 1; i >= 0; i--) {
+		const id = data.cosmetics[i];
+		if (!isCosmeticId(id) || data.hiddenCosmetics.includes(id)) continue;
+		for (const mate of getGroupMates(id))
+			if (data.cosmetics.includes(mate) && !data.hiddenCosmetics.includes(mate)) data.hiddenCosmetics.push(mate);
+	}
 	if (data.titleChoice !== "Auto" && data.titleChoice !== "None" && !isCosmeticId(data.titleChoice))
 		data.titleChoice = "Auto";
 	// NaN fails both comparisons: back to full volume
