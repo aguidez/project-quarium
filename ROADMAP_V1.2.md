@@ -5,7 +5,7 @@
 > the food reserve and a sixth companion (the Hermit Crab). Everything here is a **plan**: the economy's numbers
 > are tuned with the simulator (M1, `tools/balance-v1.2-plan.js`), nothing is built yet. Tick the boxes as tasks ship, and move what a
 > step ships into `PROJECT_CONTEXT.md` / `RELEASE_NOTES.md` / `BALANCE.md` as usual.
-> Last updated: 2026-11-07 (M2b done: the Size score live in V1.1.16; M1 done: prices tuned, end of V1.2 at ~25h15, the 4th bar at 0.9; owner's decisions: themes, 4 species per rarity, tank 33 (50 later), Size and its table,
+> Last updated: 2026-11-07 (M2 done, V1.1.19; M2b done: the Size score live in V1.1.16; M1 done: prices tuned, end of V1.2 at ~25h15, the 4th bar at 0.9; owner's decisions: themes, 4 species per rarity, tank 33 (50 later), Size and its table,
 > Galaxy at 0.2 % with the Lucky pass x3 on it, the 4th bar at 2.5 %, the Hermit Crab's live luck, boosts unchanged;
 > nothing built yet. Groundwork done: money up to 1e300, V1.1.15).
 
@@ -432,7 +432,14 @@ last live rebirth.
       6 species, milestones, quests and food changes, the size score (a player who keeps its best fish) and the new
       variant; tune the prices until the medians hit §2, write the p10–p90 and the coin rate per tank; the starfall's
       4th bar in `tools/starfall-sim.js` (§3.7); update this roadmap's numbers. Simulator horizon 30 h.
-- [ ] **M2 Groundwork**: tank 33 built for 50 (room, swim, decor, performance tests with 6 full tanks of 33 and of 50),
+- [x] **M2 Groundwork** (V1.1.19, 2026-11-07): rarities 4 a label; Fish Keeper line + its perks (refill 9 / 8 s, a 6th
+      portion) and the HUD's 6th portion; egg shop: the shelf already scrolls any number of eggs (no change); tank:
+      tested at 6 x 33 and 6 x 50 (300 bone fish, the heaviest species): render CPU 2.8 → 3.0 ms on the owner's PC, the
+      swim culling (off screen, every 2nd / 4th frame far away) does its job; 50 big fish fill a tank but stay
+      readable (design/previews/tank-50-fish-loadtest.jpg). Left for the steps that need them: the capacity milestones
+      27–33 (M3–M6, with their rebirths), the Quick pantry milestone (M4), a phone test (no device), and for 40+ fish a
+      slight shrink per capacity if the owner finds them crowded. Planned:
+      tank 33 built for 50 (room, swim, decor, performance tests with 6 full tanks of 33 and of 50),
       the rarities at 4 a label, egg shop with 16 eggs,
       Fish Keeper line + food perks + Quick pantry, the HUD's 6th portion. Can ship before any new species.
 - [x] **M2b Size score** (§3.5; V1.1.16, 2026-11-07; the Titan Trophy decor, the golden one tinted rose gold, V1.1.17): the draw, the save field, the model's scale, the coin value, the hatch reveal, the

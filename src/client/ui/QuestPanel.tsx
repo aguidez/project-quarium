@@ -61,6 +61,7 @@ const LINE_PALETTES: Record<StoryLine, Palette> = {
 	Hatchery: PALETTES.amber,
 	Collector: PALETTES.red,
 	BigCatch: PALETTES.green,
+	FishKeeper: PALETTES.ghost,
 	WaterHen: PALETTES.pink,
 	Swordfish: PALETTES.lagoon,
 	Jellyfish: PALETTES.purple,

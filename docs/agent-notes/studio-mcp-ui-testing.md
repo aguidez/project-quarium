@@ -73,3 +73,9 @@ Related: [[lobby-decor-constraints]]
   `PlayerData_v1` works: copy it to `GetDataStore("PlayerData_Backups"):SetAsync("Player_<UserId>_<reason>", raw,
   {userId})` and read it back to check, instead of pasting a huge JSON into the scratchpad. Restore with the same
   SetAsync on `PlayerData_v1` after the play has stopped and its final save is done (only if the owner wants it).
+- **Load test traps** (2026-11-07, V1.1.19, 6 x 33 / 6 x 50 fish): (1) leave the tank's 2.5D view first (teleport
+  the character to the lobby centre, 0, 5, 0): while the focus view is on, FocusController drives the camera every
+  frame and a Scriptable hold loses, so the other tanks are "off screen" and their clones never swim (flat numbers,
+  15 fps). (2) Check the swim on a `Tail1` bone's Transform: the `Head` bone isn't driven. Fish clones dropped with a
+  random yaw cluster in the middle and stand still when anchored: judge crowding loosely, real fish spread out.
+  Result on the owner's PC: 300 bone fish cost ~0.2 ms of render CPU (2.8 → 3.0 ms).

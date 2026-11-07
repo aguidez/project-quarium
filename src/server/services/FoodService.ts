@@ -3,9 +3,9 @@ import { t } from "@rbxts/t";
 import { Lifecycle } from "shared/framework";
 import { TAGS } from "shared/tags";
 import { CompanionType } from "shared/types/companions";
-import { encodeFoodRefills, FOOD_REFILL_TIME, FOOD_RESERVE_ATTRIBUTES, FOOD_RESERVE_SLOTS } from "shared/types/food";
+import { encodeFoodRefills, FOOD_RESERVE_ATTRIBUTES } from "shared/types/food";
 import { FoodLook, getFoodLook } from "shared/types/foodLooks";
-import { getSatietyBonus } from "shared/types/perks";
+import { getFoodReserve, getSatietyBonus } from "shared/types/perks";
 import { canDropFood } from "shared/types/onboarding";
 import { Aquarium, AquariumService } from "./AquariumService";
 import { DataService } from "./DataService";
@@ -48,6 +48,8 @@ class FoodServiceSingleton implements Lifecycle {
 
 		// Every player starts with a full reserve (it is never saved)
 		Players.PlayerAdded.Connect((player) => this.publishReserve(player));
+		// The reserve's size and refill time come from the perks (the Fish Keeper line): known once the profile is
+		DataService.onLoaded((player) => this.publishReserve(player));
 		for (const player of Players.GetPlayers()) this.publishReserve(player);
 
 		Players.PlayerRemoving.Connect((player) => {
@@ -95,16 +97,19 @@ class FoodServiceSingleton implements Lifecycle {
 	private takePortion(player: Player): boolean {
 		const now = Workspace.GetServerTimeNow();
 		const refills = (this.refillsByOwner.get(player) ?? []).filter((time) => time > now);
-		if (refills.size() >= FOOD_RESERVE_SLOTS) return false;
-		refills.push(now + FOOD_REFILL_TIME);
+		const reserve = getFoodReserve(DataService.getData(player)?.perks ?? []);
+		if (refills.size() >= reserve.slots) return false;
+		refills.push(now + reserve.refillTime);
 		this.refillsByOwner.set(player, refills);
 		this.publishReserve(player);
 		return true;
 	}
 
-	/** The reserve on the Player: the HUD works the refills out from the server times. */
-	private publishReserve(player: Player) {
-		player.SetAttribute(FOOD_RESERVE_ATTRIBUTES.slots, FOOD_RESERVE_SLOTS);
+	/** The reserve on the Player: the HUD works the refills out from the server times. Again after a Fish Keeper perk. */
+	public publishReserve(player: Player) {
+		const reserve = getFoodReserve(DataService.getData(player)?.perks ?? []);
+		player.SetAttribute(FOOD_RESERVE_ATTRIBUTES.slots, reserve.slots);
+		player.SetAttribute(FOOD_RESERVE_ATTRIBUTES.refillTime, reserve.refillTime);
 		player.SetAttribute(FOOD_RESERVE_ATTRIBUTES.refills, encodeFoodRefills(this.refillsByOwner.get(player) ?? []));
 	}
 

@@ -1,3 +1,5 @@
+import { FOOD_REFILL_TIME, FOOD_RESERVE_SLOTS } from "./food";
+
 /**
  * Perks: permanent bonuses earned through quests (kept through rebirths, like the quests themselves).
  * Their effects add up: CoinLinger1 + CoinLinger2 keep coins on the sand 3 s longer.
@@ -17,7 +19,10 @@ export type Perk =
 	| "Swordfish3"
 	| "Jellyfish1"
 	| "Jellyfish2"
-	| "Jellyfish3";
+	| "Jellyfish3"
+	| "FoodRefill1"
+	| "FoodRefill2"
+	| "FoodSlot1";
 
 export interface PerkConfig {
 	displayName: string;
@@ -49,6 +54,10 @@ export interface PerkConfig {
 	jellyfishInterval?: number;
 	/** ...and drops this many pellets a feed (instead of JELLYFISH_PELLETS). */
 	jellyfishPellets?: number;
+	/** A used portion of the food reserve comes back after this many seconds (instead of FOOD_REFILL_TIME); the best one counts. */
+	foodRefillTime?: number;
+	/** Portions the food reserve holds on top of FOOD_RESERVE_SLOTS. */
+	foodSlots?: number;
 }
 
 export const PERKS: Record<Perk, PerkConfig> = {
@@ -177,7 +186,44 @@ export const PERKS: Record<Perk, PerkConfig> = {
 		bounce: false,
 		jellyfishPellets: 3,
 	},
+	// The Fish Keeper line (meals given by hand, V1.1.19, ROADMAP_V1.2 §5): the reserve feeds ~24 / ~27 / ~33 fish by hand
+	FoodRefill1: {
+		displayName: "Quick refill",
+		label: "9s",
+		description: "A portion of your food reserve comes back in 9 seconds instead of 10.",
+		groundTimeBonus: 0,
+		bounce: false,
+		foodRefillTime: 9,
+	},
+	FoodRefill2: {
+		displayName: "Quicker refill",
+		label: "8s",
+		description: "A portion of your food reserve comes back in 8 seconds.",
+		groundTimeBonus: 0,
+		bounce: false,
+		foodRefillTime: 8,
+	},
+	FoodSlot1: {
+		displayName: "Bigger reserve",
+		label: "+1",
+		description: "Your food reserve holds 6 portions instead of 5.",
+		groundTimeBonus: 0,
+		bounce: false,
+		foodSlots: 1,
+	},
 };
+
+/** The player's food reserve: portions it holds and seconds a used one takes to come back (FoodService, the HUD). */
+export function getFoodReserve(perks: readonly Perk[]): { slots: number; refillTime: number } {
+	let slots = FOOD_RESERVE_SLOTS;
+	let refillTime = FOOD_REFILL_TIME;
+	for (const perk of perks) {
+		const config = PERKS[perk];
+		slots += config.foodSlots ?? 0;
+		if (config.foodRefillTime !== undefined) refillTime = math.min(refillTime, config.foodRefillTime);
+	}
+	return { slots, refillTime };
+}
 
 /** How long a coin's bounce lasts (up and down) when the player has CoinBounce. */
 export const COIN_BOUNCE_TIME = 1.5;

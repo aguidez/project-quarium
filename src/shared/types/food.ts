@@ -1,6 +1,7 @@
 /**
  * The food reserve: food is free, but the player holds at most FOOD_RESERVE_SLOTS portions. A portion used comes back
- * FOOD_REFILL_TIME seconds later, each slot on its own timer (several refill side by side). Only the player's own
+ * FOOD_REFILL_TIME seconds later, each slot on its own timer (several refill side by side). The Fish Keeper perks
+ * change both (perks.ts getFoodReserve: 6 portions, 8 s at best). Only the player's own
  * clicks use it: the companions' pellets are free and unlimited. FoodService keeps it in memory (full at every join)
  * and publishes it on the Player for the HUD (FoodReserve.tsx) and the click handler (AquariumInteractionController).
  */
@@ -8,10 +9,10 @@ export const FOOD_RESERVE_SLOTS = 5;
 export const FOOD_REFILL_TIME = 10; // seconds
 
 /**
- * Player attributes: `FoodSlots` (the reserve's size) and `FoodRefills` (the server times at which the used portions
+ * Player attributes: `FoodSlots` (the reserve's size), `FoodRefillTime` (seconds a portion takes) and `FoodRefills` (the server times at which the used portions
  * come back, soonest first, comma-separated: an attribute can't hold a list). A time already passed is a full slot.
  */
-export const FOOD_RESERVE_ATTRIBUTES = { slots: "FoodSlots", refills: "FoodRefills" } as const;
+export const FOOD_RESERVE_ATTRIBUTES = { slots: "FoodSlots", refills: "FoodRefills", refillTime: "FoodRefillTime" } as const;
 
 export function encodeFoodRefills(times: readonly number[]): string {
 	return times.map((time) => string.format("%.2f", time)).join(",");

@@ -11,6 +11,24 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.19 — 2026-11-07
+
+Groundwork for the next aquariums (V1.2): a faster food reserve for the big tanks, and room in the rarities.
+
+**New**
+- New quest line **Fish Keeper** (from the second aquarium): feed your fish with food you drop, 500, 2,000 then 6,000
+  times in all. Your past meals count, so a long-time player completes the first ones at once. Rewards: the food
+  reserve refills in 9 seconds, then 8 seconds, then holds a 6th portion.
+
+**Changes**
+- Rarities now hold 4 species each, to make room for the next ones: the Clownfish becomes Common, the Silver
+  Angelfish and the Pirate Fish Uncommon, the Catfish, the Blue Tang and the Baby Sunfish Rare, the Husky Dogfish Epic,
+  the Bunny Shark and the Mini Leviathan Legendary. Mythic waits for the species of the next update. Only the label
+  changes: no fish earns or costs differently.
+- The aquarium is ready for more fish: tanks of 33 and 50 fish were tested, with no slowdown.
+
+---
+
 ## V1.1.18 — 2026-11-07
 
 **Changes**

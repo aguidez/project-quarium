@@ -38,6 +38,7 @@ import { CoinService } from "./CoinService";
 import { CompanionService } from "./CompanionService";
 import { DataService } from "./DataService";
 import { FishService } from "./FishService";
+import { FoodService } from "./FoodService";
 import { LikeService } from "./LikeService";
 
 /** Daily / weekly boards are redrawn this soon after a reset (or after joining). */
@@ -86,7 +87,11 @@ class QuestServiceSingleton implements Lifecycle {
 		FishService.onFishFed((owner, _fishType, companion) => {
 			// The Pelican's or the Jellyfish's feeds; the others are the player's own
 			if (companion) this.addProgress(owner, "CompanionStat", 1, { companion });
-			else this.addProgress(owner, "FishFed", 1);
+			else {
+				this.addProgress(owner, "FishFed", 1);
+				// StatsService counted the meal in the same signal: read it on the next frame
+				task.defer(() => this.reportGauges(owner));
+			}
 		});
 		LikeService.onLikeGiven((player) => this.addProgress(player, "LikesGiven", 1));
 	}
@@ -189,13 +194,14 @@ class QuestServiceSingleton implements Lifecycle {
 		if (!data) return;
 		this.updateProgress(player, (config) => {
 			if (!GAUGE_STATS.includes(config.stat)) return undefined;
-			const value = this.getGaugeValue(data, config);
+			const value = this.getGaugeValue(player, data, config);
 			return (progress) => math.max(progress, value);
 		});
 	}
 
 	/** Current value of a gauge stat for this quest. */
-	private getGaugeValue(data: PlayerData, config: QuestConfig): number {
+	private getGaugeValue(player: Player, data: PlayerData, config: QuestConfig): number {
+		if (config.stat === "MealsByHand") return DataService.getSave(player)?.stats.mealsByHand ?? 0;
 		if (config.stat === "FishInTank") {
 			let total = 0;
 			for (const [, count] of pairs(data.fish)) total += count;
@@ -347,6 +353,7 @@ class QuestServiceSingleton implements Lifecycle {
 			const data = DataService.getData(player);
 			if (data && !data.perks.includes(reward.perk)) data.perks.push(reward.perk);
 			DataService.sync(player);
+			if (perk.foodRefillTime !== undefined || perk.foodSlots !== undefined) FoodService.publishReserve(player);
 			celebration = {
 				title: "Quest complete!",
 				subtitle: perk.description,

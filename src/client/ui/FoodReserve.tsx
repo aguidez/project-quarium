@@ -44,14 +44,18 @@ export interface FoodReserveProps {
 
 interface Reserve {
 	slots: number;
+	/** Seconds a used portion takes to come back (10, less with the Fish Keeper perks). */
+	refillTime: number;
 	refills: number[];
 }
 
 function readReserve(): Reserve {
 	const player = Players.LocalPlayer;
 	const slots = player.GetAttribute(FOOD_RESERVE_ATTRIBUTES.slots);
+	const refillTime = player.GetAttribute(FOOD_RESERVE_ATTRIBUTES.refillTime);
 	return {
 		slots: typeIs(slots, "number") ? slots : FOOD_RESERVE_SLOTS,
+		refillTime: typeIs(refillTime, "number") && refillTime > 0 ? refillTime : FOOD_REFILL_TIME,
 		refills: decodeFoodRefills(player.GetAttribute(FOOD_RESERVE_ATTRIBUTES.refills)),
 	};
 }
@@ -109,7 +113,7 @@ export function FoodPellet(props: {
 /**
  * The food reserve (tank view, from the onboarding's Feed step): food is free, but only FoodSlots portions are ready
  * at once; an empty slot shows its pellet growing back with the seconds left (each slot refills on its own,
- * FOOD_REFILL_TIME after it was used). A click on the water with none ready flashes the plate red and shakes it.
+ * FoodRefillTime after it was used). A click on the water with none ready flashes the plate red and shakes it.
  * Read from the attributes FoodService publishes on the local player.
  */
 export function FoodReserve(props: FoodReserveProps) {
@@ -123,6 +127,7 @@ export function FoodReserve(props: FoodReserveProps) {
 		const connections = [
 			player.GetAttributeChangedSignal(FOOD_RESERVE_ATTRIBUTES.slots).Connect(update),
 			player.GetAttributeChangedSignal(FOOD_RESERVE_ATTRIBUTES.refills).Connect(update),
+			player.GetAttributeChangedSignal(FOOD_RESERVE_ATTRIBUTES.refillTime).Connect(update),
 			RunService.RenderStepped.Connect(() => setNow(Workspace.GetServerTimeNow())),
 		];
 		const unsubscribe = props.subscribeDenied(() => (deniedAt.current = Workspace.GetServerTimeNow()));
@@ -207,7 +212,7 @@ export function FoodReserve(props: FoodReserveProps) {
 						const refillOf = (time: number) => waitingAt(time)[index - readyAt(time)];
 						const progress = now.map((time) => {
 							const refill = refillOf(time);
-							return refill === undefined ? 1 : math.clamp(1 - (refill - time) / FOOD_REFILL_TIME, 0, 1);
+							return refill === undefined ? 1 : math.clamp(1 - (refill - time) / reserve.refillTime, 0, 1);
 						});
 						return (
 							<frame

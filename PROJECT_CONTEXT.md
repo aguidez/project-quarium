@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-07 (V1.1.18: the two trophies share one spot, one or none shows; V1.1.17 the Titan Trophy decor; V1.1.16 the Size score and the Big Catch line, ROADMAP_V1.2 M2b done).
+> Last updated: 2026-11-07 (V1.1.19: rarities 4 per label, the Fish Keeper line and the food reserve's perks, tank tested at 33 / 50 (ROADMAP_V1.2 M2); V1.1.18 the two trophies share one spot; V1.1.16 the Size score and the Big Catch line, ROADMAP_V1.2 M2b done).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -217,7 +217,8 @@ ProjectQuarium/
    │  ├─ sounds.ts           Music id + SFX ids, played in 2D by AudioController (CoinStolen = the lantern's gulp, StarCatch, UfoBeam,
    │  │                      AlienScream, WeakBubble = a weak fish's bubble, CoinCollect / CompanionCoin = the coin chime)
    │  └─ types/
-   │     ├─ fish.ts          FishType, FishRarity (Common … Mythic, Secret = easter eggs), CoinType, HungerState
+   │     ├─ fish.ts          FishType, FishRarity (Common … Mythic, 4 species a label since V1.1.19: Mythic waits for V1.2's
+   │     │                   species; Secret = easter eggs), CoinType, HungerState
    │     │                   (Satiated/Hungry/Weak, no death), FISH_TYPES (income, interval, coin, rarity, oceanPoints,
    │     │                   cannibal?, growth, hunger, easterEgg?: EasterEggConfig {hatchChance, likeChance,
    │     │                   incomeShare, bestFishShare, lifetime, leaveMessage, source, perk, screamInterval}),
@@ -255,10 +256,10 @@ ProjectQuarium/
    │     │                   getPassVariantLuck (x2) / getPassCompanionSlots (+1). The companion passes (WaterHenPass,
    │     │                   SwordfishPass, JellyfishPass) are sold from their quest line, picture = the companion's sticker
    │     ├─ quests.ts        QUESTS (Story1–9, Voyage1–16 the main line, WaterHen1–3 / Swordfish1–3 / Jellyfish1–3 the paid
-   │     │                   companion lines, Hatchery1–5 / Collector1–6 / Ocean1–2 / BigCatch1–5 the free side lines,
+   │     │                   companion lines, Hatchery1–5 / Collector1–6 / Ocean1–2 / BigCatch1–5 / FishKeeper1–3 the free side lines,
    │     │                   Daily* / Weekly*), DAILY_QUEST_POOL / WEEKLY_QUEST_POOL (7 each, 3 drawn per period),
    │     │                   STORY_LINES (Start / Ocean / Rebirth (shown "Voyage") / Snail / Pelican / Hatchery /
-   │     │                   Collector / BigCatch (opens with Story2, like the Collector) / WaterHen / Swordfish /
+   │     │                   Collector / BigCatch (opens with Story2, like the Collector) / FishKeeper (with Voyage2, rebirth 2) / WaterHen / Swordfish /
    │     │                   Jellyfish: quests in order, requires (a quest), requiresCompanion, requiresPass, order),
    │     │                   refreshStoryLines, getActiveStoryQuests, getStoryLine, isQuestLocked,
    │     │                   BOARD_UNLOCK_REBIRTHS / isBoardUnlocked (dailies from rebirth 2, weeklies from 3);
@@ -266,17 +267,19 @@ ProjectQuarium/
    │     │                   VariantHatched {variant}, FishReleased, CompanionStat {companion}, SizeHatched {minSize};
    │     │                   gauges (GAUGE_STATS) FishInTank, MoneyHeld, SpeciesHatched {fishType}, Rebirths, IndexCells,
    │     │                   SpeciesFound (easter eggs excluded), VariantFound {variant}, TotalHatched, SizeFound
-   │     │                   {minSize: species whose bestSize reaches it}, BigFishInTank {minSize: living fish}; rewards Money / Companion / Feature /
+   │     │                   {minSize: species whose bestSize reaches it}, BigFishInTank {minSize: living fish}, MealsByHand
+   │     │                   (PlayerStats.mealsByHand, all time; QuestService reads it from the save); rewards Money / Companion / Feature /
    │     │                   Perk / IncomeMinutes / OceanPoints / Title / Decor / CoinBoost; daily/weekly periods (UTC)
    │     ├─ perks.ts         Perk (CoinLinger1–2, CoinBounce, FishSatiety, PelicanDouble, PelicanCharges, WaterHen1–3,
-   │     │                   Swordfish1–3, Jellyfish1–3), PERKS, COIN_BOUNCE_TIME, getGroundTimeBonus, hasCoinBounce,
+   │     │                   Swordfish1–3, Jellyfish1–3, FoodRefill1–2 / FoodSlot1 the Fish Keeper line), PERKS,
+   │     │                   getFoodReserve (portions and refill time: 5 / 10 s, 6 / 8 s at best), COIN_BOUNCE_TIME, getGroundTimeBonus, hasCoinBounce,
    │     │                   getSatietyBonus, getPelicanPellets, getPelicanCharges, getPerkHatchMultiplier,
    │     │                   getSwordfishStats, getJellyfishStats
    │     ├─ companions.ts    CompanionType (Snail, Pelican, WaterHen, Swordfish, Jellyfish), COMPANION_TYPES (+ sticker
    │     │                   `image`), DEFAULT_COMPANION_SLOTS, PELICAN_FEED_INTERVAL, WATER_HEN_HATCH_MULTIPLIER,
    │     │                   JELLYFISH_FEED_INTERVAL / JELLYFISH_CHARGES / JELLYFISH_PELLETS
    │     ├─ food.ts          The food reserve: FOOD_RESERVE_SLOTS (5), FOOD_REFILL_TIME (10 s, each slot its own timer),
-   │     │                   FOOD_RESERVE_ATTRIBUTES (Player `FoodSlots`, `FoodRefills` = the used portions' return times,
+   │     │                   FOOD_RESERVE_ATTRIBUTES (Player `FoodSlots`, `FoodRefillTime`, `FoodRefills` = the used portions' return times,
    │     │                   comma-separated), encodeFoodRefills / decodeFoodRefills, getFoodReady
    │     ├─ foodLooks.ts     FoodLook (Pellet, Shrimp), FOOD_LOOKS (min satiety bonus per look), getFoodLook: the more a
    │     │                   meal feeds (perks' satiety bonus), the more filling the food looks
@@ -348,7 +351,8 @@ ProjectQuarium/
    │     │                   (each decor piece's footprint and top in the tank's frame, from its visible parts);
    │     │                   clears the INCOME_ATTRIBUTES of a freed tank
    │     ├─ FoodService      Drops / sinks food pellets (DropFood, free), the player's food reserve (in memory, full at
-   │     │                   join: a drop takes a portion back in FOOD_REFILL_TIME, refused when none is ready; published
+   │     │                   join: a drop takes a portion back in the refill time of getFoodReserve(perks), refused when none is ready; published
+   │     │                   again on load and after a Fish Keeper perk (publishReserve);
    │     │                   as the FOOD_RESERVE_ATTRIBUTES), max 10 pellets in the water per player; throwFood (the
    │     │                   Pelican's pellet: falls through the air onto the surface, then sinks) and releaseFood (the
    │     │                   Jellyfish's: sinks straight down); Food.byCompanion names the companion, so FishService's fed
@@ -600,7 +604,7 @@ ProjectQuarium/
          │                   under the boost pills, in the guaranteed variant's colour ("NEXT EGG: AT LEAST A GHOST")
          ├─ FoodReserve      The food reserve (FigCraft food-reserve.figcraft), bottom centre of the tank view from the Feed
          │                   step, never over the bottom-left buttons: navy plate, one round slot per portion (a pellet,
-         │                   or one growing back with its seconds left), "FOOD n/5" chip; an empty click flashes it red and
+         │                   or one growing back with its seconds left, over FoodRefillTime), "FOOD n/slots" chip (6 portions fit, centred); an empty click flashes it red and
          │                   shakes it ("REFILLING..."); FoodPellet (also the Feed card's icon), getFoodReserveTop
          ├─ OnboardingPanel  Onboarding instruction card (`bottom`: lifted above the food reserve)
          ├─ RewardPopup      Reward celebration (money / companion / feature, optional image or fishType: its sticker)

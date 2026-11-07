@@ -229,7 +229,7 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 	},
 	Clownfish: {
 		displayName: "Clownfish",
-		rarity: "Uncommon",
+		rarity: "Common",
 		income: 180,
 		oceanPoints: 15,
 		coin: "Platinum",
@@ -270,7 +270,7 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 	// Epic and Legendary are kept for later species
 	SilverAngelfish: {
 		displayName: "Silver Angelfish",
-		rarity: "Rare",
+		rarity: "Uncommon",
 		income: 2400,
 		oceanPoints: 150,
 		coin: "Pearl",
@@ -283,7 +283,7 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 	},
 	PirateFish: {
 		displayName: "Pirate Fish",
-		rarity: "Rare",
+		rarity: "Uncommon",
 		income: 1500,
 		oceanPoints: 250,
 		coin: "Ruby",
@@ -310,7 +310,7 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 	// --- Rebirths 3–4 (V1 plan, BALANCE.md §5): the Pirate Wreck's and Atlantis' species, x2 income each ---
 	Catfish: {
 		displayName: "Catfish",
-		rarity: "Epic",
+		rarity: "Rare",
 		income: 16000, // 1,600/s
 		oceanPoints: 800,
 		coin: "Chest",
@@ -323,7 +323,7 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 	},
 	BlueTang: {
 		displayName: "Blue Tang",
-		rarity: "Epic",
+		rarity: "Rare",
 		income: 19200, // 3,200/s
 		oceanPoints: 1300,
 		coin: "Sapphire",
@@ -336,7 +336,7 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 	},
 	BabySunfish: {
 		displayName: "Baby Sunfish",
-		rarity: "Epic",
+		rarity: "Rare",
 		income: 130000, // 6,500/s
 		oceanPoints: 2000,
 		coin: "SunMedallion",
@@ -351,7 +351,7 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 	// "LanternFish"): another look, photophores and no lure ---
 	Lanternfish: {
 		displayName: "Lanternfish",
-		rarity: "Legendary",
+		rarity: "Epic",
 		income: 156000, // 13,000/s
 		oceanPoints: 3200,
 		coin: "Nautilus",
@@ -366,7 +366,7 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 	// with glowing scales (no fire, no fangs): CLAUDE.md §7 ---
 	Lionfish: {
 		displayName: "Lionfish",
-		rarity: "Legendary",
+		rarity: "Epic",
 		income: 208000, // 26,000/s
 		oceanPoints: 5000,
 		coin: "CoralFan",
@@ -379,7 +379,7 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 	},
 	Dragonfish: {
 		displayName: "Dragonfish",
-		rarity: "Legendary",
+		rarity: "Epic",
 		income: 1300000, // 52,000/s
 		oceanPoints: 8000,
 		coin: "DragonScale",
@@ -394,7 +394,7 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 	// fangs (CLAUDE.md §7) ---
 	WolfDogfish: {
 		displayName: "Husky Dogfish",
-		rarity: "Mythic",
+		rarity: "Epic",
 		income: 1575000, // 105,000/s
 		oceanPoints: 13000,
 		coin: "Moon",
@@ -407,7 +407,7 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 	},
 	BunnyShark: {
 		displayName: "Bunny Shark",
-		rarity: "Mythic",
+		rarity: "Legendary",
 		income: 4200000, // 210,000/s
 		oceanPoints: 20000,
 		coin: "Star",
@@ -420,7 +420,7 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 	},
 	MiniLeviathan: {
 		displayName: "Mini Leviathan",
-		rarity: "Mythic",
+		rarity: "Legendary",
 		income: 12600000, // 420,000/s
 		oceanPoints: 32000,
 		coin: "Planet",

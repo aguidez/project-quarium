@@ -57,6 +57,8 @@ export type QuestStat =
 	| "SizeFound"
 	/** Gauge: living fish of the tank with a Size score of the quest's `minSize` or more (PlayerData.tankSizes). */
 	| "BigFishInTank"
+	/** Gauge: meals the player's own food gave, all time (PlayerStats.mealsByHand): the Fish Keeper line. */
+	| "MealsByHand"
 	/**
 	 * What the quest's `companion` does for the player: coins its Snail picks up, fish its Pelican feeds (the V1
 	 * companions add theirs: eggs opened with the Water Hen equipped, coins its Swordfish grabs, fish its Jellyfish feeds).
@@ -75,6 +77,7 @@ export const GAUGE_STATS: readonly QuestStat[] = [
 	"TotalHatched",
 	"SizeFound",
 	"BigFishInTank",
+	"MealsByHand",
 ];
 
 /**
@@ -600,6 +603,32 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 18,
 		rewards: [{ kind: "Title", title: "TitleSizeCollector" }],
 	},
+	// Fish Keeper (V1.1.19, ROADMAP_V1.2 §5): meals given by hand, all time (a gauge: a veteran is ahead), from rebirth 2.
+	// The food reserve's perks: ~33 / ~37 / ~45 meals a minute by hand, for ~24 / ~27 / ~33 fish
+	FishKeeper1: {
+		category: "Story",
+		title: "Fish Keeper",
+		description: "Feed your fish 500 times with food you drop (all time).",
+		stat: "MealsByHand",
+		target: 500,
+		rewards: [{ kind: "Perk", perk: "FoodRefill1" }],
+	},
+	FishKeeper2: {
+		category: "Story",
+		title: "Devoted Keeper",
+		description: "Feed your fish 2,000 times with food you drop (all time).",
+		stat: "MealsByHand",
+		target: 2000,
+		rewards: [{ kind: "Perk", perk: "FoodRefill2" }],
+	},
+	FishKeeper3: {
+		category: "Story",
+		title: "Master Keeper",
+		description: "Feed your fish 6,000 times with food you drop (all time).",
+		stat: "MealsByHand",
+		target: 6000,
+		rewards: [{ kind: "Perk", perk: "FoodSlot1" }],
+	},
 	// Daily quests (DAILY_QUEST_POOL): doable by anyone in a session, alone; coins x2 for 5 minutes each (BALANCE.md §5.9)
 	DailyCoins: {
 		category: "Daily",
@@ -729,6 +758,7 @@ export type StoryLine =
 	| "Hatchery"
 	| "Collector"
 	| "BigCatch"
+	| "FishKeeper"
 	| "Snail"
 	| "Pelican"
 	| "WaterHen"
@@ -801,27 +831,34 @@ export const STORY_LINES: Record<StoryLine, StoryLineConfig> = {
 		requires: "Story2",
 		order: 8,
 	},
+	// Opens with rebirth 2 (Voyage "Deeper Waters"), when the dailies do: the food reserve starts to be short after
+	FishKeeper: {
+		displayName: "Fish Keeper",
+		quests: ["FishKeeper1", "FishKeeper2", "FishKeeper3"],
+		requires: "Voyage2",
+		order: 9,
+	},
 	// The paid companion lines (ROADMAP M4): shown from the moment the companion is owned, locked without the pass
 	WaterHen: {
 		displayName: "Water Hen",
 		quests: ["WaterHen1", "WaterHen2", "WaterHen3"],
 		requiresCompanion: "WaterHen",
 		requiresPass: "WaterHenPass",
-		order: 9,
+		order: 10,
 	},
 	Swordfish: {
 		displayName: "Swordfish",
 		quests: ["Swordfish1", "Swordfish2", "Swordfish3"],
 		requiresCompanion: "Swordfish",
 		requiresPass: "SwordfishPass",
-		order: 10,
+		order: 11,
 	},
 	Jellyfish: {
 		displayName: "Jellyfish",
 		quests: ["Jellyfish1", "Jellyfish2", "Jellyfish3"],
 		requiresCompanion: "Jellyfish",
 		requiresPass: "JellyfishPass",
-		order: 11,
+		order: 12,
 	},
 };
 

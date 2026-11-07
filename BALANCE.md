@@ -3,7 +3,7 @@
 > The game's balance: what an average player reaches after how long, and why. **Update it in the same task whenever a
 > number of the economy changes** (fish income, eggs, odds, rebirths, Ocean milestones, variants, food, capacity,
 > companions…): run the simulators, copy their results here, add a line to the history (§6).
-> Last updated: 2026-11-07 (V1.1.16: the Size score live, the timeline of §2 re-run, §3 Size, §6).
+> Last updated: 2026-11-07 (V1.1.19: the Fish Keeper food perks §4, rarities 4 per label §5.4, no economy number changed).
 
 
 **Where the numbers live**: `src/shared/types/fish.ts` (species), `eggs.ts` (eggs), `rebirths.ts` (rebirths),
@@ -333,7 +333,9 @@ Shiny 1 % (coins 1.2x as often, 3x more sparkling coins: +35 %), Ghost 5 % (ghos
   holds 5 portions, each one back 10 s after use (each slot on its own timer): up to 30 meals a minute by hand, enough
   for ~22 fish that eat every 45 s (a fish only eats once hungry, 30 s after its meal, weak at 45 s). A 25-fish tank
   (rebirth 7) needs ~33: the feeders (§5.8) and Hearty meals (+15 s, ~25–33 fish) make up the rest. The reserve stops
-  the spam-clicking, never a normal tank. Not in the simulator (it doesn't model hunger).
+  the spam-clicking, never a normal tank. Not in the simulator (it doesn't model hunger). **Fish Keeper** (V1.1.19,
+  meals by hand all time, from rebirth 2): 500 → refill 9 s (33 meals a minute, ~24 fish), 2,000 → 8 s (37, ~27),
+  6,000 → a 6th portion (45, ~33 fish: V1.2's biggest tank). At ~20 meals a minute while playing: ~25 min, ~1h40, ~5 h.
 - **Gamepasses are not a lever of the balance**: prices and milestones are tuned for a free player (§5.10).
 - **Early quests pay income, not Ocean Points.** The first Ocean milestones are small (50 / 100 / 200 / 500 / 1,500
   points): a few hundred points from a quest in the first hour bring the Pelican, the second companion slot and the
@@ -400,7 +402,8 @@ The owner's species, placed by aquarium theme (live numbers: §3). The plan's Ha
 Shark** and its Wolf-head Dogfish the **Husky Dogfish** (same numbers).
 
 - Income x2 per species from species 10 (the first nine go x2–2.5), Ocean Points x1.6 (the milestones follow the rebirths).
-- Rarities: 3 per label (Common 1–3, Uncommon 4–6, Rare 7–9, Epic 10–12, Legendary 13–15, Mythic 16–18).
+- Rarities: 4 per label since V1.1.19 (Common 1–4, Uncommon 5–8, Rare 9–12, Epic 13–16, Legendary 17–20, Mythic 21–24:
+  V1.2's species fill the last ones; 3 per label until then). Only a label: no number depends on it.
 - Intervals alternate quick / slow so that each species feels different and the coin count stays around 1–1.5 coins/s
   for a full tank, the range the collectors are tuned for (§5.8).
 - The Lanternfish species is not the Abyss event's villain: a different look and a different code id.
