@@ -5,6 +5,7 @@ import type { GameEventType } from "shared/types/events";
 import type { AquariumTheme } from "shared/types/rebirths";
 import { FishRarity, FishType, FISH_TYPES } from "shared/types/fish";
 import { FishVariant } from "shared/types/variants";
+import { getSizeTier, SizeTier } from "shared/types/size";
 
 // UI V2 "arcade aquatic" (FigCraft: design/ui/redesign-v2.figcraft, UIKit_V2): Fredoka One for every text,
 // Luckiest Guy for titles, buttons and big numbers, always with a dark outline (kit.tsx TextStroke).
@@ -265,6 +266,25 @@ export const VARIANT_PALETTES: Record<FishVariant, Palette> = {
 };
 
 /** Colour of each variant in the UI (Fish Index columns, Ocean rows, hatch reveal). */
+/**
+ * Colours of the Size tiers (shared/types/size; FigCraft size.figcraft): soft greys below Normal (never red: a small
+ * fish is not a punishment), white, then green, light blue and orange; the Titan's pill goes gold to pink (titanTop /
+ * titanBottom).
+ */
+export const SIZE_TIER_PALETTES: Record<SizeTier, Palette> = {
+	Tiny: palette("#C9D3DC", "#8C99A6", "#6A7682", "#3A434C"),
+	Small: palette("#E4EBF1", "#B8C4CF", "#93A1AE", "#4E5A66"),
+	Normal: palette("#FFFFFF", "#DCE9F2", "#B5C8D6", "#5E7486"),
+	Big: palette("#C2FFD3", "#5BE37D", "#2EB357", "#11602A"),
+	Huge: palette("#BFF3FF", "#4FD2FF", "#1C9FD6", "#0A4F70"),
+	Giant: palette("#FFD9A8", "#FF9F43", "#E07816", "#7A3C06"),
+	Titan: palette("#FFE45C", "#FF7AB8", "#E0558F", "#8F2A5A"),
+};
+
+export function getSizePalette(size: number): Palette {
+	return SIZE_TIER_PALETTES[getSizeTier(size)];
+}
+
 export const VARIANT_STYLES: Record<FishVariant, { color: Color3 }> = {
 	Normal: { color: Color3.fromHex("#8FA9B8") },
 	Anomaly: { color: Color3.fromHex("#B36BFF") },

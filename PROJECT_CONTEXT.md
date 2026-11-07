@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-07 (V1.1.15; big numbers: money up to 1e300, units to Vg then 1.23e66, leaderboard scores encoded; ROADMAP_V1.2 planned and its balance tuned in tools/balance-v1.2-plan.js).
+> Last updated: 2026-11-07 (V1.1.16: the Size score, -15 to +15 % on every egg fish, the Big Catch line; ROADMAP_V1.2 M2b done).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -110,6 +110,9 @@ ProjectQuarium/
 │  ├─ leaderboards.figcraft  The lobby leaderboards (Leaderboards_Mockup: the three signs on the beach, Board_ocean /
 │  │                         _income / _time faces; LeaderboardTitles_Mockup: the nameplates, Plate_<board>_<tier>),
 │  │                         built by leaderboards.build.js (figcraft-cli; exports both previews)
+│  ├─ size.figcraft          The Size score (Size_Mockup: the hatch reveal's pill in four cases, the Ocean panel row's
+│  │                         Size chips, the Fish Index row's best Size), built by size.build.js (figcraft-cli; exports
+│  │                         design/previews/size-mockup.png)
 │  ├─ starfall.figcraft      The starfall's star gauge (StarGauge_Mockup: in the tank view, its states, the star power
 │  │                         pills), built by
 │  │                         starfall.build.js (figcraft-cli; exports design/previews/star-gauge-mockup.png)
@@ -208,7 +211,7 @@ ProjectQuarium/
    │  ├─ format.ts           formatNumber ("1,234,567", from 1e12 "1.23T") / formatShort ("25K", "1.5M", "1.8T", "1Qa"):
    │  │                      UI and server messages (Luau's tostring breaks from 1e14); units K … Qa, Qi, Sx … Vg (1e63),
    │  │                      then scientific ("1.23e66"); NaN reads "0". Panel.tsx re-exports them
-   │  ├─ network.ts          Remote contracts + getRemoteEvent(name) (Remotes folder in ReplicatedStorage), FishView / FishMessage
+   │  ├─ network.ts          Remote contracts + getRemoteEvent(name) (Remotes folder in ReplicatedStorage), FishView (with its Size) / FishMessage
    │  ├─ swim.ts             SwimSegment + getSwimPose: fish movement computed identically by server and clients
    │  ├─ tags.ts             CollectionService tags and the attributes they carry
    │  ├─ sounds.ts           Music id + SFX ids, played in 2D by AudioController (CoinStolen = the lantern's gulp, StarCatch, UfoBeam,
@@ -226,6 +229,10 @@ ProjectQuarium/
    │     │                   specialOddsMultiplier, ghostCoins, sparkles, rank, oceanPointsMultiplier, description),
    │     │                   VARIANT_ORDER, GHOST_COIN_MULTIPLIER, RECOLOURED_VARIANTS, rollVariant,
    │     │                   formatVariantChance(variant, luck), getOceanPoints, getSpecialCoinOdds, getVariantIncomeMultiplier
+   │     ├─ size.ts          The Size score (V1.1.16, ROADMAP_V1.2 §3.5): SIZE_MAX (15), SizeTier / SIZE_TIERS (Tiny,
+   │     │                   Small, Normal, Big, Huge, Giant, Titan: their lowest score), rollSize (triangular: two
+   │     │                   dice), toSize (sanitising), getSizeMultiplier (1 + size / 100: body and coins), getSizeTier,
+   │     │                   formatSize ("+12%")
    │     ├─ playerData.ts    PlayerData shape + defaults + helpers (getTotalFish, getFishAndEggs, isEggUnlocked,
    │     │                   getHatchedVariant, getLivingVariant, getIncubating, hasFreeIncubator…), MAX_MONEY (1e300),
    │     │                   DEFAULT_INCUBATORS (1), getCompanionSlots (Ocean slots + the slot pass: use it, never
@@ -248,16 +255,18 @@ ProjectQuarium/
    │     │                   getPassVariantLuck (x2) / getPassCompanionSlots (+1). The companion passes (WaterHenPass,
    │     │                   SwordfishPass, JellyfishPass) are sold from their quest line, picture = the companion's sticker
    │     ├─ quests.ts        QUESTS (Story1–9, Voyage1–16 the main line, WaterHen1–3 / Swordfish1–3 / Jellyfish1–3 the paid
-   │     │                   companion lines, Hatchery1–5 / Collector1–6 / Ocean1–2 the free side lines, Daily* / Weekly*),
-   │     │                   DAILY_QUEST_POOL / WEEKLY_QUEST_POOL (6 each, 3 drawn per period), STORY_LINES (Start / Ocean /
-   │     │                   Rebirth (shown "Voyage") / Snail / Pelican / Hatchery / Collector / WaterHen / Swordfish /
+   │     │                   companion lines, Hatchery1–5 / Collector1–6 / Ocean1–2 / BigCatch1–5 the free side lines,
+   │     │                   Daily* / Weekly*), DAILY_QUEST_POOL / WEEKLY_QUEST_POOL (7 each, 3 drawn per period),
+   │     │                   STORY_LINES (Start / Ocean / Rebirth (shown "Voyage") / Snail / Pelican / Hatchery /
+   │     │                   Collector / BigCatch (opens with Story2, like the Collector) / WaterHen / Swordfish /
    │     │                   Jellyfish: quests in order, requires (a quest), requiresCompanion, requiresPass, order),
    │     │                   refreshStoryLines, getActiveStoryQuests, getStoryLine, isQuestLocked,
    │     │                   BOARD_UNLOCK_REBIRTHS / isBoardUnlocked (dailies from rebirth 2, weeklies from 3);
    │     │                   counter stats CoinMoney, CoinsCollected, FishFed, LikesGiven, OceanPoints, EggsOpened,
-   │     │                   VariantHatched {variant}, FishReleased, CompanionStat {companion}; gauges (GAUGE_STATS)
-   │     │                   FishInTank, MoneyHeld, SpeciesHatched {fishType}, Rebirths, IndexCells, SpeciesFound (easter
-   │     │                   eggs excluded), VariantFound {variant}, TotalHatched; rewards Money / Companion / Feature /
+   │     │                   VariantHatched {variant}, FishReleased, CompanionStat {companion}, SizeHatched {minSize};
+   │     │                   gauges (GAUGE_STATS) FishInTank, MoneyHeld, SpeciesHatched {fishType}, Rebirths, IndexCells,
+   │     │                   SpeciesFound (easter eggs excluded), VariantFound {variant}, TotalHatched, SizeFound
+   │     │                   {minSize: species whose bestSize reaches it}, BigFishInTank {minSize: living fish}; rewards Money / Companion / Feature /
    │     │                   Perk / IncomeMinutes / OceanPoints / Title / Decor / CoinBoost; daily/weekly periods (UTC)
    │     ├─ perks.ts         Perk (CoinLinger1–2, CoinBounce, FishSatiety, PelicanDouble, PelicanCharges, WaterHen1–3,
    │     │                   Swordfish1–3, Jellyfish1–3), PERKS, COIN_BOUNCE_TIME, getGroundTimeBonus, hasCoinBounce,
@@ -318,8 +327,8 @@ ProjectQuarium/
    │  │                      GROUP_ADMIN_RANK: the Manager role, + ADMIN_USER_IDS), checked server-side;
    │  │                      canUseAdminPanel (live: ADMIN_PANEL_USER_IDS only, the developer's account, by the
    │  │                      owner's choice rather than a group rank; Studio: everyone)
-   │  ├─ saveData.ts         SaveData (profile: PlayerData + saved tank + stats + leaderboardBanned), SavedFish,
-   │  │                      SAVE_TEMPLATE, sanitizeSave
+   │  ├─ saveData.ts         SaveData (profile: PlayerData + saved tank + stats + leaderboardBanned), SavedFish (its
+   │  │                      Size score `size`: 0 in older saves), SAVE_TEMPLATE, sanitizeSave
    │  ├─ playerStats.ts      PlayerStats (server only, never synced): sessions, days, play / tending seconds, milestones
    │  │                      {tending, play, days, at} ("Onboarding:<step>", "Rebirth<n>", "Species:<type>", "AllSpecies",
    │  │                      "Ocean:<id>", "Quest:<id>"; tending -1 = reached before the stats existed: `legacy`), coins
@@ -367,11 +376,17 @@ ProjectQuarium/
    │     │                   callbacks, findHungryFishPosition / hasHungryFish (feeders); replication to the clients that
    │     │                   watch each tank ("WatchAquariums" → FishSync messages); the quest coin boost (runCoinBoost:
    │     │                   PlayerData.coinBoostSeconds runs down only while the tank produces, coins x
-   │     │                   QUEST_COIN_BOOST_MULTIPLIER in dropCoin; Player attributes CoinBoostSeconds / CoinBoostRunning)
+   │     │                   QUEST_COIN_BOOST_MULTIPLIER in dropCoin; Player attributes CoinBoostSeconds / CoinBoostRunning);
+   │     │                   the Size score (FishEntity.size: the egg's, the saved fish's, a special fish 0; adult scale =
+   │     │                   the species' middle scale x getSizeMultiplier, coins x it, Sugar's copy too), releaseFish
+   │     │                   takes the lowest Size first (isLessValuable), refreshTankSizes → PlayerData.tankSizes
+   │     │                   (smallest first, one deferred sync per frame)
    │     ├─ EggService       BuyEgg / OpenEgg: price, gating, incubation (up to PlayerData.incubators eggs per type, the
    │     │                   soonest opens first), draw (or forceNextHatch, Studio tests), variant with the player's luck
    │     │                   (or the star power, then spent: EggHatch.starPowered),
-   │     │                   quest stats EggsOpened / VariantHatched (+ CompanionStat WaterHen when it is equipped), hatch
+   │     │                   the Size score (rollSize; none for an easter egg; EggHatch.size / newBestSize, bestSize kept by
+   │     │                   DataService.hatchEgg),
+   │     │                   quest stats EggsOpened / VariantHatched / SizeHatched (+ CompanionStat WaterHen when it is equipped), hatch
    │     │                   time x PlayerData.incubationMultiplier, reveal timing, then FishService.spawnFish; isRevealing
    │     ├─ OnboardingService  Drives onboarding steps from server facts; scripted first coin / first hunger; reward
    │     ├─ EventService     Events: recurring clock (per server; never the last event again), admin events ("/event <name>" / "/event stop", admins
@@ -573,7 +588,10 @@ ProjectQuarium/
          │                   one until moved. Several incubators: a slot shows its soonest egg, a "n/N" chip and a gold
          │                   "+" that buys one more
          ├─ EggReveal        Hatch animation (rarity, odds (never an easter egg's: "SECRET"; "STAR POWER" for a variant
-         │                   drawn with star power), "NEW!" first discovery)
+         │                   drawn with star power), the Size pill (FigCraft size.figcraft: "SIZE +12%  •  HUGE" in its
+         │                   tier's colour, popping after the caption; a Titan: gold-pink pill, glow, sparkles, a second
+         │                   chime, "A PERFECT FISH!"), "NEW BEST SIZE" for a species record, "NEW!" first discovery;
+         │                   "a" / "an" before the name)
          ├─ StarGauge        The starfall's star gauge (FigCraft starfall.figcraft), right edge: navy plate, ★ badge, tube
          │                   of 3 bars filling with gold, a chip per bar (ANOMALY / GHOST / SHINY: SURE!, dimmed, or its
          │                   chance with the player's luck), the kept power marked, "CATCH THE STARS!" / "SHINY SURE!";
@@ -619,9 +637,11 @@ ProjectQuarium/
          ├─ FishIndexPanel   Scrolling table, one row per species, one cell per variant (its sticker once found, else the
          │                   species' dark silhouette + "?"); then the "EASTER EGGS" category (only those already hatched,
          │                   Normal cell, out of the "Discovered" count, their source / perk texts); hovering a column
-         │                   header or a cell shows the variant's description (VariantTooltip)
+         │                   header or a cell shows the variant's description (VariantTooltip); next to the rarity chip,
+         │                   the species' best Size (BestSizeChip: "BEST +14%  •  GIANT", or "BEST: NONE YET")
          ├─ OceanPanel       Two columns: left, one row per kind *and* variant in the tank (a rare variant's Release asks
-         │                   "Sure?" for 3 s); right, the Ocean milestones (progress bar / CLAIM! / Claimed) in a 470 px
+         │                   "Sure?" for 3 s; under its name, its fish's Size chips, smallest first, the first one "NEXT"
+         │                   (the one Release lets go), 6 at most then "+N more"); right, the Ocean milestones (progress bar / CLAIM! / Claimed) in a 470 px
          │                   scrolling list that opens on the first one not claimed
          ├─ ShopPanel        Gamepass shop (opened at the fisherman's hut): 2x2 grid of cards (icon slot in the pass's
          │                   colour + badge drawn in game, name, text, button); prices from GetProductInfo (cached):
@@ -760,6 +780,8 @@ ProjectQuarium/
   | `money` | Current money, never above `MAX_MONEY` (1e300, a guard against infinity in a save: DataService.addMoney clamps, sanitizeSave too; past 2^53 the last digits round, unseen) |
   | `fish` | Count of living fish per type |
   | `fishVariants` | Of those, per type, the living rare variants (normal = fish − these; `getLivingVariant`). DataService keeps it (hatch / removal / changeFish), RebirthService clears it, `sanitizeSave` rebuilds it from the tank |
+  | `tankSizes` | The Size scores of the living fish, per type and variant, smallest first: written only by FishService (refreshTankSizes), reset by `sanitizeSave` and rebuilt as the tank comes back |
+  | `bestSize` | The best Size score ever hatched per species (Fish Index "Best", the SizeFound quests), kept for good |
   | `hatched` | Count ever hatched, per type (Fish Index) |
   | `hatchedVariants` | Of those, per type, the rare variants (no `Normal` key: normal = hatched − these; `getHatchedVariant`) |
   | `incubating` | Per egg type, the hatch times of its eggs (soonest first, at most `incubators`) |
@@ -815,7 +837,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
 |---|---|---|
 | `SyncPlayerData` | Full PlayerData | UiController (+ CapacityPlaque…) |
 | `Notify` | `(message, "info"\|"warning")` | HudController toast |
-| `EggHatched` | `{eggType, fishType, variant, firstTime, starPowered}` (first of that type *and* variant) | UiController → EggReveal (the server drops the fish after `HATCH_REVEAL_TIME`) |
+| `EggHatched` | `{eggType, fishType, variant, firstTime, size?, newBestSize, starPowered}` (first of that type *and* variant; size: the Size score, none for an easter egg) | UiController → EggReveal (the server drops the fish after `HATCH_REVEAL_TIME`) |
 | `Reward` | `{title, subtitle, amount, item?: {icon, name, image?}}` | RewardPopup (after any reveal) |
 | `MoneyPopup` | `{position, amount, special, ocean?, stolen?, ghost?}` | IncomePopupController |
 | `PlaySfx` | `(SfxName, pitch)` | AudioController |
@@ -848,7 +870,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
 - **Egg.** `BuyEgg` → the server checks that an incubator of that type is free (`hasFreeIncubator`), the price and
   the gate, debits the money and pushes the hatch time into the type's sorted list. Once ready, `OpenEgg` → the server
   takes the soonest egg of the type, checks it is ready and the capacity, draws the fish (`getDrawOdds`) and the
-  variant, bumps `fish` and `hatched`, fires `EggHatched` and, after the reveal, `FishService.spawnFish`, which runs
+  variant and the Size score, bumps `fish`, `hatched` and `bestSize`, fires `EggHatched` and, after the reveal, `FishService.spawnFish`, which runs
   the `onFishSpawned` callbacks (onboarding, quest gauges).
 - **Variants.** `rollVariant` draws Shiny → Ghost → Anomaly → Normal with the player's luck (the onboarding egg is
   always Normal). Effects, server-side: Anomaly drops coins 1.2x as often; Ghost's sparkling coins become ghost coins

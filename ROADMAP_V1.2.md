@@ -5,7 +5,7 @@
 > the food reserve and a sixth companion (the Hermit Crab). Everything here is a **plan**: the economy's numbers
 > are tuned with the simulator (M1, `tools/balance-v1.2-plan.js`), nothing is built yet. Tick the boxes as tasks ship, and move what a
 > step ships into `PROJECT_CONTEXT.md` / `RELEASE_NOTES.md` / `BALANCE.md` as usual.
-> Last updated: 2026-11-07 (M1 done: prices tuned, end of V1.2 at ~25h15, the 4th bar at 0.9; owner's decisions: themes, 4 species per rarity, tank 33 (50 later), Size and its table,
+> Last updated: 2026-11-07 (M2b done: the Size score live in V1.1.16; M1 done: prices tuned, end of V1.2 at ~25h15, the 4th bar at 0.9; owner's decisions: themes, 4 species per rarity, tank 33 (50 later), Size and its table,
 > Galaxy at 0.2 % with the Lucky pass x3 on it, the 4th bar at 2.5 %, the Hermit Crab's live luck, boosts unchanged;
 > nothing built yet. Groundwork done: money up to 1e300, V1.1.15).
 
@@ -333,7 +333,7 @@ releases reach millions. Times measured in M1 (medians):
 | 9,000,000 | Aquarium holds **31 fish** | ~19h53, with rebirth 11 |
 | 14,000,000 | **Aurora rims** (cosmetic: the tank's rims glow with northern lights, every theme) | ~22h20 |
 | 20,000,000 | Aquarium holds **33 fish** (the new maximum) | ~23h11, with rebirth 12 |
-| 40,000,000 | **"Ocean Legend"** title + a giant pearl decor in the tank | ~26h39, after the end |
+| 40,000,000 | **"Ocean Sovereign"** title + a giant pearl decor in the tank ("Ocean Legend" is already the Ocean Points leaderboard's title) | ~26h39, after the end |
 
 ---
 
@@ -435,7 +435,7 @@ last live rebirth.
 - [ ] **M2 Groundwork**: tank 33 built for 50 (room, swim, decor, performance tests with 6 full tanks of 33 and of 50),
       the rarities at 4 a label, egg shop with 16 eggs,
       Fish Keeper line + food perks + Quick pantry, the HUD's 6th portion. Can ship before any new species.
-- [ ] **M2b Size score** (§3.5): the draw, the save field, the model's scale, the coin value, the hatch reveal, the
+- [x] **M2b Size score** (§3.5; V1.1.16, 2026-11-07, the Titan's trophy decor left for later: title only): the draw, the save field, the model's scale, the coin value, the hatch reveal, the
       fish card, the release panel's sort, the Fish Index's best size, the Big Catch line and the size dailies /
       weeklies (FigCraft mockups of the reveal and the card first). For every player, V1 content included.
 - [ ] **M2c New variant + starfall** (§3.6, §3.7): the variant (look, coin, Fish Index column, release order), the

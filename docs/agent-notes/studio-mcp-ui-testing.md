@@ -67,3 +67,9 @@ Related: [[lobby-decor-constraints]]
   slider by the topbar's height). `user_mouse_input` x / y take the same values, but a negative y can't be sent:
   click topbar elements with `instance_path` (e.g. "LocalPlayer.PlayerGui.ReactUi.SoundControl.2.Face"; an unkeyed
   React child is named by its index).
+- **Backing up the owner's save when Edit can't read it** (2026-11-07, V1.1.16): a DataStore call from an Edit
+  execute_luau failed with "502: API Services rejected request ... Access forbidden" (the playtest itself still said
+  "Roblox API services available"). Start play, then from the **Server** datamodel `GetAsync("Player_<UserId>")` on
+  `PlayerData_v1` works: copy it to `GetDataStore("PlayerData_Backups"):SetAsync("Player_<UserId>_<reason>", raw,
+  {userId})` and read it back to check, instead of pasting a huge JSON into the scratchpad. Restore with the same
+  SetAsync on `PlayerData_v1` after the play has stopped and its final save is done (only if the owner wants it).

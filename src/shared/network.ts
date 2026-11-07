@@ -95,6 +95,8 @@ export interface FishView {
 	plot: number; // PlotIndex of its tank
 	fishType: FishType;
 	variant: FishVariant;
+	/** Size score (shared/types/size), 0 for the special fish; already part of `scale`. */
+	size: number;
 	scale: number; // adult scale (× the template), reached at the last growth stage
 	growthStage: number;
 	hunger: HungerState;
@@ -122,6 +124,10 @@ export interface EggHatch {
 	variant: FishVariant;
 	/** First fish of this type and variant the player hatches (a new fish index entry). */
 	firstTime: boolean;
+	/** Its Size score (shared/types/size); undefined for a special fish (easter egg), which has none. */
+	size?: number;
+	/** The best Size score of its species so far (a new record of the Fish Index). */
+	newBestSize: boolean;
 	/** Its variant was drawn with the player's star power (a starfall), spent by this egg. */
 	starPowered: boolean;
 }

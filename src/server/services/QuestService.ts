@@ -48,6 +48,8 @@ export interface QuestSubject {
 	fishType?: FishType;
 	variant?: FishVariant;
 	companion?: CompanionType;
+	/** A hatched fish's Size score (SizeHatched). */
+	size?: number;
 }
 
 const BOARDS: Record<QuestBoardCategory, { pool: readonly string[]; count: number; seed: number }> = {
@@ -175,6 +177,8 @@ class QuestServiceSingleton implements Lifecycle {
 			if (config.fishType !== undefined && config.fishType !== subject.fishType) return undefined;
 			if (config.variant !== undefined && config.variant !== subject.variant) return undefined;
 			if (config.companion !== undefined && config.companion !== subject.companion) return undefined;
+			if (config.minSize !== undefined && (subject.size === undefined || subject.size < config.minSize))
+				return undefined;
 			return (progress) => progress + amount;
 		});
 	}
@@ -221,6 +225,19 @@ class QuestServiceSingleton implements Lifecycle {
 				if (!isEasterEgg(fishType) && getHatchedVariant(data, fishType, variant) > 0) species += 1;
 			}
 			return species;
+		}
+		if (config.stat === "SizeFound") {
+			const minSize = config.minSize ?? 0;
+			let species = 0;
+			for (const [, best] of pairs(data.bestSize)) if (best >= minSize) species += 1;
+			return species;
+		}
+		if (config.stat === "BigFishInTank") {
+			const minSize = config.minSize ?? 0;
+			let fish = 0;
+			for (const [, variants] of pairs(data.tankSizes))
+				for (const [, sizes] of pairs(variants)) for (const size of sizes) if (size >= minSize) fish += 1;
+			return fish;
 		}
 		if (config.stat === "TotalHatched") {
 			let total = 0;

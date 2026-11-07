@@ -276,7 +276,13 @@ class DataServiceController implements Lifecycle {
 	 * Turns the soonest incubating egg of the type into a fish of the inventory (the caller checked it is ready).
 	 * Returns false if there was no such egg.
 	 */
-	public hatchEgg(player: Player, eggType: EggType, fishType: FishType, variant: FishVariant): boolean {
+	public hatchEgg(
+		player: Player,
+		eggType: EggType,
+		fishType: FishType,
+		variant: FishVariant,
+		size?: number,
+	): boolean {
 		const data = this.getData(player);
 		const eggs = data?.incubating[eggType];
 		if (!data || !eggs || eggs.size() === 0) return false;
@@ -285,6 +291,9 @@ class DataServiceController implements Lifecycle {
 		if (eggs.size() === 0) data.incubating[eggType] = undefined;
 		data.fish[fishType] += 1;
 		data.hatched[fishType] = (data.hatched[fishType] ?? 0) + 1;
+		// The species' Size record (the Fish Index's "Best", the Big Catch quests)
+		const best = data.bestSize[fishType];
+		if (size !== undefined && (best === undefined || size > best)) data.bestSize[fishType] = size;
 		if (variant !== "Normal") {
 			const variants = data.hatchedVariants[fishType] ?? {};
 			variants[variant] = (variants[variant] ?? 0) + 1;

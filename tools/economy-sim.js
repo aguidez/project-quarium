@@ -88,7 +88,7 @@ function rollVariant() {
 }
 /**
  * The Size score (ROADMAP_V1.2 §3.5): a whole number in [-sizeMax, +sizeMax], the sum of two dice (triangular), drawn
- * at hatch; the fish's coins are worth x(1 + size / 100), its Ocean Points don't change. 0 = no Size score (live V1).
+ * at hatch; the fish's coins are worth x(1 + size / 100), its Ocean Points don't change (live since V1.1.16).
  */
 function rollSize() {
 	if (!P.sizeMax) return 0;
@@ -178,6 +178,13 @@ const SIDE_QUESTS = overrides.SIDE_QUESTS ||
 			{ cells: 50, ocean: 0 },
 		],
 		ocean: { releases: 50, minutes: 3 },
+		// Big Catch (quests.ts, V1.1.16): hatch a fish of `size` or more, or hold `count` of them at once
+		bigCatch: [
+			{ size: 10, minutes: 3 },
+			{ size: 10, count: 5, minutes: 5 },
+			{ size: 13, minutes: 5 },
+			{ size: 15, minutes: 0 },
+		],
 	};
 // The Ocean line as a list (one entry before V1.2); the Big Catch line (V1.2 Size score: hatch a fish of `size` or
 // more, or hold `count` of them in the tank at once, in order) is empty without a Size score.
@@ -212,7 +219,7 @@ const P = Object.assign(
 		checkpoints: [15, 30, 60, 90, 120, 150, 180, 240, 300, 360],
 		horizon: 15 * 3600, // V1 ends at ~12h15 (all 18 species); room for the slowest players
 		players: 2000,
-		sizeMax: 0, // the Size score's range (ROADMAP_V1.2 §3.5: 15); 0 = none
+		sizeMax: 15, // the Size score's range (shared/types/size SIZE_MAX, live since V1.1.16); 0 = none
 	},
 	plan.P || {},
 	overrides.P || {},

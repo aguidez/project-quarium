@@ -11,6 +11,36 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.16 — 2026-11-07
+
+**The Size score**: every fish hatched from an egg is now born a little smaller or bigger than usual, from -15 % to
++15 %, and its coins are worth as much less or more. A reason to keep opening eggs for a better fish.
+
+**New**
+- Each fish's Size shows when it hatches, right under its rarity: "SIZE +12%  •  HUGE". Seven tiers, from Tiny to
+  Titan; a Titan (+15 %, about one egg in 1,800) is a perfect fish, with its own pill, glow and fanfare.
+- A new record for a species says so at the hatch ("NEW BEST SIZE FOR THIS SPECIES!"), and the Fish Index shows the
+  best Size of each species next to its rarity.
+- The Ocean panel shows the Size of every fish of a row, smallest first: the one marked NEXT is the one Release lets go.
+- New quest line **Big Catch** (after "Full House"): hatch a Huge fish, have 5 Huge fish at once, hatch a Giant, hatch
+  a Titan (title "Titan Tamer"), hatch a Huge fish of 18 species (title "Size Collector").
+- New daily quest "Big Fish" (hatch a fish of +4 % or more) and weekly quest "Huge Haul" (+10 % or more).
+
+**Changes**
+- The size of a fish now comes from its Size score, not from a hidden random size: a bigger fish really earns more.
+  Fish hatched before this update have a Size of 0 %.
+- Releasing a fish lets go of the smallest one of its row first (lowest Size), then the youngest, as before.
+
+**Balance**
+- With the Size score, players who keep their biggest fish earn about 15 to 30 % more, and the game is a little
+  faster for the average player: rebirth 1 at ~17 min (was ~19), rebirth 8 at ~10h47 (was ~10h56), all eighteen
+  species at ~11h59 (was ~12h18). No price was changed.
+
+**Fixes**
+- The hatch caption now says "an" before a name starting with a vowel ("You hatched an Imperial Discus!").
+
+---
+
 ## V1.1.15 — 2026-11-07
 
 Groundwork for the next rebirths: the game can now count far beyond a quadrillion.

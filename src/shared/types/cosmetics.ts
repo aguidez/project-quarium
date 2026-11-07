@@ -18,6 +18,8 @@ export type CosmeticId =
 	| "TitleMasterAquarist"
 	| "TitleCollector"
 	| "TitleOceanFriend"
+	| "TitleTitanTamer"
+	| "TitleSizeCollector"
 	| "TitleAlphaPioneer"
 	| "TitleOceanLegend"
 	| "TitleTankTycoon"
@@ -55,6 +57,16 @@ export const COSMETICS: Record<CosmeticId, CosmeticConfig> = {
 		kind: "Title",
 		displayName: "Ocean Friend",
 		description: "A title for those who set a Shiny free.",
+	},
+	TitleTitanTamer: {
+		kind: "Title",
+		displayName: "Titan Tamer",
+		description: "A title for those who hatched a Titan, a perfect fish.",
+	},
+	TitleSizeCollector: {
+		kind: "Title",
+		displayName: "Size Collector",
+		description: "A title for those who hatched a Huge fish of 18 species.",
 	},
 	TitleAlphaPioneer: {
 		kind: "Title",
@@ -114,6 +126,8 @@ export const TITLE_ORDER: readonly CosmeticId[] = [
 	"TitleOceanGuardian",
 	"TitleAlphaPioneer",
 	"TitleCollector",
+	"TitleTitanTamer",
+	"TitleSizeCollector",
 	"TitleOceanFriend",
 ];
 

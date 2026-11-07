@@ -3,6 +3,7 @@ import { MIN_FISH_KEPT } from "shared/types/features";
 import { FISH_TYPES, FishType, getFishIndexOrder } from "shared/types/fish";
 import { getLivingVariant, PlayerData } from "shared/types/playerData";
 import { FISH_VARIANTS, FishVariant, getOceanPoints, VARIANT_ORDER } from "shared/types/variants";
+import { formatSize } from "shared/types/size";
 import { getPassOceanMultiplier } from "shared/types/gamepasses";
 import { COMPANION_TYPES } from "shared/types/companions";
 import {
@@ -19,6 +20,7 @@ import {
 	FONT_BOLD,
 	FONT_TITLE,
 	getFishRarity,
+	getSizePalette,
 	NAVY,
 	OCEAN_COLORS,
 	Palette,
@@ -28,7 +30,7 @@ import {
 	verticalGradient,
 } from "./theme";
 
-const ROW_CONTENT = 62;
+const ROW_CONTENT = 70; // name, details and the row's Size chips
 const ROW_PADDING = 10;
 const ROW_DEPTH = 5;
 const ROW_HEIGHT = ROW_CONTENT + ROW_PADDING * 2 + ROW_DEPTH;
@@ -42,7 +44,9 @@ const COACH_TEXT =
 	"Press Release to send a fish back to the ocean. It frees a spot in your tank, and rarer fish give more points!";
 /** Reassures the player: the server releases the fish of the row that earns the least (FishService.releaseFish). */
 const RELEASE_RULE =
-	"Each row is a kind and a variant: Release lets go of its smallest fish. Rare variants give more points and ask you to confirm.";
+	"Each row is a kind and a variant: Release lets go of its smallest fish (the lowest Size, marked NEXT). Rare variants give more points and ask you to confirm.";
+/** Size chips shown per row (the smallest ones), then "+N more" (FigCraft size.figcraft: OceanRow). */
+const MAX_SIZE_CHIPS = 6;
 /** A rare variant's Release button stays armed ("Sure?") this long after the first click. */
 const CONFIRM_TIME = 3;
 const COACH_PADDING_X = 14 + 10;
@@ -66,7 +70,7 @@ const COACH_BUTTON_ROOM = 108; // "Got it!" button and the gap before it
 
 export interface OceanPanelProps {
 	/** Living fish per type and rare variant (PlayerData.fish, fishVariants). */
-	tank: Pick<PlayerData, "fish" | "fishVariants" | "passes">;
+	tank: Pick<PlayerData, "fish" | "fishVariants" | "passes" | "tankSizes">;
 	oceanPoints: number;
 	/** First visit after unlocking it: a short explanation on top (FigCraft: PanelCoach). */
 	showTutorial: boolean;
@@ -105,6 +109,8 @@ function FishRow(props: {
 	fishType: FishType;
 	variant: FishVariant;
 	count: number;
+	/** The Size scores of the row's fish, smallest first (PlayerData.tankSizes): the first goes on Release. */
+	sizes: readonly number[];
 	canRelease: boolean;
 	/** The x2 Ocean Points pass. */
 	pointsMultiplier: number;
@@ -204,6 +210,41 @@ function FishRow(props: {
 					TextColor3={NAVY.muted}
 					TextXAlignment={Enum.TextXAlignment.Left}
 				/>
+				{props.sizes.size() > 0 && (
+					<frame key="Sizes" LayoutOrder={3} Size={new UDim2(1, 0, 0, 20)} BackgroundTransparency={1}>
+						<uilistlayout
+							FillDirection={Enum.FillDirection.Horizontal}
+							VerticalAlignment={Enum.VerticalAlignment.Center}
+							Padding={new UDim(0, 5)}
+							SortOrder={Enum.SortOrder.LayoutOrder}
+						/>
+						{props.sizes
+							.filter((_, index) => index < MAX_SIZE_CHIPS)
+							.map((size, index) => (
+								<Chip
+									key={`Size${index}`}
+									layoutOrder={index}
+									text={index === 0 && props.canRelease ? `NEXT ${formatSize(size)}` : formatSize(size)}
+									color={getSizePalette(size).base}
+									height={20}
+									textSize={12}
+								/>
+							))}
+						{props.sizes.size() > MAX_SIZE_CHIPS && (
+							<textlabel
+								key="More"
+								LayoutOrder={MAX_SIZE_CHIPS}
+								Size={UDim2.fromOffset(0, 20)}
+								AutomaticSize={Enum.AutomaticSize.X}
+								BackgroundTransparency={1}
+								Font={FONT_BOLD}
+								Text={`+${props.sizes.size() - MAX_SIZE_CHIPS} more`}
+								TextSize={12}
+								TextColor3={NAVY.muted}
+							/>
+						)}
+					</frame>
+				)}
 			</frame>
 			<Chip
 				key="Gain"
@@ -463,6 +504,7 @@ export function OceanPanel(props: OceanPanelProps) {
 					fishType={fishType}
 					variant={variant}
 					count={count}
+					sizes={props.tank.tankSizes[fishType]?.[variant] ?? []}
 					canRelease={canRelease}
 					pointsMultiplier={getPassOceanMultiplier(props.tank.passes)}
 					onRelease={() => props.onRelease(fishType, variant)}

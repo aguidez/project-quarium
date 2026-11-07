@@ -3,6 +3,7 @@ import { EGG_TYPES, EggType, getHatchChance } from "shared/types/eggs";
 import { FISH_TYPES, FishType, getFishIndexOrder, isEasterEgg } from "shared/types/fish";
 import { getHatchedVariant, PlayerData } from "shared/types/playerData";
 import { FISH_VARIANTS, FishVariant, formatVariantChance, VARIANT_ORDER } from "shared/types/variants";
+import { formatSize, getSizeTier, SIZE_TIERS } from "shared/types/size";
 import { Card, Chip, ItemSlot, Outline, ProgressBar, TextStroke } from "./kit";
 import { formatNumber, getWrappedHeight, Panel, PANEL_PADDING } from "./Panel";
 import {
@@ -10,6 +11,7 @@ import {
 	FONT_BOLD,
 	FONT_TITLE,
 	getFishRarity,
+	getSizePalette,
 	NAVY,
 	PALETTES,
 	RARITY_STYLES,
@@ -43,7 +45,7 @@ type HoverHandler = (variant: FishVariant | undefined) => void;
 
 export interface FishIndexPanelProps {
 	/** Fish hatched so far, per type and per rare variant (PlayerData). */
-	collection: Pick<PlayerData, "hatched" | "hatchedVariants">;
+	collection: Pick<PlayerData, "hatched" | "hatchedVariants" | "bestSize">;
 	/** The player's variant luck (getPlayerVariantLuck): the chances shown are the ones they hatch with. */
 	luck: number;
 	onClose: () => void;
@@ -255,8 +257,17 @@ function FishRow(props: {
 					Padding={new UDim(0, 3)}
 					SortOrder={Enum.SortOrder.LayoutOrder}
 				/>
-				{/* The rarity always shows, so players know what they are farming for */}
-				<Chip key="Rarity" layoutOrder={1} text={rarity.label} color={rarity.color} height={22} textSize={13} />
+				{/* The rarity always shows, so players know what they are farming for; then the species' best Size */}
+				<frame key="Chips" LayoutOrder={1} Size={new UDim2(1, 0, 0, 22)} BackgroundTransparency={1}>
+					<uilistlayout
+						FillDirection={Enum.FillDirection.Horizontal}
+						VerticalAlignment={Enum.VerticalAlignment.Center}
+						Padding={new UDim(0, 8)}
+						SortOrder={Enum.SortOrder.LayoutOrder}
+					/>
+					<Chip key="Rarity" layoutOrder={1} text={rarity.label} color={rarity.color} height={22} textSize={13} />
+					{discovered && !easterEgg && <BestSizeChip best={props.collection.bestSize[props.fishType]} />}
+				</frame>
 				<Text
 					order={2}
 					text={discovered ? fish.displayName : "???"}
@@ -289,6 +300,37 @@ function FishRow(props: {
 			</frame>
 			{cells}
 		</Card>
+	);
+}
+
+/**
+ * The best Size ever hatched of a species (FigCraft size.figcraft: IndexRow): "BEST +14%  •  GIANT" in its tier's
+ * colour, or "BEST: NONE YET" for a species not hatched since the Size score came (V1.1.16).
+ */
+function BestSizeChip(props: { best?: number }) {
+	if (props.best === undefined) {
+		return (
+			<Chip
+				key="BestSize"
+				layoutOrder={2}
+				text="BEST: NONE YET"
+				color={Color3.fromHex("#3A5A80")}
+				textColor={NAVY.inactiveText}
+				height={22}
+				textSize={11}
+			/>
+		);
+	}
+	const tier = SIZE_TIERS.find(([name]) => name === getSizeTier(props.best!))![1];
+	return (
+		<Chip
+			key="BestSize"
+			layoutOrder={2}
+			text={`BEST ${formatSize(props.best)}  •  ${tier.displayName.upper()}`}
+			color={getSizePalette(props.best).base}
+			height={22}
+			textSize={12}
+		/>
 	);
 }
 

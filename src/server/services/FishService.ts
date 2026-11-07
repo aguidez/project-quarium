@@ -33,6 +33,8 @@ import { isOnboardingDone } from "shared/types/onboarding";
 import { getEventCoinMultiplier } from "shared/types/events";
 import { getSatietyBonus } from "shared/types/perks";
 import { getRebirthMultiplier } from "shared/types/rebirths";
+import { PlayerData } from "shared/types/playerData";
+import { getSizeMultiplier, rollSize, toSize } from "shared/types/size";
 import { getPassCoinMultiplier } from "shared/types/gamepasses";
 import { QUEST_COIN_BOOST_MULTIPLIER } from "shared/types/quests";
 import {
@@ -87,8 +89,10 @@ interface FishEntity {
 	fishType: FishType;
 	config: FishConfig;
 	variant: FishVariant;
+	/** Size score (shared/types/size): coins and body x getSizeMultiplier; 0 for the special fish. */
+	size: number;
 	payoutInterval: number; // seconds between two coins: the species' interval, shortened by the variant
-	scale: number; // adult scale, reached at the last growth stage
+	scale: number; // adult scale, reached at the last growth stage (the species' middle scale x its Size)
 	adultSize: Vector3; // body size at that scale (template "Body", head toward -Z)
 	bornAt: number; // os.clock() when it was dropped in the water, pushed back while the owner is AFK
 	growth: readonly GrowthStage[]; // stages of its fish type
@@ -147,6 +151,8 @@ class FishServiceSingleton implements Lifecycle {
 	private watchAppliedAt = new Map<Player, number>();
 	private weakNoticeAt = new Map<Player, number>();
 	private fartSfxAt = new Map<Player, number>();
+	/** Owners whose PlayerData.tankSizes changed: one sync at the end of the frame (a joining tank spawns many fish). */
+	private sizesToSync = new Set<Player>();
 
 	public onInit() {
 		const fishTypes = new Array<FishType>();
@@ -245,6 +251,7 @@ class FishServiceSingleton implements Lifecycle {
 			plot: fish.plot,
 			fishType: fish.fishType,
 			variant: fish.variant,
+			size: fish.size,
 			scale: fish.scale,
 			growthStage: fish.growthStage,
 			hunger: fish.state,
@@ -435,6 +442,7 @@ class FishServiceSingleton implements Lifecycle {
 			getIncomePerSecond(fish.fishType) *
 			fish.growth[fish.growthStage].coinMultiplier *
 			getVariantIncomeMultiplier(fish.variant) *
+			getSizeMultiplier(fish.size) *
 			sparkling *
 			60
 		);
@@ -474,7 +482,7 @@ class FishServiceSingleton implements Lifecycle {
 	}
 
 	/**
-	 * Coin value follows the fish's growth, times the owner's rebirth multiplier (permanent), the +50% Coins
+	 * Coin value follows the fish's growth and Size score, times the owner's rebirth multiplier (permanent), the +50% Coins
 	 * pass, the like boost (doubled for a while), the quest coin boost (x2 while it lasts), a UFO's mutation (green x2,
 	 * red x0.5) and the running event's bonus (abyssal raid x1.5). One coin out
 	 * of SPECIAL_COIN_ODDS is special (never a frozen one), one out of 5 for a shiny fish; a ghost
@@ -500,11 +508,14 @@ class FishServiceSingleton implements Lifecycle {
 			(ghost ? GHOST_COIN_MULTIPLIER : 1);
 		// An easter egg fish's coin is worth a share of the tank's income (the French Fish's croissant) or of its best
 		// fish's coin (Sugar's sugar cube)
+		// Sugar's copy keeps the best fish's Size; a fish's own coin follows its Size
 		const base = copied
-			? getCoinValue(copied.fishType, copied.growthStage, special) * (easterEgg?.bestFishShare ?? 1)
+			? getCoinValue(copied.fishType, copied.growthStage, special) *
+				getSizeMultiplier(copied.size) *
+				(easterEgg?.bestFishShare ?? 1)
 			: easterEgg
 				? this.getTankIncomePerMinute(owner) * easterEgg.incomeShare * (special ? SPECIAL_COIN_MULTIPLIER : 1)
-				: getCoinValue(fish.fishType, fish.growthStage, special);
+				: getCoinValue(fish.fishType, fish.growthStage, special) * getSizeMultiplier(fish.size);
 		const value = math.max(math.round(base * multiplier), 1);
 		const belly = this.getPose(fish).Position.sub(new Vector3(0, this.getSize(fish).Y / 2, 0));
 		CoinService.spawnCoin(owner, fish.config.coin, value, belly, special && !ghost, frozen, ghost);
@@ -524,7 +535,8 @@ class FishServiceSingleton implements Lifecycle {
 			perSecond +=
 				getIncomePerSecond(fish.fishType) *
 				fish.growth[fish.growthStage].coinMultiplier *
-				getVariantIncomeMultiplier(fish.variant);
+				getVariantIncomeMultiplier(fish.variant) *
+				getSizeMultiplier(fish.size);
 		}
 		const sparkling = 1 + (SPECIAL_COIN_MULTIPLIER - 1) / SPECIAL_COIN_ODDS;
 		return perSecond * sparkling * 60;
@@ -722,6 +734,7 @@ class FishServiceSingleton implements Lifecycle {
 		if (!fish.alive) return;
 		fish.alive = false;
 		this.fishByOwner.get(fish.owner)?.delete(fish);
+		this.refreshTankSizes(fish.owner); // before removeFish: its sync carries them
 		DataService.removeFish(fish.owner, fish.fishType, fish.variant);
 		this.send(fish.plot, { kind: "Remove", id: fish.id, cause, by: predator?.id });
 		if (cause === "Eaten" && predator) {
@@ -735,8 +748,8 @@ class FishServiceSingleton implements Lifecycle {
 
 	/**
 	 * Releases one living fish of the type and variant back to the ocean (the player picks both in the
-	 * Ocean panel): the one that earns the least (lowest growth stage, so smallest coins, then the
-	 * smallest, then the youngest). The Ocean panel tells the player so. Returns where it was (for the points popup), or undefined if the owner has none.
+	 * Ocean panel): the smallest one (lowest Size score, the owner's rule), then the one that earns the least (lowest
+	 * growth stage), then the youngest. The Ocean panel tells the player so. Returns where it was (for the points popup), or undefined if the owner has none.
 	 */
 	public releaseFish(owner: Player, fishType: FishType, variant: FishVariant): Vector3 | undefined {
 		const fishes = this.fishByOwner.get(owner);
@@ -754,11 +767,15 @@ class FishServiceSingleton implements Lifecycle {
 		return position;
 	}
 
-	/** Whether `fish` earns less than `other` (same type): commoner variant, smaller coins, smaller body, younger. */
+	/**
+	 * Whether `fish` goes before `other` (same type): commoner variant, lower Size score (permanent: a Titan just hatched
+	 * is never released before a Tiny adult), smaller coins (growth), smaller body, younger.
+	 */
 	private isLessValuable(fish: FishEntity, other: FishEntity): boolean {
 		const rank = FISH_VARIANTS[fish.variant].rank;
 		const otherRank = FISH_VARIANTS[other.variant].rank;
 		if (rank !== otherRank) return rank < otherRank;
+		if (fish.size !== other.size) return fish.size < other.size;
 		const coins = fish.growth[fish.growthStage].coinMultiplier;
 		const otherCoins = other.growth[other.growthStage].coinMultiplier;
 		if (coins !== otherCoins) return coins < otherCoins;
@@ -1077,6 +1094,7 @@ class FishServiceSingleton implements Lifecycle {
 			// It becomes the alien fish: a new fish (an easter egg), the kidnapped one is gone for good
 			fish.alive = false;
 			this.fishByOwner.get(owner)?.delete(fish);
+			this.refreshTankSizes(owner);
 			DataService.changeFish(owner, fish.fishType, fish.variant, "AlienFish", "Normal");
 			this.spawnFish(owner, "AlienFish", undefined, "Normal", { from, time });
 			task.wait(time);
@@ -1084,8 +1102,10 @@ class FishServiceSingleton implements Lifecycle {
 		}
 		if (applied === "Variant") {
 			if (better === undefined) return undefined; // (can't happen: a Shiny gets Green)
-			DataService.changeFish(owner, fish.fishType, fish.variant, fish.fishType, better);
+			const from = fish.variant;
 			fish.variant = better;
+			this.refreshTankSizes(owner); // the Size moves with its fish to the new variant
+			DataService.changeFish(owner, fish.fishType, from, fish.fishType, better);
 			fish.payoutInterval = fish.config.incomeInterval / FISH_VARIANTS[better].coinRate;
 			FishAssets.require(fish.fishType, fish.variant);
 		} else {
@@ -1117,6 +1137,8 @@ class FishServiceSingleton implements Lifecycle {
 	 * the variant it drew), and with `saved` to bring back a fish of a saved tank (same size, age,
 	 * hunger and variant). `arrival`: dropped by a UFO from that point (held in its beam for `time`
 	 * seconds) instead of the usual spot. `joining`: brought back with the tank of a joining owner (restoreTank).
+	 * `hatchedSize`: the Size score its egg drew (EggService); a saved fish keeps its own, a special fish has none, any
+	 * other new fish (admin, a newborn added on join) draws one.
 	 */
 	public spawnFish(
 		owner: Player,
@@ -1125,6 +1147,7 @@ class FishServiceSingleton implements Lifecycle {
 		hatchedVariant?: FishVariant,
 		arrival?: { from: Vector3; time: number },
 		joining = false,
+		hatchedSize?: number,
 	): FishEntity | undefined {
 		if (!owner.IsDescendantOf(Players)) return undefined;
 
@@ -1133,11 +1156,14 @@ class FishServiceSingleton implements Lifecycle {
 		const template = this.templates.get(fishType);
 		if (!aquarium || !template) return undefined;
 
-		// Random adult size of the Studio template (ServerStorage.Assets.Fish): it starts as a
-		// baby and grows over time (the clients scale their models from growthStage)
-		const scale = saved
-			? math.clamp(saved.scale, config.scaleMin, config.scaleMax)
-			: this.rng.NextNumber(config.scaleMin, config.scaleMax);
+		// Adult size of the Studio template (ServerStorage.Assets.Fish): the species' middle scale x its Size score (a
+		// special fish keeps a random one); it starts as a baby and grows (the clients scale their models from growthStage)
+		const size = config.easterEgg ? 0 : saved ? toSize(saved.size) : (hatchedSize ?? rollSize(this.rng));
+		const scale = config.easterEgg
+			? saved
+				? math.clamp(saved.scale, config.scaleMin, config.scaleMax)
+				: this.rng.NextNumber(config.scaleMin, config.scaleMax)
+			: ((config.scaleMin + config.scaleMax) / 2) * getSizeMultiplier(size);
 		const age = saved?.age ?? 0;
 		const variant = saved?.variant ?? hatchedVariant ?? "Normal";
 		const payoutInterval = config.incomeInterval / FISH_VARIANTS[variant].coinRate;
@@ -1149,6 +1175,7 @@ class FishServiceSingleton implements Lifecycle {
 			fishType,
 			config,
 			variant,
+			size,
 			payoutInterval,
 			scale,
 			adultSize: template.PrimaryPart!.Size.mul(scale),
@@ -1199,6 +1226,7 @@ class FishServiceSingleton implements Lifecycle {
 			this.fishByOwner.set(owner, fishes);
 		}
 		fishes.add(entity);
+		this.refreshTankSizes(owner);
 		// Its model reaches the clients before the message that makes them build it
 		FishAssets.require(fishType, variant);
 		this.send(entity.plot, { kind: "Spawn", fish: this.getView(entity) });
@@ -1207,6 +1235,33 @@ class FishServiceSingleton implements Lifecycle {
 		// Also for restored fish: listeners are idempotent (onboarding step after a hatch, quest gauges)
 		for (const callback of this.spawnedCallbacks) task.spawn(callback, owner, fishType);
 		return entity;
+	}
+
+	/**
+	 * Rewrites PlayerData.tankSizes from the owner's living fish (UFO passengers included: still theirs), smallest
+	 * first, and syncs it at the end of the frame (once for a whole joining tank).
+	 */
+	private refreshTankSizes(owner: Player) {
+		const data = DataService.getData(owner);
+		const fishes = this.fishByOwner.get(owner);
+		if (!data || !fishes) return;
+		const sizes: PlayerData["tankSizes"] = {};
+		for (const fish of fishes) {
+			if (!fish.alive || fish.config.easterEgg) continue;
+			const variants = sizes[fish.fishType] ?? {};
+			const list = variants[fish.variant] ?? [];
+			list.push(fish.size);
+			variants[fish.variant] = list;
+			sizes[fish.fishType] = variants;
+		}
+		for (const [, variants] of pairs(sizes)) for (const [, list] of pairs(variants)) list.sort((a, b) => a < b);
+		data.tankSizes = sizes;
+		if (this.sizesToSync.has(owner)) return;
+		this.sizesToSync.add(owner);
+		task.defer(() => {
+			this.sizesToSync.delete(owner);
+			if (owner.IsDescendantOf(Players)) DataService.sync(owner);
+		});
 	}
 
 	/** Templates still worn by a fish of some tank stay on the clients, the others go after a while (FishAssets). */
@@ -1242,6 +1297,7 @@ class FishServiceSingleton implements Lifecycle {
 				hunger: fish.state,
 				hungerLeft: fish.state === HungerState.Weak ? 0 : math.max(fish.stateEndsAt - clock, 0),
 				variant: fish.variant,
+				size: fish.size,
 			});
 		}
 		save.tank = tank;

@@ -30,6 +30,13 @@ export interface PlayerData {
 	 */
 	fishVariants: Partial<Record<FishType, Partial<Record<FishVariant, number>>>>;
 	/**
+	 * The Size scores (shared/types/size) of the living fish, per type and variant, smallest first: written only by
+	 * FishService from its fish (so the client can show them in the Ocean panel), rebuilt after every load.
+	 */
+	tankSizes: Partial<Record<FishType, Partial<Record<FishVariant, number[]>>>>;
+	/** The best Size score ever hatched per species (the Fish Index's "Best", the Big Catch quests), kept for good. */
+	bestSize: Partial<Record<FishType, number>>;
+	/**
 	 * Eggs being incubated, per type: when each hatches (Workspace:GetServerTimeNow() time), soonest first. At most
 	 * `incubators` per type; older saves held one number per type (migrated by sanitizeSave).
 	 */
@@ -134,6 +141,8 @@ export const DEFAULT_PLAYER_DATA: PlayerData = {
 		Sugar: 0,
 	},
 	fishVariants: {},
+	tankSizes: {},
+	bestSize: {},
 	incubating: {},
 	incubationMultiplier: 1,
 	incubators: DEFAULT_INCUBATORS,

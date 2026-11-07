@@ -3,7 +3,7 @@
 > The game's balance: what an average player reaches after how long, and why. **Update it in the same task whenever a
 > number of the economy changes** (fish income, eggs, odds, rebirths, Ocean milestones, variants, food, capacity,
 > companions…): run the simulators, copy their results here, add a line to the history (§6).
-> Last updated: 2026-11-07 (V1.2 plan tuned, not in the game: tools/balance-v1.2-plan.js, ROADMAP_V1.2.md; §6).
+> Last updated: 2026-11-07 (V1.1.16: the Size score live, the timeline of §2 re-run, §3 Size, §6).
 
 
 **Where the numbers live**: `src/shared/types/fish.ts` (species), `eggs.ts` (eggs), `rebirths.ts` (rebirths),
@@ -53,7 +53,7 @@ All times below are **minutes / hours of play in front of the tank** (medians, w
 
 ---
 
-## 2. Live game: expected progression (V0.60.6)
+## 2. Live game: expected progression (V1.1.16)
 
 **The reference player plays 1 h a day** (§1) and does its daily and weekly quests: their coin boosts (x2 for 15 min a
 day, 45 min a week) are part of this timeline, and the prices from rebirth 3 on are tuned for it (1.45x the plan's:
@@ -69,47 +69,52 @@ player's calendar. A player who never stops (no daily quest) needs longer, one w
 | ~5–10 min | Snail (story quest "Coin Collector", 300 $ of coins) | First companion: collects coins for the player (its pickups are not in the simulator) |
 | ~6 min (5–18) | Collector "Strange Glow": first Anomaly, 2 min of income | Opens with "Full House" (10 fish); Anomaly 10 % |
 | ~9 min | Red Tetra (Improved Egg, 500 $) | Improved Egg unlocked by buying a Common Egg |
-| **~19 min** (15–23) | **Rebirth 1** (5,000 $, quest "Saving Up"): coins x2.5, Lagoon Aquarium | The Freshwater Egg (25k) is out of reach before it; the rebirth gets past it |
+| **~17 min** (13–21) | **Rebirth 1** (5,000 $, quest "Saving Up"): coins x2.5, Lagoon Aquarium | The Freshwater Egg (25k) is out of reach before it; the rebirth gets past it |
 | ~21 min | 50 Ocean Points: **Pelican** | The fish released at rebirth 1 give ~50 points |
 | ~29 min | Clownfish (Superior Egg, 2,500 $, 15 %) |  |
 | ~37 min | 100 Ocean Points: Faster Snail; Zebra Danio (Freshwater Egg, 25k, ~39 min); Collector: 10 Fish Index cells and the first Ghost (2 + 3 min of income) |  |
-| **~46 min** (37–60) | **The first six species** (Flame Gourami, 15 % of the Freshwater Egg, or 55 % of the Amazon Egg) | Voyage quest "Freshwater Finds": 5 min of income. End of day 1 |
+| **~44 min** (34–57) | **The first six species** (Flame Gourami, 15 % of the Freshwater Egg, or 55 % of the Amazon Egg) | Voyage quest "Freshwater Finds": 5 min of income. End of day 1 |
 | ~55 min | Ocean "Back to the Sea": 50 fish released, 3 min of income |  |
 | ~60 min | **Silver Angelfish** (Amazon Egg, 150k, 45 %); 200 Ocean Points: second companion slot | Amazon Egg unlocked by the Freshwater Egg |
 | ~1h18 | 500 Ocean Points: Hungry Pelican (x1.33: every 7.5 s) | With all its quests it keeps 15 fish fed (§5.8) |
-| **~1h24** (1h12–1h37) | **Rebirth 2** (1.3M): coins x8, **Neon Coral Lagoon**; 1,500 Ocean Points: **15 fish**; Hatchery: 100 fish hatched; **the daily quests open** | Day 2. The rebirth releases a whole tank (~2,000 points) + Voyage "Deeper Waters" (500 points) |
+| **~1h20** (1h09–1h33) | **Rebirth 2** (1.3M): coins x8, **Neon Coral Lagoon**; 1,500 Ocean Points: **15 fish**; Hatchery: 100 fish hatched; **the daily quests open** | Day 2. The rebirth releases a whole tank (~2,000 points) + Voyage "Deeper Waters" (500 points) |
 | ~1h50 | Pirate Fish (Neon Coral Egg, 2.5M, 55 %) | The Neon Coral Egg costs more than rebirth 2: it is reached after it |
-| **~2h04** (1h43–2h29) | **All nine first species** (Imperial Discus, 20 % of the Neon Coral Egg) | Voyage "Crown of the Reef": 5 min of income |
+| **~1h58** (1h40–2h24) | **All nine first species** (Imperial Discus, 20 % of the Neon Coral Egg) | Voyage "Crown of the Reef": 5 min of income |
 | ~2h38 | 5,000 Ocean Points: **second incubator** | Two eggs of a kind at once: the late hatches (2–2.5 min) stop being a bottleneck |
-| **~2h40** (2h31–2h58) | **Rebirth 3** (65M): coins x25, **Sunken Pirate Wreck**; 8,000 Ocean Points: **17 fish**; **the weekly quests open** | Day 3. Voyage "Sunken Secrets" (1,500 points) |
+| **~2h37** (2h27–2h54) | **Rebirth 3** (65M): coins x25, **Sunken Pirate Wreck**; 8,000 Ocean Points: **17 fish**; **the weekly quests open** | Day 3. Voyage "Sunken Secrets" (1,500 points) |
 | ~3h12 (2h38–4h08) | Collector: 25 Fish Index cells and the first Shiny (2,500 + 2,500 Ocean Points) | Shiny 1 % (1.5 % with Lucky ocean) |
 | ~3h34 (3h10–3h53) | **Catfish** (Wreck Egg, 78M, 45 %) | The Wreck Egg costs 1.2x rebirth 3: reached after it. Voyage "Treasure of the Wreck" |
 | ~4h13 | Hatchery: 300 fish hatched |  |
-| **~4h19** (4h01–4h38) | **Rebirth 4** (175M): coins x80, **Atlantis Ruins**; 25,000 Ocean Points: **19 fish** | Day 5. Voyage "The Lost City" (4,000 points) |
+| **~4h13** (3h56–4h30) | **Rebirth 4** (175M): coins x80, **Atlantis Ruins**; 25,000 Ocean Points: **19 fish** | Day 5. Voyage "The Lost City" (4,000 points) |
 | ~4h25 | 40,000 Ocean Points: Lucky ocean (rare variants x1.5) | Side goal: +1.8 % income, not modelled |
 | ~5h07 | Blue Tang (Atlantis Egg, 210M, 55 %) |  |
-| **~5h16** (4h42–5h42) | **All twelve species** (Baby Sunfish, 20 % of the Atlantis Egg) | Voyage "Atlantean Sun" |
-| **~5h44** (5h23–6h21) | **Rebirth 5** (7.4B): coins x250, **Mariana Trench**; 70,000 Ocean Points: **21 fish**; 85,000: **Water Hen** | Day 6. The rebirth's release and Voyage "Into the Deep" (10,000 points) cross both milestones at once |
+| **~5h02** (4h35–5h34) | **All twelve species** (Baby Sunfish, 20 % of the Atlantis Egg) | Voyage "Atlantean Sun" |
+| **~5h37** (5h14–6h08) | **Rebirth 5** (7.4B): coins x250, **Mariana Trench**; 70,000 Ocean Points: **21 fish**; 85,000: **Water Hen** | Day 6. The rebirth's release and Voyage "Into the Deep" (10,000 points) cross both milestones at once |
 | ~6h34 | 120,000 Ocean Points: **Swordfish** |  |
-| **~6h44** (6h16–7h26) | Species 13, **Lanternfish** (45 % of the Trench Egg, 8.9B) | Voyage "Light of the Deep" |
+| **~6h36** (6h04–7h10) | Species 13, **Lanternfish** (45 % of the Trench Egg, 8.9B) | Voyage "Light of the Deep" |
 | ~7h19 | Hatchery: 600 fish hatched |  |
-| **~7h57** (7h26–8h37) | **Rebirth 6** (19B): coins x800, **Volcanic Temple**; 180,000 Ocean Points: **23 fish**; 200,000: **Jellyfish** | Day 9. The rebirth's release and Voyage "Heat Below" (25,000 points) |
+| **~7h43** (7h09–8h21) | **Rebirth 6** (19B): coins x800, **Volcanic Temple**; 180,000 Ocean Points: **23 fish**; 200,000: **Jellyfish** | Day 9. The rebirth's release and Voyage "Heat Below" (25,000 points) |
 | ~8h48 (8h27–9h36) | **Lionfish** (Volcano Egg, 23B, 55 %) | The Volcano Egg costs 1.2x rebirth 6: reached after it |
 | ~9h05 | 300,000 Ocean Points: **Pearl rims** (cosmetic) |  |
-| **~9h04** (8h34–9h44) | **All fifteen species** (Dragonfish, 20 % of the Volcano Egg) | Voyage "Temple Guardian" |
-| **~9h50** (9h26–10h36) | **Rebirth 7** (1T): coins x2,500, **Crystal Caverns**; 450,000 Ocean Points: **25 fish** (the maximum) | Day 11. Voyage "Crystal Path" (60,000 points) |
+| **~8h46** (8h13–9h34) | **All fifteen species** (Dragonfish, 20 % of the Volcano Egg) | Voyage "Temple Guardian" |
+| **~9h39** (9h01–10h25) | **Rebirth 7** (1T): coins x2,500, **Crystal Caverns**; 450,000 Ocean Points: **25 fish** (the maximum) | Day 11. Voyage "Crystal Path" (60,000 points) |
 | ~9h59 | Hatchery: 900 fish hatched |  |
-| **~10h56** (10h34–11h31) | **Rebirth 8** (2.2T): coins x8,000, **Cosmic Sanctuary**, the last aquarium | Day 12. Voyage "To the Stars" (150,000 points). The Crystal Egg (1.2T) costs more than rebirth 7: most players rebirth again first |
+| **~10h47** (10h16–11h20) | **Rebirth 8** (2.2T): coins x8,000, **Cosmic Sanctuary**, the last aquarium | Day 12. Voyage "To the Stars" (150,000 points). The Crystal Egg (1.2T) costs more than rebirth 7: most players rebirth again first |
 | ~10h59 (9h48–11h51) | Collector: 50 Fish Index cells, the **Collector** title |  |
 | ~11h15 (10h33–12h02) | Species 16, **Husky Dogfish** (Crystal Egg 45 %, Cosmic Egg 25 %) | Voyage "Puppy in the Caves" |
 | ~11h29 | 1,000,000 Ocean Points: **Ocean Guardian** title + whale statue in the tank | The last goal of the Ocean |
 | ~12h02 (11h22–12h44) | **Bunny Shark** (Cosmic Egg, 2.6T, 55 %) |  |
-| **~12h18** (11h35–13h01) | **All eighteen species** (Mini Leviathan, 20 % of the Cosmic Egg): the end of V1 | Day 13. Voyages "Leviathan" and "Master Aquarist" (title + golden trophy + 300,000 points); the Rebirth menu says more aquariums are coming |
+| **~11h59** (11h21–12h45) | **All eighteen species** (Mini Leviathan, 20 % of the Cosmic Egg): the end of V1 | Day 13. Voyages "Leviathan" and "Master Aquarist" (title + golden trophy + 300,000 points); the Rebirth menu says more aquariums are coming |
 | after | Hatchery: 1,200 fish hatched, the **Golden Incubator** (1 player in 3 before the end, median ~11h35 for them) | A goal past the end, with the variants |
 | any time | The French Fish (secret, 0.1 % of any egg): ~2 players in 3 hatch one in the run (median first one ~5h40) | See §3 Easter eggs |
 | after | Variants (Anomaly 10 %, Ghost 5 %, Shiny 1 %; x1.5 with Lucky ocean) to complete the Fish Index, Ocean Points | Nothing new to buy: the end of V1 |
 
-**Money collected per minute** (median, boosts included): 15 min 1.1k $, 30 min 4.9k, 60 min 51k, 90 min 82k, 2 h 854k,
+**The Size score** (V1.1.16, §3 Size): the Big Catch line's Huge fish at ~6 min, 5 Huge at once and a Giant at ~5h35
+(8 % of the players not before the end), a **Titan for 43 % of the players** before the end (median ~7h55 for them).
+The other rows above (quests, milestones) kept their V0.60.6 times: they move by the same few percent.
+
+**Money collected per minute** (V1.1.16) 15 min 1.2k $, 30 min 6.4k, 60 min 59k, 90 min 95k, 2 h 1.0M, 2h30 1.7M,
+3 h 4.5M, 4 h 15M, 5 h 104M, 6 h 271M. Before the Size score (V0.60.6), 15 min 1.1k $, 30 min 4.9k, 60 min 51k, 90 min 82k, 2 h 854k,
 2h30 1.6M, 3 h 3.6M, 4 h 14M, 5 h 70M, 6 h 209M. The Water Hen is assumed equipped from 85,000 points (eggs hatch in 0.85x their
 time; hatch speed matters little, §5.8).
 
@@ -142,6 +147,18 @@ time; hatch speed matters little, §5.8).
 
 Growth (default): x1 at birth, x1.2 after 5 min, x1.5 after 10 min in the water. One coin out of 15 sparkles (x2).
 Rarity is only a label (Fish Index order, colours).
+
+### Size score (`size.ts`, V1.1.16)
+
+Every fish of an egg draws a Size score at opening: round((u1 + u2 - 1) x 15), the sum of two dice (a triangular
+draw, mean 0), kept for its life; body and coins x (1 + size / 100); Ocean Points unchanged; the special fish have
+none. Checked over 2 million draws in Studio: Tiny (-15…-10) 6.7 %, Small (-9…-4) 22.6 %, Normal (-3…+3) 41.3 %,
+Big (+4…+9) 22.7 %, Huge (+10…+12) 5.3 %, Giant (+13, +14) 1.3 %, Titan (+15) 0.055 % (one egg in 1,800).
+
+The average fish at hatch earns as before, but the player keeps its biggest ones (it releases the weakest by real
+income; the game releases the smallest of a row first): the tank earns **+15–30 %** (59k $/min at 1 h instead of
+51k, 271M at 6 h instead of 209M), the times move **-2 to -3 %** (all eighteen species 12h19 → 11h59): the waits
+are for eggs and price cliffs as much as for money. Prices left as they are (the owner: a faster start is fine).
 
 ### Easter eggs (`fish.ts` FishConfig.easterEgg)
 
@@ -637,6 +654,7 @@ content (species, eggs, aquariums, capacity, companions themselves) away from fr
 | V0.60.14 | Sugar, easter egg of the likes: 1 % of the likes a player gives, into the giver's tank (even a full one, one per tank), a sugar cube as often as the best fish's coin, worth 1.1 x it, 500 Ocean Points, stays. Not simulated (likes are not modelled) | Timeline unchanged; +1.1 / N of a tank of N similar fish while she stays (+4 % for 25 fish, +11 % for 10, more early) |
 | V1.0.0 | The release: the alpha's limits removed (all 8 rebirths and 12 eggs, every Ocean milestone and story quest, the weekly quests from rebirth 3, the gamepasses on sale); no number changed | Unchanged: the timeline of §2 (rebirth 8 ~10h56, all eighteen species ~12h18) is now every player's; the gamepasses stay outside the balance (§5.10) |
 | V1.1.15 | MAX_MONEY 1e15 → 1e300 (a guard, no longer a ceiling of the economy), money units up to Vg then scientific, income leaderboard scores encoded above 1e15; no price, income or reward changed, simulator not affected | Unchanged: the timeline of §2; the next rebirths can cost far more than 1e15 |
+| V1.1.16 | The Size score (ROADMAP_V1.2 M2b): -15…+15, triangular, coins x(1 + size/100), Ocean Points unchanged; the Big Catch line (3 / 5 / 5 min of income, two titles), dailies "Big Fish" (+4) and weekly "Huge Haul" (+10) (coin boosts, as the others). Simulator: `P.sizeMax` 15 by default, the Big Catch line in `SIDE_QUESTS` | Rebirth 1 ~19 → **~17 min**, rebirth 2 ~1h24 → ~1h20, rebirth 8 ~10h56 → **~10h47**, all eighteen species ~12h18 → **~11h59** (11h21–12h45); income +15–30 %; a Titan for 43 % of the players before the end |
 | V1.2 (plan) | ROADMAP_V1.2.md M1, not in the game: rebirths 9–12 (200T x25,000 / 640T x120,000 / 3Qa x375,000 / 80Qa x1.2M), eggs Aurora 400T, Sky 770T, Dreamland 50Qa, Heart 96Qa (180 s), 6 species (income x2, points x1.6), tank 27–33 at 1.5M / 4M / 9M / 20M Ocean Points, Voyage 375k / 900k / 2.2M / 5M points, side lines (Hatchery 1,800–3,500, Collector to 120 cells, Ocean 500 released, Big Catch); **Size score** (-15…+15, triangular, coins x(1 + size/100)); **Galaxy** (0.2 %, ~x2 income, x10 points); starfall 4th bar at 0.9 bar of stars. Simulator: `P.sizeMax`, plan `VARIANTS`, Ocean line as a list, Big Catch line; starfall `--fourthBar` | Rebirths 9–12 at ~13h37 / 16h28 / 19h53 / 23h14, **all 24 species ~25h15 (24h18–26h34)**, ~day 26; runs 2h50–3h25. Size: V1 ~2–3 % faster (all eighteen 12h11 → 11h55), income +15–30 %. 4th bar: 2.6 % of perfect starfalls (0.3 % at 75 % caught) |
 
 ---

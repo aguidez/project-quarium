@@ -592,6 +592,8 @@ export function App(props: AppProps) {
 					fishType={props.reveal.fishType}
 					variant={props.reveal.variant}
 					firstTime={props.reveal.firstTime}
+					size={props.reveal.size}
+					newBestSize={props.reveal.newBestSize}
 					starPowered={props.reveal.starPowered}
 					luck={data ? getPlayerVariantLuck(data) : 1}
 					playSfx={props.playSfx}

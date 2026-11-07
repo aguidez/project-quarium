@@ -28,6 +28,7 @@ import {
 	STORY_LINES,
 } from "shared/types/quests";
 import { REBIRTHS } from "shared/types/rebirths";
+import { toSize } from "shared/types/size";
 import { STAR_MAX_BARS } from "shared/types/stars";
 import { createPlayerStats, PlayerStats, sanitizePlayerStats } from "./playerStats";
 import { FISH_VARIANTS, FishVariant, isFishVariant } from "shared/types/variants";
@@ -40,6 +41,7 @@ export interface SavedFish {
 	hunger: HungerState;
 	hungerLeft: number; // seconds before the next hunger state (unused while weak)
 	variant?: FishVariant; // undefined in saves made before variants: Normal
+	size?: number; // Size score (shared/types/size); undefined in saves made before it (V1.1.16): 0
 }
 
 /**
@@ -260,7 +262,15 @@ export function sanitizeSave(save: SaveData) {
 	);
 	for (const saved of save.tank) {
 		if (saved.variant !== undefined && !isFishVariant(saved.variant)) saved.variant = undefined;
+		saved.size = toSize(saved.size);
 	}
+	// Rebuilt by FishService from the fish it brings back
+	data.tankSizes = {};
+	const bestSize: PlayerData["bestSize"] = {};
+	for (const [fishType, size] of pairs(data.bestSize as Record<string, unknown>)) {
+		if (isFishType(fishType) && typeIs(size, "number")) bestSize[fishType] = toSize(size);
+	}
+	data.bestSize = bestSize;
 	// Living rare variants: restoreTank brings back, per type, the first saved fish of that type (as many as
 	// data.fish says, extra ones newborn and normal), so the same fish are counted here
 	const fishVariants: PlayerData["fishVariants"] = {};

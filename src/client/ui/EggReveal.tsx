@@ -4,7 +4,8 @@ import { SfxName } from "shared/sounds";
 import { EGG_TYPES, EggType, getHatchChance, HATCH_REVEAL_TIME } from "shared/types/eggs";
 import { FISH_TYPES, FishType } from "shared/types/fish";
 import { FISH_VARIANTS, FishVariant, formatVariantChance } from "shared/types/variants";
-import { TextStroke } from "./kit";
+import { formatSize, getSizeTier, SIZE_TIERS } from "shared/types/size";
+import { Outline, TextStroke } from "./kit";
 import { getViewportSize } from "./screenScale";
 import {
 	COLORS,
@@ -16,6 +17,7 @@ import {
 	FONT_TITLE,
 	VARIANT_STYLES,
 	getFishRarity,
+	getSizePalette,
 } from "./theme";
 
 // Timeline (seconds). It lasts HATCH_REVEAL_TIME, after which the server drops the fish in the tank.
@@ -27,9 +29,11 @@ const FISH_POP_TIME = 0.45;
 const TEXT_DELAY = 0.15; // after the break
 const CAPTION_FADE_TIME = 0.3;
 const FADE_TIME = 0.3; // at the very end
+const SIZE_DELAY = 0.35; // the Size pill pops after the caption (FigCraft size.figcraft)
+const SIZE_POP_TIME = 0.35;
 const BACKDROP_TRANSPARENCY = 0.5;
 
-const STAGE_SIZE = 560;
+const STAGE_SIZE = 600; // room under the fish for the caption and the Size pill
 const EGG_SIZE = UDim2.fromOffset(150, 180);
 const FISH_SIZE = UDim2.fromOffset(256, 160); // the sticker icon at its own size
 const FISH_WOBBLE = 4; // degrees: the hatched fish sways a little while it floats
@@ -43,6 +47,10 @@ export interface EggRevealProps {
 	firstTime: boolean;
 	/** Its variant came from the player's star power (a starfall): shown instead of the usual chance. */
 	starPowered: boolean;
+	/** Its Size score (shared/types/size); undefined for a special fish, which has none. */
+	size?: number;
+	/** The best Size of its species so far. */
+	newBestSize: boolean;
 	/** The player's variant luck: the chance shown is the one they hatched with. */
 	luck: number;
 	playSfx: (name: SfxName, playbackSpeed?: number) => void;
@@ -80,8 +88,8 @@ function crackStage(time: number): number {
 
 /** Screen-size factor so the reveal fits small screens and doesn't look tiny on big ones. */
 function getStageScale(): number {
-	// A phone in landscape (~360-390 px tall) still fits the 560 px stage with its captions
-	return math.clamp(getViewportSize().Y / 760, 0.45, 1.15);
+	// A phone in landscape (~360-390 px tall) still fits the 600 px stage with its captions
+	return math.clamp(getViewportSize().Y / 800, 0.45, 1.1);
 }
 
 /**
@@ -99,6 +107,12 @@ export function EggReveal(props: EggRevealProps) {
 	const rare = props.variant !== "Normal";
 	// A rare variant bursts in its own colour, a normal fish in its rarity's
 	const burstColor = rare ? variantStyle.color : rarity.color;
+	const size = props.size;
+	const titan = size !== undefined && getSizeTier(size) === "Titan";
+	const sizePalette = size !== undefined ? getSizePalette(size) : undefined;
+	const sizeTier = size !== undefined ? SIZE_TIERS.find(([tier]) => tier === getSizeTier(size))![1].displayName : "";
+	const article = string.match(fish.displayName.lower(), "^[aeiou]")[0] !== undefined && !rare ? "an" : "a";
+	const variantArticle = string.match(variant.displayName.lower(), "^[aeiou]")[0] !== undefined ? "an" : "a";
 
 	useEffect(() => {
 		const cues = [
@@ -106,6 +120,8 @@ export function EggReveal(props: EggRevealProps) {
 			{ at: BREAK_TIME, play: () => props.playSfx("EggHatch") },
 			{ at: BREAK_TIME + TEXT_DELAY, play: () => props.playSfx("FishObtained") },
 		];
+		// A Titan rings once more when its pill pops
+		if (titan) cues.push({ at: BREAK_TIME + TEXT_DELAY + SIZE_DELAY, play: () => props.playSfx("FishObtained", 1.35) });
 		let nextCue = 0;
 		const start = os.clock();
 		const connection = RunService.RenderStepped.Connect(() => {
@@ -135,6 +151,10 @@ export function EggReveal(props: EggRevealProps) {
 	const captionStroke = (thickness = 2.5) => (
 		<TextStroke thickness={thickness} transparency={caption.map((a) => 1 - a)} />
 	);
+	const sizePop = time.map((t) =>
+		ease(phase(t, BREAK_TIME + TEXT_DELAY + SIZE_DELAY, SIZE_POP_TIME), Enum.EasingStyle.Back),
+	);
+	const sizeNoteFade = time.map((t) => 1 - phase(t, BREAK_TIME + TEXT_DELAY + SIZE_DELAY + 0.2, CAPTION_FADE_TIME));
 
 	const rays = new Array<React.Element>();
 	for (let index = 0; index < RAY_COUNT; index++) {
@@ -293,6 +313,53 @@ export function EggReveal(props: EggRevealProps) {
 					/>
 				</frame>
 
+				{titan && (
+					<frame
+						key="TitanGlow"
+						AnchorPoint={new Vector2(0.5, 0.5)}
+						Position={UDim2.fromScale(0.5, 0.45)}
+						Size={UDim2.fromOffset(340, 260)}
+						BackgroundColor3={COLORS.gold}
+						BackgroundTransparency={time.map((t) => 0.45 + 0.1 * math.sin(t * 4))}
+						Visible={broken}
+						ZIndex={1}
+					>
+						<uicorner CornerRadius={new UDim(0.5, 0)} />
+						{/* Soft on both sides (a UIGradient can't be radial) */}
+						<uigradient
+							Transparency={
+								new NumberSequence([
+									new NumberSequenceKeypoint(0, 1),
+									new NumberSequenceKeypoint(0.5, 0.2),
+									new NumberSequenceKeypoint(1, 1),
+								])
+							}
+						/>
+						<uiscale Scale={sizePop} />
+					</frame>
+				)}
+				{titan &&
+					[
+						[-150, -70, 22],
+						[140, -50, 16],
+						[120, 70, 13],
+						[-120, 60, 15],
+					].map(([x, y, s], index) => (
+						<frame
+							key={`Sparkle${index}`}
+							AnchorPoint={new Vector2(0.5, 0.5)}
+							Position={new UDim2(0.5, x, 0.45, y)}
+							Size={UDim2.fromOffset(s, s)}
+							Rotation={45}
+							BackgroundColor3={COLORS.white}
+							BackgroundTransparency={time.map((t) => 0.2 + 0.6 * math.abs(math.sin(t * 3 + index)))}
+							Visible={broken}
+							ZIndex={3}
+						>
+							<uicorner CornerRadius={new UDim(0, 3)} />
+							<uiscale Scale={sizePop} />
+						</frame>
+					))}
 				<imagelabel
 					key="Fish"
 					AnchorPoint={new Vector2(0.5, 0.5)}
@@ -313,8 +380,8 @@ export function EggReveal(props: EggRevealProps) {
 				<frame
 					key="Caption"
 					AnchorPoint={new Vector2(0.5, 0)}
-					Position={new UDim2(0.5, 0, 0.45, 120)}
-					Size={new UDim2(1, 0, 0, 136)}
+					Position={new UDim2(0.5, 0, 0.45, 100)}
+					Size={new UDim2(1, 0, 0, 225)}
 					BackgroundTransparency={1}
 					Visible={broken}
 					ZIndex={4}
@@ -332,8 +399,8 @@ export function EggReveal(props: EggRevealProps) {
 						Font={FONT_TITLE}
 						Text={
 							rare
-								? `You hatched a ${variant.displayName} ${fish.displayName}!`
-								: `You hatched a ${fish.displayName}!`
+								? `You hatched ${variantArticle} ${variant.displayName} ${fish.displayName}!`
+								: `You hatched ${article} ${fish.displayName}!`
 						}
 						// Long names shrink to fit the stage (Luckiest Guy is wide)
 						TextScaled={true}
@@ -374,10 +441,77 @@ export function EggReveal(props: EggRevealProps) {
 							{captionStroke()}
 						</textlabel>
 					)}
+					{size !== undefined && sizePalette && (
+						<frame key="Size" LayoutOrder={4} Size={UDim2.fromOffset(300, 47)} BackgroundTransparency={1}>
+							<uiscale Scale={sizePop} />
+							<frame
+								key="Shadow"
+								Position={UDim2.fromOffset(0, 5)}
+								Size={UDim2.fromOffset(300, 42)}
+								BackgroundColor3={sizePalette.shadow}
+								BorderSizePixel={0}
+							>
+								<uicorner CornerRadius={new UDim(0.5, 0)} />
+								<Outline />
+							</frame>
+							<frame
+								key="Face"
+								Size={UDim2.fromOffset(300, 42)}
+								BackgroundColor3={COLORS.white}
+								BorderSizePixel={0}
+								ZIndex={2}
+							>
+								<uicorner CornerRadius={new UDim(0.5, 0)} />
+								<uigradient
+									Color={new ColorSequence(sizePalette.light, sizePalette.base)}
+									Rotation={90}
+								/>
+								<Outline />
+								<frame
+									key="Gloss"
+									Position={UDim2.fromOffset(6, 4)}
+									Size={new UDim2(1, -12, 0, 15)}
+									BackgroundColor3={COLORS.white}
+									BackgroundTransparency={0.65}
+									BorderSizePixel={0}
+									ZIndex={2}
+								>
+									<uicorner CornerRadius={new UDim(0.5, 0)} />
+								</frame>
+								<textlabel
+									key="Label"
+									Size={UDim2.fromScale(1, 1)}
+									BackgroundTransparency={1}
+									Font={FONT_BOLD}
+									Text={`SIZE ${formatSize(size)}  •  ${sizeTier.upper()}${titan ? "!" : ""}`}
+									TextSize={21}
+									TextColor3={COLORS.white}
+									ZIndex={3}
+								>
+									<TextStroke color={sizePalette.shadow} thickness={2.5} />
+								</textlabel>
+							</frame>
+						</frame>
+					)}
+					{(titan || (props.newBestSize && !props.firstTime)) && (
+						<textlabel
+							key="SizeNote"
+							LayoutOrder={5}
+							Size={new UDim2(1, 0, 0, 24)}
+							BackgroundTransparency={1}
+							Font={FONT_BLACK}
+							Text={titan ? "A PERFECT FISH! ONE EGG IN 1,800" : "NEW BEST SIZE FOR THIS SPECIES!"}
+							TextSize={18}
+							TextColor3={titan ? COLORS.gold : Color3.fromHex("#FFE27A")}
+							TextTransparency={sizeNoteFade}
+						>
+							<TextStroke thickness={2.5} transparency={sizeNoteFade} />
+						</textlabel>
+					)}
 					{props.firstTime && (
 						<textlabel
 							key="New"
-							LayoutOrder={4}
+							LayoutOrder={6}
 							Size={new UDim2(1, 0, 0, 22)}
 							BackgroundTransparency={1}
 							Font={FONT_BLACK}

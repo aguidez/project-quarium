@@ -28,6 +28,8 @@ const isEggHatch = t.interface({
 	fishType: t.keyOf(FISH_TYPES),
 	variant: t.keyOf(FISH_VARIANTS),
 	firstTime: t.boolean,
+	size: t.optional(t.number),
+	newBestSize: t.boolean,
 	starPowered: t.boolean,
 });
 const isReward = t.interface({

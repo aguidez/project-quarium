@@ -51,6 +51,12 @@ export type QuestStat =
 	| "VariantHatched"
 	/** Fish released from the Ocean menu (a rebirth's release doesn't count). */
 	| "FishReleased"
+	/** Fish hatched with a Size score of the quest's `minSize` or more (shared/types/size). */
+	| "SizeHatched"
+	/** Gauge: species whose best Size ever hatched (PlayerData.bestSize) is the quest's `minSize` or more. */
+	| "SizeFound"
+	/** Gauge: living fish of the tank with a Size score of the quest's `minSize` or more (PlayerData.tankSizes). */
+	| "BigFishInTank"
 	/**
 	 * What the quest's `companion` does for the player: coins its Snail picks up, fish its Pelican feeds (the V1
 	 * companions add theirs: eggs opened with the Water Hen equipped, coins its Swordfish grabs, fish its Jellyfish feeds).
@@ -67,6 +73,8 @@ export const GAUGE_STATS: readonly QuestStat[] = [
 	"SpeciesFound",
 	"VariantFound",
 	"TotalHatched",
+	"SizeFound",
+	"BigFishInTank",
 ];
 
 /**
@@ -110,6 +118,8 @@ export interface QuestConfig {
 	variant?: FishVariant;
 	/** The companion a CompanionStat quest counts. */
 	companion?: CompanionType;
+	/** The least Size score a SizeHatched / SizeFound / BigFishInTank quest counts. */
+	minSize?: number;
 }
 
 export const QUESTS: Record<string, QuestConfig> = {
@@ -540,6 +550,53 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 1,
 		rewards: [{ kind: "Title", title: "TitleOceanFriend" }],
 	},
+	// Big Catch (V1.1.16, the Size score: ROADMAP_V1.2 §3.5): opens with "Full House" like the Collector, so early: its
+	// money rewards are minutes of income (BALANCE.md §4). Huge = +10 % or more, Giant +13, Titan +15 (shared/types/size)
+	BigCatch1: {
+		category: "Story",
+		title: "Big Catch",
+		description: "Hatch a Huge fish (Size +10% or more).",
+		stat: "SizeFound",
+		minSize: 10,
+		target: 1,
+		rewards: [{ kind: "IncomeMinutes", minutes: 3 }],
+	},
+	BigCatch2: {
+		category: "Story",
+		title: "Heavyweights",
+		description: "Have 5 Huge fish (Size +10% or more) in your tank at once.",
+		stat: "BigFishInTank",
+		minSize: 10,
+		target: 5,
+		rewards: [{ kind: "IncomeMinutes", minutes: 5 }],
+	},
+	BigCatch3: {
+		category: "Story",
+		title: "Giant Find",
+		description: "Hatch a Giant fish (Size +13% or more).",
+		stat: "SizeFound",
+		minSize: 13,
+		target: 1,
+		rewards: [{ kind: "IncomeMinutes", minutes: 5 }],
+	},
+	BigCatch4: {
+		category: "Story",
+		title: "Titan Tamer",
+		description: "Hatch a Titan: a perfect fish, Size +15%.",
+		stat: "SizeFound",
+		minSize: 15,
+		target: 1,
+		rewards: [{ kind: "Title", title: "TitleTitanTamer" }],
+	},
+	BigCatch5: {
+		category: "Story",
+		title: "Size Collector",
+		description: "Hatch a Huge fish (Size +10% or more) of 18 different species.",
+		stat: "SizeFound",
+		minSize: 10,
+		target: 18,
+		rewards: [{ kind: "Title", title: "TitleSizeCollector" }],
+	},
 	// Daily quests (DAILY_QUEST_POOL): doable by anyone in a session, alone; coins x2 for 5 minutes each (BALANCE.md §5.9)
 	DailyCoins: {
 		category: "Daily",
@@ -590,6 +647,15 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 1,
 		rewards: [{ kind: "CoinBoost", minutes: 5 }],
 	},
+	DailySize: {
+		category: "Daily",
+		title: "Big Fish",
+		description: "Hatch a Big fish or bigger (Size +4% or more).",
+		stat: "SizeHatched",
+		minSize: 4,
+		target: 1,
+		rewards: [{ kind: "CoinBoost", minutes: 5 }],
+	},
 	// Weekly quests (WEEKLY_QUEST_POOL): coins x2 for 15 minutes each
 	WeeklyCoins: {
 		category: "Weekly",
@@ -632,6 +698,15 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 25,
 		rewards: [{ kind: "CoinBoost", minutes: 15 }],
 	},
+	WeeklySize: {
+		category: "Weekly",
+		title: "Huge Haul",
+		description: "Hatch a Huge fish or bigger (Size +10% or more).",
+		stat: "SizeHatched",
+		minSize: 10,
+		target: 1,
+		rewards: [{ kind: "CoinBoost", minutes: 15 }],
+	},
 	// The social one: a week leaves time to meet other players (one like an hour, LIKE_COOLDOWN)
 	WeeklyLikes: {
 		category: "Weekly",
@@ -650,6 +725,7 @@ export type StoryLine =
 	| "Rebirth"
 	| "Hatchery"
 	| "Collector"
+	| "BigCatch"
 	| "Snail"
 	| "Pelican"
 	| "WaterHen"
@@ -716,27 +792,33 @@ export const STORY_LINES: Record<StoryLine, StoryLineConfig> = {
 		requires: "Story2",
 		order: 7,
 	},
+	BigCatch: {
+		displayName: "Big Catch",
+		quests: ["BigCatch1", "BigCatch2", "BigCatch3", "BigCatch4", "BigCatch5"],
+		requires: "Story2",
+		order: 8,
+	},
 	// The paid companion lines (ROADMAP M4): shown from the moment the companion is owned, locked without the pass
 	WaterHen: {
 		displayName: "Water Hen",
 		quests: ["WaterHen1", "WaterHen2", "WaterHen3"],
 		requiresCompanion: "WaterHen",
 		requiresPass: "WaterHenPass",
-		order: 8,
+		order: 9,
 	},
 	Swordfish: {
 		displayName: "Swordfish",
 		quests: ["Swordfish1", "Swordfish2", "Swordfish3"],
 		requiresCompanion: "Swordfish",
 		requiresPass: "SwordfishPass",
-		order: 9,
+		order: 10,
 	},
 	Jellyfish: {
 		displayName: "Jellyfish",
 		quests: ["Jellyfish1", "Jellyfish2", "Jellyfish3"],
 		requiresCompanion: "Jellyfish",
 		requiresPass: "JellyfishPass",
-		order: 10,
+		order: 11,
 	},
 };
 
@@ -815,6 +897,7 @@ export const DAILY_QUEST_POOL: readonly string[] = [
 	"DailyEggsBig",
 	"DailyFeed",
 	"DailyAnomaly",
+	"DailySize",
 ];
 export const WEEKLY_QUEST_POOL: readonly string[] = [
 	"WeeklyCoins",
@@ -823,6 +906,7 @@ export const WEEKLY_QUEST_POOL: readonly string[] = [
 	"WeeklyGhost",
 	"WeeklyRelease",
 	"WeeklyLikes",
+	"WeeklySize",
 ];
 /**
  * Rebirths a player needs before their daily / weekly boards open (decided by the owner, V0.48): the first hours stay
