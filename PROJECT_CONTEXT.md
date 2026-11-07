@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-07 (V1.1.14; repo cleaned after V1.1: ROADMAP_V1.1 closed, its leftovers in ROADMAP_FIXES; group-mesh-upload removed).
+> Last updated: 2026-11-07 (V1.1.15; big numbers: money up to 1e300, units to Vg then 1.23e66, leaderboard scores encoded; ROADMAP_V1.2 planned).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -42,7 +42,7 @@ coins. Around that core loop:
 the release (V1.0.0). The testers who finished the alpha (V0.60) keep its "Alpha Pioneer" title; nobody earns it
 any more. **`BALANCE.md`** holds the expected progression
 (rebirth 1 ~19 min … all eighteen species ~12h20 for a player of 1 h a day), every number and the design rules.
-How to add content: `docs/agent-notes/content-recipes.md`. **`ROADMAP_FIXES.md`**: small fixes noted along the way (and the leftovers of the V1.1 animation revamp).
+How to add content: `docs/agent-notes/content-recipes.md`. **`ROADMAP_FIXES.md`**: small fixes noted along the way (and the leftovers of the V1.1 animation revamp). **`ROADMAP_V1.2.md`**: the plan of the next content update (4 rebirths, ~13 h more).
 
 ---
 
@@ -75,6 +75,9 @@ ProjectQuarium/
 ├─ BALANCE.md                The balance: expected progression, live numbers, design rules, V1 design, history
 ├─ ROADMAP_FIXES.md          Small fixes to plan (the K-pop idol's texture and rig, the other tanks' fish badges, Blender
 │                            on the Windows PC, optional V1.1 leftovers)
+├─ ROADMAP_V1.2.md           The next content update, planned (not built): rebirths 9–12 and 4 aquariums, 4 eggs,
+│                            species 19–24, tank 33, a size score per fish, a fifth variant (starfall's 4th bar),
+│                            food reserve upgrades, new quests / milestones, the Hermit Crab
 ├─ default.project.json      Rojo mapping (see §1)
 ├─ .mcp.json                 Project MCP servers (Roblox_Studio, FigCraft, Blender), started by `node tools/mcp/*.js` on any OS
 ├─ workspace.local.example.json  Template of workspace.local.json (git-ignored): FigCraft folder / port, wgpu backend,
@@ -199,7 +202,8 @@ ProjectQuarium/
    │  ├─ version.ts          GAME_VERSION (the top patch of RELEASE_NOTES.md: bump it with each patch), getVersionLabel
    │  │                      ("V1.0.0"): App shows it small and faded, bottom-right
    │  ├─ format.ts           formatNumber ("1,234,567", from 1e12 "1.23T") / formatShort ("25K", "1.5M", "1.8T", "1Qa"):
-   │  │                      UI and server messages (Luau's tostring breaks from 1e14); Panel.tsx re-exports them
+   │  │                      UI and server messages (Luau's tostring breaks from 1e14); units K … Qa, Qi, Sx … Vg (1e63),
+   │  │                      then scientific ("1.23e66"); NaN reads "0". Panel.tsx re-exports them
    │  ├─ network.ts          Remote contracts + getRemoteEvent(name) (Remotes folder in ReplicatedStorage), FishView / FishMessage
    │  ├─ swim.ts             SwimSegment + getSwimPose: fish movement computed identically by server and clients
    │  ├─ tags.ts             CollectionService tags and the attributes they carry
@@ -219,7 +223,7 @@ ProjectQuarium/
    │     │                   VARIANT_ORDER, GHOST_COIN_MULTIPLIER, RECOLOURED_VARIANTS, rollVariant,
    │     │                   formatVariantChance(variant, luck), getOceanPoints, getSpecialCoinOdds, getVariantIncomeMultiplier
    │     ├─ playerData.ts    PlayerData shape + defaults + helpers (getTotalFish, getFishAndEggs, isEggUnlocked,
-   │     │                   getHatchedVariant, getLivingVariant, getIncubating, hasFreeIncubator…), MAX_MONEY (1e15),
+   │     │                   getHatchedVariant, getLivingVariant, getIncubating, hasFreeIncubator…), MAX_MONEY (1e300),
    │     │                   DEFAULT_INCUBATORS (1), getCompanionSlots (Ocean slots + the slot pass: use it, never
    │     │                   companionSlots alone), getHatchMultiplier (Water Hen equipped: 0.85, or its perk's),
    │     │                   starPower / starCharge (the starfall), getPlayerVariantLuck (Lucky ocean x the Lucky pass: EggService's draw and the chances the UI
@@ -411,7 +415,9 @@ ProjectQuarium/
    │     │                   choices; AquariumService and TitleService apply them. "SetSoundVolume" (0–1): saved only
    │     │                   (soundVolume, rounded to 0.01, no sync: the client applies it itself)
    │     ├─ LeaderboardService  The lobby leaderboards (§3.4): one OrderedDataStore per board
-   │     │                   (Leaderboard_<Id>_v1, key = UserId), writes its players' scores every 2 min (changed ones only;
+   │     │                   (Leaderboard_<Id>_v1, key = UserId; value = encodeScore: raw below 1e15, above it
+   │     │                   1e15 + (log10 - 15) x 1e12, as an OrderedDataStore holds int64 only; decodeScore on read),
+   │     │                   writes its players' scores every 2 min (changed ones only;
    │     │                   setBanned: the admin panel's LB BAN, removes at once / writes again at the next tick)
    │     │                   and when they leave (sampled in onSave), reads the top 100 every 2 min, names from UserService,
    │     │                   merges its players' live scores and sends LeaderboardSync every 30 s and at join; the titles'
@@ -747,7 +753,7 @@ ProjectQuarium/
 
   | Field | Content |
   |---|---|
-  | `money` | Current money, never above `MAX_MONEY` (1e15: DataService.addMoney clamps, sanitizeSave too) |
+  | `money` | Current money, never above `MAX_MONEY` (1e300, a guard against infinity in a save: DataService.addMoney clamps, sanitizeSave too; past 2^53 the last digits round, unseen) |
   | `fish` | Count of living fish per type |
   | `fishVariants` | Of those, per type, the living rare variants (normal = fish − these; `getLivingVariant`). DataService keeps it (hatch / removal / changeFish), RebirthService clears it, `sanitizeSave` rebuilds it from the tank |
   | `hatched` | Count ever hatched, per type (Fish Index) |
