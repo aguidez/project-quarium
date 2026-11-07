@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-07 (V1.1.19: rarities 4 per label, the Fish Keeper line and the food reserve's perks, tank tested at 33 / 50 (ROADMAP_V1.2 M2); V1.1.18 the two trophies share one spot; V1.1.16 the Size score and the Big Catch line, ROADMAP_V1.2 M2b done).
+> Last updated: 2026-11-07 (V1.1.20: the Galaxy variant, its animated look and star coins, the starfall's 4th bar, 5 Fish Index columns (ROADMAP_V1.2 M2c); V1.1.19 rarities 4 per label, Fish Keeper; V1.1.18 the two trophies share one spot; V1.1.16 the Size score and the Big Catch line, ROADMAP_V1.2 M2b done).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -116,6 +116,8 @@ ProjectQuarium/
 │  ├─ starfall.figcraft      The starfall's star gauge (StarGauge_Mockup: in the tank view, its states, the star power
 │  │                         pills), built by
 │  │                         starfall.build.js (figcraft-cli; exports design/previews/star-gauge-mockup.png)
+│  ├─ star-gauge-4.figcraft  The gauge's 4th bar, the Galaxy's (StarGauge4_Mockup: 2.4 / 3.4 / 4 bars), built by
+│  │                         star-gauge-4.build.js (exports design/previews/star-gauge-4-mockup.png)
 │  ├─ admin-panel.figcraft   The admin panel (AdminPanel_Mockup, AdminAquariums_Mockup: the Aquariums tab), built by
 │  │                         admin-panel.build.js (run through figcraft-cli; it also exports both previews)
 │  ├─ shopbar.figcraft       FigCraft source of the older UI frames: OnboardingCard, RewardPopup, CapacityPlaque,
@@ -138,6 +140,8 @@ ProjectQuarium/
 │  │                         ids in theme.ts FISH_ICONS
 │  ├─ fish/variants/variant-spec.json  Hue / saturation / tint per species and variant for fish-variant-recolor.js,
 │  │                         plus the uploaded Anomaly / Shiny texture ids (`_colorMaps`)
+│  ├─ fish/variants/galaxy/  The Galaxy textures (<Type>_Galaxy.png, 420², tools/fish-galaxy.js), uploaded into the
+│  │                         <Type>_Galaxy FishVariantAppearance instances; the stickers are fish/stickers/Icon_<Type>_Galaxy.png
 │  ├─ eggs.build.js          → design/ui/eggs/*.svg + .png: egg sprites (whole, top / bottom halves, 3 cracks); PNG ×2
 │  │                         through FigCraft (file.import / export) or @resvg/resvg-js (200×240); ids in theme.ts EGG_SPRITES
 │  ├─ gate.build.js          Locked-gate icon of gated eggs (design/ui/eggs/LockedGate)
@@ -189,6 +193,9 @@ ProjectQuarium/
 │                            and staff profiles; `--file dump.json` to test without the API, `--out` to keep a snapshot
 ├─ tools/fish-variant-recolor.js  Hue rotation of a species' texture into its Anomaly / Shiny looks (`sheet <Type>` to
 │                            pick the angles, `build variant-spec.json`; optional tint for grey fish); pipeline in its header
+├─ tools/fish-galaxy.js      The Galaxy look offline (`texture` / `sticker` <in> <out> [seed]): night palette by
+│                            luminance (eyes and stripes kept), pink / cyan nebulae, stars; the species' Normal ColorMap
+│                            comes from the public thumbnails API (Studio's HTTP no longer reaches a local server)
 ├─ tools/pass-icons.js       Gamepass, Shop and Aquarium icons drawn as SVG in the V2 style, rendered with @resvg/resvg-js
 ├─ tools/sound-icons.js      The sound control's speaker icons (on: two waves, off: a red cross), same pipeline
 ├─ tools/loading-art.js     Loading screen art from design/ui/loading/LoadingArt.png: logo cut out along its navy outline,
@@ -226,10 +233,11 @@ ProjectQuarium/
    │     │                   DEFAULT_FISH_CAPACITY, isEasterEgg, getFishIndexOrder
    │     ├─ eggs.ts          EggType, EGG_TYPES (price, hatchTime, odds, order, requires: the odds the UI shows),
    │     │                   getDrawOdds (+ easter eggs, taken from the most common fish), rollEgg, starter egg
-   │     ├─ variants.ts      FishVariant (Normal / Anomaly / Ghost / Shiny), FISH_VARIANTS (chance, coinRate,
-   │     │                   specialOddsMultiplier, ghostCoins, sparkles, rank, oceanPointsMultiplier, description),
-   │     │                   VARIANT_ORDER, GHOST_COIN_MULTIPLIER, RECOLOURED_VARIANTS, rollVariant,
-   │     │                   formatVariantChance(variant, luck), getOceanPoints, getSpecialCoinOdds, getVariantIncomeMultiplier
+   │     ├─ variants.ts      FishVariant (Normal / Anomaly / Ghost / Shiny / Galaxy), FISH_VARIANTS (chance, coinRate,
+   │     │                   specialOddsMultiplier, ghostCoins, starCoins, sparkles, rank, oceanPointsMultiplier, description),
+   │     │                   VARIANT_ORDER, GHOST_COIN_MULTIPLIER, STAR_COIN_MULTIPLIER (3), GALAXY_PASS_LUCK (3),
+   │     │                   RECOLOURED_VARIANTS (Anomaly, Shiny, Galaxy), getLuckFor, rollVariant(rng, luck, galaxyLuck),
+   │     │                   formatVariantChance(variant, luck, galaxyLuck), getOceanPoints, getSpecialCoinOdds, getVariantIncomeMultiplier
    │     ├─ size.ts          The Size score (V1.1.16, ROADMAP_V1.2 §3.5): SIZE_MAX (15), SizeTier / SIZE_TIERS (Tiny,
    │     │                   Small, Normal, Big, Huge, Giant, Titan: their lowest score), rollSize (triangular: two
    │     │                   dice), toSize (sanitising), getSizeMultiplier (1 + size / 100: body and coins), getSizeTier,
@@ -296,7 +304,8 @@ ProjectQuarium/
    │     │                   (Sleep / Green / Red) + FISH_EFFECT_DURATION + FISH_EFFECT_COIN_MULTIPLIER, getNextVariant,
    │     │                   UFO_TIMING / UFO_KIDNAP_TIME, UFO_BEAM_ATTRIBUTE
    │     ├─ stars.ts         The starfall: StarSize / STAR_SIZES (weight, power range, studs), STARFALL (stars per tank,
-   │     │                   timing, floor), STAR_BARS (variant guaranteed per bar, better chances), STAR_MAX_BARS,
+   │     │                   timing, floor), STAR_BARS (variant guaranteed per bar, better chances), STAR_MAX_BARS (4),
+   │     │                   STAR_GOLD_BARS (3), FOURTH_BAR_COST (0.9 bar of stars), addStarPower (the gauge in bars),
    │     │                   drawStarSize, getFinalStarCharge, getStarVariantOdds / rollStarVariant, getGuaranteedVariant,
    │     │                   the StarSize / Caught / Fading attributes of a star hitbox
    │     ├─ leaderboards.ts  LeaderboardId (OceanPoints / Income / PlayTime), LEADERBOARD_IDS, LEADERBOARD_SIZE (100),
@@ -485,7 +494,9 @@ ProjectQuarium/
       ├─ main.client.ts      Registers controllers
       ├─ fishLook.ts         getFishTemplate / cloneFishTemplate (undefined until the server replicated the species),
       │                      hasVariantLook, onFishAssetAdded, applyVariantLook (recoloured appearance, ghost
-      │                      translucency, shiny particles), used by FishRenderController
+      │                      translucency, shiny particles; Galaxy: its texture, a colour pulse driven by one
+      │                      RenderStepped for every Galaxy appearance, twinkling stars and a shooting star), setFishTint
+      │                      (the hunger / UFO tints: a Galaxy keeps its pulse on top), used by FishRenderController
       ├─ eventLighting.ts    setEventNight(name, night, amount): the Abyss / UFO / Starfall nights blend over one snapshot
       │                      of the place's own Lighting (taken when the first night starts, restored exactly once all are
       │                      at 0), so an event replacing another never keeps the other's night as its "day"
@@ -596,9 +607,10 @@ ProjectQuarium/
          │                   tier's colour, popping after the caption; a Titan: gold-pink pill, glow, sparkles, a second
          │                   chime, "A PERFECT FISH!"), "NEW BEST SIZE" for a species record, "NEW!" first discovery;
          │                   "a" / "an" before the name)
-         ├─ StarGauge        The starfall's star gauge (FigCraft starfall.figcraft), right edge: navy plate, ★ badge, tube
-         │                   of 3 bars filling with gold, a chip per bar (ANOMALY / GHOST / SHINY: SURE!, dimmed, or its
-         │                   chance with the player's luck), the kept power marked, "CATCH THE STARS!" / "SHINY SURE!";
+         ├─ StarGauge        The starfall's star gauge (FigCraft starfall.figcraft + star-gauge-4.figcraft), right edge: navy
+         │                   plate, ★ badge, tube of 4 bars (3 gold, the 4th night blue to pink with dots), a chip per bar
+         │                   (ANOMALY / GHOST / SHINY / GALAXY: SURE!, dimmed, or its chance with the player's luck and
+         │                   Galaxy luck), the kept power marked, "CATCH THE STARS!" / "SHINY SURE!" / "GALAXY SURE!";
          │                   only while the starfall runs
          ├─ StarPowerPill    The star power kept (starPower > 0, no starfall running): a pill under the egg shop, stacked
          │                   under the boost pills, in the guaranteed variant's colour ("NEXT EGG: AT LEAST A GHOST")
@@ -876,8 +888,9 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   takes the soonest egg of the type, checks it is ready and the capacity, draws the fish (`getDrawOdds`) and the
   variant and the Size score, bumps `fish`, `hatched` and `bestSize`, fires `EggHatched` and, after the reveal, `FishService.spawnFish`, which runs
   the `onFishSpawned` callbacks (onboarding, quest gauges).
-- **Variants.** `rollVariant` draws Shiny → Ghost → Anomaly → Normal with the player's luck (the onboarding egg is
-  always Normal). Effects, server-side: Anomaly drops coins 1.2x as often; Ghost's sparkling coins become ghost coins
+- **Variants.** `rollVariant` draws Galaxy → Shiny → Ghost → Anomaly → Normal with the player's luck (Galaxy: its own
+  luck, the Lucky pass counting x3; the onboarding egg is always Normal; a UFO never makes a Galaxy). Galaxy drops its
+  coins 1.5x as often, one out of 5 a star coin (the "Star" coin, worth 3 plain coins). Effects, server-side: Anomaly drops coins 1.2x as often; Ghost's sparkling coins become ghost coins
   (translucent, worth `GHOST_COIN_MULTIPLIER` = 3 sparkling ones); Shiny has the anomaly pace and one sparkling coin out
   of 5 instead of 15. Looks, client-side: Anomaly / Shiny wear their FishVariantAppearance, a ghost turns 50 %
   translucent and pale, a shiny twinkles. A variant fish whose owner leaves during its hatch reveal comes back as a

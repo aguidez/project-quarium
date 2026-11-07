@@ -5,7 +5,7 @@
 > the food reserve and a sixth companion (the Hermit Crab). Everything here is a **plan**: the economy's numbers
 > are tuned with the simulator (M1, `tools/balance-v1.2-plan.js`), nothing is built yet. Tick the boxes as tasks ship, and move what a
 > step ships into `PROJECT_CONTEXT.md` / `RELEASE_NOTES.md` / `BALANCE.md` as usual.
-> Last updated: 2026-11-07 (M2 done, V1.1.19; M2b done: the Size score live in V1.1.16; M1 done: prices tuned, end of V1.2 at ~25h15, the 4th bar at 0.9; owner's decisions: themes, 4 species per rarity, tank 33 (50 later), Size and its table,
+> Last updated: 2026-11-07 (M2c done, V1.1.20; M2 done, V1.1.19; M2b done: the Size score live in V1.1.16; M1 done: prices tuned, end of V1.2 at ~25h15, the 4th bar at 0.9; owner's decisions: themes, 4 species per rarity, tank 33 (50 later), Size and its table,
 > Galaxy at 0.2 % with the Lucky pass x3 on it, the 4th bar at 2.5 %, the Hermit Crab's live luck, boosts unchanged;
 > nothing built yet. Groundwork done: money up to 1e300, V1.1.15).
 
@@ -445,7 +445,9 @@ last live rebirth.
 - [x] **M2b Size score** (§3.5; V1.1.16, 2026-11-07; the Titan Trophy decor, the golden one tinted rose gold, V1.1.17): the draw, the save field, the model's scale, the coin value, the hatch reveal, the
       fish card, the release panel's sort, the Fish Index's best size, the Big Catch line and the size dailies /
       weeklies (FigCraft mockups of the reveal and the card first). For every player, V1 content included.
-- [ ] **M2c New variant + starfall** (§3.6, §3.7): the variant (look, coin, Fish Index column, release order), the
+- [x] **M2c New variant + starfall** (§3.6, §3.7; V1.1.20, 2026-11-07: Galaxy textures per species from
+      tools/fish-galaxy.js instead of one tiling texture, animated in game by a colour pulse and particles, 36 uploads;
+      the Collector's 100 / 120-cell quests wait for V1.2's species): the variant (look, coin, Fish Index column, release order), the
       4th bar of the gauge (mockup first), the Collector's new quests. Its uploads (one texture, one coin) previewed
       first.
 - [ ] **M3 Aurora Glacier**: theme, Aurora Egg, Penguin Puffer (mesh, bones, sticker, Fish Index), rebirth 9, tank 27,

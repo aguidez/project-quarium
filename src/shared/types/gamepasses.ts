@@ -45,7 +45,7 @@ export const GAME_PASSES: Record<GamePass, GamePassConfig> = {
 	},
 	Lucky: {
 		displayName: "Lucky",
-		description: "Anomaly, Ghost and Shiny fish hatch twice as often.",
+		description: "Anomaly, Ghost and Shiny fish hatch twice as often, Galaxy fish three times as often.",
 		id: 2068051760,
 		image: "rbxassetid://96173355511700", // design/ui/passes/Pass_Lucky.png
 		badge: "x2",

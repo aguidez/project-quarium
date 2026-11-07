@@ -75,6 +75,8 @@ const DEFAULT_GROWTH = [
 // A normal fish earns 1 + 1/15 (one coin in 15 sparkles, x2). Anomaly: coins 1.2x as often. Ghost: its
 // sparkling coins become ghost coins worth 3 sparkling ones. Shiny: anomaly pace + 3x the sparkling coins
 let VARIANTS = [
+	// Galaxy (V1.1.20): coins 1.5x as often, one out of 5 a star coin worth 3 coins
+	{ name: "Galaxy", chance: 0.002, mult: (1.5 * (4 / 5 + (1 / 5) * 3)) / (1 + 1 / 15), ocean: 10 },
 	{ name: "Shiny", chance: 0.01, mult: 1.2 * ((4 / 5 + (1 / 5) * 2) / (1 + 1 / 15)), ocean: 5 },
 	{ name: "Ghost", chance: 0.05, mult: (14 / 15 + (1 / 15) * 6) / (1 + 1 / 15), ocean: 3 },
 	{ name: "Anomaly", chance: 0.1, mult: 1.2, ocean: 2 },
@@ -176,6 +178,8 @@ const SIDE_QUESTS = overrides.SIDE_QUESTS ||
 			{ cells: 25, ocean: 2500 },
 			{ variant: "Shiny", ocean: 2500 },
 			{ cells: 50, ocean: 0 },
+			{ cells: 75, minutes: 3 }, // V1.1.20 (90 cells with the Galaxy column)
+			{ variant: "Galaxy", minutes: 3 },
 		],
 		ocean: { releases: 50, minutes: 3 },
 		// Big Catch (quests.ts, V1.1.16): hatch a fish of `size` or more, or hold `count` of them at once

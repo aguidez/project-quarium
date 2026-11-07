@@ -9,6 +9,7 @@ import {
 	getFishAndEggs,
 	getHatchedVariant,
 	getIncubating,
+	getPlayerGalaxyLuck,
 	getPlayerVariantLuck,
 	getTotalFish,
 	hasFreeIncubator,
@@ -122,13 +123,14 @@ class EggServiceSingleton implements Lifecycle {
 		// Then its variant (the tutorial's fish is always a normal one, so it looks like the tutorial says;
 		// an easter egg fish has none, and leaves the star power for the next egg)
 		const luck = getPlayerVariantLuck(data);
+		const galaxyLuck = getPlayerGalaxyLuck(data);
 		const plain = onboardingEgg || isEasterEgg(fishType);
 		const starPowered = !plain && data.starPower > 0;
 		const variant: FishVariant = plain
 			? "Normal"
 			: starPowered
-				? rollStarVariant(this.rng, data.starPower, luck)
-				: rollVariant(this.rng, luck);
+				? rollStarVariant(this.rng, data.starPower, luck, galaxyLuck)
+				: rollVariant(this.rng, luck, galaxyLuck);
 		const firstTime = getHatchedVariant(data, fishType, variant) === 0;
 		// Its Size score (shared/types/size): every fish of an egg, the tutorial's included; a special fish has none
 		const size = isEasterEgg(fishType) ? undefined : rollSize(this.rng);

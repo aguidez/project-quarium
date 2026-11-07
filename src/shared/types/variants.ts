@@ -4,7 +4,7 @@ import { FISH_TYPES, FishType, SPECIAL_COIN_MULTIPLIER, SPECIAL_COIN_ODDS } from
  * Every hatched fish is drawn a variant on top of its species. Variants are rare, look different and
  * earn a bit more; each one is its own entry of the Fish Index.
  */
-export type FishVariant = "Normal" | "Anomaly" | "Ghost" | "Shiny";
+export type FishVariant = "Normal" | "Anomaly" | "Ghost" | "Shiny" | "Galaxy";
 
 export interface VariantConfig {
 	displayName: string;
@@ -18,6 +18,8 @@ export interface VariantConfig {
 	specialOddsMultiplier: number;
 	/** Its sparkling coins are ghost coins instead, worth GHOST_COIN_MULTIPLIER sparkling coins. */
 	ghostCoins: boolean;
+	/** Its sparkling coins are star coins instead (the "Star" coin), worth STAR_COIN_MULTIPLIER plain coins (Galaxy). */
+	starCoins?: boolean;
 	/** Its fish sparkle, like sparkling coins. */
 	sparkles: boolean;
 	/** Release order when no variant is picked: the lowest rank first. */
@@ -81,30 +83,55 @@ export const FISH_VARIANTS: Record<FishVariant, VariantConfig> = {
 		rank: 3,
 		oceanPointsMultiplier: 5,
 	},
+	// V1.1.20 (ROADMAP_V1.2 §3.6): rarer than the Shiny (0.2 %, one egg in 500), ~x2 income: coins 1.5x as often, one out
+	// of 5 a star coin worth 3 coins: 1.5 x (4/5 + 1/5 x 3) / (1 + 1/15) = x1.97. Night blue, full of tiny stars
+	Galaxy: {
+		displayName: "Galaxy",
+		description:
+			"Night blue and full of stars. Drops its coins 1.5x as often, and one out of 5 is a star coin worth 3 coins. Worth 10x Ocean Points.",
+		chance: 0.002,
+		coinRate: 1.5,
+		specialOddsMultiplier: 3,
+		ghostCoins: false,
+		starCoins: true,
+		sparkles: true,
+		rank: 4,
+		oceanPointsMultiplier: 10,
+	},
 };
 
 /** Fish Index columns, and draw order of rollVariant (the rarest first). */
-export const VARIANT_ORDER: readonly FishVariant[] = ["Normal", "Anomaly", "Ghost", "Shiny"];
+export const VARIANT_ORDER: readonly FishVariant[] = ["Normal", "Anomaly", "Ghost", "Shiny", "Galaxy"];
 
 /** A ghost coin (replacing a ghost fish's sparkling coin) is worth this many sparkling coins. */
 export const GHOST_COIN_MULTIPLIER = 3;
+/** A star coin (a Galaxy fish's sparkling coin) is worth this many plain coins. */
+export const STAR_COIN_MULTIPLIER = 3;
+/** The Lucky pass multiplies the Galaxy's chance by this instead of LUCKY_PASS_MULTIPLIER (the owner: a bit more). */
+export const GALAXY_PASS_LUCK = 3;
 
 /** Variants that wear a recoloured texture (a FishVariantAppearance, see tags.ts); a ghost turns translucent instead. */
-export const RECOLOURED_VARIANTS: readonly FishVariant[] = ["Anomaly", "Shiny"];
+export const RECOLOURED_VARIANTS: readonly FishVariant[] = ["Anomaly", "Shiny", "Galaxy"];
 
 export function isFishVariant(value: unknown): value is FishVariant {
 	return typeIs(value, "string") && FISH_VARIANTS[value as FishVariant] !== undefined;
 }
 
+/** The luck a variant's chance is multiplied by: `galaxyLuck` for the Galaxy (its own pass bonus), `luck` for the others. */
+export function getLuckFor(variant: FishVariant, luck: number, galaxyLuck: number): number {
+	return variant === "Galaxy" ? galaxyLuck : luck;
+}
+
 /**
- * Draws the variant of a hatching fish: Shiny 1 %, Ghost 5 %, Anomaly 10 %, else Normal. `luck` multiplies
- * the rare variants' chances (Ocean milestone "VariantLuck": x1.5 = 1.5 % / 7.5 % / 15 %).
+ * Draws the variant of a hatching fish: Galaxy 0.2 %, Shiny 1 %, Ghost 5 %, Anomaly 10 %, else Normal. `luck` multiplies
+ * the rare variants' chances (Ocean milestone "VariantLuck": x1.5 = 1.5 % / 7.5 % / 15 %), `galaxyLuck` the Galaxy's
+ * (playerData getPlayerGalaxyLuck: the Lucky pass counts x3 there).
  */
-export function rollVariant(rng: Random, luck = 1): FishVariant {
+export function rollVariant(rng: Random, luck = 1, galaxyLuck = luck): FishVariant {
 	let roll = rng.NextNumber();
 	for (let i = VARIANT_ORDER.size() - 1; i >= 1; i--) {
 		const variant = VARIANT_ORDER[i];
-		roll -= FISH_VARIANTS[variant].chance * luck;
+		roll -= FISH_VARIANTS[variant].chance * getLuckFor(variant, luck, galaxyLuck);
 		if (roll < 0) return variant;
 	}
 	return "Normal";
@@ -128,18 +155,22 @@ export function getVariantIncomeMultiplier(variant: FishVariant): number {
 	const config = FISH_VARIANTS[variant];
 	const normalSpecial = 1 / SPECIAL_COIN_ODDS;
 	const special = 1 / getSpecialCoinOdds(variant);
-	const specialValue = SPECIAL_COIN_MULTIPLIER * (config.ghostCoins ? GHOST_COIN_MULTIPLIER : 1);
+	const specialValue = config.starCoins
+		? STAR_COIN_MULTIPLIER
+		: SPECIAL_COIN_MULTIPLIER * (config.ghostCoins ? GHOST_COIN_MULTIPLIER : 1);
 	const perCoin = 1 - special + special * specialValue;
 	return (config.coinRate * perCoin) / (1 - normalSpecial + normalSpecial * SPECIAL_COIN_MULTIPLIER);
 }
 
 /** Percent shown next to a variant ("10%"), from its chance. */
 /** "10%": the chance at hatch, with the player's variant luck (Lucky ocean, the Lucky pass) like rollVariant. */
-export function formatVariantChance(variant: FishVariant, luck = 1): string {
-	let chance = FISH_VARIANTS[variant].chance * luck;
+export function formatVariantChance(variant: FishVariant, luck = 1, galaxyLuck = luck): string {
+	let chance = FISH_VARIANTS[variant].chance * getLuckFor(variant, luck, galaxyLuck);
 	if (variant === "Normal") {
 		chance = 1;
-		for (const other of VARIANT_ORDER) chance -= FISH_VARIANTS[other].chance * luck;
+		for (const other of VARIANT_ORDER) chance -= FISH_VARIANTS[other].chance * getLuckFor(other, luck, galaxyLuck);
 	}
-	return `${math.floor(chance * 1000 + 0.5) / 10}%`;
+	// One decimal ("10%", "1.5%"); two under 1 % (the Galaxy: "0.2%", "0.45%"), trailing zeros dropped
+	const [text] = string.format(chance < 0.01 ? "%.2f" : "%.1f", chance * 100).gsub("%.?0+$", "");
+	return `${text}%`;
 }

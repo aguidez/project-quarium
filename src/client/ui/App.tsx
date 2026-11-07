@@ -8,7 +8,13 @@ import { ActiveEvent, GameEventType } from "shared/types/events";
 import { Feature } from "shared/types/features";
 import { FishType } from "shared/types/fish";
 import { canDropFood, isOnboardingDone, STORY_QUEST_HINT_DELAY } from "shared/types/onboarding";
-import { getCompanionSlots, getPlayerVariantLuck, getTotalFish, PlayerData } from "shared/types/playerData";
+import {
+	getCompanionSlots,
+	getPlayerGalaxyLuck,
+	getPlayerVariantLuck,
+	getTotalFish,
+	PlayerData,
+} from "shared/types/playerData";
 import { GamePass } from "shared/types/gamepasses";
 import { hasClaimableQuest } from "shared/types/quests";
 import { FishVariant } from "shared/types/variants";
@@ -381,6 +387,7 @@ export function App(props: AppProps) {
 					bars={data.starCharge}
 					saved={starPower}
 					luck={getPlayerVariantLuck(data)}
+					galaxyLuck={getPlayerGalaxyLuck(data)}
 					scale={uiScale}
 				/>
 			)}
@@ -524,6 +531,7 @@ export function App(props: AppProps) {
 					key="FishIndexPanel"
 					collection={data}
 					luck={getPlayerVariantLuck(data)}
+					galaxyLuck={getPlayerGalaxyLuck(data)}
 					onClose={() => setOpenPanel(undefined)}
 				/>
 			)}
@@ -596,6 +604,7 @@ export function App(props: AppProps) {
 					newBestSize={props.reveal.newBestSize}
 					starPowered={props.reveal.starPowered}
 					luck={data ? getPlayerVariantLuck(data) : 1}
+					galaxyLuck={data ? getPlayerGalaxyLuck(data) : 1}
 					playSfx={props.playSfx}
 					onEnd={props.onRevealEnd}
 				/>

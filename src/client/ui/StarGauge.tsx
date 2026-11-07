@@ -1,17 +1,18 @@
 import React, { useBinding, useEffect } from "@rbxts/react";
 import { RunService } from "@rbxts/services";
-import { getGuaranteedVariant, getStarVariantOdds, STAR_MAX_BARS } from "shared/types/stars";
+import { getGuaranteedVariant, getStarVariantOdds, STAR_GOLD_BARS, STAR_MAX_BARS } from "shared/types/stars";
 import { FishVariant, VARIANT_ORDER } from "shared/types/variants";
 import { Outline, TextStroke } from "./kit";
 import { FONT_BOLD, FONT_TITLE, NAVY, OUTLINE, PALETTES, STARFALL_COLORS, VARIANT_PALETTES, verticalGradient } from "./theme";
 
-// FigCraft starfall.figcraft (StarGauge_Mockup)
+// FigCraft starfall.figcraft (StarGauge_Mockup), star-gauge-4.figcraft for the 4th bar (V1.1.20)
 const PLATE_WIDTH = 104;
-const PLATE_HEIGHT = 392;
+const BAR_HEIGHT = 80;
 const PLATE_DEPTH = 6;
 const TUBE_WIDTH = 44;
 const TUBE_TOP = 88;
-const TUBE_HEIGHT = 270;
+const TUBE_HEIGHT = BAR_HEIGHT * STAR_MAX_BARS;
+const PLATE_HEIGHT = 88 + TUBE_HEIGHT + 44;
 const CHIP_WIDTH = 104;
 const CHIP_HEIGHT = 44;
 const CHIP_GAP = 10;
@@ -22,7 +23,13 @@ const FILL_SPEED = 2.5; // bars per second the fill moves toward its value
 const WHITE = new Color3(1, 1, 1);
 const STAR_GLYPH = "★";
 /** The chips, from the bottom bar up. */
-const BAR_VARIANTS: FishVariant[] = ["Anomaly", "Ghost", "Shiny"];
+const BAR_VARIANTS: FishVariant[] = ["Anomaly", "Ghost", "Shiny", "Galaxy"];
+/** The 4th bar's fill (the Galaxy's): night blue at the bottom to pink on top, like the Galaxy fish. */
+const GALAXY_FILL = new ColorSequence([
+	new ColorSequenceKeypoint(0, Color3.fromHex("#FF8AD8")),
+	new ColorSequenceKeypoint(0.5, Color3.fromHex("#5B3BFF")),
+	new ColorSequenceKeypoint(1, Color3.fromHex("#1B1060")),
+]);
 
 export interface StarGaugeProps {
 	/** The starfall's gauge so far. */
@@ -31,11 +38,16 @@ export interface StarGaugeProps {
 	saved: number;
 	/** The player's own variant luck (Lucky ocean, the Lucky pass): the chances shown include it. */
 	luck: number;
+	/** Its Galaxy luck (the Lucky pass counts x3 there). */
+	galaxyLuck: number;
 	scale: number;
 }
 
+/** "19%"; with one decimal under 10 % ("2.5%", "0.3%": the Galaxy's chances are small). */
 function percent(chance: number): string {
-	return `${math.floor(chance * 100 + 0.5)}%`;
+	if (chance >= 0.1) return `${math.floor(chance * 100 + 0.5)}%`;
+	const [text] = string.format("%.1f", chance * 100).gsub("%.0$", "");
+	return `${text}%`;
 }
 
 /** One chip beside its bar: lit with SURE! when the variant is guaranteed, dimmed when a better one is, else its chance. */
@@ -136,8 +148,9 @@ function StarGlyph(props: { size: number; position: UDim2; anchorPoint?: Vector2
 export function StarGauge(props: StarGaugeProps) {
 	const bars = math.clamp(props.bars, 0, STAR_MAX_BARS);
 	const full = bars >= STAR_MAX_BARS;
+	const shinySure = bars >= STAR_GOLD_BARS;
 	const guaranteed = getGuaranteedVariant(bars);
-	const odds = getStarVariantOdds(bars, props.luck);
+	const odds = getStarVariantOdds(bars, props.luck, props.galaxyLuck);
 
 	// The fill glides toward the gauge's value
 	const [shown, setShown] = useBinding(bars);
@@ -151,8 +164,8 @@ export function StarGauge(props: StarGaugeProps) {
 		return () => connection.Disconnect();
 	}, [bars]);
 
-	const caption = full ? "SHINY SURE!" : "CATCH THE STARS!";
-	const captionPalette = PALETTES.gold;
+	const caption = full ? "GALAXY SURE!" : shinySure ? "SHINY SURE!" : "CATCH THE STARS!";
+	const captionPalette = full ? VARIANT_PALETTES.Galaxy : PALETTES.gold;
 	const plateX = CHIP_WIDTH + CHIP_GAP;
 	const tubeX = (PLATE_WIDTH - TUBE_WIDTH) / 2;
 	const width = plateX + PLATE_WIDTH;
@@ -189,7 +202,10 @@ export function StarGauge(props: StarGaugeProps) {
 			>
 				<uicorner CornerRadius={new UDim(0, 24)} />
 				<uigradient Color={verticalGradient(NAVY.cardTop, NAVY.cardBottom)} Rotation={90} />
-				<Outline color={full ? STARFALL_COLORS.star : OUTLINE} thickness={full ? 4 : 3} />
+				<Outline
+					color={full ? VARIANT_PALETTES.Galaxy.light : shinySure ? STARFALL_COLORS.star : OUTLINE}
+					thickness={shinySure ? 4 : 3}
+				/>
 				<frame
 					key="Gloss"
 					Position={UDim2.fromOffset(8, 6)}
@@ -227,7 +243,8 @@ export function StarGauge(props: StarGaugeProps) {
 						key="Fill"
 						AnchorPoint={new Vector2(0, 1)}
 						Position={UDim2.fromScale(0, 1)}
-						Size={shown.map((value) => UDim2.fromScale(1, value / STAR_MAX_BARS))}
+						// The gold part: bars 1–3
+						Size={shown.map((value) => UDim2.fromScale(1, math.min(value, STAR_GOLD_BARS) / STAR_MAX_BARS))}
 						Visible={shown.map((value) => value > 0.01)}
 						BackgroundColor3={WHITE}
 						BorderSizePixel={0}
@@ -245,12 +262,42 @@ export function StarGauge(props: StarGaugeProps) {
 							<uicorner CornerRadius={new UDim(0, 5)} />
 						</frame>
 					</frame>
-					{[1, 2].map((bar) => (
+					<frame
+						key="GalaxyFill"
+						AnchorPoint={new Vector2(0, 1)}
+						Position={UDim2.fromScale(0, 1 - STAR_GOLD_BARS / STAR_MAX_BARS)}
+						Size={shown.map((value) =>
+							UDim2.fromScale(1, math.max(value - STAR_GOLD_BARS, 0) / STAR_MAX_BARS),
+						)}
+						Visible={shown.map((value) => value > STAR_GOLD_BARS + 0.01)}
+						BackgroundColor3={WHITE}
+						BorderSizePixel={0}
+					>
+						<uicorner CornerRadius={new UDim(0, TUBE_WIDTH / 2)} />
+						<uigradient Color={GALAXY_FILL} Rotation={90} />
+						{[
+							[10, 0.15, 3],
+							[28, 0.35, 2],
+							[18, 0.6, 3],
+							[31, 0.8, 2],
+						].map(([x, y, size], index) => (
+							<frame
+								key={`Dot${index}`}
+								Position={new UDim2(0, x, y, 0)}
+								Size={UDim2.fromOffset(size, size)}
+								BackgroundColor3={WHITE}
+								BorderSizePixel={0}
+							>
+								<uicorner CornerRadius={new UDim(0.5, 0)} />
+							</frame>
+						))}
+					</frame>
+					{[1, 2, 3].map((bar) => (
 						<frame
 							key={`Notch${bar}`}
 							Position={new UDim2(0, 0, 1 - bar / STAR_MAX_BARS, -2)}
 							Size={new UDim2(1, 0, 0, 4)}
-							BackgroundColor3={OUTLINE}
+							BackgroundColor3={bar === STAR_GOLD_BARS ? VARIANT_PALETTES.Galaxy.light : OUTLINE}
 							BackgroundTransparency={0.15}
 							BorderSizePixel={0}
 							ZIndex={2}
@@ -279,7 +326,7 @@ export function StarGauge(props: StarGaugeProps) {
 					// Rounded down: "3.0" only once the gauge is really full
 					Text={full ? "MAX!" : `${string.format("%.1f", math.floor(bars * 10) / 10)} / ${STAR_MAX_BARS}`}
 					TextSize={20}
-					TextColor3={STARFALL_COLORS.star}
+					TextColor3={full ? VARIANT_PALETTES.Galaxy.light : STARFALL_COLORS.star}
 				>
 					<TextStroke thickness={3} />
 				</textlabel>

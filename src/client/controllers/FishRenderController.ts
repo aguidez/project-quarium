@@ -7,7 +7,7 @@ import { TAGS } from "shared/tags";
 import { getGrowthStages, HungerState } from "shared/types/fish";
 import { FishEffect } from "shared/types/ufo";
 import { UFO_COLORS } from "client/ui/theme";
-import { applyVariantLook, cloneFishTemplate, hasVariantLook, onFishAssetAdded } from "client/fishLook";
+import { applyVariantLook, cloneFishTemplate, hasVariantLook, onFishAssetAdded, setFishTint } from "client/fishLook";
 import { FocusController } from "./FocusController";
 import { getWorldLabelScale } from "client/ui/screenScale";
 
@@ -402,8 +402,9 @@ class FishRenderControllerSingleton implements Lifecycle {
 		for (const { appearance, baseColor } of fish.tints) {
 			const fed = weak ? baseColor.Lerp(WEAK_COLOR, WEAK_TINT) : baseColor;
 			const color = aura ? fed.Lerp(aura, AURA_TINT) : fed;
-			if (time <= 0) appearance.Color = color;
-			else TweenService.Create(appearance, new TweenInfo(time), { Color: color }).Play();
+			setFishTint(appearance, color, time, (seconds) =>
+				TweenService.Create(appearance, new TweenInfo(seconds), { Color: color }).Play(),
+			);
 		}
 	}
 

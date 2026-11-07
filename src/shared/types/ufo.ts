@@ -35,10 +35,14 @@ export function drawUfoOutcome(roll: number): UfoOutcome {
 	return "Green";
 }
 
-/** The variant one step better (Normal → Anomaly → Ghost → Shiny), or undefined for a Shiny. */
+/**
+ * The variant one step better (Normal → Anomaly → Ghost → Shiny), or undefined for a Shiny or a Galaxy: a UFO never
+ * makes a Galaxy (it stays the eggs' and the starfall's jackpot).
+ */
 export function getNextVariant(variant: FishVariant): FishVariant | undefined {
 	const index = VARIANT_ORDER.indexOf(variant);
-	return index >= 0 && index < VARIANT_ORDER.size() - 1 ? VARIANT_ORDER[index + 1] : undefined;
+	const shiny = VARIANT_ORDER.indexOf("Shiny");
+	return index >= 0 && index < shiny ? VARIANT_ORDER[index + 1] : undefined;
 }
 
 /**

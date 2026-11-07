@@ -27,6 +27,7 @@ import {
 	GHOST_COIN_MULTIPLIER,
 	getSpecialCoinOdds,
 	getVariantIncomeMultiplier,
+	STAR_COIN_MULTIPLIER,
 } from "shared/types/variants";
 import { INCOME_ATTRIBUTES } from "shared/types/aquarium";
 import { isOnboardingDone } from "shared/types/onboarding";
@@ -496,6 +497,8 @@ class FishServiceSingleton implements Lifecycle {
 		// `plain`: never sparkling nor ghost (the alien fish's scream)
 		const special = !frozen && !plain && this.rng.NextNumber() * getSpecialCoinOdds(fish.variant) < 1;
 		const ghost = special && FISH_VARIANTS[fish.variant].ghostCoins;
+		// A Galaxy fish's sparkling coins are star coins: the "Star" coin, worth STAR_COIN_MULTIPLIER plain coins
+		const starCoin = special && !copied && !easterEgg && FISH_VARIANTS[fish.variant].starCoins === true;
 		const data = DataService.getData(owner);
 		const multiplier =
 			getRebirthMultiplier(data?.rebirths ?? 0) *
@@ -515,10 +518,12 @@ class FishServiceSingleton implements Lifecycle {
 				(easterEgg?.bestFishShare ?? 1)
 			: easterEgg
 				? this.getTankIncomePerMinute(owner) * easterEgg.incomeShare * (special ? SPECIAL_COIN_MULTIPLIER : 1)
-				: getCoinValue(fish.fishType, fish.growthStage, special) * getSizeMultiplier(fish.size);
+				: starCoin
+					? getCoinValue(fish.fishType, fish.growthStage, false) * STAR_COIN_MULTIPLIER * getSizeMultiplier(fish.size)
+					: getCoinValue(fish.fishType, fish.growthStage, special) * getSizeMultiplier(fish.size);
 		const value = math.max(math.round(base * multiplier), 1);
 		const belly = this.getPose(fish).Position.sub(new Vector3(0, this.getSize(fish).Y / 2, 0));
-		CoinService.spawnCoin(owner, fish.config.coin, value, belly, special && !ghost, frozen, ghost);
+		CoinService.spawnCoin(owner, starCoin ? "Star" : fish.config.coin, value, belly, special && !ghost, frozen, ghost);
 	}
 
 	/**

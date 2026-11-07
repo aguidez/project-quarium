@@ -71,3 +71,14 @@ with `tools/blender/studio/export_fish.luau` + `tools/obj-receiver.js`, upload w
   a SurfaceAppearance ColorMap (it survives), and check the look afterwards with a capture. An Edit capture with
   camera arguments needs `workspace.CurrentCamera.CameraType` Custom (after a Scriptable sticker sheet, put it back).
 
+- **2026-11-07 (V1.1.20, the Galaxy variant)**: the Studio assistant's `HttpService` now refuses local servers
+  ("domain 127.0.0.1:<port> is not in the Assistant HTTP allowlist"): textures can't be pulled out of Studio by POST
+  any more. Pull them from the **public thumbnails API** instead, no auth: `GET
+  https://thumbnails.roblox.com/v1/assets?assetIds=<id>&size=420x420&format=Png`, poll until `state` is
+  `Completed` (a few seconds, sometimes a retry), then download `imageUrl` (the whole UV atlas, 420²; fine for a
+  recolour). `upload_image` from a 127.0.0.1 static server still works (36 images in two calls). A per-species variant
+  look is then: Normal ColorMap id from the template's SurfaceAppearance → thumbnail → offline transform
+  (tools/fish-galaxy.js) → upload → a clone of the species' Normal SurfaceAppearance with the new ColorMap, Color
+  white, attributes FishType / Variant, tag FishVariantAppearance, in ServerStorage.Assets.FishVariants (save the
+  place). Stickers: the same transform on the Normal sticker (outline and shadow kept), no new render needed.
+  A preview of an animated look as a GIF: draw the frames offline and run tools/blender/frames-to-gif.js on them.

@@ -53,6 +53,8 @@ export interface EggRevealProps {
 	newBestSize: boolean;
 	/** The player's variant luck: the chance shown is the one they hatched with. */
 	luck: number;
+	/** Its Galaxy luck (the Lucky pass counts x3 there). */
+	galaxyLuck: number;
 	playSfx: (name: SfxName, playbackSpeed?: number) => void;
 	onEnd: () => void;
 }
@@ -433,7 +435,7 @@ export function EggReveal(props: EggRevealProps) {
 							BackgroundTransparency={1}
 							Font={FONT_TITLE}
 							// Drawn with star power (a starfall), not with the usual chance
-							Text={`${variant.displayName.upper()}  •  ${props.starPowered ? "STAR POWER" : formatVariantChance(props.variant, props.luck)}`}
+							Text={`${variant.displayName.upper()}  •  ${props.starPowered ? "STAR POWER" : formatVariantChance(props.variant, props.luck, props.galaxyLuck)}`}
 							TextSize={24}
 							TextColor3={variantStyle.color}
 							{...captionText()}

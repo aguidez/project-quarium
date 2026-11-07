@@ -18,7 +18,7 @@ import {
 	VARIANT_PALETTES,
 } from "./theme";
 
-const INDEX_PANEL_WIDTH = 820;
+const INDEX_PANEL_WIDTH = 920; // 5 variant columns since the Galaxy (V1.1.20): one column wider than V1
 const SLOT = 88;
 const SLOT_DEPTH = 4;
 const GAP = 12;
@@ -30,7 +30,7 @@ const SCROLLBAR = 10;
 const TABLE_INSET = 4; // room for the row outlines, which the scrolling frame would clip
 const INNER_WIDTH = INDEX_PANEL_WIDTH - PANEL_PADDING * 2;
 /** Info column of a row: what the slots and paddings leave. */
-const INFO_WIDTH = INNER_WIDTH - TABLE_INSET * 2 - SCROLLBAR - ROW_PADDING * 2 - 4 * (SLOT + GAP);
+const INFO_WIDTH = INNER_WIDTH - TABLE_INSET * 2 - SCROLLBAR - ROW_PADDING * 2 - VARIANT_ORDER.size() * (SLOT + GAP);
 const SECTION_HEIGHT = 30; // "EASTER EGGS" title row
 /** Rows shown before the table scrolls. */
 const VISIBLE_ROWS = 3;
@@ -48,6 +48,8 @@ export interface FishIndexPanelProps {
 	collection: Pick<PlayerData, "hatched" | "hatchedVariants" | "bestSize">;
 	/** The player's variant luck (getPlayerVariantLuck): the chances shown are the ones they hatch with. */
 	luck: number;
+	/** Its Galaxy luck (getPlayerGalaxyLuck: the Lucky pass counts x3 there). */
+	galaxyLuck: number;
 	onClose: () => void;
 }
 
@@ -93,7 +95,7 @@ function Text(props: {
 }
 
 /** What a variant brings, under its column header (right-aligned: the last column sits by the panel's edge). */
-function VariantTooltip(props: { variant: FishVariant; luck: number }) {
+function VariantTooltip(props: { variant: FishVariant; luck: number; galaxyLuck: number }) {
 	const config = FISH_VARIANTS[props.variant];
 	const palette = VARIANT_PALETTES[props.variant];
 	const textWidth = TOOLTIP_WIDTH - TOOLTIP_PADDING * 2;
@@ -123,7 +125,7 @@ function VariantTooltip(props: { variant: FishVariant; luck: number }) {
 				Size={new UDim2(1, 0, 0, 22)}
 				BackgroundTransparency={1}
 				Font={FONT_TITLE}
-				Text={`${config.displayName.upper()}  ${formatVariantChance(props.variant, props.luck)}`}
+				Text={`${config.displayName.upper()}  ${formatVariantChance(props.variant, props.luck, props.galaxyLuck)}`}
 				TextSize={18}
 				TextColor3={props.variant === "Normal" ? WHITE : palette.base}
 				TextXAlignment={Enum.TextXAlignment.Left}
@@ -153,6 +155,7 @@ function ColumnHeader(props: {
 	order: number;
 	variant: FishVariant;
 	luck: number;
+	galaxyLuck: number;
 	hovered: boolean;
 	onHover: HoverHandler;
 }) {
@@ -186,11 +189,11 @@ function ColumnHeader(props: {
 				Size={new UDim2(1, 0, 0, 16)}
 				BackgroundTransparency={1}
 				Font={FONT_BOLD}
-				Text={formatVariantChance(props.variant, props.luck)}
+				Text={formatVariantChance(props.variant, props.luck, props.galaxyLuck)}
 				TextSize={14}
 				TextColor3={props.hovered ? WHITE : NAVY.muted}
 			/>
-			{props.hovered && <VariantTooltip variant={props.variant} luck={props.luck} />}
+			{props.hovered && <VariantTooltip variant={props.variant} luck={props.luck} galaxyLuck={props.galaxyLuck} />}
 		</frame>
 	);
 }
@@ -232,7 +235,7 @@ function FishRow(props: {
 				missing={!found}
 				silhouette={true}
 				image={FISH_ICONS[props.fishType][found ? variant : "Normal"]}
-				shiny={found && variant === "Shiny"}
+				shiny={found && FISH_VARIANTS[variant].sparkles}
 				onHover={(hovered) => props.onHover(hovered ? variant : undefined)}
 			/>
 		);
@@ -356,7 +359,7 @@ function SectionTitle(props: { order: number; text: string }) {
 
 /**
  * Fish index (FigCraft redesign-v2: FishIndex_V2): one row per fish of the game, one column per variant
- * (Normal, Anomaly, Ghost, Shiny); an entry is discovered by hatching that fish in that variant once.
+ * (Normal, Anomaly, Ghost, Shiny, Galaxy); an entry is discovered by hatching that fish in that variant once.
  * Easter egg fish (no variant) have their own category at the bottom, invisible (not even a silhouette)
  * until hatched: the category itself only shows once one of them is found. They stay out of the
  * "Discovered" count, a bonus beside the collection.
@@ -402,6 +405,7 @@ export function FishIndexPanel(props: FishIndexPanelProps) {
 			order={index + 2}
 			variant={variant}
 			luck={props.luck}
+			galaxyLuck={props.galaxyLuck}
 			hovered={hovered === variant}
 			onHover={setHovered}
 		/>

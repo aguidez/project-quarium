@@ -254,7 +254,7 @@ function FishSlot(props: { fish: AdminTankFish; armed: boolean; onArm: () => voi
 				size={SLOT}
 				palette={VARIANT_PALETTES[fish.variant]}
 				image={FISH_ICONS[fish.fishType][fish.variant]}
-				shiny={fish.variant === "Shiny"}
+				shiny={fish.variant === "Shiny" || fish.variant === "Galaxy"}
 				zIndex={2}
 			/>
 			{props.armed ? (

@@ -1,4 +1,4 @@
-import { FISH_VARIANTS, FishVariant, VARIANT_ORDER } from "./variants";
+import { FISH_VARIANTS, FishVariant, getLuckFor, VARIANT_ORDER } from "./variants";
 
 /**
  * The starfall (an event, StarfallService): shooting stars fall into every owned aquarium and the owner clicks them like
@@ -32,7 +32,23 @@ export const STAR_SIZES: Record<StarSize, StarSizeConfig> = {
 /** Draw order of the sizes (the rarest last). */
 export const STAR_SIZE_ORDER: readonly StarSize[] = ["Small", "Medium", "Big", "Huge"];
 
-export const STAR_MAX_BARS = 3;
+/**
+ * Bars of the gauge (PlayerData.starCharge / starPower count in bars). Bars 1–3 cost one bar of stars each; the 4th
+ * (V1.1.20, the Galaxy's: ROADMAP_V1.2 §3.7) costs FOURTH_BAR_COST, so what the stars bring past 3 bars fills it slowly:
+ * 4 bars in ~2.6 % of perfect starfalls (tools/starfall-sim.js --fourthBar 0.9).
+ */
+export const STAR_MAX_BARS = 4;
+/** Bars of the gold part of the gauge (Anomaly, Ghost, Shiny). */
+export const STAR_GOLD_BARS = 3;
+export const FOURTH_BAR_COST = 0.9;
+
+/** The gauge after a star of `power` (in bars of stars) is caught: one for one up to 3 bars, then at 1 / FOURTH_BAR_COST. */
+export function addStarPower(bars: number, power: number): number {
+	const gold = math.min(STAR_GOLD_BARS - bars, power);
+	if (gold >= power) return math.min(bars + power, STAR_MAX_BARS);
+	const left = power - math.max(gold, 0);
+	return math.min(math.max(bars, STAR_GOLD_BARS) + left / FOURTH_BAR_COST, STAR_MAX_BARS);
+}
 
 export const STARFALL = {
 	/** Stars falling into each tank during the event (a tank joining late gets its share of the time left). */
@@ -53,9 +69,10 @@ export const STARFALL = {
  * from `from` to `to`. Under one bar, the gauge multiplies the usual variant chances by 1 → 1 + EMPTY_BAR_LUCK.
  */
 export const STAR_BARS: { guaranteed: FishVariant; better: Partial<Record<FishVariant, [number, number]>> }[] = [
-	{ guaranteed: "Anomaly", better: { Ghost: [0.1, 0.4], Shiny: [0.02, 0.06] } },
-	{ guaranteed: "Ghost", better: { Shiny: [0.05, 0.4] } },
-	{ guaranteed: "Shiny", better: {} },
+	{ guaranteed: "Anomaly", better: { Ghost: [0.1, 0.4], Shiny: [0.02, 0.06], Galaxy: [0.002, 0.002] } },
+	{ guaranteed: "Ghost", better: { Shiny: [0.05, 0.4], Galaxy: [0.002, 0.003] } },
+	{ guaranteed: "Shiny", better: { Galaxy: [0.005, 0.05] } },
+	{ guaranteed: "Galaxy", better: {} },
 ];
 const EMPTY_BAR_LUCK = 2;
 
@@ -88,18 +105,21 @@ export function getFinalStarCharge(charge: number, caught: number, fallen: numbe
 	return math.clamp(math.max(charge, floor), 0, STAR_MAX_BARS);
 }
 
-/** Chances of each variant for an egg opened with this star power (they add up to 1). `luck`: the player's own. */
-export function getStarVariantOdds(power: number, luck = 1): Record<FishVariant, number> {
-	const odds: Record<FishVariant, number> = { Normal: 0, Anomaly: 0, Ghost: 0, Shiny: 0 };
+/**
+ * Chances of each variant for an egg opened with this star power (they add up to 1). `luck`: the player's own,
+ * `galaxyLuck` its Galaxy one (the Lucky pass counts x3 there).
+ */
+export function getStarVariantOdds(power: number, luck = 1, galaxyLuck = luck): Record<FishVariant, number> {
+	const odds: Record<FishVariant, number> = { Normal: 0, Anomaly: 0, Ghost: 0, Shiny: 0, Galaxy: 0 };
 	const bars = math.clamp(power, 0, STAR_MAX_BARS);
 	const full = math.floor(bars);
 	const part = bars - full;
 	if (full === 0) {
-		const boosted = luck * (1 + EMPTY_BAR_LUCK * part);
+		const boost = 1 + EMPTY_BAR_LUCK * part;
 		let rest = 1;
-		for (const variant of VARIANT_ORDER) {
-			if (variant === "Normal") continue;
-			odds[variant] = math.min(FISH_VARIANTS[variant].chance * boosted, rest);
+		for (let i = VARIANT_ORDER.size() - 1; i >= 1; i--) {
+			const variant = VARIANT_ORDER[i];
+			odds[variant] = math.min(FISH_VARIANTS[variant].chance * getLuckFor(variant, luck, galaxyLuck) * boost, rest);
 			rest -= odds[variant];
 		}
 		odds.Normal = rest;
@@ -112,7 +132,7 @@ export function getStarVariantOdds(power: number, luck = 1): Record<FishVariant,
 		const variant = VARIANT_ORDER[i];
 		const range = bar.better[variant];
 		if (!range) continue;
-		odds[variant] = math.min((range[0] + (range[1] - range[0]) * part) * luck, rest);
+		odds[variant] = math.min((range[0] + (range[1] - range[0]) * part) * getLuckFor(variant, luck, galaxyLuck), rest);
 		rest -= odds[variant];
 	}
 	odds[bar.guaranteed] += rest;
@@ -120,8 +140,8 @@ export function getStarVariantOdds(power: number, luck = 1): Record<FishVariant,
 }
 
 /** The variant of an egg opened with star power (see getStarVariantOdds). */
-export function rollStarVariant(rng: Random, power: number, luck = 1): FishVariant {
-	const odds = getStarVariantOdds(power, luck);
+export function rollStarVariant(rng: Random, power: number, luck = 1, galaxyLuck = luck): FishVariant {
+	const odds = getStarVariantOdds(power, luck, galaxyLuck);
 	let roll = rng.NextNumber();
 	for (let i = VARIANT_ORDER.size() - 1; i >= 1; i--) {
 		roll -= odds[VARIANT_ORDER[i]];

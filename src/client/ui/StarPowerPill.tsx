@@ -1,5 +1,5 @@
 import React from "@rbxts/react";
-import { getGuaranteedVariant, STAR_MAX_BARS } from "shared/types/stars";
+import { getGuaranteedVariant, STAR_GOLD_BARS, STAR_MAX_BARS } from "shared/types/stars";
 import { FISH_VARIANTS } from "shared/types/variants";
 import { Plate, TextStroke } from "./kit";
 import { PILL_HEIGHT } from "./LikeBoostPill";
@@ -19,7 +19,8 @@ export interface StarPowerPillProps {
 
 /** What the star power promises the next egg ("NEXT EGG: AT LEAST A GHOST"). */
 function describe(power: number): string {
-	if (power >= STAR_MAX_BARS) return "NEXT EGG: SHINY FOR SURE!";
+	if (power >= STAR_MAX_BARS) return "NEXT EGG: GALAXY FOR SURE!";
+	if (power >= STAR_GOLD_BARS) return "NEXT EGG: SHINY FOR SURE!";
 	const guaranteed = getGuaranteedVariant(power);
 	if (guaranteed === "Normal") return "NEXT EGG: BETTER VARIANT ODDS";
 	const name = FISH_VARIANTS[guaranteed].displayName.upper();

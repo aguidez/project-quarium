@@ -8,7 +8,7 @@ import { OnboardingStep } from "./onboarding";
 import { createQuestsData, QuestsData } from "./quests";
 import { getVariantLuck, OceanRewardId } from "./oceanRewards";
 import { getPerkHatchMultiplier, Perk } from "./perks";
-import { FishVariant } from "./variants";
+import { FishVariant, GALAXY_PASS_LUCK } from "./variants";
 import type { LeaderboardId } from "./leaderboards";
 import { GamePass, getPassCompanionSlots, getPassVariantLuck } from "./gamepasses";
 
@@ -210,6 +210,11 @@ export function getCompanionSlots(data: Pick<PlayerData, "companionSlots" | "pas
 /** The rare variants' chances multiplier of a player: Lucky ocean (Ocean milestone) x the Lucky pass. */
 export function getPlayerVariantLuck(data: Pick<PlayerData, "oceanRewardsClaimed" | "passes">): number {
 	return getVariantLuck(data.oceanRewardsClaimed) * getPassVariantLuck(data.passes);
+}
+
+/** The Galaxy's luck: the same Lucky ocean, the Lucky pass counting x3 (GALAXY_PASS_LUCK) instead of x2. */
+export function getPlayerGalaxyLuck(data: Pick<PlayerData, "oceanRewardsClaimed" | "passes">): number {
+	return getVariantLuck(data.oceanRewardsClaimed) * (data.passes.includes("Lucky") ? GALAXY_PASS_LUCK : 1);
 }
 
 /** Hatch time of an egg bought now (x its EGG_TYPES time): shorter while the Water Hen is equipped. */

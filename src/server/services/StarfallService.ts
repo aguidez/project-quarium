@@ -6,6 +6,7 @@ import { TAGS } from "shared/tags";
 import { isEventImmune, StarfallEventConfig } from "shared/types/events";
 import {
 	drawStarSize,
+	addStarPower,
 	getFinalStarCharge,
 	getGuaranteedVariant,
 	STAR_CAUGHT_ATTRIBUTE,
@@ -231,7 +232,7 @@ class StarfallServiceSingleton implements Lifecycle {
 		if (!data) return;
 		this.removeStar(shower, star, CAUGHT_LINGER);
 		shower.caught += 1;
-		data.starCharge = math.min(data.starCharge + star.power, STAR_MAX_BARS);
+		data.starCharge = addStarPower(data.starCharge, star.power);
 		DataService.sync(player);
 		// The chime climbs with the gauge
 		this.sfxRemote.FireClient(player, "StarCatch", 1 + (data.starCharge / STAR_MAX_BARS) * 0.5);

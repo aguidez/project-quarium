@@ -535,6 +535,24 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 50,
 		rewards: [{ kind: "Title", title: "TitleCollector" }],
 	},
+	// V1.1.20 (ROADMAP_V1.2 §7.2): 18 species x 5 variants = 90 cells today
+	Collector7: {
+		category: "Story",
+		title: "Index Expert",
+		description: "Fill 75 entries of the Fish Index.",
+		stat: "IndexCells",
+		target: 75,
+		rewards: [{ kind: "IncomeMinutes", minutes: 3 }],
+	},
+	Collector8: {
+		category: "Story",
+		title: "Stargazer",
+		description: "Find a Galaxy fish.",
+		stat: "VariantFound",
+		variant: "Galaxy",
+		target: 1,
+		rewards: [{ kind: "IncomeMinutes", minutes: 3 }],
+	},
 	// Ocean: after "Full House" (which opens the Ocean menu), give fish back to the sea
 	Ocean1: {
 		category: "Story",
@@ -821,7 +839,7 @@ export const STORY_LINES: Record<StoryLine, StoryLineConfig> = {
 	},
 	Collector: {
 		displayName: "Collector",
-		quests: ["Collector1", "Collector2", "Collector3", "Collector4", "Collector5", "Collector6"],
+		quests: ["Collector1", "Collector2", "Collector3", "Collector4", "Collector5", "Collector6", "Collector7", "Collector8"],
 		requires: "Story2",
 		order: 7,
 	},

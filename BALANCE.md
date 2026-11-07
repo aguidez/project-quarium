@@ -3,7 +3,7 @@
 > The game's balance: what an average player reaches after how long, and why. **Update it in the same task whenever a
 > number of the economy changes** (fish income, eggs, odds, rebirths, Ocean milestones, variants, food, capacity,
 > companions…): run the simulators, copy their results here, add a line to the history (§6).
-> Last updated: 2026-11-07 (V1.1.19: the Fish Keeper food perks §4, rarities 4 per label §5.4, no economy number changed).
+> Last updated: 2026-11-07 (V1.1.20: the Galaxy variant and the starfall's 4th bar, §3 Variants / Starfall, §6).
 
 
 **Where the numbers live**: `src/shared/types/fish.ts` (species), `eggs.ts` (eggs), `rebirths.ts` (rebirths),
@@ -220,15 +220,18 @@ the star power if it beats the one kept; the next egg opened spends it.
 |---|---|
 | Under 1 bar (p filled) | The usual chances x (1 + 2p): up to x3 just under one bar |
 | 1 bar + p | **Anomaly** at least; Ghost 10 → 40 %, Shiny 2 → 6 % as the second bar fills |
-| 2 bars + p | **Ghost** at least; Shiny 5 → 40 % |
-| 3 bars | **Shiny** |
+| 2 bars + p | **Ghost** at least; Shiny 5 → 40 % (Galaxy 0.2 → 0.3 %) |
+| 3 bars + p | **Shiny** at least; Galaxy 0.5 → 5 % as the 4th bar fills (V1.1.20) |
+| 4 bars | **Galaxy** (the 4th bar costs 0.9 bar of stars: what the stars bring past 3 bars fills it) |
 
-| Stars caught | Bars (p10 / median / p90) | 1 / 2 / 3 bars reached | Next egg: Anomaly / Ghost / Shiny | A 12 h run (15 starfalls) |
+Measured with the 4th bar (V1.1.20, `node tools/starfall-sim.js`, 400,000 events per rate; bars 1–3 unchanged):
+
+| Stars caught | Bars (p10 / median / p90) | 1 / 2 / 3 / 4 bars reached | Next egg: Anomaly / Ghost / Shiny / Galaxy | A 12 h run (15 starfalls) |
 |---|---|---|---|---|
-| 40 % | 0.49 / 0.94 / 1.66 | 45 / 4 / 0 % | 44 / 18 / 3.5 % (Normal 34 %) | 6.6 Anomaly, 2.7 Ghost, 0.5 Shiny |
-| 60 % | 0.90 / 1.44 / 2.27 | 84 / 18 / 1 % | 52 / 32 / 7 % | 7.7, 4.7, 1.1 |
-| 75 % | 1.23 / 1.83 / 2.70 | 98 / 38 / 5 % | 42 / 44 / 13 % | 6.2, 6.6, 2.0 |
-| 100 % | 1.82 / 2.46 / 3.00 | 100 / 81 / 21 % | 12 / 53 / 35 % | 1.8, 8.0, 5.3 |
+| 40 % | 0.50 / 0.94 / 1.66 | 45 / 4 / 0.1 / 0 % | 44 / 18 / 3.3 / 0.4 % (Normal 34 %) | 6.6 Anomaly, 2.7 Ghost, 0.5 Shiny, 0.05 Galaxy |
+| 60 % | 0.90 / 1.45 / 2.26 | 84 / 18 / 1.3 / 0.1 % | 52 / 32 / 6.9 / 0.4 % | 7.8, 4.8, 1.0, 0.05 |
+| 75 % | 1.23 / 1.83 / 2.68 | 98 / 39 / 4.6 / 0.3 % | 41 / 44 / 13 / 0.6 % | 6.2, 6.6, 2.0, 0.09 |
+| 100 % | 1.82 / 2.46 / 3.40 | 100 / 81 / 21 / 2.6 % | 12 / 53 / 32 / 3.2 % | 1.8, 8.0, 4.8, 0.48 |
 
 **Why it doesn't break the curve**: a 12 h run opens ~900 eggs, which already give ~90 Anomalies, ~45 Ghosts and ~9
 Shinies; a player catching three stars out of four adds ~6, ~7 and ~2. A variant earns +20 to +35 % on one fish out of
@@ -302,8 +305,11 @@ A release earns the species' points x 1 / 2 / 3 / 5 (Normal / Anomaly / Ghost / 
 
 ### Variants (`variants.ts`)
 
-Shiny 1 % (coins 1.2x as often, 3x more sparkling coins: +35 %), Ghost 5 % (ghost coins worth 3 sparkling ones:
-+25 %), Anomaly 10 % (coins 1.2x as often: +20 %). On average +3.6 % income, all included in the simulator.
+Galaxy 0.2 % (V1.1.20: coins 1.5x as often, one out of 5 a star coin worth 3 coins: x1.97, Ocean Points x10), Shiny
+1 % (coins 1.2x as often, 3x more sparkling coins: +35 %), Ghost 5 % (ghost coins worth 3 sparkling ones: +25 %),
+Anomaly 10 % (coins 1.2x as often: +20 %). On average +3.8 % income, all included in the simulator. The Lucky ocean
+multiplies every rare chance by 1.5; the Lucky pass by 2, and by 3 the Galaxy's (0.2 → 0.6 %, 0.9 % with the ocean).
+A UFO never makes a Galaxy.
 
 ---
 
@@ -658,6 +664,7 @@ content (species, eggs, aquariums, capacity, companions themselves) away from fr
 | V1.0.0 | The release: the alpha's limits removed (all 8 rebirths and 12 eggs, every Ocean milestone and story quest, the weekly quests from rebirth 3, the gamepasses on sale); no number changed | Unchanged: the timeline of §2 (rebirth 8 ~10h56, all eighteen species ~12h18) is now every player's; the gamepasses stay outside the balance (§5.10) |
 | V1.1.15 | MAX_MONEY 1e15 → 1e300 (a guard, no longer a ceiling of the economy), money units up to Vg then scientific, income leaderboard scores encoded above 1e15; no price, income or reward changed, simulator not affected | Unchanged: the timeline of §2; the next rebirths can cost far more than 1e15 |
 | V1.1.16 | The Size score (ROADMAP_V1.2 M2b): -15…+15, triangular, coins x(1 + size/100), Ocean Points unchanged; the Big Catch line (3 / 5 / 5 min of income, two titles), dailies "Big Fish" (+4) and weekly "Huge Haul" (+10) (coin boosts, as the others). Simulator: `P.sizeMax` 15 by default, the Big Catch line in `SIDE_QUESTS` | Rebirth 1 ~19 → **~17 min**, rebirth 2 ~1h24 → ~1h20, rebirth 8 ~10h56 → **~10h47**, all eighteen species ~12h18 → **~11h59** (11h21–12h45); income +15–30 %; a Titan for 43 % of the players before the end |
+| V1.1.20 | The Galaxy variant (ROADMAP_V1.2 M2c): 0.2 %, coins 1.5x as often, one out of 5 a star coin worth 3 coins (x1.97), Ocean Points x10; the Lucky pass x3 on it; no Galaxy from a UFO. Starfall: a 4th bar (0.9 bar of stars) guaranteeing a Galaxy, Galaxy 0.5 → 5 % on the way. Collector 75 cells (3 min) and first Galaxy (3 min). Simulators: Galaxy in `VARIANTS`, starfall `--fourthBar` 0.9 by default | Unchanged within the noise: all eighteen species ~11h57 (11h17–12h43); average variant bonus +3.6 → +3.8 %. The 75-cell quest comes after the end of V1 (90 cells). 4 bars in 2.6 % of perfect starfalls, the Shiny's 3 bars unchanged (21 %) |
 | V1.2 (plan) | ROADMAP_V1.2.md M1, not in the game: rebirths 9–12 (200T x25,000 / 640T x120,000 / 3Qa x375,000 / 80Qa x1.2M), eggs Aurora 400T, Sky 770T, Dreamland 50Qa, Heart 96Qa (180 s), 6 species (income x2, points x1.6), tank 27–33 at 1.5M / 4M / 9M / 20M Ocean Points, Voyage 375k / 900k / 2.2M / 5M points, side lines (Hatchery 1,800–3,500, Collector to 120 cells, Ocean 500 released, Big Catch); **Size score** (-15…+15, triangular, coins x(1 + size/100)); **Galaxy** (0.2 %, ~x2 income, x10 points); starfall 4th bar at 0.9 bar of stars. Simulator: `P.sizeMax`, plan `VARIANTS`, Ocean line as a list, Big Catch line; starfall `--fourthBar` | Rebirths 9–12 at ~13h37 / 16h28 / 19h53 / 23h14, **all 24 species ~25h15 (24h18–26h34)**, ~day 26; runs 2h50–3h25. Size: V1 ~2–3 % faster (all eighteen 12h11 → 11h55), income +15–30 %. 4th bar: 2.6 % of perfect starfalls (0.3 % at 75 % caught) |
 
 ---

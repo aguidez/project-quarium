@@ -11,6 +11,27 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.20 — 2026-11-07
+
+**The Galaxy variant**: a new variant, rarer than the Shiny.
+
+**New**
+- **Galaxy fish** (0.2 %, one egg in 500): night blue, full of stars and pink and blue nebulae; its colours slowly
+  shift, stars twinkle on its body and a shooting star crosses it now and then. Every species has its Galaxy look.
+- A Galaxy fish drops its coins 1.5 times as often, and one coin out of 5 is a **star coin** worth 3 coins: about
+  twice the income of a normal fish. Released, it is worth 10 times the Ocean Points.
+- The Fish Index has a fifth column, Galaxy.
+- **The starfall's gauge has a 4th bar**: what the stars bring past 3 bars now fills it, slowly. Bars 1 to 3 don't
+  change (the Shiny for sure at 3 bars, as before); between 3 and 4 bars the next egg's Galaxy chance grows from
+  0.5 % to 5 %, and 4 bars give a Galaxy for sure. It only happens in about 1 starfall out of 40, catching every star.
+- New Collector quests: fill 75 entries of the Fish Index, and find a Galaxy fish (minutes of income each).
+
+**Changes**
+- The Lucky pass makes Galaxy fish three times as likely (the other variants twice, as before).
+- A UFO's mutation never turns a fish into a Galaxy: a Shiny stays the best it can give.
+
+---
+
 ## V1.1.19 — 2026-11-07
 
 Groundwork for the next aquariums (V1.2): a faster food reserve for the big tanks, and room in the rarities.

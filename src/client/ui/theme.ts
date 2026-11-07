@@ -120,108 +120,126 @@ export const FISH_ICONS: Record<FishType, Record<FishVariant, string>> = {
 		Anomaly: "rbxassetid://81342229332826",
 		Ghost: "rbxassetid://122884795120966",
 		Shiny: "rbxassetid://120579157264598",
+		Galaxy: "rbxassetid://107222556225993",
 	},
 	Big: {
 		Normal: "rbxassetid://79814556352685",
 		Anomaly: "rbxassetid://99760732461454",
 		Ghost: "rbxassetid://110304916312275",
 		Shiny: "rbxassetid://120996176272657",
+		Galaxy: "rbxassetid://127069049227959",
 	},
 	RedTetra: {
 		Normal: "rbxassetid://86618308058080",
 		Anomaly: "rbxassetid://103307326043288",
 		Ghost: "rbxassetid://106797427209781",
 		Shiny: "rbxassetid://71943826792937",
+		Galaxy: "rbxassetid://109236521684911",
 	},
 	Clownfish: {
 		Normal: "rbxassetid://114102644558524",
 		Anomaly: "rbxassetid://70664728701506",
 		Ghost: "rbxassetid://70705428026205",
 		Shiny: "rbxassetid://133655556487680",
+		Galaxy: "rbxassetid://71908170108545",
 	},
 	ZebraDanio: {
 		Normal: "rbxassetid://138477666040081",
 		Anomaly: "rbxassetid://131837360407704",
 		Ghost: "rbxassetid://101750992429024",
 		Shiny: "rbxassetid://104468280292133",
+		Galaxy: "rbxassetid://96752064562263",
 	},
 	FlameGourami: {
 		Normal: "rbxassetid://123542852004775",
 		Anomaly: "rbxassetid://96832484650921",
 		Ghost: "rbxassetid://98937947123813",
 		Shiny: "rbxassetid://99142483619384",
+		Galaxy: "rbxassetid://137337201224873",
 	},
 	SilverAngelfish: {
 		Normal: "rbxassetid://132775879168139",
 		Anomaly: "rbxassetid://110848707606414",
 		Ghost: "rbxassetid://72774080667754",
 		Shiny: "rbxassetid://109331093351123",
+		Galaxy: "rbxassetid://89884984661906",
 	},
 	PirateFish: {
 		Normal: "rbxassetid://104113182127697",
 		Anomaly: "rbxassetid://87343122073363",
 		Ghost: "rbxassetid://89533035670236",
 		Shiny: "rbxassetid://75278429179620",
+		Galaxy: "rbxassetid://122776366163090",
 	},
 	ImperialDiscus: {
 		Normal: "rbxassetid://139654199951383",
 		Anomaly: "rbxassetid://112097089028511",
 		Ghost: "rbxassetid://74436895352088",
 		Shiny: "rbxassetid://122796208562105",
+		Galaxy: "rbxassetid://122322925725571",
 	},
 	Catfish: {
 		Normal: "rbxassetid://79912028142678",
 		Anomaly: "rbxassetid://101981295520070",
 		Ghost: "rbxassetid://108703439719644",
 		Shiny: "rbxassetid://88991604714601",
+		Galaxy: "rbxassetid://120444529002739",
 	},
 	BlueTang: {
 		Normal: "rbxassetid://84168600741956",
 		Anomaly: "rbxassetid://97068349463650",
 		Ghost: "rbxassetid://90036740164027",
 		Shiny: "rbxassetid://78945259622335",
+		Galaxy: "rbxassetid://85763305407891",
 	},
 	BabySunfish: {
 		Normal: "rbxassetid://137342877522798",
 		Anomaly: "rbxassetid://108132028623203",
 		Ghost: "rbxassetid://104893016520068",
 		Shiny: "rbxassetid://114271773447954",
+		Galaxy: "rbxassetid://122111527573702",
 	},
 	Lanternfish: {
 		Normal: "rbxassetid://128662677168064",
 		Anomaly: "rbxassetid://85959311229276",
 		Ghost: "rbxassetid://96170546434722",
 		Shiny: "rbxassetid://130156391015583",
+		Galaxy: "rbxassetid://100899651731498",
 	},
 	Lionfish: {
 		Normal: "rbxassetid://136049057236963",
 		Anomaly: "rbxassetid://128348629033015",
 		Ghost: "rbxassetid://82334868775418",
 		Shiny: "rbxassetid://111025640215018",
+		Galaxy: "rbxassetid://125966798647679",
 	},
 	Dragonfish: {
 		Normal: "rbxassetid://126100559241211",
 		Anomaly: "rbxassetid://95244607905271",
 		Ghost: "rbxassetid://104543312979275",
 		Shiny: "rbxassetid://89883389934153",
+		Galaxy: "rbxassetid://76665457357514",
 	},
 	WolfDogfish: {
 		Normal: "rbxassetid://113379750149852",
 		Anomaly: "rbxassetid://85231797584530",
 		Ghost: "rbxassetid://118486190217943",
 		Shiny: "rbxassetid://111147344409728",
+		Galaxy: "rbxassetid://73496614770651",
 	},
 	BunnyShark: {
 		Normal: "rbxassetid://107327208598706",
 		Anomaly: "rbxassetid://122949860094205",
 		Ghost: "rbxassetid://88194071263777",
 		Shiny: "rbxassetid://118888539697471",
+		Galaxy: "rbxassetid://126673443850007",
 	},
 	MiniLeviathan: {
 		Normal: "rbxassetid://88991168701910",
 		Anomaly: "rbxassetid://76326534871685",
 		Ghost: "rbxassetid://102144531109970",
 		Shiny: "rbxassetid://122761530150036",
+		Galaxy: "rbxassetid://73730807845628",
 	},
 	// Easter egg: no variant, every column is its one icon
 	FrenchFish: {
@@ -229,18 +247,21 @@ export const FISH_ICONS: Record<FishType, Record<FishVariant, string>> = {
 		Anomaly: FRENCH_FISH_ICON,
 		Ghost: FRENCH_FISH_ICON,
 		Shiny: FRENCH_FISH_ICON,
+		Galaxy: FRENCH_FISH_ICON,
 	},
 	AlienFish: {
 		Normal: ALIEN_FISH_ICON,
 		Anomaly: ALIEN_FISH_ICON,
 		Ghost: ALIEN_FISH_ICON,
 		Shiny: ALIEN_FISH_ICON,
+		Galaxy: ALIEN_FISH_ICON,
 	},
 	Sugar: {
 		Normal: SUGAR_ICON,
 		Anomaly: SUGAR_ICON,
 		Ghost: SUGAR_ICON,
 		Shiny: SUGAR_ICON,
+		Galaxy: SUGAR_ICON,
 	},
 };
 
@@ -263,6 +284,7 @@ export const VARIANT_PALETTES: Record<FishVariant, Palette> = {
 	Anomaly: PALETTES.purple,
 	Ghost: PALETTES.ghost,
 	Shiny: PALETTES.gold,
+	Galaxy: palette("#B9A8FF", "#6C4CFF", "#4A2ED1", "#1E0E6B"),
 };
 
 /** Colour of each variant in the UI (Fish Index columns, Ocean rows, hatch reveal). */
@@ -290,6 +312,7 @@ export const VARIANT_STYLES: Record<FishVariant, { color: Color3 }> = {
 	Anomaly: { color: Color3.fromHex("#B36BFF") },
 	Ghost: { color: Color3.fromHex("#9FE3FF") },
 	Shiny: { color: Color3.fromHex("#FFD54A") },
+	Galaxy: { color: Color3.fromHex("#A493FF") },
 };
 
 export interface EggSprites {
