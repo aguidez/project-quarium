@@ -53,7 +53,7 @@ interface Sway {
 }
 
 /**
- * What is left of V1's fish animation now that every species swims with bones (FishRigController, ROADMAP_V1.1 A8):
+ * What is left of V1's fish animation now that every species swims with bones (FishRigController):
  * - the beat puff of the music events, for every fish, event guest and fish-shaped companion;
  * - a fallback for a template without a bone rig (warned once in the output): a local fish sways as a whole; an event
  *   guest (a server model, the K-pop idol until it is rigged) only puffs.

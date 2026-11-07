@@ -52,7 +52,7 @@ Blender already open. Blender stays open after the session. `get_screenshot_of_w
 `render_thumbnail_to_path`, `jump_to_*` (focus an object / tab), `search_api_docs`, `get_python_api_docs`,
 `search_manual_docs` (offline Blender docs: use them before guessing a `bpy` API).
 
-**Batch checklist (one species = a few calls; ROADMAP_V1.1 A5).** Paths from the repo root.
+**Batch checklist (one species = a few calls).** Paths from the repo root.
 1. *Export* (Studio, Edit): `node tools/obj-receiver.js design/rigs/work` in the background; run
    `tools/blender/studio/export_fish.luau` once for the batch with its `FISHES` list set (execute_luau takes the
    text: copy the file with the line changed; template names: the Husky Dogfish is `WolfDogfish`); then `node tools/blender/rgba-to-png.js design/rigs/work/<Fish>_color.b64` (PNG + `<Fish>.json`
@@ -129,10 +129,23 @@ Edit too. Permissions it relies on (Studio's Assistant Settings → MCP Permissi
 
 **Rules.**
 - Real work goes in versioned scripts in `tools/blender/` (rig, preview render, export) that the MCP runs or that run
-  headless (`blender --background --python`); never code that exists only in a session (ROADMAP_V1.1 §2).
+  headless (`blender --background --python`); never code that exists only in a session.
+- Automate, don't hand-rig: a script rigs a model from its shape (settings in `design/rigs/<Name>.json`), so a new
+  species costs one call; the UVs survive the round trip, so the uploaded textures, SurfaceAppearances and variant
+  looks are reused as they are (no texture re-uploaded).
 - The add-on's sandbox is "weak" by design (it only blocks quitting Blender and resetting the preferences): it runs
   any code with the user's rights. Only send code that touches Blender data and the project's work folders.
 - Work files (exported / rigged meshes) go in `design/rigs/work/` (git-ignored); settings per species in
   `design/rigs/<FishType>.json`.
 - Previews (renders) are shown to the owner from `design/previews/` (agent note previews-in-project), never
-  uploaded; every final upload follows CLAUDE.md §7 and the ROADMAP_V1.1 §4 watch list.
+  uploaded; every final upload follows CLAUDE.md §7 and the watch list below.
+
+**Moderation watch list for rigs** (CLAUDE.md §7; each rig is a new upload, as the group):
+
+| Item | Risk | Rule |
+|---|---|---|
+| Every re-imported model | A new upload | Same approved shape and UVs; Blender preview to the owner first; uploaded once, the final file only |
+| Decimated meshes | A simplified shape reads differently (a fin turning into a spike, a stick-like tail) | Owner compares before / after renders; nothing thin out of the mouth |
+| Mouth and jaw animation | An open mouth with something near it | Only the lower lip moves (`"jaw": false` for whiskers, bills, lures); nothing ever held in a mouth |
+| Swordfish, Lionfish | A bill or fins posed as a weapon / spines | No thrust pose; fins stay soft and rounded in every frame |
+| The shop's Fisherman | A raised arm holding something | Empty hands; a slow friendly wave |

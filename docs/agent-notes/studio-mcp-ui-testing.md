@@ -29,14 +29,6 @@ Playtesting UI through the Roblox Studio MCP:
   loop inside the same execute_luau (the Assistant resets a Scriptable camera after each call), 4–8 s to settle, then
   5 s of `HeartbeatTimeMs` / `RenderCPUFrameTime`; compare by removing the `Fish` tag (they stop) and resetting the
   bones' Transform. A first sample that gets 1 frame in 5 s is a stalled render: run it again.
-- **Load test recipe (V0.46)**: TEMP harness = `STORE_NAME` to a test store, an optional `testAquarium` param on
-  FishService.spawnFish and a `/loadtest` TextChatCommand filling every tank (`AquariumService.getAquariums()`) with
-  25 fish; send it from a Client execute_luau (`RBXGeneral:SendAsync` in task.spawn). Measure each view with a
-  RenderStepped loop holding a Scriptable camera, 8 s to settle, then 5 s of `Stats.HeartbeatTimeMs` /
-  `RenderCPUFrameTime` / `RenderGPUFrameTime`; count `Animated` fish vs a moving mesh `Weld` (sway). **Leave the 2.5D
-  view first** (click FocusUi `Back`): teleporting out keeps FocusController focused, the client then renders only
-  its own tank and the LOD never releases its rigs (a whole test was invalid that way). Revert with `git checkout` of
-  the three files, check no `TEMP TEST` is left.
 - **Perf measurements**: Studio caps at 60 fps, and at 15 fps when its window loses focus (steady 66.7 ms frames = that cap, not load; got fooled once). Use `Stats.HeartbeatTimeMs` (script time) and `Stats.RenderCPUFrameTime` / `RenderGPUFrameTime` averaged over a few seconds instead of fps. Solo play has one Player: to load other tanks, a temporary `// TEMP TEST` harness spawned real FishService fish with the player as owner but another tank (excluded from saves and quest callbacks), backed up and restored afterwards.
 
 - **UI V2 instance paths** (2026-10-30): a kit Button3D's clickable part is its `Face` child: side buttons "…ReactUi.SideButtons.Quests.Button.Face", panel close "…ReactUi.Modal.Panel.Window.Close.Face".

@@ -53,7 +53,6 @@ cp workspace.local.example.json workspace.local.json      # Windows PowerShell: 
 | `robloxStudioMcp` | the Studio MCP server isn't found automatically | path of `StudioMCP` (macOS) or `mcp.bat` / `StudioMCP.exe` (Windows) |
 | `robloxFontsDir` | the Roblox fonts aren't found (FigCraft V2 build script) | Studio's `content/fonts` folder |
 | `robloxOpenCloudKey` | you read the real players' statistics (`npm run stats`) | an Open Cloud API key, see below. **Secret**: only in this file, never in git |
-| `robloxGroupOpenCloudKey` | you upload meshes for the game (`npm run group-mesh-upload`) | an Open Cloud key made **under the group** (see below). **Secret** |
 | `robloxUniverseId` | another experience than Project: Quarium's (10774507209) | its universe id (`game.GameId`) |
 
 Each key can also be given as an environment variable (`FIGCRAFT_DIR`, `ROBLOX_STUDIO_MCP`, `ROBLOX_FONTS_DIR`,
@@ -72,12 +71,10 @@ operations **List entry keys** and **Read entry**
 For `npm run share-assets` (`tools/share-assets.js`) the same key, made by the account that owns the assets, also
 needs the API system **Asset Permissions** with **write** (`asset-permissions:write`).
 
-**Group key (meshes the clients animate, optional).** The game belongs to the owner's group: a mesh the clients
-animate must belong to the group too. `npm run group-mesh-upload` (`tools/group-mesh-upload.js`) uploads meshes as the
-group, so it needs a key created with the **group** picked as the creator on the Creator Dashboard: API systems
-**Assets** (Read, Write) and **Asset Permissions** (Write); Data Stores (List entry keys, Read entry) can be added for
-`npm run stats`. Copy it into `robloxGroupOpenCloudKey`. A personal key can't create assets as a group ("unauthorized
-to create an Model asset as Group").
+**Uploads as the group.** The game belongs to the owner's group: the rigged meshes are uploaded as the group from
+Studio's MCP (`open_cloud_invoke`, agent note blender-pipeline), with the permissions set in Studio's Assistant
+Settings → MCP Permissions (asset:read / asset:write, the upload folder `design/rigs/work`, the HTTP allow list
+`127.0.0.1:34999`): no key in `workspace.local.json`.
 
 **Blender MCP (V1.1 animations, optional otherwise).** With Blender **closed**, run `npm run blender-setup`
 (`tools/blender/setup.js`): it downloads the official Blender Lab MCP release pinned in `tools/blender/blender-config.js`
@@ -102,7 +99,7 @@ change. The Blender MCP launcher then starts Blender by itself when Claude Code 
 - Open the repo folder in VS Code (or run `claude` in it). The project's MCP servers come from `.mcp.json`; they start
   through `node tools/mcp/*.js`, which work on every OS and read `workspace.local.json`. Approve them on first launch,
   then check with `/mcp` that **Roblox_Studio** (Studio open), **FigCraft** and **Blender** (after `npm run blender-setup`) are connected.
-- Rules and context the agent reads: `CLAUDE.md`, `PROJECT_CONTEXT.md`, `BALANCE.md`, `ROADMAP_V1.1.md`,
+- Rules and context the agent reads: `CLAUDE.md`, `PROJECT_CONTEXT.md`, `BALANCE.md`, `ROADMAP_FIXES.md`,
   `RELEASE_NOTES.md` and the notes in `docs/agent-notes/` (the working knowledge that used to live in the old
   machine's Claude memory).
 - Personal Claude settings for this machine go in `.claude/settings.local.json` (git-ignored); shared ones in
@@ -117,7 +114,6 @@ npx rbxtsc            # zero errors
 npm run sim           # economy simulator (BALANCE.md)
 npm run stats         # real players' statistics vs the simulator (needs robloxOpenCloudKey)
 npm run share-assets <id...>  # lets the group's game use assets of the owner's account: audio (robloxOpenCloudKey)
-npm run group-mesh-upload <file.obj...>  # uploads meshes as the group, for the clients to animate (robloxGroupOpenCloudKey)
 ```
 
 ## What is shared, what stays on each machine

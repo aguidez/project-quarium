@@ -1,4 +1,4 @@
-# Auto-rig of the Jellyfish companion (ROADMAP_V1.1 A7): not a fish, so its own skeleton, built from its shape.
+# Auto-rig of the Jellyfish companion (V1.1): not a fish, so its own skeleton, built from its shape.
 # Blender axes (imported like the fish, rig_fish.import_fish): up +Z, front +Y (Roblox -Z), right +X.
 #
 # Bones (all deforming):
@@ -127,7 +127,7 @@ def rig_jellyfish(obj, overrides=None):
 
 
 # The pulse (as FishRigController plays it): 0.8 pulses a second, the rim squeezes in, the tentacles trail behind, the
-# whole jellyfish rises a little with each squeeze and sways slowly (V1's CompanionAnimationController numbers).
+# whole jellyfish rises a little with each squeeze and sways slowly (V1's numbers).
 PULSE_FREQUENCY = 0.8
 RIM_SQUEEZE = 12.0
 TENTACLE_TRAIL = 14.0

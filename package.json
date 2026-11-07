@@ -14,7 +14,6 @@
     "sim": "node tools/economy-sim.js",
     "stats": "node tools/player-stats.js",
     "share-assets": "node tools/share-assets.js",
-    "group-mesh-upload": "node tools/group-mesh-upload.js",
     "blender-setup": "node tools/blender/setup.js",
     "doctor": "node tools/check-setup.js"
   },

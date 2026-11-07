@@ -1,5 +1,5 @@
 {
-	"//": "The shop's Fisherman (Workspace.Lobby.FishingHut*.Fisherman.body.body_geom, his look a TextureID), a box rig (tools/blender/rig_boxes.py): the chest breathes, the head turns toward the player, the right arm waves (HandL / HandR: the bottom of each hand, below the sleeve's box, follows its arm) (an empty hand, slow and friendly: ROADMAP_V1.1 section 4).",
+	"//": "The shop's Fisherman (Workspace.Lobby.FishingHut*.Fisherman.body.body_geom, his look a TextureID), a box rig (tools/blender/rig_boxes.py): the chest breathes, the head turns toward the player, the right arm waves (HandL / HandR: the bottom of each hand, below the sleeve's box, follows its arm) (an empty hand, slow and friendly: the moderation watch list of docs/agent-notes/blender-pipeline.md).",
 	"rig": "boxes",
 	"root": {
 		"name": "Hips",

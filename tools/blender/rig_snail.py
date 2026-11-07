@@ -1,4 +1,4 @@
-# Auto-rig of the Snail companion (ROADMAP_V1.1 A7): not a fish, its own skeleton, built from its shape.
+# Auto-rig of the Snail companion (V1.1): not a fish, its own skeleton, built from its shape.
 # Blender axes (imported like the fish, rig_fish.import_fish): up +Z, front +Y (Roblox -Z), right +X.
 # t = 0 at the front of the mesh, 1 at its back; h = 0 at the bottom of the foot, 1 at the top of the shell.
 #

@@ -1,5 +1,5 @@
 // Receives the OBJ files a Studio script POSTs (HttpService, enabled for the export only) and writes them into a
-// folder: how a mesh is exported from the place (docs/agent-notes/fish-asset-pipeline.md "Meshes the group owns").
+// folder: how a mesh is exported from the place (docs/agent-notes/blender-pipeline.md, batch checklist step 1).
 // Usage: node tools/obj-receiver.js design/meshes [port=34999]. Local only (127.0.0.1); header x-append: 1 appends a
 // piece to the file (send big meshes in ~500 KB pieces). Also takes <Name>.b64: a texture as base64 RGBA (a 512 pull for the
 // Blender previews), turned into a PNG by tools/blender/rgba-to-png.js. Studio's MCP only reaches the addresses of its

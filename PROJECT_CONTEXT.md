@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-07 (V1.1.14: V1.1 done, the EditableMesh swim removed; every species and companion on bones, the idol waits for its texture).
+> Last updated: 2026-11-07 (V1.1.14; repo cleaned after V1.1: ROADMAP_V1.1 closed, its leftovers in ROADMAP_FIXES; group-mesh-upload removed).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -42,7 +42,7 @@ coins. Around that core loop:
 the release (V1.0.0). The testers who finished the alpha (V0.60) keep its "Alpha Pioneer" title; nobody earns it
 any more. **`BALANCE.md`** holds the expected progression
 (rebirth 1 ~19 min … all eighteen species ~12h20 for a player of 1 h a day), every number and the design rules.
-How to add content: `docs/agent-notes/content-recipes.md`. **`ROADMAP_V1.1.md`**: the plan after V1 (animation revamp with Blender skeletons, steps A0–A8). **`ROADMAP_FIXES.md`**: small fixes noted along the way.
+How to add content: `docs/agent-notes/content-recipes.md`. **`ROADMAP_FIXES.md`**: small fixes noted along the way (and the leftovers of the V1.1 animation revamp).
 
 ---
 
@@ -54,7 +54,7 @@ How to add content: `docs/agent-notes/content-recipes.md`. **`ROADMAP_V1.1.md`**
 | Sync | **Rojo 7.7.1** (aftman). `default.project.json` maps `out/server` → ServerScriptService.TS, `out/shared` → ReplicatedStorage.TS, `out/client` → StarterPlayerScripts.TS, `out/first` → ReplicatedFirst.TS (loading screen); it also sets StarterGui `ScreenOrientation = LandscapeSensor` (mobile locked to landscape, set again on PlayerGui by the loading screen). Never edit those scripts in Studio. A change to `default.project.json` needs `rojo serve` restarted (and the plugin reconnected) |
 | Packages | `@rbxts/react` + `react-roblox` (UI), `@rbxts/t` (runtime validation), `@rbxts/janitor` (cleanup), `@rbxts/services`, `@rbxts/profile-store` (player saves, see §3.1) |
 | Build / check | `npx rbxtsc` after every change; it must report zero errors |
-| Workspace | Windows or macOS, set up from `SETUP.md`; `npm run doctor` checks a machine. Machine-specific values (install paths, GPU flags, API keys) only in the git-ignored `workspace.local.json` (via `tools/local-config.js`), never in committed files; scripts are cross-platform Node. npm scripts: `build`, `watch`, `serve` (rojo serve), `sim` (economy simulator), `stats` (real players), `share-assets`, `group-mesh-upload`, `blender-setup` (installs the Blender MCP), `doctor`. `jimp` 0.22 and `@resvg/resvg-js` 2.6 (SVG → PNG without FigCraft) are devDependencies for the image tools |
+| Workspace | Windows or macOS, set up from `SETUP.md`; `npm run doctor` checks a machine. Machine-specific values (install paths, GPU flags, API keys) only in the git-ignored `workspace.local.json` (via `tools/local-config.js`), never in committed files; scripts are cross-platform Node. npm scripts: `build`, `watch`, `serve` (rojo serve), `sim` (economy simulator), `stats` (real players), `share-assets`, `blender-setup` (installs the Blender MCP), `doctor`. `jimp` 0.22 and `@resvg/resvg-js` 2.6 (SVG → PNG without FigCraft) are devDependencies for the image tools |
 | Framework | `shared/framework.ts`: singletons implementing `Lifecycle { onInit (sync), onStart (task.spawn) }`, registered in order in `server/main.server.ts` / `client/main.client.ts` |
 | Server authority | The client only sends **intents**. The server validates each one with `t`, reads prices and odds from shared config, and owns money, inventory, timers and every gameplay state. Even fish positions are server-computed (swim segments): clients only render them, never report them |
 | World ↔ code | Studio models are found by **CollectionService tags** (`shared/tags.ts`) and attributes, never by deep paths. Templates live in `ServerStorage.Assets` in the place file, which Rojo does not manage: **remind the user to save the place** after MCP edits |
@@ -73,9 +73,8 @@ ProjectQuarium/
 ├─ PROJECT_CONTEXT.md        This file
 ├─ RELEASE_NOTES.md          Every change of the game, patch by patch, newest on top, never deleted
 ├─ BALANCE.md                The balance: expected progression, live numbers, design rules, V1 design, history
-├─ ROADMAP_V1.1.md           After V1: the animation revamp (Blender skeletons instead of EditableMesh), steps A0–A8 (done but the idol)
-├─ ROADMAP_FIXES.md         Small fixes to plan, outside the big roadmaps (the K-pop idol's texture, the other tanks' fish
-│                            badges)
+├─ ROADMAP_FIXES.md          Small fixes to plan (the K-pop idol's texture and rig, the other tanks' fish badges, Blender
+│                            on the Windows PC, optional V1.1 leftovers)
 ├─ default.project.json      Rojo mapping (see §1)
 ├─ .mcp.json                 Project MCP servers (Roblox_Studio, FigCraft, Blender), started by `node tools/mcp/*.js` on any OS
 ├─ workspace.local.example.json  Template of workspace.local.json (git-ignored): FigCraft folder / port, wgpu backend,
@@ -170,10 +169,7 @@ ProjectQuarium/
 ├─ tools/starfall-sim.js     The starfall's star gauge (mirrors shared/types/stars): bars per share of stars caught, the
 │                            next egg's variant, what a 12 h run gets (`--luck`, `--perHour`); results in BALANCE.md §3
 ├─ tools/share-assets.js     `npm run share-assets <id...>`: grants the group's game (Open Cloud asset-permissions,
-│                            Universe / Use) the use of assets of the owner's account (private audio; not enough for
-│                            an animated mesh)
-├─ tools/group-mesh-upload.js  `npm run group-mesh-upload <file.obj...>`: OBJ to GLB, uploaded as the group's Model
-│                            (group key), granted to the owner's account and the universe; prints the model ids
+│                            Universe / Use) the use of assets of the owner's account (private audio)
 ├─ tools/obj-receiver.js     Local receiver of the OBJ (and .b64 texture) files a Studio script exports, on
 │                            127.0.0.1:34999, the address in Studio's MCP HTTP allowlist (agent note fish-asset-pipeline)
 ├─ tools/player-stats.js     Real players vs the simulator (`npm run stats`): reads every profile of PlayerData_v1 through
@@ -654,7 +650,7 @@ ProjectQuarium/
 - **Template layout** (every model below): invisible root (`Body`; `Hitbox` x1.25 for coins) + welded `Mesh`
   MeshPart, head / front toward −Z, texture in a **SurfaceAppearance** (tinted by its `Color` when needed), built at
   the right size (never `ScaleTo`: CompanionService tweens back to scale 1). Generated meshes, ≤ ~4k triangles.
-  **Bone fish** (V1.1, ROADMAP_V1.1): model attribute `Rig = "Bones"`; its `Mesh` is the skinned MeshPart of a Blender
+  **Bone fish** (V1.1): model attribute `Rig = "Bones"`; its `Mesh` is the skinned MeshPart of a Blender
   rig (tools/blender/, agent note blender-pipeline: export → rig → GLB → Open Cloud as the group), the 10 Bones under
   it, same Size / CFrame / SurfaceAppearance / WeldConstraint to `Body` as the static mesh it replaced. `ScaleTo`
   scales the bones too; a change of `Size` alone leaves them where they were, so a template's bones must match its
@@ -1013,9 +1009,8 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   leaderboards and gamepasses: the passes were created again (ids in `gamepasses.ts`). In a group game the group's
   owner (rank 255) is the game's owner for `isGameOwner`: that is Secret_Lokii; the developer's account DOT_Pinpin is
   a Manager (rank 254), an admin through `GROUP_ADMIN_RANK` (dev commands in Studio, `/event`). Images, plain meshes and audio stay DOT_Pinpin's (the 6 private musics
-  shared with the game); the 24 meshes the clients animate (20 fish, the Swordfish, the abyss lantern, the K-pop idol,
-  the UFO) were re-uploaded as the group (V0.60.5, `design/meshes/` holds their OBJ source): a new animated mesh must
-  be too (agent note fish-asset-pipeline "Meshes the group owns"), or only DOT_Pinpin sees it swim.
+  shared with the game); every rig (fish, companions, guests, the fisherman) is uploaded as the group (agent note
+  blender-pipeline; `design/meshes/` holds the OBJ sources, manifest.json their ids).
 - **Saves in Studio** need *Game Settings → Security → Enable Studio Access to API Services*; without it ProfileStore
   runs on a mock store (warning in the output) and nothing persists between playtests. Studio and live servers
   share the same store. Reset everyone by bumping `STORE_NAME`; reset your own save in a Studio playtest with
@@ -1035,7 +1030,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   steady 66.7 ms frames are that cap, not load.
 - **K-pop idol without its texture** (found 2026-11-06): `EventFish.KpopIdol.Mesh` has no TextureID / SurfaceAppearance:
   the guest has been plain grey since V0.60.5, whose group mesh swap (`ApplyMesh`) clears a TextureID (a
-  SurfaceAppearance survives it). Fix in progress (ROADMAP_V1.1 A5.9): find the texture in a place version from before
+  SurfaceAppearance survives it). Fix planned (ROADMAP_FIXES, on the Windows PC): find the texture in a place version from before
   2026-11-03, put it back as a SurfaceAppearance ColorMap, then rig the idol.
 - **Swim animation on bones** (V1.1, since V1.1.14 the only one): no EditableMesh, no memory budget, every fish on
   screen swims, its cost per *fish* and small. Load test 2026-11-07 (Studio on the Mac, 6 tanks x 25 bone fish of the

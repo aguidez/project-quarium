@@ -1,4 +1,4 @@
-# One species (or companion) through the whole Blender side of the bone pipeline (ROADMAP_V1.1 A5), in one call from the Blender MCP:
+# One species (or companion) through the whole Blender side of the bone pipeline (V1.1), in one call from the Blender MCP:
 #   ns = {}; exec(open("<repo>/tools/blender/convert_fish.py").read(), ns); ns["convert"]("<repo>", "BlueNeon")
 # Needs design/meshes/<Fish>.obj and design/rigs/work/<Fish>_color.png + <Fish>.json (tools/blender/studio/
 # export_fish.luau, then rgba-to-png.js). Settings: design/rigs/<Fish>.json if present (rig_fish.py DEFAULTS

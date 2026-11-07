@@ -1,9 +1,9 @@
-# Export of a fish rigged by rig_fish.py to a GLB for Roblox (ROADMAP_V1.1 A2): the skinned mesh and its bones only
+# Export of a fish rigged by rig_fish.py to a GLB for Roblox (V1.1): the skinned mesh and its bones only
 # (no material, texture, camera, light or animation: the game keeps the template's SurfaceAppearance, so nothing but
 # the model is uploaded). Works on temporary copies; the scene is left as it was.
 #
 # Axes: Blender's glTF exporter writes Blender (x, y, z) as glTF (x, z, -y), and Roblox's glTF import turns a mesh 180°
-# around its vertical axis (tools/group-mesh-upload.js, checked in V0.60.5). The copies are turned 180° around Blender's
+# around its vertical axis (checked vertex by vertex in V0.60.5). The copies are turned 180° around Blender's
 # Z first, so the nose (+Y in Blender) lands at Roblox's mesh-local -Z, like every fish template.
 #
 # Use from the Blender MCP:  exec(open("<repo>/tools/blender/export_fish.py").read(), ns); ns["export_fish"](obj, arm, path)

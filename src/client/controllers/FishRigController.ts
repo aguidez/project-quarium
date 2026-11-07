@@ -6,7 +6,7 @@ import { FISH_TYPES, FishType, HungerState } from "shared/types/fish";
 
 /**
  * Template attribute of a fish whose `Mesh` is a skinned mesh made in Blender (tools/blender/rig_fish.py): it swims
- * with its bones here, FishAnimationController leaves it alone (beat puffs apart).
+ * with its bones here; FishAnimationController only adds its beat puffs.
  */
 export const RIG_ATTRIBUTE = "Rig";
 export const BONES_RIG = "Bones";
@@ -15,7 +15,7 @@ export function hasBoneRig(model: Instance): boolean {
 	return model.GetAttribute(RIG_ATTRIBUTE) === BONES_RIG;
 }
 
-// V1's rhythm (FishAnimationController), approved by the owner on the Blender preview (tools/blender/preview_swim.py)
+// V1's rhythm, approved by the owner on the Blender preview (tools/blender/preview_swim.py)
 const SWIM_FREQUENCY = 1.6; // tail beats per second
 const FIN_FREQUENCY = 2.4;
 const MOUTH_FREQUENCY = 1.1;
@@ -23,7 +23,7 @@ const BODY_WAVE = 3; // radians of lag from nose to tail tip
 const SLOW_SPEED = 0.45; // asleep (a UFO's mutation) or leaving: lazy beats
 const SLOW_AMOUNT = 0.6; // ... and smaller ones
 
-// Behaviours (ROADMAP_V1.1 A6), from what the fish does on screen, compared with its species' wandering speed (the
+// Behaviours (V1.1), from what the fish does on screen, compared with its species' wandering speed (the
 // server's segments: a chase is 2×, a weak fish 0.35×, a wait 0):
 //   rest (still)   slow, small beats; the pectorals keep paddling to hover
 //   cruise (1×)    V1's swim
@@ -46,7 +46,7 @@ const WEAK_FIN_DROOP = math.rad(35);
 const WEAK_TAIL_SAG = math.rad(15); // in total over the spine
 const WEAK_FLUTTER = 0.5; // × dorsal / ventral flutter
 const DROOP_SETTLE = 1.5;
-// Moments (ROADMAP_V1.1 A6, patch 2), short overlays on the swim, from the fish's local attributes:
+// Moments (V1.1), short overlays on the swim, from the fish's local attributes:
 //   Feed     Hunger back to Satiated (it just ate): a bite (jaw snap, head jerk), then a happy wiggle
 //   Grow     GrowthStage up: fins flare, a slow sweep of the tail
 //   Released Exit = "Released": strong fast tail strokes up to the surface
@@ -67,7 +67,7 @@ const STRUGGLE_WIGGLE = 1.5;
 const STRUGGLE_RATE = 7;
 
 // The Jellyfish companion (tools/blender/rig_jellyfish.py: Bell, Rim<side>, Tent<side><1..3>), V1's rhythm
-// (its V1 CompanionAnimationController): the rim swings in from a pivot near the dome's top, the tentacles trail behind, the
+// (V1's): the rim swings in from a pivot near the dome's top, the tentacles trail behind, the
 // whole jellyfish rises a little with each squeeze and sways slowly
 const JELLY_PULSE_FREQUENCY = 0.8; // pulses per second
 const JELLY_RIM_SQUEEZE = math.rad(12);
@@ -234,7 +234,7 @@ function boneAxis(mesh: MeshPart, bone: Bone, meshAxis: Vector3): Vector3 {
 }
 
 /**
- * Bone swimming (ROADMAP_V1.1 A4): the fish whose template says `Rig = "Bones"` swim by turning the bones of their
+ * Bone swimming (V1.1): the fish whose template says `Rig = "Bones"` swim by turning the bones of their
  * skinned mesh (a spine wave, fins, mouth), each fish at its own phase. The GPU deforms the mesh: no EditableMesh, no
  * memory budget, every species on screen swims. Purely visual and local; FishAnimationController adds the beat puffs.
  */

@@ -1,5 +1,5 @@
-# Auto-rig of a fish mesh (ROADMAP_V1.1 A2): an armature built from the mesh's shape, with weights from the same
-# position rules as V1's EditableMesh swim (client/controllers/FishAnimationController.ts), so a new species costs
+# Auto-rig of a fish mesh (V1.1): an armature built from the mesh's shape, with weights from the same
+# position rules as V1's swim (vertices weighted by where they sit on the body), so a new species costs
 # one command, not an evening in Blender.
 #
 # Blender axes (the OBJ imported with forward -Z / up Y, see import_fish): nose toward +Y, tail toward -Y, back +Z,

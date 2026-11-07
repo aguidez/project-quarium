@@ -1,4 +1,4 @@
-# A generic box rig (ROADMAP_V1.1 A7) for the companions and props that are no fish (the Pelican, the Water Hen, the
+# A generic box rig (V1.1) for the companions and props that are no fish (the Pelican, the Water Hen, the
 # shop's Fisherman): every bone and the zone of vertices it carries are described in the settings
 # (design/rigs/<Name>.json, "rig": "boxes"), in the mesh's normalised space:
 #   side  -1 left .. 1 right (Blender x / half width)

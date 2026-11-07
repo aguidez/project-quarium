@@ -1,7 +1,6 @@
 // Lets the game use assets its owner's account made: the game belongs to the owner's group, while the meshes, audio
-// and images generated or uploaded from Studio belong to the owner's user account. A fish mesh the clients animate
-// (AssetService.CreateEditableMeshAsync) or a private sound then fails for every player but the owner ("not allowed to
-// be forked", "User is not authorized to access Asset") until the experience is granted their use.
+// and images generated or uploaded from Studio belong to the owner's user account. A private sound then stays silent
+// for every player but the owner ("User is not authorized to access Asset") until the experience is granted its use.
 //
 // Usage: node tools/share-assets.js <assetId> [assetId...]
 // Needs robloxOpenCloudKey (workspace.local.json, see SETUP.md) with the Asset Permissions API system (write), made by

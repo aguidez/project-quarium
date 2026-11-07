@@ -1,5 +1,5 @@
-# Swim preview of a fish rigged by rig_fish.py (ROADMAP_V1.1 A2): a looping "Swim" action that mirrors V1's
-# procedural swim (client/controllers/FishAnimationController.ts: SWIM_FREQUENCY, BODY_WAVE, fin and mouth beats),
+# Swim preview of a fish rigged by rig_fish.py (V1.1): a looping "Swim" action that mirrors the game's
+# bone swim (client/controllers/FishRigController.ts: SWIM_FREQUENCY, BODY_WAVE, fin and mouth beats),
 # rendered as PNG frames for the owner (local only, never uploaded). tools/blender/frames-to-gif.js makes the GIF.
 #
 # Use from the Blender MCP:  exec(open("<repo>/tools/blender/preview_swim.py").read()); add_swim_action(arm)
@@ -56,7 +56,7 @@ def _bone_t(arm, name, nose, length):
     return min(max((nose - head.y) / length, 0.0), 1.0)
 
 
-# Behaviours (ROADMAP_V1.1 A6), as FishRigController plays them: beat (× rate), amount (× amplitude), paddle (×
+# Behaviours (V1.1), as FishRigController plays them: beat (× rate), amount (× amplitude), paddle (×
 # pectoral rate), bend (degrees over the spine, a turn: tail trailing), droop (0 .. 1, weak: fins hang, tail sags).
 BEHAVIOURS = {
     "Cruise": {},
