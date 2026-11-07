@@ -586,7 +586,10 @@ export const QUESTS: Record<string, QuestConfig> = {
 		stat: "SizeFound",
 		minSize: 15,
 		target: 1,
-		rewards: [{ kind: "Title", title: "TitleTitanTamer" }],
+		rewards: [
+			{ kind: "Title", title: "TitleTitanTamer" },
+			{ kind: "Decor", decor: "DecorTitanTrophy" },
+		],
 	},
 	BigCatch5: {
 		category: "Story",

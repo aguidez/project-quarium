@@ -11,6 +11,14 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.17 — 2026-11-07
+
+**New**
+- The Big Catch quest "Titan Tamer" now also gives the **Titan Trophy**: a rose-gold trophy standing next to the whale
+  statue in your aquarium (it can be hidden from the Customize menu, like the other decor).
+
+---
+
 ## V1.1.16 — 2026-11-07
 
 **The Size score**: every fish hatched from an egg is now born a little smaller or bigger than usual, from -15 % to

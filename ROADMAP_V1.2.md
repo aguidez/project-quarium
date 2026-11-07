@@ -363,7 +363,7 @@ signature species, then reach the next aquarium. Ocean Points rewards x2.5 per r
 | **Fish Keeper** (new) | 500 / 2,000 / 6,000 meals by hand → food refill 9 s, 8 s, +1 portion (§5) |
 | **Hatchery** (continued) | 1,800 / 2,500 / 3,500 fish hatched → 2 min of income each, the last one a **Diamond Incubator** decor |
 | **Collector** (continued) | in order: 75 Fish Index cells → 3 min of income (~20h53); first Shiny Mythic of V1.2 (species 21–24) → 5,000,000 Ocean Points; first **Galaxy** → 3 min of income; 100 cells → **Galaxy rims** (cosmetic); 120 cells (every species in every variant) → title **"Variant Master"**. Measured: only ~38 % of the players get the Shiny Mythic and the first Galaxy before the end (~24h51 for them): from there the line is a goal past the end, like the Golden Incubator |
-| **Big Catch** (new, size §3.5; opens with "Full House", so early: its rewards are minutes of income, BALANCE.md §4) | in order: hatch a Huge fish (+10) → 3 min of income; have 5 Huge fish (or better) in the tank at once → 5 min; hatch a Giant (+13) → 5 min; hatch a **Titan** (+15) → title **"Titan Tamer"** + a Titan trophy decor; a best size of +10 or more for 18 species in the Fish Index → title **"Size Collector"** |
+| **Big Catch** (new, size §3.5; opens with "Full House", so early: its rewards are minutes of income, BALANCE.md §4) | in order: hatch a Huge fish (+10) → 3 min of income; have 5 Huge fish (or better) in the tank at once → 5 min; hatch a Giant (+13) → 5 min; hatch a **Titan** (+15) → title **"Titan Tamer"** + the **Titan Trophy** decor (rose gold, V1.1.17); a best size of +10 or more for 18 species in the Fish Index → title **"Size Collector"** |
 | **Ocean** (continued) | release 500 fish → 5 min of income; release a Shiny Baby Kraken → title **"Pearl Diver"** |
 | **Hermit Crab** (new, free) | its 3 upgrade quests (§8) |
 
@@ -435,7 +435,7 @@ last live rebirth.
 - [ ] **M2 Groundwork**: tank 33 built for 50 (room, swim, decor, performance tests with 6 full tanks of 33 and of 50),
       the rarities at 4 a label, egg shop with 16 eggs,
       Fish Keeper line + food perks + Quick pantry, the HUD's 6th portion. Can ship before any new species.
-- [x] **M2b Size score** (§3.5; V1.1.16, 2026-11-07, the Titan's trophy decor left for later: title only): the draw, the save field, the model's scale, the coin value, the hatch reveal, the
+- [x] **M2b Size score** (§3.5; V1.1.16, 2026-11-07; the Titan Trophy decor, the golden one tinted rose gold, V1.1.17): the draw, the save field, the model's scale, the coin value, the hatch reveal, the
       fish card, the release panel's sort, the Fish Index's best size, the Big Catch line and the size dailies /
       weeklies (FigCraft mockups of the reveal and the card first). For every player, V1 content included.
 - [ ] **M2c New variant + starfall** (§3.6, §3.7): the variant (look, coin, Fish Index column, release order), the

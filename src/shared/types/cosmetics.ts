@@ -27,6 +27,7 @@ export type CosmeticId =
 	| "DecorWhaleStatue"
 	| "DecorGoldenTrophy"
 	| "DecorIncubator"
+	| "DecorTitanTrophy"
 	| "FinishPearlRims";
 
 export interface CosmeticConfig {
@@ -101,6 +102,11 @@ export const COSMETICS: Record<CosmeticId, CosmeticConfig> = {
 		displayName: "Golden Trophy",
 		description: "A golden trophy for your aquarium.",
 	},
+	DecorTitanTrophy: {
+		kind: "Decor",
+		displayName: "Titan Trophy",
+		description: "A rose-gold trophy for those who hatched a Titan, a perfect fish.",
+	},
 	DecorIncubator: {
 		kind: "Decor",
 		displayName: "Golden Incubator",
@@ -157,6 +163,7 @@ export const DECOR_SLOTS: Partial<Record<CosmeticId, Vector3>> = {
 	DecorWhaleStatue: new Vector3(-18.5, 4, -6),
 	DecorGoldenTrophy: new Vector3(19, 4, -6),
 	DecorIncubator: new Vector3(15.2, 4, -5.6), // next to the trophy (Hatchery line, ROADMAP M7)
+	DecorTitanTrophy: new Vector3(-14.4, 4, -5.6), // next to the whale statue (Big Catch line, V1.1.17)
 };
 
 export function isDecor(cosmetic: CosmeticId): boolean {
