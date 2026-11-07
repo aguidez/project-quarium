@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-07 (V1.1.15; big numbers: money up to 1e300, units to Vg then 1.23e66, leaderboard scores encoded; ROADMAP_V1.2 planned).
+> Last updated: 2026-11-07 (V1.1.15; big numbers: money up to 1e300, units to Vg then 1.23e66, leaderboard scores encoded; ROADMAP_V1.2 planned and its balance tuned in tools/balance-v1.2-plan.js).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -165,12 +165,16 @@ ProjectQuarium/
 │                            reports each step's median / p10 / p90, species discovery, Ocean milestones, income and Ocean
 │                            Points per checkpoint. Options: `--players n`, JSON overrides (coinBoost / oceanBoost /
 │                            hatchScale: gamepass or "/speed" estimates; P.hoursPerDay: 1 = the reference player, 0 = one
-│                            long session), `--plan <file>` to preview a planned economy. Copy its results into BALANCE.md
+│                            long session), `--plan <file>` to preview a planned economy (P.sizeMax: the planned Size
+│                            score). Copy its results into BALANCE.md
+├─ tools/balance-v1.2-plan.js  The V1.2 plan for `economy-sim --plan` (ROADMAP_V1.2 M1): V1 + rebirths 9–12, eggs 13–16,
+│                            species 19–24, tank 33, Size score, Galaxy; removed once V1.2 is in the game
 ├─ tools/companion-sim.js    AFK simulator: share of fish-time weak with a feeder (Pelican, Jellyfish) per tank size,
 │                            share of coins a collector (Snail, Swordfish) picks up per coin rate; mirrors CompanionService,
 │                            FishService hunger, FoodService, CoinService
 ├─ tools/starfall-sim.js     The starfall's star gauge (mirrors shared/types/stars): bars per share of stars caught, the
-│                            next egg's variant, what a 12 h run gets (`--luck`, `--perHour`); results in BALANCE.md §3
+│                            next egg's variant, what a 12 h run gets (`--luck`, `--perHour`, `--fourthBar`: the V1.2
+│                            plan's Galaxy bar); results in BALANCE.md §3
 ├─ tools/share-assets.js     `npm run share-assets <id...>`: grants the group's game (Open Cloud asset-permissions,
 │                            Universe / Use) the use of assets of the owner's account (private audio)
 ├─ tools/obj-receiver.js     Local receiver of the OBJ (and .b64 texture) files a Studio script exports, on

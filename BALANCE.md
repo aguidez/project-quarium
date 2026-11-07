@@ -3,7 +3,7 @@
 > The game's balance: what an average player reaches after how long, and why. **Update it in the same task whenever a
 > number of the economy changes** (fish income, eggs, odds, rebirths, Ocean milestones, variants, food, capacity,
 > companions…): run the simulators, copy their results here, add a line to the history (§6).
-> Last updated: 2026-11-07 (V1.1.15: the money cap 1e15 → 1e300, no price or income changed; §5.6, §6).
+> Last updated: 2026-11-07 (V1.2 plan tuned, not in the game: tools/balance-v1.2-plan.js, ROADMAP_V1.2.md; §6).
 
 
 **Where the numbers live**: `src/shared/types/fish.ts` (species), `eggs.ts` (eggs), `rebirths.ts` (rebirths),
@@ -14,7 +14,8 @@
 |---|---|
 | `node tools/economy-sim.js` | The live economy (mirrors the config: keep it in sync), 2,000 average players second by second |
 | `node tools/companion-sim.js` | AFK farming: how many fish the Pelican keeps fed, the share of the coins the Snail and the Swordfish pick up, the Jellyfish |
-| `node tools/starfall-sim.js` | The starfall's star gauge (mirrors `stars.ts`): bars filled per share of stars caught, the next egg's variant, what a 12 h run gets |
+| `node tools/starfall-sim.js` | The starfall's star gauge (mirrors `stars.ts`): bars filled per share of stars caught, the next egg's variant, what a 12 h run gets; `--fourthBar 0.9` plays the V1.2 plan's 4th bar (Galaxy) |
+| `node tools/economy-sim.js --plan tools/balance-v1.2-plan.js` | The V1.2 plan (ROADMAP_V1.2.md): rebirths 9–12, eggs 13–16, species 19–24, tank 33, the Size score (`P.sizeMax`), Galaxy; not in the game |
 
 How to add content (species, theme, companion, egg): `docs/agent-notes/content-recipes.md`.
 
@@ -636,6 +637,7 @@ content (species, eggs, aquariums, capacity, companions themselves) away from fr
 | V0.60.14 | Sugar, easter egg of the likes: 1 % of the likes a player gives, into the giver's tank (even a full one, one per tank), a sugar cube as often as the best fish's coin, worth 1.1 x it, 500 Ocean Points, stays. Not simulated (likes are not modelled) | Timeline unchanged; +1.1 / N of a tank of N similar fish while she stays (+4 % for 25 fish, +11 % for 10, more early) |
 | V1.0.0 | The release: the alpha's limits removed (all 8 rebirths and 12 eggs, every Ocean milestone and story quest, the weekly quests from rebirth 3, the gamepasses on sale); no number changed | Unchanged: the timeline of §2 (rebirth 8 ~10h56, all eighteen species ~12h18) is now every player's; the gamepasses stay outside the balance (§5.10) |
 | V1.1.15 | MAX_MONEY 1e15 → 1e300 (a guard, no longer a ceiling of the economy), money units up to Vg then scientific, income leaderboard scores encoded above 1e15; no price, income or reward changed, simulator not affected | Unchanged: the timeline of §2; the next rebirths can cost far more than 1e15 |
+| V1.2 (plan) | ROADMAP_V1.2.md M1, not in the game: rebirths 9–12 (200T x25,000 / 640T x120,000 / 3Qa x375,000 / 80Qa x1.2M), eggs Aurora 400T, Sky 770T, Dreamland 50Qa, Heart 96Qa (180 s), 6 species (income x2, points x1.6), tank 27–33 at 1.5M / 4M / 9M / 20M Ocean Points, Voyage 375k / 900k / 2.2M / 5M points, side lines (Hatchery 1,800–3,500, Collector to 120 cells, Ocean 500 released, Big Catch); **Size score** (-15…+15, triangular, coins x(1 + size/100)); **Galaxy** (0.2 %, ~x2 income, x10 points); starfall 4th bar at 0.9 bar of stars. Simulator: `P.sizeMax`, plan `VARIANTS`, Ocean line as a list, Big Catch line; starfall `--fourthBar` | Rebirths 9–12 at ~13h37 / 16h28 / 19h53 / 23h14, **all 24 species ~25h15 (24h18–26h34)**, ~day 26; runs 2h50–3h25. Size: V1 ~2–3 % faster (all eighteen 12h11 → 11h55), income +15–30 %. 4th bar: 2.6 % of perfect starfalls (0.3 % at 75 % caught) |
 
 ---
 

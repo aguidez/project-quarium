@@ -7,8 +7,9 @@
 // Prints median / p10 / p90 times of each step, and the median income at a few checkpoints.
 // Usage: node tools/economy-sim.js [--plan <file.js>] [--players 500] ['{"P":{"collect":0.6}}']
 //   --plan: plays a planned economy (a module exporting FISH, EGGS, REBIRTHS, CAPACITY, OCEAN_MILESTONES,
-//           INCUBATORS, HATCH, QUEST_REWARDS, SIDE_QUESTS, P) instead of the live config below: write one to
-//           preview a future update (the V1 plan was tools/balance-v1-plan.js, removed in V0.50: it is in the game)
+//           INCUBATORS, HATCH, QUEST_REWARDS, SIDE_QUESTS, VARIANTS, P) instead of the live config below: write one
+//           to preview a future update (the V1 plan was tools/balance-v1-plan.js, removed in V0.50: it is in the game;
+//           the V1.2 one is tools/balance-v1.2-plan.js, ROADMAP_V1.2.md)
 //   e.g. no rebirth: node tools/economy-sim.js '{"P":{"rebirths":0}}'
 //   gamepass x2 coins (an estimate, never a target): '{"P":{"coinBoost":2}}', x2 Ocean Points: oceanBoost
 const args = process.argv.slice(2);
@@ -78,11 +79,20 @@ let VARIANTS = [
 	{ name: "Ghost", chance: 0.05, mult: (14 / 15 + (1 / 15) * 6) / (1 + 1 / 15), ocean: 3 },
 	{ name: "Anomaly", chance: 0.1, mult: 1.2, ocean: 2 },
 ];
+if (plan.VARIANTS) VARIANTS = plan.VARIANTS;
 if (overrides.VARIANTS) VARIANTS = overrides.VARIANTS;
 function rollVariant() {
 	let r = Math.random();
 	for (const v of VARIANTS) if ((r -= v.chance) < 0) return v;
 	return { name: "Normal", mult: 1, ocean: 1 };
+}
+/**
+ * The Size score (ROADMAP_V1.2 §3.5): a whole number in [-sizeMax, +sizeMax], the sum of two dice (triangular), drawn
+ * at hatch; the fish's coins are worth x(1 + size / 100), its Ocean Points don't change. 0 = no Size score (live V1).
+ */
+function rollSize() {
+	if (!P.sizeMax) return 0;
+	return Math.round((Math.random() + Math.random() - 1) * P.sizeMax);
 }
 let EGGS = [
 	{ name: "Common", price: 100, hatch: 3, odds: { Basic: 80, Big: 20 } },
@@ -169,6 +179,10 @@ const SIDE_QUESTS = overrides.SIDE_QUESTS ||
 		],
 		ocean: { releases: 50, minutes: 3 },
 	};
+// The Ocean line as a list (one entry before V1.2); the Big Catch line (V1.2 Size score: hatch a fish of `size` or
+// more, or hold `count` of them in the tank at once, in order) is empty without a Size score.
+const OCEAN_LINE = [].concat(SIDE_QUESTS.ocean);
+const BIG_CATCH = SIDE_QUESTS.bigCatch || [];
 const P = Object.assign(
 	{
 		collect: 0.5, // share of coin value the player collects (0.5 = average player, calibrated)
@@ -198,6 +212,7 @@ const P = Object.assign(
 		checkpoints: [15, 30, 60, 90, 120, 150, 180, 240, 300, 360],
 		horizon: 15 * 3600, // V1 ends at ~12h15 (all 18 species); room for the slowest players
 		players: 2000,
+		sizeMax: 0, // the Size score's range (ROADMAP_V1.2 §3.5: 15); 0 = none
 	},
 	plan.P || {},
 	overrides.P || {},
@@ -282,7 +297,9 @@ function simulate() {
 	let hatcheryStep = 0; // side lines (SIDE_QUESTS): next quest of each
 	let collectorStep = 0;
 	let released = 0; // fish released to make room
-	let oceanLineDone = false;
+	let oceanLineStep = 0;
+	let bigCatchStep = 0;
+	let bestSize = -Infinity; // best Size score hatched so far
 	const cells = new Set(); // Fish Index cells: "type:variant"
 	const variantsFound = new Set();
 	const dayLength = P.hoursPerDay * 3600;
@@ -314,16 +331,32 @@ function simulate() {
 		}
 		while (oceanUnlocked && collectorStep < SIDE_QUESTS.collector.length) {
 			const q = SIDE_QUESTS.collector[collectorStep];
-			if (q.variant ? !variantsFound.has(q.variant) : cells.size < q.cells) break;
+			const found = q.species
+				? q.species.some((type) => cells.has(`${type}:${q.variant}`))
+				: q.variant
+					? variantsFound.has(q.variant)
+					: cells.size >= q.cells;
+			if (!found) break;
 			ocean += q.ocean || 0;
 			money += earned * 60 * (q.minutes || 0);
-			sideAt[`Collector ${q.variant || q.cells + " cells"}`] = t;
+			sideAt[`Collector ${q.variant ? q.variant + (q.label ? " " + q.label : "") : q.cells + " cells"}`] = t;
 			collectorStep++;
 		}
-		if (!oceanLineDone && released >= SIDE_QUESTS.ocean.releases) {
-			money += earned * 60 * SIDE_QUESTS.ocean.minutes;
-			sideAt[`Ocean ${SIDE_QUESTS.ocean.releases} released`] = t;
-			oceanLineDone = true;
+		while (oceanLineStep < OCEAN_LINE.length && released >= OCEAN_LINE[oceanLineStep].releases) {
+			money += earned * 60 * OCEAN_LINE[oceanLineStep].minutes;
+			sideAt[`Ocean ${OCEAN_LINE[oceanLineStep].releases} released`] = t;
+			oceanLineStep++;
+		}
+		while (oceanUnlocked && bigCatchStep < BIG_CATCH.length) {
+			const q = BIG_CATCH[bigCatchStep];
+			const done = q.count
+				? fish.filter((f) => !f.easter && f.size >= q.size).length >= q.count
+				: bestSize >= q.size;
+			if (!done) break;
+			money += earned * 60 * (q.minutes || 0);
+			ocean += q.ocean || 0;
+			sideAt[`Big Catch ${q.count ? q.count + " x " : ""}+${q.size}`] = t;
+			bigCatchStep++;
 		}
 		// daily / weekly quests, mid-session (see P.hoursPerDay)
 		if (dayLength > 0 && t % dayLength === Math.floor(dayLength / 2)) {
@@ -383,7 +416,9 @@ function simulate() {
 					continue;
 				}
 				const variant = rollVariant();
-				fish.push({ type, born: t + P.reveal, vm: variant.mult, om: variant.ocean });
+				const size = rollSize();
+				bestSize = Math.max(bestSize, size);
+				fish.push({ type, born: t + P.reveal, vm: variant.mult * (1 + size / 100), om: variant.ocean, size });
 				cells.add(`${type}:${variant.name}`);
 				if (variant.name !== "Normal") variantsFound.add(variant.name);
 				if (!discovered.has(type)) {
@@ -464,6 +499,12 @@ const line = (label, values) => {
 	);
 };
 const short = (n) =>
+	n >= 1e18
+		? (n / 1e18).toFixed(1) + "Qi"
+		: n >= 1e15
+			? (n / 1e15).toFixed(1) + "Qa"
+			: short12(n);
+const short12 = (n) =>
 	n >= 1e12
 		? (n / 1e12).toFixed(1) + "T"
 		: n >= 1e9

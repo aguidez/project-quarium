@@ -1,7 +1,9 @@
 // Starfall simulator (the star gauge of the starfall event, src/shared/types/stars.ts: keep the numbers below in sync).
 // Monte Carlo of one event per catch rate: bars filled (p10 / median / p90), share reaching 1 / 2 / 3 bars, and the
 // variant the next egg hatches with that star power. Then what a 12 h run gets from its starfalls.
-// Usage: node tools/starfall-sim.js [--events 20000] [--luck 1] [--perHour 1.25]
+// Usage: node tools/starfall-sim.js [--events 20000] [--luck 1] [--perHour 1.25] [--fourthBar 1.7]
+//   fourthBar: the V1.2 plan's 4th bar (ROADMAP_V1.2 §3.7): what it costs in bars of stars (0 = the live 3 bars); the
+//   gauge then keeps filling past 3 bars, a full 4th bar guarantees a Galaxy, a partial one raises its chance
 //   luck: the player's variant luck (Lucky ocean x1.5, the Lucky pass x2); perHour: starfalls an hour of play (one
 //   recurring event every ~12 min, drawn among the recurring ones: 4 of them = 1.25 starfalls an hour)
 const args = process.argv.slice(2);
@@ -12,6 +14,7 @@ const flag = (name, fallback) => {
 const EVENTS = flag("--events", 20000);
 const LUCK = flag("--luck", 1);
 const PER_HOUR = flag("--perHour", 1.25);
+const FOURTH = flag("--fourthBar", 0);
 
 // stars.ts STARFALL / STAR_SIZES / STAR_BARS
 const STARS = { min: 16, max: 20, floor: 1.5, maxBars: 3 };
@@ -27,6 +30,20 @@ const BARS = [
 	{ guaranteed: "Shiny", better: {} },
 ];
 const BASE = { Shiny: 0.01, Ghost: 0.05, Anomaly: 0.1 }; // variants.ts chances
+const VARIANT_NAMES = ["Shiny", "Ghost", "Anomaly"];
+if (FOURTH > 0) {
+	// The V1.2 plan: Galaxy (0.2 %) above the Shiny; the bars keep at least its base chance, the 3rd bar raises it as
+	// the 4th fills (0.5 % → 5 %), the 4th bar guarantees it
+	BASE.Galaxy = 0.002;
+	VARIANT_NAMES.unshift("Galaxy");
+	BARS[0].better.Galaxy = [0.002, 0.002];
+	BARS[1].better.Galaxy = [0.002, 0.003];
+	BARS[2].better.Galaxy = [0.005, 0.05];
+	BARS.push({ guaranteed: "Galaxy", better: {} });
+}
+/** Star power → bars shown: 1 bar of stars a bar up to 3, the 4th costs FOURTH bars of stars. */
+const MAX_CHARGE = FOURTH > 0 ? STARS.maxBars + FOURTH : STARS.maxBars;
+const toBars = (charge) => (charge <= STARS.maxBars ? charge : STARS.maxBars + (charge - STARS.maxBars) / FOURTH);
 const EMPTY_BAR_LUCK = 2;
 
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -44,11 +61,11 @@ function event(rate) {
 		const size = drawSize();
 		const power = rand(size.power[0], size.power[1]);
 		if (Math.random() < rate) {
-			charge = Math.min(charge + power, STARS.maxBars);
+			charge = Math.min(charge + power, MAX_CHARGE);
 			caught++;
 		}
 	}
-	return Math.min(Math.max(charge, (STARS.floor * caught) / n), STARS.maxBars);
+	return toBars(Math.min(Math.max(charge, (STARS.floor * caught) / n), MAX_CHARGE));
 }
 /** getStarVariantOdds + rollStarVariant. */
 function variant(power, luck) {
@@ -64,7 +81,7 @@ function variant(power, luck) {
 		odds[bar.guaranteed] = 1;
 	}
 	let acc = 0;
-	for (const name of ["Shiny", "Ghost", "Anomaly"]) {
+	for (const name of VARIANT_NAMES) {
 		acc += odds[name] || 0;
 		if (r < acc) return name;
 	}
@@ -76,6 +93,7 @@ console.log(`Starfall: ${EVENTS} events per catch rate, luck x${LUCK}`);
 for (const rate of [0.4, 0.6, 0.75, 0.9, 1]) {
 	const fills = [];
 	const v = { Normal: 0, Anomaly: 0, Ghost: 0, Shiny: 0 };
+	if (FOURTH > 0) v.Galaxy = 0;
 	for (let i = 0; i < EVENTS; i++) {
 		const f = event(rate);
 		fills.push(f);
@@ -83,13 +101,13 @@ for (const rate of [0.4, 0.6, 0.75, 0.9, 1]) {
 	}
 	fills.sort((a, b) => a - b);
 	const q = (x) => fills[Math.floor(x * (EVENTS - 1))].toFixed(2);
-	const bars = [1, 2, 3].map((b) => pct(fills.filter((f) => f >= b).length / EVENTS));
+	const bars = (FOURTH > 0 ? [1, 2, 3, 4] : [1, 2, 3]).map((b) => pct(fills.filter((f) => f >= b).length / EVENTS));
 	const perRun = PER_HOUR * 12;
 	console.log(
-		`catch ${(rate * 100).toFixed(0)}%: bars p10 ${q(0.1)} median ${q(0.5)} p90 ${q(0.9)} | >= 1/2/3 bars ${bars.join(" / ")}`,
+		`catch ${(rate * 100).toFixed(0)}%: bars p10 ${q(0.1)} median ${q(0.5)} p90 ${q(0.9)} | >= ${FOURTH > 0 ? "1/2/3/4" : "1/2/3"} bars ${bars.join(" / ")}`,
 	);
 	console.log(
 		`  next egg: ${Object.entries(v).map(([k, c]) => `${k} ${pct(c / EVENTS)}`).join(", ")}` +
-			` | a 12 h run (${perRun} starfalls): ${["Anomaly", "Ghost", "Shiny"].map((k) => `${((v[k] / EVENTS) * perRun).toFixed(1)} ${k}`).join(", ")}`,
+			` | a 12 h run (${perRun} starfalls): ${[...VARIANT_NAMES].reverse().map((k) => `${((v[k] / EVENTS) * perRun).toFixed(FOURTH > 0 ? 2 : 1)} ${k}`).join(", ")}`,
 	);
 }

@@ -2,10 +2,10 @@
 
 > The first content update after V1: **4 more rebirths and their aquariums, 4 eggs, 6 species**, a bigger tank, a
 > **size score on every fish**, a **fifth variant** rarer than the Shiny, new quests and Ocean milestones, upgrades for
-> the food reserve and a sixth companion (the Hermit Crab). Everything here is a **plan**: the numbers are first
-> guesses, to be tuned with the simulator before anything is built (M1). Tick the boxes as tasks ship, and move what a
+> the food reserve and a sixth companion (the Hermit Crab). Everything here is a **plan**: the economy's numbers
+> are tuned with the simulator (M1, `tools/balance-v1.2-plan.js`), nothing is built yet. Tick the boxes as tasks ship, and move what a
 > step ships into `PROJECT_CONTEXT.md` / `RELEASE_NOTES.md` / `BALANCE.md` as usual.
-> Last updated: 2026-11-07 (owner's decisions: themes, 4 species per rarity, tank 33 (50 later), Size and its table,
+> Last updated: 2026-11-07 (M1 done: prices tuned, end of V1.2 at ~25h15, the 4th bar at 0.9; owner's decisions: themes, 4 species per rarity, tank 33 (50 later), Size and its table,
 > Galaxy at 0.2 % with the Lucky pass x3 on it, the 4th bar at 2.5 %, the Hermit Crab's live luck, boosts unchanged;
 > nothing built yet. Groundwork done: money up to 1e300, V1.1.15).
 
@@ -33,31 +33,41 @@
 
 ---
 
-## 2. Target timeline (reference player: 1 h a day, dailies and weeklies)
+## 2. Timeline (reference player: 1 h a day, dailies and weeklies)
 
-From V1 (BALANCE.md §2): rebirth 8 at ~10h56, all eighteen species at ~12h18. The new runs, first guesses:
+**Measured** (M1, 2026-11-07: `node tools/economy-sim.js --plan tools/balance-v1.2-plan.js`, 2,000 players, Size
+score included; medians, p10–p90):
 
-| Time (median) | Step | Run length |
-|---|---|---|
-| ~10h56 | Rebirth 8 (V1, unchanged) | — |
-| ~12h18 | All eighteen species (V1's end, unchanged) | — |
-| **~13h15** | **Rebirth 9**: Aurora Glacier; tank 27 | run 8: ~2h20 (the V1 end + ~1 h of saving) |
-| ~14h30 | Species 19, Penguin Puffer | |
-| **~16h00** | **Rebirth 10**: Sky Archipelago; tank 29 | run 9: ~2h45 |
-| ~17h45 | Species 20–21, Cloud Whale and Pegasus Seahorse | |
-| **~19h15** | **Rebirth 11**: Rainbow Dreamland; tank 31 | run 10: ~3h15 |
-| ~21h00 | Species 22, Kitty Koi | |
-| **~23h00** | **Rebirth 12**: Heart of the Ocean, the last aquarium of V1.2; tank 33 | run 11: ~3h45 |
-| **~25h30** | **All twenty-four species** (Baby Kraken): the end of V1.2 | ~2h30 after rebirth 12 |
+| Time (median) | p10–p90 | Step | Run length |
+|---|---|---|---|
+| ~10h45 | 9h58–11h12 | Rebirth 8 (V1 numbers; 10h55 today, the Size score brings it ~10 min earlier) | — |
+| ~11h55 | 11h10–12h41 | All eighteen species (12h19 today) | — |
+| **~13h37** | 12h38–14h24 | **Rebirth 9**: Aurora Glacier; tank 27 | run 8: 2h52 |
+| ~16h27 | 14h42–17h52 | Species 19, Penguin Puffer | |
+| **~16h28** | 15h24–17h08 | **Rebirth 10**: Sky Archipelago; tank 29 | run 9: 2h51 |
+| ~17h45 / ~18h41 | 16h37–19h49 | Species 20–21, Cloud Whale and Pegasus Seahorse | |
+| **~19h53** | 18h47–20h45 | **Rebirth 11**: Rainbow Dreamland; tank 31 | run 10: 3h25 |
+| **~23h14** | 22h05–24h10 | **Rebirth 12**: Heart of the Ocean, the last aquarium of V1.2; tank 33 | run 11: 3h21 |
+| ~23h42 | 21h41–25h26 | Species 22, Kitty Koi | |
+| ~24h45 | 23h40–25h31 | Species 23, Panda Manta | |
+| **~25h15** | **24h18–26h34** | **All twenty-four species** (Baby Kraken): the end of V1.2 | 2h01 after rebirth 12 |
 
-- **Why ~13 h**: the late V1 runs last ~1h05–2h15. Growing them by ~30 min each (2h15 → 3h45) gives ~11h45 of runs plus
-  the last species: ~13 h. Shorter runs (~2 h each) would give ~9 h, but the game would stop slowing down.
-- At 1 h a day it is **~13 more days**; for a player of 3 h a day ~4–5 days. Measure the p10–p90 spread in M1 and
-  write it here.
-- The runs bringing 2 species (10 and 12) earn more and would come out shorter than the others: their rebirth price
-  rises more than in V1 (ratio ~4–5 instead of 2.2) to keep the curve going up.
-- The daily boosts (15 min a day) weigh less in a 3 h run: the late game slows down a bit on its own. The simulator's
-  horizon goes 15 h → 30 h.
+- **+~13 h of play** after V1's end (12h19 → 25h15), **~13 more days** at 1 h a day (day 13 → ~day 26). The runs grow
+  from ~1h05–2h15 (V1's last ones) to **2h50–3h25**; the last one is shorter (2 h) because it ends on a species, not
+  on a rebirth.
+- **The model's average player rebirths as soon as it can**: like V1's Husky Dogfish (10h55, after rebirth 8), the
+  Penguin Puffer and the Kitty Koi mostly hatch right around the next rebirth (in the next run, from the next egg,
+  which still holds them at 25 %). Real players who wait for the species before rebirthing get them in their own run.
+- **What shaped the prices** (the cliffs of BALANCE.md §4, measured here): an even rebirth (10, 12) must stay at
+  ≤ ~1.6x the egg its run farms, or the average player keeps buying that egg to swap its baby fish and never saves up
+  (rebirth 10: 400T → 15h43, 500T → never by 20 h). So a run is lengthened by its 1-species egg (Aurora 2x rebirth 9,
+  Dreamland ~17x rebirth 11) more than by its rebirth, and rebirth 10's multiplier is **x4.8** instead of ~x3.2: at
+  x80,000 the Sky Egg (2 species) costs ~4 min of the tank's income and run 10 lasted 5 h (rebirth 11 at ~21h30).
+- **The Size score** makes V1 ~2–3 % faster (rebirth 1 18.5 → 16.6 min, rebirth 8 10h51 → 10h45, all eighteen
+  species 12h11 → 11h55: inside the p10–p90 spread) and the whole game ~16 min shorter (25h31 → 25h15): the income
+  is +15–30 % higher with it (a player keeps its biggest fish), but the waits are for eggs and cliffs as much as for
+  money. V1's prices are left as they are (the owner: a faster start is fine).
+- The daily boosts stay as they are (owner): their weight shrinks in 3 h runs, included in the run above.
 
 ---
 
@@ -125,23 +135,27 @@ notes say so. The quests that name a rarity (§7) use the new labels.
 
 ### 3.3 Eggs (13–16)
 
-| Egg | Price (first guess) | Hatch | Odds | Unlocked by |
-|---|---|---|---|---|
-| Aurora | 1.2x rebirth 9 (~240T) | 180 s | Mini Leviathan 55, Penguin Puffer 45 | a Cosmic Egg |
-| Sky | 1.2x rebirth 10 (~1.1Qa) | 180 s | Penguin Puffer 25, Cloud Whale 55, Pegasus Seahorse 20 | an Aurora Egg |
-| Dreamland | 1.2x rebirth 11 (~70Qa) | 180 s | Pegasus Seahorse 55, Kitty Koi 45 | a Sky Egg |
-| Heart | 1.2x rebirth 12 (~360Qa) | 180 s | Kitty Koi 25, Panda Manta 55, Baby Kraken 20 | a Dreamland Egg |
+Prices tuned in M1 (§2 explains the rules that shaped them):
 
-The egg shop shows 6 slots today: check how the shelf pages / scrolls with 16 eggs (it already handles 12).
+| Egg | Price | vs its rebirth | Hatch | Odds | Unlocked by |
+|---|---|---|---|---|---|
+| Aurora | **400T** | 2x rebirth 9 | 180 s | Mini Leviathan 55, Penguin Puffer 45 | a Cosmic Egg |
+| Sky | **770T** | 1.2x rebirth 10 | 180 s | Penguin Puffer 25, Cloud Whale 55, Pegasus Seahorse 20 | an Aurora Egg |
+| Dreamland | **50Qa** | ~17x rebirth 11 | 180 s | Pegasus Seahorse 55, Kitty Koi 45 | a Sky Egg |
+| Heart | **96Qa** | 1.2x rebirth 12 | 180 s | Kitty Koi 25, Panda Manta 55, Baby Kraken 20 | a Dreamland Egg |
+
+- The Heart Egg sits on a cliff: 86Qa → the end at ~25h06, 95Qa (with rebirth 12 at 72Qa) → ~26h43. Never move it,
+  rebirth 12 or the Dreamland Egg by more than ~5 % without re-running the simulator.
+- The egg shop shows 6 slots today: check how the shelf pages / scrolls with 16 eggs (it already handles 12).
 
 ### 3.4 Rebirths (9–12)
 
-| Rebirth | Price (first guess, the simulator decides) | Coins | Aquarium | Tank (Ocean milestone it comes with) |
-|---|---|---|---|---|
-| 9 | ~200T | x25,000 | Aurora Glacier | 27 |
-| 10 | ~900T | x80,000 | Sky Archipelago | 29 |
-| 11 | ~60Qa | x250,000 | Rainbow Dreamland | 31 |
-| 12 | ~300Qa | x800,000 | Heart of the Ocean | 33 |
+| Rebirth | Price | Coins | Step | Aquarium | Tank (Ocean milestone it comes with) |
+|---|---|---|---|---|---|
+| 9 | **200T** | x25,000 | x3.1 | Aurora Glacier | 27 |
+| 10 | **640T** | **x120,000** | x4.8 | Sky Archipelago | 29 |
+| 11 | **3Qa** | x375,000 | x3.1 | Rainbow Dreamland | 31 |
+| 12 | **80Qa** | x1,200,000 | x3.2 | Heart of the Ocean | 33 |
 
 After rebirth 12 the Rebirth menu says the next aquariums come with the next update (the message moves from rebirth 8).
 
@@ -183,10 +197,11 @@ its coins. The number is **shown to the player**, never hidden: it is a reason t
   those fish, FishService.releaseFish takes the **lowest Size score first**, then (today's order) the lowest growth
   stage, the smallest body, the youngest. The Size goes first because it is permanent: a Titan baby just hatched is
   never released before a Tiny adult. The Ocean panel says so ("the smallest one goes back to the ocean").
-- **Balance**: the average at hatch is 0 (symmetric draw), but the player keeps the best fish and releases the others,
-  so a full tank ends above 0. First estimate: **+4 to +8 % income** late in a run, a bit more for a player who farms
-  the egg for size. M1 models it (the simulator's player releases its weakest fish by real income, size included) and
-  re-tunes the prices if it moves the curve by more than the noise.
+- **Balance (measured, M1)**: the average at hatch is 0, but the player keeps its biggest fish and releases the
+  others, so the tank's income is **+15–30 % higher** with the Size score (money per minute at 1 h 51k → 59k, at
+  12 h 755B → 993B). The times move much less (**-2 to -3 %**: the end 25h31 → 25h15), because the waits are for eggs
+  and price cliffs as much as for money; §2 has the details. The Big Catch line (§7.2): a Huge at ~6 min, 5 Huge at
+  once and a Giant at ~5h45, a **Titan for 72 % of the players** before the end (median ~10h05 for them).
 - **The Size only changes the income, never the Ocean Points** (owner, 2026-11-07): a release stays worth its species
   and variant.
 - Applies to every egg fish of every species, V1 included (the feature reaches every player at once). The special fish
@@ -235,13 +250,24 @@ The new variant sits above it: **rarer, and clearly richer**. Common numbers for
 Same event, same stars, same gauge, **the same chance of a guaranteed Shiny**; one more bar, very hard to fill.
 
 - The gauge goes from 3 to **4 bars**. Bars 1–3 don't change (Anomaly, Ghost, Shiny guaranteed, same chances while
-  they fill: BALANCE.md §3 Starfall). What the stars bring past 3 bars, lost today, now fills the 4th bar, but the
-  4th bar costs much more (e.g. it needs ~1.5–2 bars' worth of stars on its own: the simulator sets it).
-- 3 bars + p of the 4th: Shiny guaranteed, the new variant's chance grows from 0.5 % to 5 % as the 4th bar fills.
-  **4 bars: the new variant guaranteed.**
-- **Target** (tools/starfall-sim.js; owner, 2026-11-07): 4 bars in **~2.5 % of the starfalls caught at 100 %**
-  (~0.3 % at 75 %, to measure). A perfect player meets it once every ~40 starfalls (~32 h of play); most players get
-  it from the 4th bar's partial chance, rarely. The floor (1.5 bars x the share caught) stays as it is.
+  they fill: BALANCE.md §3 Starfall). What the stars bring past 3 bars, lost today, now fills the 4th bar, which
+  costs **0.9 bar of stars** (measured, M1): the stars of a whole event rarely go that far.
+- Galaxy in the bars: bars 1 and 2 keep its base chance (0.2 %, 0.2 → 0.3 % as the 2nd bar fills); 3 bars + p of
+  the 4th: Shiny guaranteed, Galaxy 0.5 % → 5 % as the 4th fills; **4 bars: Galaxy guaranteed.**
+- **Measured** (`node tools/starfall-sim.js --fourthBar 0.9`, 400,000 events per catch rate; owner's target 2.5 %):
+
+| Stars caught | ≥ 3 bars (Shiny guaranteed) | 4 bars (Galaxy guaranteed) | Next egg is a Galaxy | Galaxies from a 12 h run's 15 starfalls |
+|---|---|---|---|---|
+| 60 % | 1.3 % | 0.1 % | 0.4 % | 0.05 |
+| 75 % | 4.6 % | 0.3 % | 0.6 % | 0.09 |
+| 90 % | 12.3 % | 1.2 % | 1.6 % | 0.24 |
+| 100 % | 21.0 % (unchanged) | **2.6 %** | 3.2 % | 0.48 |
+
+  A perfect player fills the 4th bar once in ~38 starfalls (~30 h of play), most players almost never: the starfall
+  stays the Shiny event, Galaxy its rare jackpot. Next eggs that hatch a Shiny at 100 %: 34.6 % → 31.7 % (the 3.2 %
+  that turn Galaxy instead). With the Lucky pass (luck x3 on Galaxy) a perfect starfall's next egg is a Galaxy 4.4 %
+  of the time.
+- The floor (1.5 bars x the share caught) stays as it is.
 - The 4th bar gets its own colour and a short sparkle in the gauge (FigCraft mockup first), so that a near miss is
   visible and exciting.
 - The best of two starfalls is still the one kept; the power is still spent on the next egg.
@@ -295,19 +321,19 @@ Plus one Ocean milestone (§6, 6M points): **refill 7 s** (51 meals a minute, ro
 
 ## 6. Ocean milestones (after 1,000,000)
 
-A rebirth releases a whole tank; with the new species' points (51,000–537,000 a fish, x2–5 for variants) the
-releases reach millions. First guesses (the simulator places them on the rebirths):
+A rebirth releases a whole tank; with the new species' points (51,000–537,000 a fish, x2–10 for variants) the
+releases reach millions. Times measured in M1 (medians):
 
-| Points | Reward | Comes with |
+| Points | Reward | Reached |
 |---|---|---|
-| 1,500,000 | Aquarium holds **27 fish** | rebirth 9 |
-| 2,500,000 | **Hermit Crab** (the new companion, §8) | run 9 |
-| 4,000,000 | Aquarium holds **29 fish** | rebirth 10 |
-| 6,000,000 | **Quick pantry**: food refill 7 s | run 10 |
-| 9,000,000 | Aquarium holds **31 fish** | rebirth 11 |
-| 14,000,000 | **Aurora rims** (cosmetic: the tank's rims glow with northern lights, every theme) | run 11 |
-| 20,000,000 | Aquarium holds **33 fish** (the new maximum) | rebirth 12 |
-| 40,000,000 | **"Ocean Legend"** title + a giant pearl decor in the tank | after the end |
+| 1,500,000 | Aquarium holds **27 fish** | ~13h29, with rebirth 9 |
+| 2,500,000 | **Hermit Crab** (the new companion, §8) | ~13h57 |
+| 4,000,000 | Aquarium holds **29 fish** | ~16h27, with rebirth 10 |
+| 6,000,000 | **Quick pantry**: food refill 7 s | ~19h08 |
+| 9,000,000 | Aquarium holds **31 fish** | ~19h53, with rebirth 11 |
+| 14,000,000 | **Aurora rims** (cosmetic: the tank's rims glow with northern lights, every theme) | ~22h20 |
+| 20,000,000 | Aquarium holds **33 fish** (the new maximum) | ~23h11, with rebirth 12 |
+| 40,000,000 | **"Ocean Legend"** title + a giant pearl decor in the tank | ~26h39, after the end |
 
 ---
 
@@ -336,7 +362,7 @@ signature species, then reach the next aquarium. Ocean Points rewards x2.5 per r
 |---|---|
 | **Fish Keeper** (new) | 500 / 2,000 / 6,000 meals by hand → food refill 9 s, 8 s, +1 portion (§5) |
 | **Hatchery** (continued) | 1,800 / 2,500 / 3,500 fish hatched → 2 min of income each, the last one a **Diamond Incubator** decor |
-| **Collector** (continued) | 75 Fish Index cells → 3 min of income; first fish of the new variant (§3.6) → 3 min of income; first Shiny Mythic of V1.2 (species 21–24) → 5,000,000 Ocean Points; 100 cells → **Galaxy rims** (cosmetic, if Galaxy is chosen); 120 cells (every species in every variant) → title **"Variant Master"** |
+| **Collector** (continued) | in order: 75 Fish Index cells → 3 min of income (~20h53); first Shiny Mythic of V1.2 (species 21–24) → 5,000,000 Ocean Points; first **Galaxy** → 3 min of income; 100 cells → **Galaxy rims** (cosmetic); 120 cells (every species in every variant) → title **"Variant Master"**. Measured: only ~38 % of the players get the Shiny Mythic and the first Galaxy before the end (~24h51 for them): from there the line is a goal past the end, like the Golden Incubator |
 | **Big Catch** (new, size §3.5; opens with "Full House", so early: its rewards are minutes of income, BALANCE.md §4) | in order: hatch a Huge fish (+10) → 3 min of income; have 5 Huge fish (or better) in the tank at once → 5 min; hatch a Giant (+13) → 5 min; hatch a **Titan** (+15) → title **"Titan Tamer"** + a Titan trophy decor; a best size of +10 or more for 18 species in the Fish Index → title **"Size Collector"** |
 | **Ocean** (continued) | release 500 fish → 5 min of income; release a Shiny Baby Kraken → title **"Pearl Diver"** |
 | **Hermit Crab** (new, free) | its 3 upgrade quests (§8) |
@@ -402,7 +428,7 @@ last live rebirth.
       update (§4); the Fish Keeper rewards (§5); boosts unchanged (§7.3); Size and its table, no Ocean Points, the
       smallest released first (§3.5); Galaxy at 0.2 %, Lucky pass x3 on it (§3.6); the 4th bar at 2.5 % (§3.7); the
       Hermit Crab with a live luck (§8).
-- [ ] **M1 Balance plan**: `tools/balance-v1.2-plan.js` (`node tools/economy-sim.js --plan`), the 4 rebirths, 4 eggs,
+- [x] **M1 Balance plan** (2026-11-07): `tools/balance-v1.2-plan.js` (`node tools/economy-sim.js --plan`), the 4 rebirths, 4 eggs,
       6 species, milestones, quests and food changes, the size score (a player who keeps its best fish) and the new
       variant; tune the prices until the medians hit §2, write the p10–p90 and the coin rate per tank; the starfall's
       4th bar in `tools/starfall-sim.js` (§3.7); update this roadmap's numbers. Simulator horizon 30 h.
