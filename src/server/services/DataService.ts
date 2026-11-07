@@ -183,7 +183,7 @@ class DataServiceController implements Lifecycle {
 		const data = this.getData(player);
 		if (!data || amount <= 0) return;
 
-		// Clamped: the UI and the doubles stay exact up there (MAX_MONEY), far above the V1 economy
+		// Clamped below the doubles' limit (MAX_MONEY): a save never holds an infinity
 		data.money = math.min(data.money + amount, MAX_MONEY);
 		this.sync(player);
 	}

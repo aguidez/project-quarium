@@ -15,7 +15,10 @@ import { SaveData } from "../saveData";
 import { DataService } from "./DataService";
 import { FishService } from "./FishService";
 
-/** One OrderedDataStore per board: key = the UserId as text, value = the score (a whole number). */
+/**
+ * One OrderedDataStore per board: key = the UserId as text, value = the score encoded by encodeScore (an OrderedDataStore
+ * only holds 64-bit integers, ~9.2e18, and incremental incomes go far past it).
+ */
 const STORE_NAMES: Record<LeaderboardId, string> = {
 	OceanPoints: "Leaderboard_OceanPoints_v1",
 	Income: "Leaderboard_Income_v1",
@@ -58,12 +61,32 @@ function toSnapshot(value: unknown): TitleSnapshot | undefined {
 	return { day: raw.day, ranks };
 }
 
+/**
+ * Scores below RAW_SCORE_LIMIT are stored as they are (every score written before V1.1.15 is one of them); above it,
+ * RAW_SCORE_LIMIT + (log10(score) - 15) x LOG_SCORE_SCALE. The order is kept, the encoded value stays below 2^53 up to
+ * the doubles' limit (1e308 → ~1.29e15), and a decoded score is off by ~2e-12 of itself: invisible on the signs.
+ */
+const RAW_SCORE_LIMIT = 1e15;
+const LOG_SCORE_SCALE = 1e12;
+
+function encodeScore(score: number): number {
+	if (!(score > 0)) return 0; // also NaN
+	if (score < RAW_SCORE_LIMIT) return math.floor(score);
+	const logScore = math.log10(math.min(score, 1.7976931348623157e308)) - 15;
+	return RAW_SCORE_LIMIT + math.max(math.floor(logScore * LOG_SCORE_SCALE), 0);
+}
+
+function decodeScore(stored: number): number {
+	if (stored < RAW_SCORE_LIMIT) return stored;
+	return 10 ** (15 + (stored - RAW_SCORE_LIMIT) / LOG_SCORE_SCALE);
+}
+
 type Scores = Record<LeaderboardId, number>;
 
 interface Session {
 	joinedAt: number;
 	writtenAt: number;
-	/** Last values written to the stores (unchanged ones aren't written again). */
+	/** Last values written to the stores, encoded (unchanged ones aren't written again). */
 	written: Partial<Scores>;
 	/** Last scores sampled: on every push, write and save (the final save samples them before the tank is emptied). */
 	scores?: Scores;
@@ -220,7 +243,7 @@ class LeaderboardServiceSingleton implements Lifecycle {
 	private write(userId: number, scores: Scores, written: Partial<Scores>) {
 		for (const board of LEADERBOARD_IDS) {
 			const store = this.stores.get(board);
-			const value = scores[board];
+			const value = encodeScore(scores[board]);
 			if (!store || written[board] === value) continue;
 			const [ok, err] = pcall(() => store.SetAsync(tostring(userId), value));
 			if (ok) written[board] = value;
@@ -249,7 +272,7 @@ class LeaderboardServiceSingleton implements Lifecycle {
 				const userId = tonumber(item.key);
 				const value = item.value;
 				if (userId !== undefined && typeIs(value, "number") && value > 0)
-					entries.push({ userId, name: "", value });
+					entries.push({ userId, name: "", value: decodeScore(value) });
 			}
 			this.tops[board] = entries;
 		}

@@ -3,7 +3,7 @@
 > The game's balance: what an average player reaches after how long, and why. **Update it in the same task whenever a
 > number of the economy changes** (fish income, eggs, odds, rebirths, Ocean milestones, variants, food, capacity,
 > companions…): run the simulators, copy their results here, add a line to the history (§6).
-> Last updated: 2026-11-05 (V1.0.0: the release, the alpha's limits gone, no number changed; §6, §7).
+> Last updated: 2026-11-07 (V1.1.15: the money cap 1e15 → 1e300, no price or income changed; §5.6, §6).
 
 
 **Where the numbers live**: `src/shared/types/fish.ts` (species), `eggs.ts` (eggs), `rebirths.ts` (rebirths),
@@ -405,8 +405,9 @@ Shark** and its Wolf-head Dogfish the **Husky Dogfish** (same numbers).
   species earn much more. The simulator tuned them on target times.
 - Crystal Caverns links the Volcanic Temple (glowing rock) to the Cosmic Sanctuary (crystals, light).
 - After rebirth 8 the Rebirth menu says the next aquariums come with the next update. Money keeps growing after the end
-  (~3T/min at 14 h): it is clamped at 1e15 (MAX_MONEY) so a player farming for days never gets near 2^53 (exact
-  integers of a Luau number).
+  (~3T/min at 14 h). Since V1.1.15 it is clamped at 1e300 (MAX_MONEY, only a guard: a save can't hold an infinity):
+  past 2^53 (~9e15) a Luau number rounds its last digits, as in every incremental game, and the UI shortens up to Vg
+  (1e63), then writes 1.23e66. The economy can climb as far as new rebirths need.
 
 ### 5.7 Ocean Points and milestones (tank 10 → 25)
 
@@ -634,6 +635,7 @@ content (species, eggs, aquariums, capacity, companions themselves) away from fr
 | V0.60.9 | On joining, each fish's first coin falls at a random time between 1 and 2 of its intervals (was exactly 1), then the usual pace: the coins no longer drop in chorus. Not simulated (the simulator's income is continuous) | One coin per fish later on average, half an interval of its income per session: 2–15 s of a fish's income an hour (4–30 s intervals), under 0.5 % of a 1 h session. Timeline unchanged |
 | V0.60.14 | Sugar, easter egg of the likes: 1 % of the likes a player gives, into the giver's tank (even a full one, one per tank), a sugar cube as often as the best fish's coin, worth 1.1 x it, 500 Ocean Points, stays. Not simulated (likes are not modelled) | Timeline unchanged; +1.1 / N of a tank of N similar fish while she stays (+4 % for 25 fish, +11 % for 10, more early) |
 | V1.0.0 | The release: the alpha's limits removed (all 8 rebirths and 12 eggs, every Ocean milestone and story quest, the weekly quests from rebirth 3, the gamepasses on sale); no number changed | Unchanged: the timeline of §2 (rebirth 8 ~10h56, all eighteen species ~12h18) is now every player's; the gamepasses stay outside the balance (§5.10) |
+| V1.1.15 | MAX_MONEY 1e15 → 1e300 (a guard, no longer a ceiling of the economy), money units up to Vg then scientific, income leaderboard scores encoded above 1e15; no price, income or reward changed, simulator not affected | Unchanged: the timeline of §2; the next rebirths can cost far more than 1e15 |
 
 ---
 

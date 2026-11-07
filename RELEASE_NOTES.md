@@ -11,6 +11,18 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.15 — 2026-11-07
+
+Groundwork for the next rebirths: the game can now count far beyond a quadrillion.
+
+**Changes**
+- Money is no longer capped at 1 quadrillion (1Qa): it can climb to 1e300, like other incremental games.
+- Big amounts keep their short names past "Qa": Qi, Sx, Sp, Oc, No, Dc, Ud, Dd, Td, Qad, Qid, Sxd, Spd, Ocd, Nod, Vg
+  (1e63), then scientific notation ("1.23e66").
+- The income leaderboard stores scores in a form that keeps working at any size (no change for today's scores).
+
+---
+
 ## V1.1.14 — 2026-11-07
 
 **The animation revamp (V1.1) is complete**: since V1.1.1 every species, the special fish, the abyss lantern fish and

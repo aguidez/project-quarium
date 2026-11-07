@@ -13,10 +13,11 @@ import type { LeaderboardId } from "./leaderboards";
 import { GamePass, getPassCompanionSlots, getPassVariantLuck } from "./gamepasses";
 
 /**
- * Money never goes above this (DataService credits clamp to it): 1 quadrillion, the last unit the UI shortens
- * ("Qa"), and far below the doubles' exact-integer limit (9e15). The V1 economy tops out around 2T.
+ * Money never goes above this (DataService credits clamp to it): 1e300, a guard below the doubles' limit (~1.8e308)
+ * so a save never holds an infinity (JSON can't store it). Past 2^53 (~9e15) money loses its last digits, as in every
+ * incremental game: a rounding no one sees. The UI shortens up to "Vg" (1e63), then writes "1.23e66" (format.ts).
  */
-export const MAX_MONEY = 1e15;
+export const MAX_MONEY = 1e300;
 /** Incubators per egg type at first; PlayerData.incubators grows with the Ocean milestones. */
 export const DEFAULT_INCUBATORS = 1;
 
