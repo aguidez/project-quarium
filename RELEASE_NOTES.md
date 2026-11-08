@@ -11,6 +11,14 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.2.1 — 2026-11-08
+
+**Fixes**
+- The painted backgrounds of the aquariums no longer spill over the top of the tank: the Crystal Caverns' stalactites
+  (and shapes on the edges of 8 other themes) stuck out above the rims as dark bars and triangles.
+
+---
+
 ## V1.2.0 — 2026-11-08
 
 **V1.2, the Voyage goes on: the update in one patch (V1.1.15 to V1.1.25, published together).**

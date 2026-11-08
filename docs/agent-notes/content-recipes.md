@@ -48,7 +48,9 @@ Static meshes (decor, coins) and images show whoever owns them.
 1. Brief + mood board to the owner (palette, 3–5 key props, backdrop).
 2. Build in Studio under `ServerStorage.Assets.AquariumThemes.<Theme>` (tag `AquariumThemeTemplate`, attr `Theme`,
    PrimaryPart `Origin`, `Style/` parts named like the tank's including `Water`, `Decor/` low along the back and sides,
-   CanQuery off), backdrop as a SurfaceGui of Frames (no uploaded image), props by `generate_mesh` tinted by
+   CanQuery off), backdrop as a SurfaceGui of Frames (no uploaded image) with **`ClipsDescendants = true` on the SurfaceGui itself**
+   (a rotated Frame ignores its parents' clipping and a CanvasGroup doesn't clip on a SurfaceGui: 45° shapes on the
+   edge stuck out above the rims of 7 themes until V1.2.1), props by `generate_mesh` tinted by
    SurfaceAppearance Color. The sand's top is at y = 3.5 above `Origin` (the Style parts sit elsewhere, only their
    look is copied): put each prop's bottom at ~3.4, or on the prop it stands on. A prop at 4.4+ floats (Atlantis
    corals, V0.56); check every prop's lowest corner against 3.5 before saving.

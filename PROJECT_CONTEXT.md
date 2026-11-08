@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-08 (V1.2.0: V1.2 complete and published as one update (ROADMAP_V1.2 M0–M7); formatMultiplier shortens the late rebirths' multipliers (x1.2M)).
+> Last updated: 2026-11-08 (V1.2.1: the theme paintings clipped to their backdrop; V1.2.0: V1.2 complete and published as one update (ROADMAP_V1.2 M0–M7)).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -775,7 +775,8 @@ ProjectQuarium/
     changing owner gets its water back; look + children such as a painted backdrop SurfaceGui copied onto the tank),
     `Decor/` cloned into the tank (CanQuery off, low along the back and sides: fish and coins stay visible; props rest
     on the sand, whose top is at y = 3.5 above `Origin`, or sink ~0.1 into it).
-    Backdrops are SurfaceGuis drawn with Frames only (no uploaded image); props are generated meshes. Each theme left
+    Backdrops are SurfaceGuis drawn with Frames only (no uploaded image), `ClipsDescendants` on (a rotated Frame is
+    never clipped by its parents: it poked over the rims, V1.2.1); props are generated meshes. Each theme left
     out the props at risk of moderation (CLAUDE.md §7): no cannons, skulls, swords, bottles, trident,
     torches, flames, smoke, faces; magma is flat Neon veins (a rock ring around a glow read as a campfire).
 - `Workspace.StreamingEnabled = true`. All tanks are within ~130 studs of each other, so streaming does not cull them.
