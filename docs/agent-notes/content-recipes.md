@@ -7,7 +7,7 @@ metadata:
 
 How to add content to the game (moved from ROADMAP.md when V1 was complete, V0.50). Every new design follows
 CLAUDE.md §7 (moderation): describe it to the owner first when its theme is risky, preview locally, upload once.
-Numbers are tuned with `tools/economy-sim.js` (a `--plan <file>` previews them before they go in the config), then
+Numbers are tuned with `tools/economy-sim.js` (its config mirror: `tools/sim/config.js`; a `--plan <file>` previews them before they go in the config), then
 BALANCE.md is updated (CLAUDE.md §0c). Asset quirks: [[fish-asset-pipeline]].
 
 **Every new mesh, sound or music** generated or uploaded from Studio belongs to the owner's user account, while the

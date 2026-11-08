@@ -454,7 +454,7 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 		speedMax: 2.8,
 		hunger: DEFAULT_HUNGER,
 	},
-	// V1.2 (ROADMAP_V1.2 §3.2), species 19, the Aurora Glacier's: a round fox-fish (it replaced the planned Penguin
+	// V1.2, species 19, the Aurora Glacier's: a round fox-fish (it replaced the planned Penguin
 	// Puffer). Income x2 the Mini Leviathan's, Ocean Points x1.6
 	FoxBetta: {
 		displayName: "Fox Betta",
@@ -469,7 +469,7 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 		speedMax: 3,
 		hunger: DEFAULT_HUNGER,
 	},
-	// V1.2 (ROADMAP_V1.2 §3.2), species 20-21, the Sky Archipelago's (rebirth 10, the Sky Egg). Income x2 the previous
+	// V1.2, species 20-21, the Sky Archipelago's (rebirth 10, the Sky Egg). Income x2 the previous
 	// species', Ocean Points x1.6
 	CloudWhale: {
 		displayName: "Cloud Whale",

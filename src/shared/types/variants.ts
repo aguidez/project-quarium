@@ -29,7 +29,7 @@ export interface VariantConfig {
 }
 
 /**
- * Balance (tools/economy-sim.js): a normal fish earns 1 + 1/15 (one coin out of 15 sparkles, x2).
+ * Balance (tools/economy-sim.js, mirror tools/sim/config.js): a normal fish earns 1 + 1/15 (one coin out of 15 sparkles, x2).
  * Anomaly +20 %, Ghost +25 % (14/15 + 6/15), Shiny +35 % (anomaly pace and one coin out of 5
  * sparkling: 1.2 × 1.2 / 1.0667). The rarer, the richer. On average (10 % / 5 % / 1 %) +3.6 %
  * income: first rebirth 28.9 → 27.7 min, the six first species 61.5 → 58.2 min (medians), well
@@ -83,7 +83,7 @@ export const FISH_VARIANTS: Record<FishVariant, VariantConfig> = {
 		rank: 3,
 		oceanPointsMultiplier: 5,
 	},
-	// V1.1.20 (ROADMAP_V1.2 §3.6): rarer than the Shiny (0.2 %, one egg in 500), ~x2 income: coins 1.5x as often, one out
+	// V1.1.20: rarer than the Shiny (0.2 %, one egg in 500), ~x2 income: coins 1.5x as often, one out
 	// of 5 a star coin worth 3 coins: 1.5 x (4/5 + 1/5 x 3) / (1 + 1/15) = x1.97. Night blue, full of tiny stars
 	Galaxy: {
 		displayName: "Galaxy",

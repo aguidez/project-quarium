@@ -196,7 +196,7 @@ export const OCEAN_MILESTONES: readonly OceanMilestone[] = [
 		description: "The title Ocean Guardian above your head, and a whale statue in your aquarium.",
 		reward: { kind: "Cosmetic", cosmetics: ["TitleOceanGuardian", "DecorWhaleStatue"] },
 	},
-	// V1.2 (ROADMAP_V1.2 §6): one step of 2 per rebirth, reached with rebirth 9's release (~13h29)
+	// V1.2: one step of 2 per rebirth, reached with rebirth 9's release (~13h29)
 	{
 		id: "Aquarium27",
 		points: 1500000,
@@ -204,7 +204,7 @@ export const OCEAN_MILESTONES: readonly OceanMilestone[] = [
 		description: "Your aquarium holds 27 fish.",
 		reward: { kind: "Capacity", capacity: 27 },
 	},
-	// Reached during run 9 (~13h57): the variant luck companion (ROADMAP_V1.2 §8), free like the Water Hen
+	// Reached during run 9 (~13h57): the variant luck companion, free like the Water Hen
 	{
 		id: "HermitCrab",
 		points: 2500000,
@@ -226,7 +226,7 @@ export const OCEAN_MILESTONES: readonly OceanMilestone[] = [
 		description: "A portion of your food reserve comes back in 7 seconds.",
 		reward: { kind: "Perk", perk: "FoodRefill3" },
 	},
-	// Rebirth 11 (ROADMAP_V1.2 M5): the tank 31 comes with its release (~19h53), then a cosmetic goal
+	// Rebirth 11: the tank 31 comes with its release (~19h53), then a cosmetic goal
 	{
 		id: "Aquarium31",
 		points: 9000000,
@@ -241,7 +241,7 @@ export const OCEAN_MILESTONES: readonly OceanMilestone[] = [
 		description: "The rims of your aquarium glow with the colours of the northern lights, whatever its theme.",
 		reward: { kind: "Cosmetic", cosmetics: ["FinishAuroraRims"] },
 	},
-	// Rebirth 12 (ROADMAP_V1.2 M6): the tank 33 (the new maximum) with its release, then the last goal of the ocean
+	// Rebirth 12: the tank 33 (the new maximum) with its release, then the last goal of the ocean
 	{
 		id: "Aquarium33",
 		points: 20000000,

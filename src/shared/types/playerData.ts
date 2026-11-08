@@ -47,7 +47,7 @@ export interface PlayerData {
 	 */
 	incubationMultiplier: number;
 	/**
-	 * The Hermit Crab's time on each incubating egg (ROADMAP_V1.2 §8), parallel to `incubating` (same type, same
+	 * The Hermit Crab's time on each incubating egg, parallel to `incubating` (same type, same
 	 * index): when the egg was bought and the seconds of its incubation spent with the crab equipped. Credited by
 	 * syncIncubationCrab from `crabSyncedAt` while `crabEquipped` (the crab's state since then), so it runs offline too.
 	 */
@@ -277,7 +277,7 @@ function incubationOverlap(start: number, hatchAt: number, from: number, to: num
 }
 
 /**
- * Credits the Hermit Crab's time to the incubating eggs (ROADMAP_V1.2 §8): if it was equipped since `crabSyncedAt`,
+ * Credits the Hermit Crab's time to the incubating eggs: if it was equipped since `crabSyncedAt`,
  * every egg gets the part of [crabSyncedAt, now] it spent incubating (the wait once ready doesn't count); then the
  * state follows what is equipped now. DataService.sync runs it on every change (the crab equipped or not), the save's
  * load runs it for the time offline (the crab stays equipped while away, like the Water Hen's speed).

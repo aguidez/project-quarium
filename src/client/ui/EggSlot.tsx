@@ -72,7 +72,7 @@ export interface EggSlotProps {
 	aquariumFull?: boolean;
 	/**
 	 * The Hermit Crab owned and an egg in the slot: the share (0..1) of the soonest egg's incubation spent with it so
-	 * far (playerData getCrabShare), read every frame; its mark shows once above 0 (ROADMAP_V1.2 §8).
+	 * far (playerData getCrabShare), read every frame; its mark shows once above 0.
 	 */
 	crabShare?: () => number;
 	/** The crab's sticker for that mark. */

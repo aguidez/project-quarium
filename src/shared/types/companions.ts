@@ -46,7 +46,7 @@ export const COMPANION_TYPES: Record<CompanionType, CompanionConfig> = {
 		image: "rbxassetid://96894492239649", // design/ui/companions/Companion_Jellyfish.png
 		ability: "Drifts in the water and drops food right above your hungry fish, as soon as they need it.",
 	},
-	// V1.2 (ROADMAP_V1.2 §8): free from the Ocean (2,500,000 points), its own free quest line
+	// V1.2: free from the Ocean (2,500,000 points), its own free quest line
 	HermitCrab: {
 		displayName: "Hermit Crab",
 		icon: "",
@@ -83,7 +83,7 @@ export const JELLYFISH_CHARGES = 2;
 export const JELLYFISH_PELLETS = 2;
 
 /**
- * The Hermit Crab's variant luck (ROADMAP_V1.2 §8): the eggs that incubate with it equipped get x(1 + bonus x the
+ * The Hermit Crab's variant luck: the eggs that incubate with it equipped get x(1 + bonus x the
  * share of their incubation spent with it) on every rare variant's chance, Galaxy included (getCrabLuck in
  * playerData.ts). Its quests (Hermit Crab Pass) raise the bonus (perks.ts crabLuck: x1.35, x1.45, x1.6).
  */

@@ -2,7 +2,7 @@
 // Monte Carlo of one event per catch rate: bars filled (p10 / median / p90), share reaching 1 / 2 / 3 bars, and the
 // variant the next egg hatches with that star power. Then what a 12 h run gets from its starfalls.
 // Usage: node tools/starfall-sim.js [--events 20000] [--luck 1] [--perHour 1.25] [--fourthBar 1.7]
-//   fourthBar: the 4th bar (the Galaxy's, live since V1.1.20; ROADMAP_V1.2 §3.7): what it costs in bars of stars (0 = V1's 3 bars); the
+//   fourthBar: the 4th bar (the Galaxy's, live since V1.1.20): what it costs in bars of stars (0 = V1's 3 bars); the
 //   gauge then keeps filling past 3 bars, a full 4th bar guarantees a Galaxy, a partial one raises its chance
 //   luck: the player's variant luck (Lucky ocean x1.5, the Lucky pass x2); perHour: starfalls an hour of play (one
 //   recurring event every ~12 min, drawn among the recurring ones: 4 of them = 1.25 starfalls an hour)

@@ -9,7 +9,7 @@ import { getOceanPoints, VARIANT_ORDER } from "./variants";
  * coin multiplier and a new aquarium look. Their fish go back to the ocean and earn their Ocean
  * Points. Kept: Fish Index, quests, companions, Ocean Points, features, likes.
  *
- * Balance (BALANCE.md, tools/economy-sim.js; average player collecting ~50% of the coins, rebirthing
+ * Balance (BALANCE.md, tools/economy-sim.js and its mirror tools/sim/config.js; average player collecting ~50% of the coins, rebirthing
  * as soon as it can): rebirth 1 at ~28 min (p10 21, p90 36) gets past the Freshwater Egg (25k);
  * rebirth 2 at ~1h44 (p10 1h31, p90 1h59) gets past the Amazon Egg (150k) and opens the Neon Coral
  * Egg (2.5M, more than its price), the last species at ~2h31. Its x8 is steep on purpose: the run
@@ -78,9 +78,9 @@ export const REBIRTHS: readonly RebirthConfig[] = [
 	{ price: 1e12, multiplier: 2500, startMoney: 300, theme: "CrystalCaverns" },
 	// The last aquarium of V1
 	{ price: 2.2e12, multiplier: 8000, startMoney: 300, theme: "CosmicSanctuary" },
-	// V1.2 (ROADMAP_V1.2 §3.4, tuned with tools/balance-v1.2-plan.js): rebirth 9 at ~13h37
+	// V1.2 (tuned with the simulator): rebirth 9 at ~13h37
 	{ price: 200e12, multiplier: 25000, startMoney: 300, theme: "AuroraGlacier" },
-	// Rebirth 10 at ~16h28: x4.8 only (an even rebirth stays under ~1.6x the egg its run farms, ROADMAP_V1.2 §2)
+	// Rebirth 10 at ~16h28: x4.8 only (an even rebirth stays under ~1.6x the egg its run farms)
 	{ price: 640e12, multiplier: 120000, startMoney: 300, theme: "SkyArchipelago" },
 	// Rebirth 11 at ~19h53
 	{ price: 3e15, multiplier: 375000, startMoney: 300, theme: "RainbowDreamland" },

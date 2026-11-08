@@ -95,7 +95,7 @@ export const COSMETICS: Record<CosmeticId, CosmeticConfig> = {
 		displayName: "Size Collector",
 		description: "A title for those who hatched a Huge fish of 18 species.",
 	},
-	// V1.2 (ROADMAP_V1.2 §6, §7)
+	// V1.2
 	TitleOceanSovereign: {
 		kind: "Title",
 		displayName: "Ocean Sovereign",
@@ -187,7 +187,7 @@ export const COSMETICS: Record<CosmeticId, CosmeticConfig> = {
 		description: "A pearly finish on the rims of your aquarium, whatever its theme. One rims finish shows at a time.",
 		group: "Rims",
 	},
-	// V1.2 (ROADMAP_V1.2 §6, Ocean 14,000,000): the rims glow and drift through the northern lights' colours (client)
+	// V1.2 (Ocean 14,000,000): the rims glow and drift through the northern lights' colours (client)
 	FinishAuroraRims: {
 		kind: "Finish",
 		displayName: "Aurora Rims",

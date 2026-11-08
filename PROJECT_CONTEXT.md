@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-08 (V1.2.11: the Ocean Creator title with twinkling golden sparkles, mock-up C; V1.2.8: the creator's title).
+> Last updated: 2026-11-08 (V1.2.11; simulator in segments of 3 rebirths, ROADMAP_V1.2 removed, context trimmed).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -16,10 +16,11 @@ coins. Around that core loop:
   and daily / weekly boards rewarded by a coin boost;
 - companions (the Snail picks up coins on the sand, the Swordfish in the water, the Pelican and the Jellyfish feed, the
   Water Hen speeds up hatching, the Hermit Crab brings rare variants to the eggs that incubate with it);
-- fish variants: every hatch can be an Anomaly (10 %), a Ghost (5 %) or a Shiny (1 %), rarer and richer;
+- fish variants: every hatch can be an Anomaly (10 %), a Ghost (5 %), a Shiny (1 %) or a Galaxy (0.2 %), rarer and
+  richer; and a Size score (-15…+15) that scales the fish and its coins;
 - a Fish Index (collection): one row per species, one column per variant, plus the easter eggs;
 - the Ocean: release fish (the player picks the kind and the variant) for Ocean Points, a progression score that
-  unlocks milestones (companions, upgrades, tank size 10 → 25, a second incubator, variant luck, cosmetics);
+  unlocks milestones (companions, upgrades, tank size 10 → 33, a second incubator, variant luck, cosmetics);
 - events: recurring ones drawn by each server every 5–15 min (Island Breeze: a sunny music event, coins fall on the
   beat; the abyssal raid: the world goes dark, a lantern fish steals coins; the UFO night: a UFO beams the fish up one
   by one and drops them back mutated; the starfall: stars fall into the tanks, clicked they fill a star gauge that
@@ -39,11 +40,9 @@ coins. Around that core loop:
 - easter eggs: secret fish hidden in every egg (the French Fish), made by an event (the Alien Fish of the UFO
   night) or brought by a like (Sugar), their own Fish Index category.
 
-18 species (+ 3 secret), 12 eggs, 8 rebirths: the whole V1 content, all of it open since
-the release (V1.0.0). The testers who finished the alpha (V0.60) keep its "Alpha Pioneer" title; nobody earns it
-any more. **`BALANCE.md`** holds the expected progression
-(rebirth 1 ~19 min … all eighteen species ~12h20 for a player of 1 h a day), every number and the design rules.
-How to add content: `docs/agent-notes/content-recipes.md`. **`ROADMAP_FIXES.md`**: small fixes noted along the way (and the leftovers of the V1.1 animation revamp). **`ROADMAP_V1.2.md`**: the plan of the next content update (4 rebirths, ~13 h more).
+24 species (+ 3 secret), 16 eggs, 12 rebirths (V1 + the V1.2 content). **`BALANCE.md`** holds the expected
+progression (rebirth 1 ~17 min … all 24 species ~25h for a player of 1 h a day), every number and the design rules.
+How to add content: `docs/agent-notes/content-recipes.md`. **`ROADMAP_FIXES.md`**: small fixes noted along the way.
 
 ---
 
@@ -74,11 +73,7 @@ ProjectQuarium/
 ├─ PROJECT_CONTEXT.md        This file
 ├─ RELEASE_NOTES.md          Every change of the game, patch by patch, newest on top, never deleted
 ├─ BALANCE.md                The balance: expected progression, live numbers, design rules, V1 design, history
-├─ ROADMAP_FIXES.md          Small fixes to plan (the K-pop idol's texture and rig, the other tanks' fish badges, Blender
-│                            on the Windows PC, optional V1.1 leftovers)
-├─ ROADMAP_V1.2.md           The next content update, planned (not built): rebirths 9–12 and 4 aquariums, 4 eggs,
-│                            species 19–24, tank 33, a size score per fish, a fifth variant (starfall's 4th bar),
-│                            food reserve upgrades, new quests / milestones, the Hermit Crab
+├─ ROADMAP_FIXES.md          Small fixes to plan
 ├─ default.project.json      Rojo mapping (see §1)
 ├─ .mcp.json                 Project MCP servers (Roblox_Studio, FigCraft, Blender), started by `node tools/mcp/*.js` on any OS
 ├─ workspace.local.example.json  Template of workspace.local.json (git-ignored): FigCraft folder / port, wgpu backend,
@@ -89,38 +84,12 @@ ProjectQuarium/
 │                            testing, lobby decor, moderation, player stats), index in its README
 ├─ design/meshes/           OBJ source of the 25 animated meshes (exported V0.60.5; Sugar V0.60.14) + manifest.json
 │                            (template, old id)
-├─ design/previews/          Images shown to the owner (Studio captures, mock-ups): crab-sax-preview.jpg (mock-
-│                            up), crab-sax-carry-1-right / -2-middle / -3-left.jpg (Island Breeze's guest dancing),
-│                            admin-panel-mockup.png / admin-panel-ingame.jpg (the admin panel), admin-aquariums-
-│                            mockup.png / admin-aquariums-list-ingame.jpg / -tank-ingame.jpg (its Aquariums tab),
-│                            admin-servers-mockup.png / admin-servers-ingame.jpg (its Servers tab),
-│                            star-gauge-mockup.png
-│                            (the starfall's gauge and the star power pill), star-power-pill-ingame.jpg,
-│                            leaderboards-mockup.png / leaderboards-ingame.jpg, leaderboard-titles-mockup.png /
-│                            leaderboard-titles-ingame.jpg (the nameplates' four tiers), food-reserve-mockup.png /
-│                            food-reserve-ingame.jpg / -empty-ingame.jpg / -onboarding-ingame.jpg (the food reserve),
-│                            phone-ui-lobby / -tank / -fish-index / -ocean.jpg (the UI on a phone, red box = 844 × 390),
-│                            sound-control-ingame.jpg (the sound control open, at 40),
-│                            shop-zone-idle.jpg / shop-zone-active.jpg (the east hut's mat, alone / stood on),
-│                            pink-fish-candidates.jpg (Sugar's three candidates, #3 chosen), sugar-in-tank.jpg /
-│                            sugar-popup.jpg / sugar-fish-index.jpg
+├─ design/previews/          Images shown to the owner: FigCraft mock-ups (*-mockup.png) and Studio captures
+│                            (*-ingame.jpg, phone-ui-*.jpg: the UI on a phone, red box = 844 × 390); names say what
 ├─ design/ui/
-│  ├─ food-reserve.figcraft  The food reserve HUD (FoodReserve_Mockup: in the tank view, in the onboarding's Feed step,
-│  │                         full / refilling / empty), built by food-reserve.build.js (figcraft-cli; exports
-│  │                         design/previews/food-reserve-mockup.png)
-│  ├─ leaderboards.figcraft  The lobby leaderboards (Leaderboards_Mockup: the three signs on the beach, Board_ocean /
-│  │                         _income / _time faces; LeaderboardTitles_Mockup: the nameplates, Plate_<board>_<tier>),
-│  │                         built by leaderboards.build.js (figcraft-cli; exports both previews)
-│  ├─ size.figcraft          The Size score (Size_Mockup: the hatch reveal's pill in four cases, the Ocean panel row's
-│  │                         Size chips, the Fish Index row's best Size), built by size.build.js (figcraft-cli; exports
-│  │                         design/previews/size-mockup.png)
-│  ├─ starfall.figcraft      The starfall's star gauge (StarGauge_Mockup: in the tank view, its states, the star power
-│  │                         pills), built by
-│  │                         starfall.build.js (figcraft-cli; exports design/previews/star-gauge-mockup.png)
-│  ├─ star-gauge-4.figcraft  The gauge's 4th bar, the Galaxy's (StarGauge4_Mockup: 2.4 / 3.4 / 4 bars), built by
-│  │                         star-gauge-4.build.js (exports design/previews/star-gauge-4-mockup.png)
-│  ├─ admin-panel.figcraft   The admin panel (AdminPanel_Mockup, AdminAquariums_Mockup: the Aquariums tab), built by
-│  │                         admin-panel.build.js (run through figcraft-cli; it also exports both previews)
+│  ├─ <name>.figcraft + <name>.build.js  One mock-up per feature, built by its script through figcraft-cli (which
+│  │                         also exports its design/previews/*-mockup.png): food-reserve, leaderboards (signs and
+│  │                         nameplates), size, starfall + star-gauge-4 (the gauge, its Galaxy bar), admin-panel
 │  ├─ shopbar.figcraft       FigCraft source of the older UI frames: OnboardingCard, RewardPopup, CapacityPlaque,
 │  │                         EventBanner(Abyss), QuestPanel, CompanionPanel, OceanPanel / OceanCoach / PanelCoach,
 │  │                         LikeBoard / LikeBoostPill, LoadingScreen / TailSprite, RebirthPanel, OwnerPlate,
@@ -169,20 +138,18 @@ ProjectQuarium/
 ├─ design/rigs/work/        Rig work files (exported textures, .blend, render frames): git-ignored
 ├─ tools/local-config.js     Reads workspace.local.json (+ UPPER_SNAKE env overrides), finds the Roblox fonts folder
 ├─ tools/check-setup.js      `npm run doctor`: checks Node, packages, Rojo version, Studio MCP, fonts, FigCraft, Blender, uv, Blender MCP
-├─ tools/economy-sim.js      Monte Carlo balance simulator (`npm run sim`): mirrors the economy config (keep it in sync);
-│                            reports each step's median / p10 / p90, species discovery, Ocean milestones, income and Ocean
-│                            Points per checkpoint. Options: `--players n`, JSON overrides (coinBoost / oceanBoost /
-│                            hatchScale: gamepass or "/speed" estimates; P.hoursPerDay: 1 = the reference player, 0 = one
-│                            long session), `--plan <file>` to preview a planned economy (P.sizeMax: the planned Size
-│                            score). Copy its results into BALANCE.md
-├─ tools/balance-v1.2-plan.js  The V1.2 plan for `economy-sim --plan` (ROADMAP_V1.2 M1): V1 + rebirths 9–12, eggs 13–16,
-│                            species 19–24, tank 33, Size score, Galaxy; removed once V1.2 is in the game
+├─ tools/economy-sim.js      Balance simulator (`npm run sim`), command line over tools/sim/; played in segments of 3
+│                            rebirths, each cached and replayed only when its numbers change (usage: BALANCE.md top)
+├─ tools/sim/                Its modules: config.js (THE mirror of the economy config, CLAUDE.md §0c), player.js (one
+│                            player, resumable after a rebirth), quests.js, rolls.js (seeded draws), report.js,
+│                            segments.js (slices + fingerprints), pool.js / worker.js (worker_threads)
+├─ tools/.sim-cache/         The saved segments (git-ignored, re-creatable)
 ├─ tools/companion-sim.js    AFK simulator: share of fish-time weak with a feeder (Pelican, Jellyfish) per tank size,
 │                            share of coins a collector (Snail, Swordfish) picks up per coin rate; mirrors CompanionService,
 │                            FishService hunger, FoodService, CoinService
 ├─ tools/starfall-sim.js     The starfall's star gauge (mirrors shared/types/stars): bars per share of stars caught, the
-│                            next egg's variant, what a 12 h run gets (`--luck`, `--perHour`, `--fourthBar`: the V1.2
-│                            plan's Galaxy bar); results in BALANCE.md §3
+│                            next egg's variant, what a 12 h run gets (`--luck`, `--perHour`, `--fourthBar`: the Galaxy
+│                            bar); results in BALANCE.md §3
 ├─ tools/share-assets.js     `npm run share-assets <id...>`: grants the group's game (Open Cloud asset-permissions,
 │                            Universe / Use) the use of assets of the owner's account (private audio)
 ├─ tools/obj-receiver.js     Local receiver of the OBJ (and .b64 texture) files a Studio script exports, on
@@ -227,8 +194,8 @@ ProjectQuarium/
    │  │                      WeakBubble = a weak fish's bubble, CoinCollect / CompanionCoin = the coin chime); SfxConfig
    │  │                      `region` (PlaybackRegion) and `fallback` (played when the id fails to preload, AudioController)
    │  └─ types/
-   │     ├─ fish.ts          FishType, FishRarity (Common … Mythic, 4 species a label since V1.1.19: Mythic waits for V1.2's
-   │     │                   species; Secret = easter eggs), CoinType, HungerState
+   │     ├─ fish.ts          FishType, FishRarity (Common … Mythic, 4 species a label; Secret = easter
+   │     │                   eggs), CoinType, HungerState
    │     │                   (Satiated/Hungry/Weak, no death), FISH_TYPES (income, interval, coin, rarity, oceanPoints,
    │     │                   cannibal?, growth, hunger, easterEgg?: EasterEggConfig {hatchChance, likeChance,
    │     │                   incomeShare, bestFishShare, lifetime, leaveMessage, source, perk, screamInterval}),
@@ -241,7 +208,7 @@ ProjectQuarium/
    │     │                   VARIANT_ORDER, GHOST_COIN_MULTIPLIER, STAR_COIN_MULTIPLIER (3), GALAXY_PASS_LUCK (3),
    │     │                   RECOLOURED_VARIANTS (Anomaly, Shiny, Galaxy), getLuckFor, rollVariant(rng, luck, galaxyLuck),
    │     │                   formatVariantChance(variant, luck, galaxyLuck), getOceanPoints, getSpecialCoinOdds, getVariantIncomeMultiplier
-   │     ├─ size.ts          The Size score (V1.1.16, ROADMAP_V1.2 §3.5): SIZE_MAX (15), SizeTier / SIZE_TIERS (Tiny,
+   │     ├─ size.ts          The Size score: SIZE_MAX (15), SizeTier / SIZE_TIERS (Tiny,
    │     │                   Small, Normal, Big, Huge, Giant, Titan: their lowest score), rollSize (triangular: two
    │     │                   dice), toSize (sanitising), getSizeMultiplier (1 + size / 100: body and coins), getSizeTier,
    │     │                   formatSize ("+12%")
@@ -261,7 +228,7 @@ ProjectQuarium/
    │     │                   upgrades, its perks): the line under its ability on the companion card
    │     ├─ customization.ts ThemeChoice (a reached theme or "Auto"), TitleChoice (a title held, "Auto" = the best,
    │     │                   "None"); getUnlockedThemes / getThemeOrder, getDisplayedTheme, isHideable (Decor / Finish),
-   │     │                   isCosmeticShown (finishes: Pearl rims and, V1.2, Aurora and Galaxy rims, grouped "Rims": one shows); titles: TitleData, getOwnedTitles (leaderboard titles held, best rank first,
+   │     │                   isCosmeticShown (finishes: Pearl, Aurora and Galaxy rims, grouped "Rims": one shows); titles: TitleData, getOwnedTitles (leaderboard titles held, best rank first,
    │     │                   then the earned ones in TITLE_ORDER), getBestTitle, getTitleRank, getDisplayedTitle
    │     ├─ cosmetics.ts     CosmeticId / COSMETICS (kind Title / Decor / Finish; `leaderboard` on the three leaderboard
    │     │                   titles TitleOceanLegend / TitleTankTycoon / TitleDevotedKeeper, never in PlayerData.cosmetics;
@@ -332,7 +299,7 @@ ProjectQuarium/
    │     │                   EVENT_ATTRIBUTES, LURKING_ATTRIBUTE, ADMIN_EVENT_ORDER, getActiveEvent,
    │     │                   getEventCoinMultiplier(owner), EventSource, getRecurringEvents, getRecurringChance,
    │     │                   EVENT_IMMUNE_ATTRIBUTE + isEventImmune (tutorial)
-   │     ├─ rebirths.ts      REBIRTHS (price, multiplier, start money, theme; 12 since V1.1.24), AQUARIUM_THEMES (Basic + the 12 themes, AuroraGlacier, SkyArchipelago, RainbowDreamland and HeartOfTheOcean the V1.2 ones),
+   │     ├─ rebirths.ts      REBIRTHS (price, multiplier, start money, theme; 12), AQUARIUM_THEMES (Basic + the 12 themes),
    │     │                   getNextRebirth, getRebirthMultiplier, getAquariumTheme, getRebirthOceanPoints, formatMultiplier ("x2.5", "x8,000", "x1.2M")
    │     ├─ likes.ts         Like rules (1 per hour given, x2 coins for 5 min, restarted by each like), board offset, helpers
    │     ├─ onboarding.ts    Onboarding steps + rules (what is allowed / free at each step), ONBOARDING_REWARD,
@@ -368,7 +335,7 @@ ProjectQuarium/
    │     ├─ AquariumService  Registers Studio tanks, assigns one per player, owner nameplate (OwnerPlate SurfaceGui on the
    │     │                   Base), runtime folders (Fish/Food/Coins/Companions), focus reports ("SetFocus") + isTending /
    │     │                   isAtOwnAquarium; dresses each tank in its owner's displayed theme (polled every second; free
-   │     │                   tanks Basic), a rims finish (Pearl: pearly F3ECF7 rims, Reflectance 0.3; Aurora / Galaxy, V1.2: Neon
+   │     │                   tanks Basic), a rims finish (Pearl: pearly F3ECF7 rims, Reflectance 0.3; Aurora / Galaxy: Neon
    │     │                   rims tagged `GlowRim` with attribute `RimFinish`, coloured by the clients; any theme; the rarest wins in a broken save) and the
    │     │                   decor cosmetics (DecorTemplate clones at DECOR_SLOTS), rebuilt when any of them changes; `decorCovers`
    │     │                   (each decor piece's footprint and top in the tank's frame, from its visible parts);
@@ -450,12 +417,12 @@ ProjectQuarium/
    │     ├─ OceanService     ReleaseFish (+ Ocean Points), ClaimOceanReward, FinishTutorial (any feature's tutorial),
    │     │                   credits an easter egg fish that leaves on its own (points, popup, its leaveMessage)
    │     ├─ RebirthService   "Rebirth" intent (needs the "Rebirth" feature): fish to the ocean, run reset, rebirths + 1, popup
-   │     ├─ StatsService     Play statistics (calibration, ROADMAP M7): every 1 s counts play / tending time (tending =
+   │     ├─ StatsService     Play statistics (calibration): every 1 s counts play / tending time (tending =
    │     │                   AquariumService.isTending + onboarding done: the simulator's play time) and stamps the
    │     │                   milestones; counts coins (CoinService callbacks), meals (onFishFed), quests (onQuestClaimed),
    │     │                   likes (onLikeGiven); "ReportClientStats" action (once a minute: platform, fps, memory;
    │     │                   validated, ≥ 45 s apart). Creator Dashboard (AnalyticsService, all in pcall):
-   │     │                   onboarding funnel, one-time "Progression" funnel (Onboarding:Done, Rebirth1–8, AllSpecies),
+   │     │                   onboarding funnel, one-time "Progression" funnel (Onboarding:Done, Rebirth<n>, AllSpecies),
    │     │                   custom events MilestoneMinutes, SessionMinutes / SessionMinutesInGame, CoinPickupPercent,
    │     │                   DailyQuestClaimed / WeeklyQuestClaimed; legacy saves stay out of the funnels, the owner's test
    │     │                   profiles (testSpeedUsed / testNoPasses) and the staff's (stats.staff = isAdmin, set at each
@@ -556,32 +523,16 @@ ProjectQuarium/
       │  ├─ FishAnimationController  The beat puffs of the music events (every fish, event guest and the Swordfish), and the
       │  │                   fallback of a template without `Rig = "Bones"` (warned once): a local fish sways as a whole
       │  │                   on a local Weld, an event guest (the K-pop idol for now) only puffs
-      │  ├─ FishRigController  Bone swim (V1.1) of the fish whose template has `Rig = "Bones"`: turns the bones of
-      │  │                   their skinned `Mesh` (rig_fish.py names: Head, Spine<n>, Tail1/2, FinTop/Bottom, FinL/R, Jaw,
-      │  │                   Ear*) with V1's beats, the spine's yaw by each bone's t shared out over the chain, Ear* bones
-      │  │                   flopping and trailing the turns, each fish at its own phase. Behaviours from its real speed
-      │  │                   against its species' wandering speed (FISH_TYPES speedMin / Max): rest (0×: slow small beats,
-      │  │                   pectorals hover), cruise (1×), sprint (2×: faster, wider); a turn bends the spine against
-      │  │                   the yaw rate; Weak: fins droop, tail sags; Asleep: V1's lazy swim. Moments from the
-      │  │                   local attributes: Hunger back to Satiated (bite + joy wiggle), GrowthStage up (fins flare,
-      │  │                   tail sweep), Exit "Released" (fast strong strokes) / "Eaten" / "Abducted" (struggle). The
-      │  │                   Jellyfish (rig_jellyfish.py): Bell (bob + sway), Rim<side> squeeze, Tent<side><1-3> trail,
-      │  │                   V1's 0.8 pulses/s. The Snail (rig_snail.py): SnailHead / SnailTail stretch the body from
-      │  │                   its pace, Shell rocks, EyeL / EyeR sway (each motion on a phase of its own). The Pelican
-      │  │                   and the Water Hen (rig_boxes.py: Torso, Head, WingL / R, TailFan; the Pelican's Neck, Beak,
-      │  │                   LegL / R): breath, nod, wing ruffle, tail flick; the Pelican's lean (its Body's forward
-      │  │                   tilt / PELICAN_LEAN) stretches the neck, dips the beak, opens the wings; the Hen rocks /
-      │  │                   nods / bobs on its Torso, faster while it paddles (> 0.4 studs/s on the flat). A fish whose
-      │  │                   FishConfig.stroke is "Vertical" (the Cloud Whale) beats its spine wave around the side axis,
-      │  │                   its turns still bend it sideways. The Pegasus Seahorse (rig_boxes.py, found by its `Curl`
-      │  │                   bone: Torso rock + bob, Head nod, WingL / R flap on the pectoral beat, Curl sway). The Hermit
-      │  │                   Crab (rig_boxes.py: LegsL / R shuffle on the crawl phase, ClawL / R pinch sideways, Head nod;
-      │  │                   its shell on the root, never moved). The Sea Turtle (rig_boxes.py, found by its `FlipperFL`
-      │  │                   bone: FlipperFL / FR row, mostly a sweep with a small beat, their FlipperTip* children follow,
-      │  │                   FlipperBL / BR steer, Head nods; no Torso drive: the shell never moves). The Baby Kraken
-      │  │                   (found by `ArmsL`: Torso rock + bob, ArmsL / R sway); every frame
-      │  │                   within 60 studs, every 2nd to 110, every 4th beyond, frozen off screen; no budget
-      │  ├─ AuroraRimsController  The glowing rims cosmetics (V1.2): drifts the Neon colour of every rim tagged `GlowRim`
+      │  ├─ FishRigController  Bone swim of the templates with `Rig = "Bones"`: turns the bones of their skinned `Mesh`
+      │  │                   (rig_fish.py names: Head, Spine<n>, Tail1/2, FinTop/Bottom, FinL/R, Jaw, Ear*) with V1's
+      │  │                   beats, each fish at its own phase; rest / cruise / sprint from its speed vs its species'
+      │  │                   (speedMin / Max), turns bend the spine, Weak droops, Asleep swims lazily; moments from the
+      │  │                   local attributes (fed, GrowthStage up, Exit Released / Eaten / Abducted). Companions and
+      │  │                   box rigs are found by a bone name (Jellyfish Bell, Snail SnailHead, Pelican / Water Hen
+      │  │                   Torso, Pegasus `Curl`, Hermit Crab LegsL, Sea Turtle `FlipperFL`, Baby Kraken `ArmsL`);
+      │  │                   FishConfig.stroke "Vertical" (Cloud Whale) waves around the side axis. Every frame within
+      │  │                   60 studs, every 2nd to 110, every 4th beyond, frozen off screen
+      │  ├─ AuroraRimsController  The glowing rims cosmetics: drifts the Neon colour of every rim tagged `GlowRim`
       │  │                   (AquariumService.applyTheme tags them) through its `RimFinish` palette (Aurora: the northern
       │  │                   lights; Galaxy: night blue, violet, pink), 20 updates a second
       │  ├─ TitleSparklesController  Twinkles the creator title's sparkles (Frames tagged `TitleSparkle`): each grows from
@@ -712,7 +663,7 @@ ProjectQuarium/
          │                   colour + badge drawn in game, name, text, button); prices from GetProductInfo (cached):
          │                   "R$ <price>", "SOON" when off sale (or no id), "OWNED"
          ├─ RebirthPanel     Multiplier hero, what is lost / earned (Ocean Points preview), progress, 2-click confirm;
-         │                   after rebirth 8: "Voyage complete! More aquariums arrive with the next update!"
+         │                   after the last rebirth: "Voyage complete! More aquariums arrive with the next update!"
          ├─ AquariumPanel    Customization: THEME cards (Automatic, then every theme in rebirth order, the ones not reached
          │                   locked), DECOR & FINISHES cards with a SHOWN / HIDDEN switch, TITLE buttons (getOwnedTitles; a
          │                   leaderboard title with its rank: "OCEAN LEGEND #2"); scrolls past 470 px. The Customize button
@@ -730,18 +681,12 @@ ProjectQuarium/
 
 - **`Workspace.Lobby`**: 6 `Aquarium` models (Aquarium1–6 at x = −64 / 0 / 64, z = ±16). Each has a PrimaryPart
   `Base`, an `AquariumWater` part and the Studio `Decorations` (basic theme, removed at runtime). Beach decor, the
-  `LobbySpawn` (x 95.5, its sun decor with it), the `WelcomeSign` at the north end (108, 0, 64), and two identical fishing huts, the shop, at
-  both ends of the central aisle: `FishingHutEast` (113, 0, 0, facing −X) and `FishingHutWest` (−113, 0, 0, facing +X).
-  Each: `Hut` (driftwood shack, counter window), `Fisherman` (tag `ShopKeeper`, PrimaryPart its MeshPart, no
-  collision), `SignAnchor` (a BillboardGui "SHOP" plate), `ShopZone` (tag `ShopZone`: invisible, non-colliding Part,
-  9 × 3.2 studs, its top face on the floor 6.7 studs in front of the fisherman). Layout constraints: `docs/agent-notes/lobby-decor-constraints.md`.
-  `Leaderboards` (folder): an alcove of three signs in the north-west corner, turned 30° from the north fence toward
-  the middle of the lobby (along the corner's diagonal, open to players coming from either side): `OceanPointsBoard`
-  (centre, ground (−103, 0, 67), screen 11 studs wide), `IncomeBoard` (north-east, the viewers' left) and
-  `PlayTimeBoard` (south-west), 8 wide, turned 35° toward the viewers. 4.8 studs from the west fence, 2.5 from the
-  north one, 3.5 west of the line where they would start to cover Aquarium4 in its 2.5D view. Each: tag `Leaderboard`, attribute `Board`, PrimaryPart `Screen` (its Front face carries the board; keep
-  the 440 : 540 aspect), whitewashed planks, driftwood trims, posts with rope and white caps, a lobby Starfish /
-  Seashell clone on top (`Topper`). Parts only, nothing uploaded.
+  `LobbySpawn`, the `WelcomeSign`, two identical fishing huts (the shop) at both ends of the central aisle,
+  `FishingHutEast` / `FishingHutWest`: each a `Hut`, a `Fisherman` (tag `ShopKeeper`), a `SignAnchor` ("SHOP") and a
+  `ShopZone` (tag `ShopZone`, invisible floor pad in front of him). `Leaderboards` (folder): three signs in the
+  north-west corner (`OceanPointsBoard` in the middle, `IncomeBoard`, `PlayTimeBoard`), each tagged `Leaderboard`,
+  attribute `Board`, PrimaryPart `Screen` (its Front face carries the board, keep the 440 : 540 aspect), parts only.
+  Positions and layout constraints: `docs/agent-notes/lobby-decor-constraints.md`.
 - **Template layout** (every model below): invisible root (`Body`; `Hitbox` x1.25 for coins) + welded `Mesh`
   MeshPart, head / front toward −Z, texture in a **SurfaceAppearance** (tinted by its `Color` when needed), built at
   the right size (never `ScaleTo`: CompanionService tweens back to scale 1). Generated meshes, ≤ ~4k triangles.
@@ -750,19 +695,12 @@ ProjectQuarium/
   it, same Size / CFrame / SurfaceAppearance / WeldConstraint to `Body` as the static mesh it replaced. `ScaleTo`
   scales the bones too; a change of `Size` alone leaves them where they were, so a template's bones must match its
   `Size` (swap_template.luau's `fitBones` places them at mesh-space position x Size / MeshSize; without it the mesh
-  crumples, V1.1.1 to V1.1.9); the beat puff's short Size change is fine. Converted so far:
-  GoldenGuppy, BlueNeon, ZebraDanio, RedTetra, Clownfish, FlameGourami, SilverAngelfish, ImperialDiscus, FrenchFish,
-  Catfish, PirateFish (a new model since V1.1.3, its tricorn rigid on the head), BlueTang, BabySunfish, Lanternfish,
-  Lionfish, Dragonfish (7-bone spine), WolfDogfish (the Husky Dogfish), BunnyShark (EarL / EarR), MiniLeviathan (rigged
-  in its own space, the template keeps its -30° pitch), FoxBetta (V1.2, EarL / EarR), CloudWhale (V1.2, vertical stroke, its cloud
-  rigid), PegasusSeahorse (V1.2, a box rig), KittyKoi (V1.2, EarL / EarR, no jaw), SeaTurtle (V1.2, a box rig, shell rigid), BabyKraken (V1.2, a box rig): every species of the 12 aquariums, plus Sugar, AlienFish and the
-  abyss `LanternFish` (EventFish; work files `AbyssLantern`; its stalk rigid under the welded lit Lure, no jaw). Still
-  without bones: the K-pop idol (its template lost its texture, see §4: it only puffs on the beat until it is rigged)
-  and the UFO (a ship the server glides, spins and tilts: no rig needed, tag `Ufo`, never a fish). The Swordfish companion too
-  (`Assets.Companions`, no jaw: its bill; FishRigController tracks `Companion` models with `Rig`), and every other
-  companion on its own rig: Jellyfish, Snail, Pelican, WaterHen, HermitCrab (V1.2); the shop's Fisherman (both huts' `body_geom`, no
-  `Rig` attribute: ShopKeeperController finds his bones) (rig settings per species in design/rigs/<Fish>.json; ids in design/meshes/manifest.json:
-  `rigModelId`, `rigMeshId`, `staticMeshId`).
+  crumples); the beat puff's short Size change is fine. On bones: every species, the three easter eggs, the abyss
+  `LanternFish`, every companion and the shop's Fisherman (no `Rig` attribute: ShopKeeperController finds his bones);
+  oddities: MiniLeviathan rigged in its own space (template pitched -30°), box rigs (rig_boxes.py) for the Pegasus
+  Seahorse, Sea Turtle and Baby Kraken, the Cloud Whale's vertical stroke. Without bones: the K-pop idol (lost its
+  texture, ROADMAP_FIXES: only puffs on the beat) and the UFO (a ship, tag `Ufo`). Rig settings per species in
+  design/rigs/<Fish>.json; ids in design/meshes/manifest.json (`rigModelId`, `rigMeshId`, `staticMeshId`).
 - **`ServerStorage.Assets`**:
   - `Fish/` (tag `FishTemplate`, attr `FishType`): the 24 species + `FrenchFish`, `AlienFish` and `Sugar` (no
     FishVariants).
@@ -780,15 +718,11 @@ ProjectQuarium/
     meshes come with their front on local −X: rotated so they face the glass.
   - `EventFish/` (tag `EventFishTemplate`, attr `EventType`): `KpopIdol` (Kpop), `LanternFish` (Abyss: near-black
     anglerfish, welded parts lit / faded by the client: `Lure` and per eye an `EyeShell`, a red Neon `Eye` and a
-    `Pupil`), `Ufo` (Ufo: silver saucer, root `Body` 8 × 4 × 8), `SaxCrab` (Island: a coral crab holding a golden
-    saxophone at its side, 54 Parts, no mesh, nothing uploaded; invisible anchored `Body` 6.3 × 3.5 × 3.7, face toward
-    −Z; Motor6D `Dance` Body → `Hips` (the crab's 27 parts welded to it, pivot at the bottom of the shell), Motor6D
-    `Sway` Hips → `SaxRoot` (saxophone and claws, pivot at their centre; Attachments `Grip1` / `Grip2` at
-    the claws' centres) and two Motor6D `Arm` Hips → each arm (pivot at the shoulder, ObjectValue `Grip` → its
-    Attachment); no `Mesh` MeshPart, so no swim deformation or beat puff). The saxophone has no mouthpiece and stays away from the face (moderation,
-    CLAUDE.md §7).
+    `Pupil`), `Ufo` (Ufo: silver saucer, root `Body` 8 × 4 × 8), `SaxCrab` (Island: a coral crab with a golden saxophone, 54
+    Parts, nothing uploaded; Motor6D `Dance` Body → `Hips`, `Sway` Hips → `SaxRoot`, two `Arm` Motor6Ds with a `Grip`
+    ObjectValue each; no `Mesh`, so no swim or beat puff; the sax has no mouthpiece and stays away from the face, CLAUDE.md §7).
   - `Companions/` (tag `CompanionTemplate`, attr `CompanionType`): `Snail`, `Pelican`, `WaterHen`, `Swordfish`,
-    `Jellyfish`, `HermitCrab` (V1.2); `Lobby/` (decor).
+    `Jellyfish`, `HermitCrab`; `Lobby/` (decor).
   - `Food/` (tag `FoodTemplate`, attr `FoodLook`; a single anchored MeshPart, its size is the food's): `Shrimp`.
   - `LikeBoards/LikeBoard` (tag `LikeBoardTemplate`): driftwood lectern, PrimaryPart `Root` at ground level, front
     −Z, invisible `Board` part whose Front face carries the counter (SurfaceGui density = BOARD_CANVAS_WIDTH / the
@@ -983,7 +917,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   (surface as pickup height), 0.95x the Snail's speed across the tank, dives / climbs at 6 studs/s, grabs within its
   reach (perks: getSwordfishStats; the reach also covers the gap to the closest point its body may go), cruises at
   2 studs/s otherwise. **Jellyfish**: drifts in the top 35 % of the water; on demand like the Smart Pelican, swoops over
-  the hungriest fish and releases its pellets 1.4 studs apart (getJellyfishStats). **Hermit Crab** (V1.2): strolls on
+  the hungriest fish and releases its pellets 1.4 studs apart (getJellyfishStats). **Hermit Crab**: strolls on
   the sand with long rests (HERMIT_CRAB_STROLL_SPEED); its ability is EggService's luck by egg (playerData
   getCrabLuck), shown on the egg slot as a crab mark with the share of the soonest egg's incubation (EggSlot CrabMark).
 - **Quests.** `QuestService.addProgress(stat, amount, subject)` handles the counters (CoinMoney excludes the
@@ -998,8 +932,8 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   `requires` it (`refreshStoryLines`, also run on load and every 5 s, so a `requiresCompanion` line shows up within
   5 s). Start (Story1 "Coin Collector" → the Snail) opens Ocean (Story2 "Full House" → the Ocean feature), Rebirth
   (Story9 "Saving Up": gauge MoneyHeld = REBIRTHS[0].price, written out because rebirths.ts can't be imported by
-  quests.ts → the "Rebirth" feature, then the 16 Voyage quests: a signature species or a rebirth per aquarium, to
-  "Master Aquarist") and Hatchery; the Snail / Pelican lines give perks; the paid lines (`requiresPass`) count nothing
+  quests.ts → the "Rebirth" feature, then the 25 Voyage quests: a signature species or a rebirth per aquarium, to the
+  last one, all 24 species) and Hatchery; the Snail / Pelican lines give perks; the paid lines (`requiresPass`) count nothing
   and can't be claimed without the pass (`isQuestLocked`). Goals and rewards of every line: `quests.ts` and BALANCE.md
   §5.9. Daily / weekly boards: 3 quests per period drawn from the pools, the same draw for every player, reward
   `CoinBoost {minutes}` → PlayerData.coinBoostSeconds.
@@ -1024,48 +958,28 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   second (not loaded or onboarding not Done); immune owners get no guest, no raid, no UFO, no star and no coin bonus, and
   MusicEventController hides the event from them; when the tutorial ends mid-event, the event joins them.
 - **Music event.** `EventService.startEvent` sets the attributes; the server beat loop drops the beat coins. *Flat*
-  (K-pop, admin): `FishService.dropBeatCoins(chance)` on every beat, the same chance for every fish. *Paced* (Island
-  Breeze, recurring): on one beat out of `every` (2: the track's accented backbeat), `dropPacedBeatCoins(seconds)`, each
-  fish dropping with chance seconds / its own payout interval (variant included), seconds = boost x 2 beats, the boost
-  growing 0.5 → 1.5 over the event: every fish earns x2 of its own income on average. The finale (last drop beat
-  ≥ 2.5 s before the end) drops every fish's coin at once (`dropBeatCoins(1)`), then the beat drops nothing more.
-  Client: MusicEventController (music, beats, `onBeat` → FishAnimationController puffs, banner, the guest's effects in
-  the event's `EVENT_BANNER_STYLES` accents). *Guest move* (`guestMove`): "Swim" (K-pop idol) wanders through the
-  water like a fish with pauses facing the glass; "Walk" (the saxophone crab) stays on the sand on a lane 35 % of the
-  half depth toward the glass, always facing it, and steps sideways (2.2 studs/s, steps ≥ 3 studs, 0.8–3 s dancing on
-  each spot). *Dance* (guests with the `GUEST_DANCE_JOINTS` Motor6Ds, client-only `Transform` every frame on the
-  track's position, `getCarryPose`): the instrument goes from one side of the body to the other and back on an 8-beat
-  cycle: 2 beats on its side (one 12° lean outward), 2 beats across (low in front of the belly, 0.85 stud down halfway,
-  tipped flat with its top leading, so its neck never passes the face), 2 beats on the other side (tilt mirrored), 2
-  beats back; the body rocks ±6° and dips 0.3 stud on every beat, with little hops while it walks; each arm is turned and stretched from its shoulder to its grip every frame (worked out from the
-  joints in the hips' space, no frame of lag).
-- **Abyssal raid.** `AbyssService.run` until the end: in each owned tank, a loop waits for a coin (`findCoinToSteal`:
-  most valuable, not frozen / bubble, ≥ 2.5 s left on the sand), then makes a pass, again and again (0.8–2.2 s of rest):
-  the server clones `LanternFish` at the back of the tank, `Lurking` = true then false; it glides 1.2 s at 3 studs/s
-  (lure and eyes fade in on the clients), then darts at up to 9 studs/s following the coin (while still emerging it
-  may switch target; later a coin collected first or expired is a miss). Within reach it calls `stealCoin` (no credit,
-  "-X$" popup, CoinStolen SFX) and carries the coin welded to its mouth, then `Lurking` = true: it swims back into the
-  dark and is destroyed. Moved by the server (Heartbeat). While it runs every coin is worth x1.5 (`coinMultiplier`).
-  Client: AbyssEventController (2.5 s fades), banner glowing cyan ↔ red, the event's track crossfades over the music.
-- **UFO night.** `UfoService.run` (recurring, 60 s). Per owned tank a UFO flies in from high up, hovers 5 studs above
-  the water over a random fish (not an easter egg, not already taken), beams it up (`Beaming`, UfoBeam SFX;
-  `FishService.beamUp`: the fish is `held` on a segment up to the UFO, then `away`: Remove "Abducted", frozen), flies
-  off (2.2 s), comes back over another spot and beams it down (`beamDown` → Spawn with a falling segment). ~12.2 s a
-  kidnapping, none starts that couldn't end in time. Outcome drawn when it is taken (`drawUfoOutcome`, or the owner's
-  forced one in Studio): **Sleep** (1 min frozen), **Green** / **Red** (1 min of coins x2 / x0.5), **Variant** (the next
-  variant for good: `DataService.changeFish`; a Shiny gets Green), **Alien** (replaced by an AlienFish; hatched counts
-  it). The minute counts only while the tank produces. The owner gets a notice (warning for Sleep / Red).
-- **Starfall.** `StarfallService.run` (recurring, 60 s, no template). Per owned tank (not immune; a tank joining late
-  gets its share for the time left) 16–20 stars, one per slot of equal length from 2 s after the start to 8 s before
-  the end, size drawn by weight. A star is an invisible anchored ball (tag `Star`, attribute `StarSize`) in the tank's
-  Coins folder: it streaks in on a slant from 38 studs above and 20 to a side (30 studs/s), sinks slowly (2.4 studs/s),
-  lies 6 s on the sand (`Fading` for the last 1.5 s), then vanishes. `CatchStar` (the owner, at the tank) adds its
-  power (random in its size's range) to `starCharge`, sets `Caught` (the clients burst it) and plays StarCatch higher
-  as the gauge fills. `stop()` (the end, an admin stop or replacement) turns each gauge into
-  `getFinalStarCharge` (at least 1.5 x the share caught) and keeps the better of it and `starPower`, with a notice.
-  `EggService.openEgg`: with `starPower` > 0 (not the onboarding egg, not an easter egg), the variant comes from
-  `rollStarVariant(power, luck)` and the power is spent. Client: StarfallEventController, StarGauge (during the
-  event), StarPowerPill (after it), banner.
+  (K-pop, admin): `FishService.dropBeatCoins(chance)` on every beat. *Paced* (Island Breeze, recurring): on one beat
+  out of 2, `dropPacedBeatCoins(seconds)`, each fish dropping with chance seconds / its payout interval, the boost
+  growing 0.5 → 1.5 (every fish earns ~x2 its income); a finale drops every fish's coin once. Client:
+  MusicEventController (music, beats, `onBeat` → FishAnimationController puffs, banner, guest effects). Guests:
+  "Swim" (K-pop idol) wanders like a fish; "Walk" (the saxophone crab) steps sideways on the sand facing the glass and
+  dances (client `Transform` of its `GUEST_DANCE_JOINTS` Motor6Ds on the track's position, `getCarryPose`: the sax
+  swings side to side on an 8-beat cycle, never past the face).
+- **Abyssal raid.** `AbyssService.run`: per owned tank, a loop waits for a coin (`findCoinToSteal`: most valuable, ≥
+  2.5 s left on the sand), then the server clones `LanternFish` at the back (`Lurking`), it glides out and darts at the
+  coin; within reach `stealCoin` (no credit, "-X$" popup) and it swims back into the dark. Coins are worth x1.5 while it
+  runs. Client: AbyssEventController.
+- **UFO night.** `UfoService.run` (recurring, 60 s): per owned tank a UFO hovers over a random fish (no easter egg),
+  beams it up (`FishService.beamUp`: held, then away and frozen), flies off and beams it down elsewhere (`beamDown`),
+  ~12 s a kidnapping. Outcome (`drawUfoOutcome`, or forced in Studio): **Sleep** (1 min frozen), **Green** / **Red**
+  (1 min of coins x2 / x0.5), **Variant** (the next variant for good, `DataService.changeFish`; a Shiny gets Green),
+  **Alien** (replaced by an AlienFish). The minute counts only while the tank produces; the owner gets a notice.
+- **Starfall.** `StarfallService.run` (recurring, 60 s): per owned tank 16–20 stars on even slots, size drawn by
+  weight; a star is an invisible anchored ball (tag `Star`, `StarSize`) that streaks in, sinks, lies 6 s on the sand
+  (`Fading` at the end) and vanishes. `CatchStar` adds its power to `starCharge` (`Caught`, StarCatch SFX). `stop()`
+  turns each gauge into `getFinalStarCharge` (≥ 1.5 x the share caught) and keeps the better of it and `starPower`.
+  `EggService.openEgg` with `starPower` > 0 (not the onboarding egg, not an easter egg) draws the variant from
+  `rollStarVariant(power, luck)` and spends it. Client: StarfallEventController, StarGauge, StarPowerPill, banner.
 - **Leaderboards.** LeaderboardService samples each player's scores (Ocean Points, `getSteadyIncomePerSecond`,
   `PlayerStats.playSeconds`) on every push, write and save. Every 2 min it `SetAsync`s the changed ones into the
   board's OrderedDataStore and reads the top 100 (`GetSortedAsync`), and it writes the last sample when the player
@@ -1086,7 +1000,7 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   second click. Server: refused during a hatch reveal; Ocean Points from `getRebirthOceanPoints` (variants included),
   `FishService.releaseAll`, `CoinService.clearOwner`, then money = start money, fish / incubating / eggsBought reset
   (free starter egg again), `rebirths + 1`, reward popup. Kept: Fish Index, quests, companions, Ocean Points and
-  milestones, features, perks, cosmetics, likes, coin boost. After rebirth 8 the menu says more aquariums are coming.
+  milestones, features, perks, cosmetics, likes, coin boost. After the last rebirth the menu says more aquariums are coming.
 - **Likes.** Another player's board shows a local ProximityPrompt (E, 10 studs; its text shows the cooldown). It
   sends `GiveLike`; the server checks the giver is within `LIKE_RANGE` of the board, that the tank has an owner who
   isn't the giver, and the giver's cooldown (`lastLikeGivenAt` + 1 h, any tank). Then `likesReceived += 1` and the
@@ -1128,28 +1042,14 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   food is in the water), sent only to the clients watching that tank. A chase segment covers 1 s of swimming
   (`CHASE_LOOKAHEAD`) and is replaced after 0.25 s, so its end is never reached. Coins, food, companions and event
   guests are still server-tweened (≈ 0.4 KB/s per sinking coin: the candidates if they become numerous).
-- **Performance** (load test with 18 species, 2026-11-01, Studio solo, 6 tanks x 25 fish): every view at 60 fps
-  (aisle view: scripts 6.9 ms, render CPU 11.0 ms, GPU 2.5 ms; 2.5D view of an 18-species tank: 4.2 / 7.8 / 2.1 ms);
-  server negligible. The swim animation costs per *species* on screen, not per fish; weak devices feel it first. Real
-  mobile memory: to check with the first players (ROADMAP M7). Studio caps at 15 fps when its window loses focus:
-  steady 66.7 ms frames are that cap, not load.
-- **K-pop idol without its texture** (found 2026-11-06): `EventFish.KpopIdol.Mesh` has no TextureID / SurfaceAppearance:
-  the guest has been plain grey since V0.60.5, whose group mesh swap (`ApplyMesh`) clears a TextureID (a
-  SurfaceAppearance survives it). Fix planned (ROADMAP_FIXES, on the Windows PC): find the texture in a place version from before
-  2026-11-03, put it back as a SurfaceAppearance ColorMap, then rig the idol.
-- **Swim animation on bones** (V1.1, since V1.1.14 the only one): no EditableMesh, no memory budget, every fish on
-  screen swims, its cost per *fish* and small. Load test 2026-11-07 (Studio on the Mac, 6 tanks x 25 bone fish of the
-  18 species, client clones held still, aisle view): every fish posed, script 1.15 ms a frame, render CPU 5.9 ms with
-  the bones vs 6.2 ms without (noise: the GPU skins them); posing the 1,508 bones once costs 0.46 ms of script. V1's
-  "before" (V0.46, fish moving): 6.9 ms scripts / 11.0 ms render, 6 species animated, the rest swaying. A real phone
-  ran the bone swim smoothly (the owner, A4). Keep new fish meshes ≤ ~4k triangles, textures 512²; an EditableMesh
-  (the Studio export snippet only) counts triangles against a client budget (~81k on the owner's PC).
+- **Performance**: the bone swim costs per *fish* and little (6 tanks x 25 bone fish: script 1.15 ms a frame, render
+  CPU ~6 ms; 6 x 33 and 6 x 50 tested too: render 2.8 → 3.0 ms); a real phone ran it smoothly; server negligible.
+  Real mobile memory: to check with the players. Keep new fish meshes ≤ ~4k triangles, textures 512². Studio caps at
+  15 fps when its window loses focus: steady 66.7 ms frames are that cap, not load.
 - **Many species** (goal: dozens): server, network and saves only pay per fish; templates load on demand
   (server/fishAssets), so clients only download the species present. Production (mesh + icon + config + balance per
   species) is the real limit: colour variants of a mesh cost almost nothing.
 - **Studio captures** don't show BillboardGuis parented to PlayerGui (hunger badges, popups): check them by script.
-- **Roblox moderation**: a "Firefighter" fish was dropped, its icon got the account a warning (a nozzle in its mouth,
-  read as a cigarette). Rules in CLAUDE.md §7.
 - **Gamepasses on sale**: the code offers every pass with an id, but Roblox only sells the ones put on sale (with a
   price) on the Creator Dashboard; the shop card of one off sale there says SOON.
 - **After the release** (the owner's): the calibration with real players
@@ -1175,6 +1075,8 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
 - **Admin panel**: on live servers only for the accounts of `ADMIN_PANEL_USER_IDS` (`server/admins.ts`: the
   developer, DOT_Pinpin; the owner wants accounts, not a group rank), whose events reach every server (the scope chip
   says so); everyone in a Studio playtest. Add an account there to open it to someone else. New admin tools go in their own tab (`ADMIN_TABS` + a tab component in AdminPanel.tsx + AdminService actions).
-- **Playtesting**: see `docs/agent-notes/studio-mcp-ui-testing.md` and `fish-asset-pipeline.md`. In short: stand at
-  the tank CFrame × (0, 5, −14) to be in the focus zone, drive flows through remotes, feed fish in long tests, and
-  mark temporary test values with `// TEMP TEST`, then restore them.
+- **Playtesting**: `docs/agent-notes/studio-mcp-ui-testing.md` and `fish-asset-pipeline.md`.
+- **Next updates** (owner's decisions, from the V1.2 plan): the tank goes up to 50 fish (built and tested for it);
+  species 25–28 Celestial and 29–32 Eternal (4 a rarity label); a feeder pet for the big tanks (no free feeder keeps
+  more than 15 fish fed, the Jellyfish pass 25); keep a goal under ~1 h in every run (a 1h30+ gap gets a milestone or a
+  side quest, not a shorter run); watch the UI widths of big numbers and the Fish Index on a phone (844 × 390).

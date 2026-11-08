@@ -3,7 +3,7 @@
 > The game's balance: what an average player reaches after how long, and why. **Update it in the same task whenever a
 > number of the economy changes** (fish income, eggs, odds, rebirths, Ocean milestones, variants, food, capacity,
 > companions…): run the simulators, copy their results here, add a line to the history (§6).
-> Last updated: 2026-11-08 (V1.1.25: §2 rewritten for the whole of V1.2 from the V1.1.24 run, ROADMAP_V1.2 M7).
+> Last updated: 2026-11-08 (the simulator in segments of 3 rebirths, seeded, no number changed; V1.1.25: §2 rewritten for the whole of V1.2 from the V1.1.24 run).
 
 
 **Where the numbers live**: `src/shared/types/fish.ts` (species), `eggs.ts` (eggs), `rebirths.ts` (rebirths),
@@ -12,15 +12,24 @@
 
 | Tool | What it plays |
 |---|---|
-| `node tools/economy-sim.js` | The live economy (mirrors the config: keep it in sync), 2,000 average players second by second |
+| `node tools/economy-sim.js` (`npm run sim`) | The live economy (its mirror of the config, `tools/sim/config.js`: keep it in sync), 2,000 average players second by second, in segments of 3 rebirths |
 | `node tools/companion-sim.js` | AFK farming: how many fish the Pelican keeps fed, the share of the coins the Snail and the Swordfish pick up, the Jellyfish |
 | `node tools/starfall-sim.js` | The starfall's star gauge (mirrors `stars.ts`): bars filled per share of stars caught, the next egg's variant, what a 12 h run gets; `--fourthBar 0.9` plays the V1.2 plan's 4th bar (Galaxy) |
-| `node tools/economy-sim.js --plan tools/balance-v1.2-plan.js` | The V1.2 plan (ROADMAP_V1.2.md): rebirths 9–12, eggs 13–16, species 19–24, tank 33, the Size score (`P.sizeMax`), Galaxy; not in the game |
 
 How to add content (species, theme, companion, egg): `docs/agent-notes/content-recipes.md`.
 
 Options: `--players 300` (faster, noisier), a JSON of overrides (`'{"P":{"coinBoost":2}}'`, see the file headers),
 `--plan <file.js>` to preview a planned economy (how the V1 plan was tuned before it was built).
+
+**How the economy simulator runs** (since 2026-11-08): the timeline is played in **segments of 3 rebirths** (start →
+rebirth 3, 3 → 6, 6 → 9, 9 → the end), each saved in `tools/.sim-cache/`. A run replays only the segments whose
+numbers changed (a segment's fingerprint covers the eggs, species, rebirths and Ocean milestones its players reached):
+tuning rebirth 11 or the Heart Egg replays only the last segment (~15 s), rebirth 5 replays from the second one.
+`--segment k` plays one segment alone (and prints its part of the report, "not yet" for the players still on the way),
+`--status` lists them, `--fresh` replays all. Each player draws from its own seeded generator (`--seed n` for another
+sample): the same config always gives the same report, so two runs differ only by what was changed (compare them
+directly; the noise between samples stays ~±5 min on the late steps). A full run of 2,000 players takes ~30 s on
+the cores - 1. The numbers of BALANCE.md always come from a full run (`npm run sim`), never from a single segment.
 
 ---
 
@@ -504,7 +513,7 @@ on the sand). Reference coin rate: **1 coin/s ≈ a full V1 tank of 15 fish**, 1
 | Jellyfish | Feeds the fish (replaces the Pelican) | free (Ocean 200,000) | **Jellyfish pass**: 3 quests | ~8h05 |
 | Hermit Crab (V1.2) | Rare variants more often on the eggs that incubate with it (x1.25) | free (Ocean 2,500,000) | Hermit Crab pass (V1.1.24): 100 / 300 / 800 eggs with its full bonus → x1.35 / x1.45 / x1.6 | ~14h03 |
 
-**The Hermit Crab's luck is live** (ROADMAP_V1.2 §8, V1.1.22): each incubating egg counts the seconds of its incubation
+**The Hermit Crab's luck is live** (V1.1.22): each incubating egg counts the seconds of its incubation
 spent with the crab equipped (offline included, the wait once ready excluded); at opening its luck is 1 + bonus x that
 share (x1.125 for an egg incubated half the time with the free crab). Equipping it only to open ready eggs gives
 nothing, and its quests count only the eggs that got the full bonus. It multiplies the other variant luck (Lucky ocean,
@@ -718,6 +727,7 @@ content (species, eggs, aquariums, capacity, companions themselves) away from fr
 | V1.1.23 | ROADMAP_V1.2 M5: rebirth 11 (3Qa, x375,000, Rainbow Dreamland), Dreamland Egg (50Qa, Pegasus Seahorse 55 / Kitty Koi 45), the Kitty Koi (Mythic, 53.76M / 8 s, 210,000 points), Ocean milestones 9,000,000 (31 fish) and 14,000,000 (Aurora rims), Voyage 21 (rebirth 11: 2,200,000 points) and 22 (Kitty Koi: 5 min). Simulator: the live config mirrors them, horizon 28 h | Earlier steps unchanged (rebirth 10 ~16h31); the Pegasus Seahorse ~17h49 → ~18h47 (now often from the Dreamland Egg), Quick pantry ~19h20; rebirth 11 **~19h57** (18h55–20h56), plan 19h53; Aurora rims ~21h30; the Kitty Koi, the end of the content for now, **~22h49** (21h39–24h42), plan 23h42 |
 | V1.1.24 | ROADMAP_V1.2 M6: rebirth 12 (80Qa, x1,200,000, Heart of the Ocean), Heart Egg (96Qa, Kitty Koi 25 / Sea Turtle 55 / Baby Kraken 20), the Sea Turtle (Mythic, 268.8M / 20 s, 336,000 points; the planned Panda Manta replaced) and the Baby Kraken (Mythic, 806.4M / 30 s, 537,000 points), Ocean milestones 20,000,000 (33 fish) and 40,000,000 (title + Giant Pearl), Voyage 23 (rebirth 12: 5,000,000 points), 24 (Baby Kraken: 5 min), 25 (all 24 species: title, Pearl Throne, 8,000,000 points), Hatchery 1,800 / 2,500 / 3,500, Collector to 120 cells, Ocean 500 released, dailies and weeklies 9 each (coin boosts, unchanged). Simulator: the live config mirrors them (the Shiny Mythic quest not modelled), horizon 32 h (a full run ~15 min) | Earlier steps unchanged within the noise (rebirth 11 ~19h51); rebirth 12 **~23h09** (21h55–24h10), plan 23h14; 33 fish with it; the Kitty Koi ~22h49 → ~23h39 (now mostly from the Heart Egg); Sea Turtle ~24h44; **all 24 species ~25h16 (24h15–26h36)**, plan 25h15; Ocean Points at the end 24.7M (40M after the end); Hatchery 2,500 for 1 player in 25 before the end |
 | V1.1.25 | ROADMAP_V1.2 M7, the check: no number changed. §2 rewritten in time order for the whole of V1.2 from the V1.1.24 run (2,000 players, 32 h); a late playtest (a copy of a rebirth 7 save in a test store, rebirths 8 → 12, every new egg opened) found no blocking issue | The V1.1.24 times: all 24 species ~25h16 (24h15–26h36), the plan's 25h15; the Golden Incubator (Hatchery 1,200) now at ~12h43, before rebirth 9; a Titan for 71 % of the players before the end of V1.2 |
+| V1.2.11 (simulator) | No number changed. The simulator split into `tools/sim/` and played in segments of 3 rebirths (saved, replayed only when their numbers change), seeded players, all the cores: a full run ~15 min → ~27 s. Same model: with the same draws, the old and new code give identical players | The seed-1 reference run (2,000 players): rebirth 9 ~13h36, rebirth 12 ~23h10 (22h02–24h11), **all 24 species ~25h14 (24h15–26h35)**, within the noise of the V1.1.24 run (25h16) |
 | V1.2 (plan) | ROADMAP_V1.2.md M1, not in the game: rebirths 9–12 (200T x25,000 / 640T x120,000 / 3Qa x375,000 / 80Qa x1.2M), eggs Aurora 400T, Sky 770T, Dreamland 50Qa, Heart 96Qa (180 s), 6 species (income x2, points x1.6), tank 27–33 at 1.5M / 4M / 9M / 20M Ocean Points, Voyage 375k / 900k / 2.2M / 5M points, side lines (Hatchery 1,800–3,500, Collector to 120 cells, Ocean 500 released, Big Catch); **Size score** (-15…+15, triangular, coins x(1 + size/100)); **Galaxy** (0.2 %, ~x2 income, x10 points); starfall 4th bar at 0.9 bar of stars. Simulator: `P.sizeMax`, plan `VARIANTS`, Ocean line as a list, Big Catch line; starfall `--fourthBar` | Rebirths 9–12 at ~13h37 / 16h28 / 19h53 / 23h14, **all 24 species ~25h15 (24h18–26h34)**, ~day 26; runs 2h50–3h25. Size: V1 ~2–3 % faster (all eighteen 12h11 → 11h55), income +15–30 %. 4th bar: 2.6 % of perfect starfalls (0.3 % at 75 % caught) |
 
 ---

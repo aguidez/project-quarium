@@ -353,7 +353,7 @@ export const QUESTS: Record<string, QuestConfig> = {
 			{ kind: "OceanPoints", amount: 300000 },
 		],
 	},
-	// V1.2 (ROADMAP_V1.2 §7.1): the Voyage goes on, two quests per aquarium; Ocean Points x2.5 per rebirth
+	// V1.2: the Voyage goes on, two quests per aquarium; Ocean Points x2.5 per rebirth
 	Voyage17: {
 		category: "Story",
 		title: "Beyond the Stars",
@@ -463,7 +463,7 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 400,
 		rewards: [{ kind: "Perk", perk: "WaterHen3" }],
 	},
-	// The Hermit Crab's line (Hermit Crab Pass since V1.1.24, ROADMAP_V1.2 §8): eggs opened with its full bonus (incubated with it all the way)
+	// The Hermit Crab's line (Hermit Crab Pass since V1.1.24): eggs opened with its full bonus (incubated with it all the way)
 	HermitCrab1: {
 		category: "Story",
 		title: "Shell Seeker",
@@ -593,7 +593,7 @@ export const QUESTS: Record<string, QuestConfig> = {
 			{ kind: "IncomeMinutes", minutes: 2 },
 		],
 	},
-	// V1.2 (ROADMAP_V1.2 §7.2): the line goes on, its last goal a diamond incubator
+	// V1.2: the line goes on, its last goal a diamond incubator
 	Hatchery6: {
 		category: "Story",
 		title: "Busy Nursery",
@@ -674,7 +674,7 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 50,
 		rewards: [{ kind: "Title", title: "TitleCollector" }],
 	},
-	// V1.1.20 (ROADMAP_V1.2 §7.2): 18 species x 5 variants = 90 cells today
+	// V1.1.20: 18 species x 5 variants = 90 cells today
 	Collector7: {
 		category: "Story",
 		title: "Index Expert",
@@ -692,7 +692,7 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 1,
 		rewards: [{ kind: "IncomeMinutes", minutes: 3 }],
 	},
-	// V1.2 (ROADMAP_V1.2 §7.2): past the end of the content for most players, like the Golden Incubator
+	// V1.2: past the end of the content for most players, like the Golden Incubator
 	Collector9: {
 		category: "Story",
 		title: "Mythic Shine",
@@ -737,7 +737,7 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 1,
 		rewards: [{ kind: "Title", title: "TitleOceanFriend" }],
 	},
-	// V1.2 (ROADMAP_V1.2 §7.2)
+	// V1.2
 	Ocean3: {
 		category: "Story",
 		title: "Tide Keeper",
@@ -756,7 +756,7 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 1,
 		rewards: [{ kind: "Title", title: "TitlePearlDiver" }],
 	},
-	// Big Catch (V1.1.16, the Size score: ROADMAP_V1.2 §3.5): opens with "Full House" like the Collector, so early: its
+	// Big Catch (V1.1.16, the Size score): opens with "Full House" like the Collector, so early: its
 	// money rewards are minutes of income (BALANCE.md §4). Huge = +10 % or more, Giant +13, Titan +15 (shared/types/size)
 	BigCatch1: {
 		category: "Story",
@@ -806,7 +806,7 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 18,
 		rewards: [{ kind: "Title", title: "TitleSizeCollector" }],
 	},
-	// Fish Keeper (V1.1.19, ROADMAP_V1.2 §5): meals given by hand, all time (a gauge: a veteran is ahead), from rebirth 2.
+	// Fish Keeper (V1.1.19): meals given by hand, all time (a gauge: a veteran is ahead), from rebirth 2.
 	// The food reserve's perks: ~33 / ~37 / ~45 meals a minute by hand, for ~24 / ~27 / ~33 fish
 	FishKeeper1: {
 		category: "Story",
@@ -882,7 +882,7 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 1,
 		rewards: [{ kind: "CoinBoost", minutes: 5 }],
 	},
-	// V1.2 (ROADMAP_V1.2 §7.3): more variety for the late game, same reward
+	// V1.2: more variety for the late game, same reward
 	DailyFeedBig: {
 		category: "Daily",
 		title: "Busy Keeper",
@@ -950,7 +950,7 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 25,
 		rewards: [{ kind: "CoinBoost", minutes: 15 }],
 	},
-	// V1.2 (ROADMAP_V1.2 §7.3). The planned "hatch a fish of V1.2" left out: the boards are the same for every player
+	// V1.2. The planned "hatch a fish of V1.2" left out: the boards are the same for every player
 	// and most of them are far from rebirth 9, so it would be impossible for them
 	WeeklyFeedBig: {
 		category: "Weekly",

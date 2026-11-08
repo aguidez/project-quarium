@@ -1,5 +1,5 @@
 /**
- * The Size score (ROADMAP_V1.2 §3.5): every fish hatched from an egg gets a whole number from -SIZE_MAX to +SIZE_MAX,
+ * The Size score: every fish hatched from an egg gets a whole number from -SIZE_MAX to +SIZE_MAX,
  * drawn by the server when the egg is opened and kept for the fish's whole life (SavedFish.size). The fish is
  * x getSizeMultiplier bigger and its coins are worth as much more; its Ocean Points don't change. Shown to the player
  * as a percentage with a tier ("+12% Huge"): never hidden, it is a reason to farm better fish.
@@ -16,7 +16,7 @@ export interface SizeTierConfig {
 	displayName: string;
 }
 
-/** From the smallest up (BALANCE / ROADMAP_V1.2 §3.5: the draw's chances per tier). */
+/** From the smallest up (BALANCE.md: the draw's chances per tier). */
 export const SIZE_TIERS: readonly [SizeTier, SizeTierConfig][] = [
 	["Tiny", { min: -15, displayName: "Tiny" }], // 6.7 %
 	["Small", { min: -9, displayName: "Small" }], // 22.7 %

@@ -36,7 +36,7 @@ export interface EggConfig {
 }
 
 /**
- * Balance: see BALANCE.md (timeline, reasons) and tools/economy-sim.js (average player collecting
+ * Balance: see BALANCE.md (timeline, reasons) and tools/economy-sim.js, its mirror tools/sim/config.js (average player collecting
  * ~50% of the coins, feeding its fish, weakest fish released for room, saving for the next egg,
  * rebirthing as soon as it can). Medians: rebirth 1 at ~28 min, the six first species at ~61 min,
  * rebirth 2 at ~1h44, all nine species at ~2h31. The Freshwater Egg (25k) is the wall the first
@@ -187,7 +187,7 @@ export const EGG_TYPES: Record<EggType, EggConfig> = {
 		order: 12,
 		requires: "Crystal",
 	},
-	// V1.2 (ROADMAP_V1.2 §3.3): 2x rebirth 9, the wall of run 9 (tools/balance-v1.2-plan.js)
+	// V1.2: 2x rebirth 9, the wall of run 9 (tuned with the simulator)
 	Aurora: {
 		displayName: "Aurora Egg",
 		price: 400e12,
@@ -199,7 +199,7 @@ export const EGG_TYPES: Record<EggType, EggConfig> = {
 		order: 13,
 		requires: "Cosmic",
 	},
-	// 1.2x rebirth 10 (tools/balance-v1.2-plan.js): bought with the end of run 10's money
+	// 1.2x rebirth 10 (tuned with the simulator): bought with the end of run 10's money
 	Sky: {
 		displayName: "Sky Egg",
 		price: 770e12,
@@ -212,7 +212,7 @@ export const EGG_TYPES: Record<EggType, EggConfig> = {
 		order: 14,
 		requires: "Aurora",
 	},
-	// ~17x rebirth 11 (tools/balance-v1.2-plan.js): run 11's long wall, after a rebirth only x3.1 the last one
+	// ~17x rebirth 11 (tuned with the simulator): run 11's long wall, after a rebirth only x3.1 the last one
 	Dreamland: {
 		displayName: "Dreamland Egg",
 		price: 50e15,

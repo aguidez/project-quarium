@@ -126,7 +126,7 @@ class EggServiceSingleton implements Lifecycle {
 		const fishType = onboardingEgg ? ONBOARDING_FISH : (forced ?? rollEgg(eggType, this.rng));
 		// Then its variant (the tutorial's fish is always a normal one, so it looks like the tutorial says;
 		// an easter egg fish has none, and leaves the star power for the next egg)
-		// The Hermit Crab (ROADMAP_V1.2 §8): its luck by the share of this egg's incubation spent with it, credited
+		// The Hermit Crab: its luck by the share of this egg's incubation spent with it, credited
 		// up to now (equipping it only to open a ready egg gives nothing)
 		const now = Workspace.GetServerTimeNow();
 		syncIncubationCrab(data, now);

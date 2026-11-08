@@ -548,7 +548,7 @@ class CompanionServiceSingleton implements Lifecycle {
 	}
 
 	/**
-	 * The Hermit Crab (ROADMAP_V1.2 §8) only strolls on the sand: its luck acts on the eggs (EggService), the time it
+	 * The Hermit Crab only strolls on the sand: its luck acts on the eggs (EggService), the time it
 	 * is equipped counts (playerData syncIncubationCrab), not where it is.
 	 */
 	private hermitCrabLoop(entity: CompanionEntity) {

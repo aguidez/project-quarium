@@ -1,4 +1,4 @@
-// The Galaxy variant's look (ROADMAP_V1.2 §3.6, V1.1.20), offline: turns a fish texture or sticker into a night-sky
+// The Galaxy variant's look (V1.1.20), offline: turns a fish texture or sticker into a night-sky
 // version that keeps the fish readable (its light and dark areas: eyes, stripes, fins) and sprinkles it with stars.
 //   node tools/fish-galaxy.js texture <in.png> <out.png> [seed]   a species ColorMap (UV atlas): every pixel recoloured
 //   node tools/fish-galaxy.js sticker <in.png> <out.png> [seed]   a sticker icon: the white outline and the shadow kept

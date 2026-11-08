@@ -34,7 +34,7 @@ export const STAR_SIZE_ORDER: readonly StarSize[] = ["Small", "Medium", "Big", "
 
 /**
  * Bars of the gauge (PlayerData.starCharge / starPower count in bars). Bars 1–3 cost one bar of stars each; the 4th
- * (V1.1.20, the Galaxy's: ROADMAP_V1.2 §3.7) costs FOURTH_BAR_COST, so what the stars bring past 3 bars fills it slowly:
+ * (V1.1.20, the Galaxy's) costs FOURTH_BAR_COST, so what the stars bring past 3 bars fills it slowly:
  * 4 bars in ~2.6 % of perfect starfalls (tools/starfall-sim.js --fourthBar 0.9).
  */
 export const STAR_MAX_BARS = 4;

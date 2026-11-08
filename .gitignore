@@ -49,3 +49,6 @@ desktop.ini
 # Exported OBJ sources of the animated meshes (big; the manifest is kept)
 /design/meshes/*.obj
 /design/ui/sound/_sheet.png
+
+# ---- Economy simulator: saved segments (tools/sim/segments.js, re-creatable) ----
+/tools/.sim-cache/

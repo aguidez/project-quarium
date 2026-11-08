@@ -1,4 +1,4 @@
-// FigCraft script: the star gauge with its 4th bar, the Galaxy's (V1.1.20, ROADMAP_V1.2 §3.7; StarGauge.tsx). Bars 1–3
+// FigCraft script: the star gauge with its 4th bar, the Galaxy's (V1.1.20; StarGauge.tsx). Bars 1–3
 // are the gold ones of starfall.build.js (Anomaly, Ghost, Shiny guaranteed); the 4th, on top, fills night blue to
 // pink and guarantees a Galaxy. Its states: under 3 bars (unchanged), 3 bars and a bit (Shiny sure, Galaxy's chance
 // growing), 4 bars (Galaxy sure).

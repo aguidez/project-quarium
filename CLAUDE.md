@@ -12,8 +12,9 @@
 
 ## 0c. Balance (KEEP UP TO DATE)
 - `BALANCE.md` describes the game's balance: the average player's expected progression (what after how long, and why), the numbers (species, eggs, rebirths, Ocean milestones, variants), the design rules and the history of the balance changes.
-- **Every change to a number of the economy** (fish income or interval, egg price / hatch / odds, rebirth price / multiplier, Ocean milestones, variants, food, capacity…) **updates, in the same task**: `tools/economy-sim.js` (mirror of the config), a run of `node tools/economy-sim.js`, and `BALANCE.md` (timeline, tables, a new line in its history). A task isn't finished while BALANCE.md is stale.
+- **Every change to a number of the economy** (fish income or interval, egg price / hatch / odds, rebirth price / multiplier, Ocean milestones, variants, food, capacity…) **updates, in the same task**: `tools/sim/config.js` (the simulator's mirror of the config), a run of `node tools/economy-sim.js`, and `BALANCE.md` (timeline, tables, a new line in its history). A task isn't finished while BALANCE.md is stale.
 - When the owner gives a target ("rebirth 2 at ~1h45"), tune with the simulator until the median hits it, and write the p10–p90 spread too.
+- **The simulator runs in segments of 3 rebirths** (start → 3, 3 → 6, 6 → 9, 9 → the end; one more per 3 new rebirths), each cached in `tools/.sim-cache/` and replayed only when a number it uses changes. While tuning, run only the segment you touch (`npm run sim -- --segment k`, `--status` to see which are stale; `--players 300` for a first look); its players are seeded, so two runs differ only by what you changed. The numbers written in BALANCE.md always come from a full `npm run sim` (2,000 players). Never go back to one long script: new content adds a segment.
 
 ## 0d. Agent Notes (SHARED MEMORY, KEEP UP TO DATE)
 - `docs/agent-notes/` holds the durable working knowledge of the project (owner preferences, asset pipelines, Studio MCP testing tricks, tool quirks), indexed in its `README.md`. **Read the notes a task touches before starting it.**

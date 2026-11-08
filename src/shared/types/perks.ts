@@ -192,7 +192,7 @@ export const PERKS: Record<Perk, PerkConfig> = {
 		bounce: false,
 		jellyfishPellets: 3,
 	},
-	// The Fish Keeper line (meals given by hand, V1.1.19, ROADMAP_V1.2 §5): the reserve feeds ~24 / ~27 / ~33 fish by hand
+	// The Fish Keeper line (meals given by hand, V1.1.19): the reserve feeds ~24 / ~27 / ~33 fish by hand
 	FoodRefill1: {
 		displayName: "Quick refill",
 		label: "9s",
@@ -209,7 +209,7 @@ export const PERKS: Record<Perk, PerkConfig> = {
 		bounce: false,
 		foodRefillTime: 8,
 	},
-	// The Quick pantry Ocean milestone (6,000,000 points, ROADMAP_V1.2 §6): the best refill wins
+	// The Quick pantry Ocean milestone (6,000,000 points): the best refill wins
 	FoodRefill3: {
 		displayName: "Quick pantry",
 		label: "7s",
@@ -226,7 +226,7 @@ export const PERKS: Record<Perk, PerkConfig> = {
 		bounce: false,
 		foodSlots: 1,
 	},
-	// The Hermit Crab's line (Hermit Crab Pass, ROADMAP_V1.2 §8): eggs opened with its full bonus
+	// The Hermit Crab's line (Hermit Crab Pass): eggs opened with its full bonus
 	HermitCrab1: {
 		displayName: "Lucky shell",
 		label: "x1.35",

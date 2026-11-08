@@ -1,4 +1,4 @@
-// FigCraft script: the Size score's mock-ups (V1.1.16, ROADMAP_V1.2 §3.5, V2 arcade style): the hatch reveal's Size pill
+// FigCraft script: the Size score's mock-ups (V1.1.16, V2 arcade style): the hatch reveal's Size pill
 // (EggReveal.tsx), the Ocean panel row's sizes (OceanPanel.tsx FishRow) and the Fish Index row's best Size
 // (FishIndexPanel.tsx FishRow).
 // Usage: node design/ui/size.build.js <script.json>
