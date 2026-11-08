@@ -302,6 +302,29 @@ const EGGS = {
 				.join("") +
 			sparkle(30, 26, 6, "#FFFFFF") + sparkle(26, 84, 3.5, "#FFE7A0") + sparkle(80, 100, 3, "#BFF6FF"),
 	},
+	// Sky Archipelago (V1.2): a sunset sky shell, a little floating island with its waterfall, a sea of clouds
+	Sky: {
+		outline: "#1E3C78",
+		defs: `<linearGradient id="shell" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0" stop-color="#6FB2F5"/><stop offset="0.5" stop-color="#B9C2F2"/><stop offset="0.78" stop-color="#F7B8CF"/><stop offset="1" stop-color="#FFCB8E"/>
+		</linearGradient>
+		<linearGradient id="fall" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0" stop-color="#F4FBFF" stop-opacity="0.95"/><stop offset="1" stop-color="#F4FBFF" stop-opacity="0"/>
+		</linearGradient>`,
+		decor:
+			`<path d="M62 64 L66 64 L66 92 L62 92 Z" fill="url(#fall)"/>` +
+			`<path d="M34 60 C38 76 46 86 52 92 C58 84 66 74 70 60 Z" fill="#B7A1DC" stroke="#6E5AA8" stroke-width="1.8" stroke-linejoin="round"/>` +
+			`<path d="M42 66 C46 74 50 80 52 84" fill="none" stroke="#8E78C4" stroke-width="1.6" stroke-linecap="round"/>` +
+			`<ellipse cx="52" cy="59" rx="20" ry="6" fill="#62C27A" stroke="#2E7D4A" stroke-width="1.8"/>` +
+			`<circle cx="44" cy="54" r="4.5" fill="#4FAE66" stroke="#2E7D4A" stroke-width="1.4"/>` +
+			`<circle cx="59" cy="53" r="5.5" fill="#4FAE66" stroke="#2E7D4A" stroke-width="1.4"/>` +
+			[[2, 104, 14], [20, 98, 13], [38, 104, 12], [56, 98, 14], [76, 102, 13], [96, 98, 14]]
+				.map(([cx, cy, r]) => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#FFFFFF" stroke="#C9D6F2" stroke-width="1.5"/>`)
+				.join("") +
+			`<ellipse cx="26" cy="38" rx="9" ry="4" fill="#FFFFFF" opacity="0.85"/><ellipse cx="31" cy="35" rx="5" ry="4" fill="#FFFFFF" opacity="0.85"/>` +
+			`<ellipse cx="76" cy="30" rx="7" ry="3" fill="#FFFFFF" opacity="0.8"/>` +
+			sparkle(30, 26, 6, "#FFFFFF") + sparkle(80, 46, 3.5, "#FFF1C8") + sparkle(20, 74, 3, "#FFFFFF"),
+	},
 };
 
 function svg(body, defs = "") {

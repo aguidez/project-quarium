@@ -1,0 +1,7 @@
+{
+	"//": "The Cloud Whale (V1.2 M4, species 20): a whale beats its fluke up and down (\"stroke\": \"vertical\", FishConfig.stroke in the game). The cloud on its back (t 0.05-0.5, upper half) follows the head rigidly; no dorsal or ventral fin (the cloud is no fin, the flippers hang low and are the pectorals).",
+	"stroke": "vertical",
+	"fin_top": false,
+	"fin_bottom": false,
+	"rigid_boxes": [{ "t": [0.0, 0.5], "height": [0.3, 1.05], "side": [-1.05, 1.05], "fade": 0.06 }]
+}

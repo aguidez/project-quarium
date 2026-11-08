@@ -369,6 +369,23 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 1,
 		rewards: [{ kind: "IncomeMinutes", minutes: 5 }],
 	},
+	Voyage19: {
+		category: "Story",
+		title: "Above the Clouds",
+		description: "Rebirth into the Sky Archipelago (rebirth 10).",
+		stat: "Rebirths",
+		target: 10,
+		rewards: [{ kind: "OceanPoints", amount: 900000 }],
+	},
+	Voyage20: {
+		category: "Story",
+		title: "Winged Wonder",
+		description: "Hatch a Pegasus Seahorse.",
+		stat: "SpeciesHatched",
+		fishType: "PegasusSeahorse",
+		target: 1,
+		rewards: [{ kind: "IncomeMinutes", minutes: 5 }],
+	},
 	// The Water Hen's line (Water Hen pass, BALANCE.md §5.9): eggs opened with it equipped. Slow on purpose: its
 	// effect is the smallest
 	WaterHen1: {
@@ -397,6 +414,34 @@ export const QUESTS: Record<string, QuestConfig> = {
 		companion: "WaterHen",
 		target: 400,
 		rewards: [{ kind: "Perk", perk: "WaterHen3" }],
+	},
+	// The Hermit Crab's line (free, ROADMAP_V1.2 §8): eggs opened with its full bonus (incubated with it all the way)
+	HermitCrab1: {
+		category: "Story",
+		title: "Shell Seeker",
+		description: "Open 100 eggs that incubated with your Hermit Crab all the way.",
+		stat: "CompanionStat",
+		companion: "HermitCrab",
+		target: 100,
+		rewards: [{ kind: "Perk", perk: "HermitCrab1" }],
+	},
+	HermitCrab2: {
+		category: "Story",
+		title: "Lucky Charm",
+		description: "Open 300 eggs that incubated with your Hermit Crab all the way.",
+		stat: "CompanionStat",
+		companion: "HermitCrab",
+		target: 300,
+		rewards: [{ kind: "Perk", perk: "HermitCrab2" }],
+	},
+	HermitCrab3: {
+		category: "Story",
+		title: "Treasure Shell",
+		description: "Open 800 eggs that incubated with your Hermit Crab all the way.",
+		stat: "CompanionStat",
+		companion: "HermitCrab",
+		target: 800,
+		rewards: [{ kind: "Perk", perk: "HermitCrab3" }],
 	},
 	// The Swordfish's line (Swordfish pass): coins it picks up (~1 coin/s)
 	Swordfish1: {
@@ -799,7 +844,8 @@ export type StoryLine =
 	| "Pelican"
 	| "WaterHen"
 	| "Swordfish"
-	| "Jellyfish";
+	| "Jellyfish"
+	| "HermitCrab";
 
 export interface StoryLineConfig {
 	/** Small tag over its quests in the quest book. */
@@ -844,6 +890,8 @@ export const STORY_LINES: Record<StoryLine, StoryLineConfig> = {
 			"Voyage16",
 			"Voyage17",
 			"Voyage18",
+			"Voyage19",
+			"Voyage20",
 		],
 		requires: "Story1",
 		order: 3,
@@ -897,6 +945,13 @@ export const STORY_LINES: Record<StoryLine, StoryLineConfig> = {
 		requiresCompanion: "Jellyfish",
 		requiresPass: "JellyfishPass",
 		order: 12,
+	},
+	// Free (ROADMAP_V1.2 §8): shown from the moment the crab is owned
+	HermitCrab: {
+		displayName: "Hermit Crab",
+		quests: ["HermitCrab1", "HermitCrab2", "HermitCrab3"],
+		requiresCompanion: "HermitCrab",
+		order: 13,
 	},
 };
 

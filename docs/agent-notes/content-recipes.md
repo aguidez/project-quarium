@@ -58,6 +58,9 @@ Static meshes (decor, coins) and images show whoever owns them.
 ## A new companion
 
 1. Brief + mesh (`ServerStorage.Assets.Companions`, tag `CompanionTemplate`, attr `CompanionType`), sticker icon.
+   Show 3–4 candidates; anything bumpy on a moving part reads badly once animated (the Hermit Crab, V1.2), and a part the
+   owner wants still (a shell) stays on the root bone, proved by a zero-weight check and a pixel diff
+   ([[fish-asset-pipeline]]).
 2. `CompanionType`, `COMPANION_TYPES` (ability text), its loop in CompanionService, its perks in `perks.ts`,
    its line in `companionStats.ts`.
 3. Ocean milestone (free unlock) + its story line; for the paid companions the line has `requiresPass` and shows

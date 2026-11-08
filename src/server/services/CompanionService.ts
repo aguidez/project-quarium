@@ -5,6 +5,7 @@ import { TAGS } from "shared/tags";
 import {
 	COMPANION_TYPES,
 	CompanionType,
+	HERMIT_CRAB_STROLL_SPEED,
 	JELLYFISH_CHARGES,
 	JELLYFISH_FEED_INTERVAL,
 	JELLYFISH_PELLETS,
@@ -43,6 +44,8 @@ const SNAIL_REACH = 1.8; // horizontal studs from the coin to pick it up
 const SNAIL_PICKUP_HEIGHT = 3; // the falling coin must be this low above the sand
 const SNAIL_REST_MIN = 1.5; // rests between strolls
 const SNAIL_REST_MAX = 4;
+const HERMIT_CRAB_REST_MIN = 2; // the crab sits longer between its strolls
+const HERMIT_CRAB_REST_MAX = 6;
 
 // Pelican: perched on the back rim, near a corner (out of the way of the fish), facing the glass
 const PELICAN_PERCH_X = -0.36; // × the rim's length, from its middle (left of the tank seen from the front)
@@ -111,6 +114,7 @@ class CompanionServiceSingleton implements Lifecycle {
 		WaterHen: (entity) => this.waterHenLoop(entity),
 		Swordfish: (entity) => this.swordfishLoop(entity),
 		Jellyfish: (entity) => this.jellyfishLoop(entity),
+		HermitCrab: (entity) => this.hermitCrabLoop(entity),
 	};
 
 	public onInit() {
@@ -540,6 +544,28 @@ class CompanionServiceSingleton implements Lifecycle {
 				continue;
 			}
 			this.crawlStep(entity, strollTarget, SNAIL_STROLL_SPEED * boost);
+		}
+	}
+
+	/**
+	 * The Hermit Crab (ROADMAP_V1.2 §8) only strolls on the sand: its luck acts on the eggs (EggService), the time it
+	 * is equipped counts (playerData syncIncubationCrab), not where it is.
+	 */
+	private hermitCrabLoop(entity: CompanionEntity) {
+		let strollTarget: Vector3 | undefined;
+		let restUntil = 0;
+		while (entity.alive) {
+			if (os.clock() < restUntil) {
+				task.wait(0.2);
+				continue;
+			}
+			strollTarget ??= this.randomFloorPoint(entity);
+			if (flat(strollTarget.sub(entity.body.Position)).Magnitude < 0.5) {
+				strollTarget = undefined;
+				restUntil = os.clock() + this.rng.NextNumber(HERMIT_CRAB_REST_MIN, HERMIT_CRAB_REST_MAX);
+				continue;
+			}
+			this.crawlStep(entity, strollTarget, HERMIT_CRAB_STROLL_SPEED);
 		}
 	}
 

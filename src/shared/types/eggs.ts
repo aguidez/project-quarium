@@ -14,7 +14,8 @@ export type EggType =
 	| "Volcano"
 	| "Crystal"
 	| "Cosmic"
-	| "Aurora";
+	| "Aurora"
+	| "Sky";
 
 export interface EggOdds {
 	fishType: FishType;
@@ -195,6 +196,19 @@ export const EGG_TYPES: Record<EggType, EggConfig> = {
 		],
 		order: 13,
 		requires: "Cosmic",
+	},
+	// 1.2x rebirth 10 (tools/balance-v1.2-plan.js): bought with the end of run 10's money
+	Sky: {
+		displayName: "Sky Egg",
+		price: 770e12,
+		hatchTime: 180,
+		odds: [
+			{ fishType: "FoxBetta", chance: 25 },
+			{ fishType: "CloudWhale", chance: 55 },
+			{ fishType: "PegasusSeahorse", chance: 20 },
+		],
+		order: 14,
+		requires: "Aurora",
 	},
 };
 

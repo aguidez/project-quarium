@@ -1,5 +1,6 @@
 import { CompanionType } from "./companions";
 import { CosmeticId } from "./cosmetics";
+import { Perk } from "./perks";
 
 /**
  * Ocean milestones: Ocean Points (earned by releasing fish, never spent) unlock rewards at thresholds,
@@ -24,7 +25,10 @@ export type OceanRewardId =
 	| "PearlRims"
 	| "Aquarium25"
 	| "OceanGuardian"
-	| "Aquarium27";
+	| "Aquarium27"
+	| "HermitCrab"
+	| "Aquarium29"
+	| "QuickPantry";
 
 /**
  * A companion upgrade multiplies what the companion does: the Snail's crawling speed, the Pelican's
@@ -41,7 +45,9 @@ export type OceanReward =
 	/** The rare variants' chances are multiplied by this (getVariantLuck: nothing stored beyond the claimed id). */
 	| { kind: "VariantLuck"; multiplier: number }
 	/** Titles, decor or a tank finish (PlayerData.cosmetics): no effect on the economy. */
-	| { kind: "Cosmetic"; cosmetics: readonly CosmeticId[] };
+	| { kind: "Cosmetic"; cosmetics: readonly CosmeticId[] }
+	/** A permanent perk (PlayerData.perks), like a quest's: the Quick pantry's food refill. */
+	| { kind: "Perk"; perk: Perk };
 
 export interface OceanMilestone {
 	id: OceanRewardId;
@@ -193,6 +199,28 @@ export const OCEAN_MILESTONES: readonly OceanMilestone[] = [
 		title: "Glacier aquarium",
 		description: "Your aquarium holds 27 fish.",
 		reward: { kind: "Capacity", capacity: 27 },
+	},
+	// Reached during run 9 (~13h57): the variant luck companion (ROADMAP_V1.2 §8), free like the Water Hen
+	{
+		id: "HermitCrab",
+		points: 2500000,
+		title: "Hermit Crab",
+		description: "A new companion: the eggs that incubate with it hatch rare variants more often.",
+		reward: { kind: "Companion", companion: "HermitCrab" },
+	},
+	{
+		id: "Aquarium29",
+		points: 4000000,
+		title: "Sky aquarium",
+		description: "Your aquarium holds 29 fish.",
+		reward: { kind: "Capacity", capacity: 29 },
+	},
+	{
+		id: "QuickPantry",
+		points: 6000000,
+		title: "Quick pantry",
+		description: "A portion of your food reserve comes back in 7 seconds.",
+		reward: { kind: "Perk", perk: "FoodRefill3" },
 	},
 ];
 

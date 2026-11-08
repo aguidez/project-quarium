@@ -8,10 +8,12 @@ import { getCompanionSlots, getLivingVariant, getTotalFish } from "shared/types/
 import { FISH_VARIANTS, FishVariant, getOceanPoints } from "shared/types/variants";
 import { COMPANION_TYPES } from "shared/types/companions";
 import { getOceanMilestone } from "shared/types/oceanRewards";
+import { PERKS } from "shared/types/perks";
 import { CompanionService } from "./CompanionService";
 import { getTestSpeed } from "../playerStats";
 import { DataService } from "./DataService";
 import { FishService } from "./FishService";
+import { FoodService } from "./FoodService";
 import { QuestService } from "./QuestService";
 
 const isRelease = t.interface({
@@ -128,6 +130,17 @@ class OceanServiceSingleton implements Lifecycle {
 				subtitle: milestone.description,
 				amount: 0,
 				item: { icon: `x${reward.multiplier}`, name: milestone.title },
+			};
+		} else if (reward.kind === "Perk") {
+			const perk = PERKS[reward.perk];
+			if (!data.perks.includes(reward.perk)) data.perks.push(reward.perk);
+			DataService.sync(player);
+			if (perk.foodRefillTime !== undefined || perk.foodSlots !== undefined) FoodService.publishReserve(player);
+			celebration = {
+				title: "Ocean reward!",
+				subtitle: perk.description,
+				amount: 0,
+				item: { icon: perk.label, name: milestone.title },
 			};
 		} else if (reward.kind === "Cosmetic") {
 			for (const cosmetic of reward.cosmetics) DataService.addCosmetic(player, cosmetic); // syncs

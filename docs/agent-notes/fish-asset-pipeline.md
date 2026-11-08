@@ -89,3 +89,27 @@ with `tools/blender/studio/export_fish.luau` + `tools/obj-receiver.js`, upload w
   with the head of a fox: two large triangular fox ears standing straight up ...") or the generator draws a plain fish
   in the animal's colours; check every candidate for a thin dark stick at the face (a fox-fish had one: rejected).
   The owner dropped the Penguin Puffer for a Fox Betta.
+- **2026-11-08 (V1.2 M4: Cloud Whale, Pegasus Seahorse, Hermit Crab, Sky Archipelago)**:
+  - **Raw mesh vs generated model**: a generated model may hold its MeshPart turned (the first crab showed its face on
+    world -X, its raw mesh faced -Z). Templates and rigs work on the **raw** mesh: build the template with the MeshPart at
+    identity in the Body (no `rel` rotation, no yaw), check the face with a capture from -Z, and check an exported OBJ with a
+    scan (two claws must fall on the side axis, symmetric) before rigging.
+  - **A part that must never move** (the owner, about the crab's shell: "don't animate the shell"): keep it on the root
+    bone and nothing else. Find its extent with a scan of the vertices coloured by their texture (UV -> pixel), keep every
+    moving box clear of it with a short fade, then **prove it**: in Blender, the max moving weight on the part's vertices
+    must be 0, and a pixel diff of two preview frames (white where pixels change) must show nothing on it. The first crab
+    candidate (a shell covered in round bumps) looked like "pustules" once animated: prefer smooth shapes for anything
+    that moves. A colour filter on a shaded texture misses the dark tones: read what it flags before concluding.
+  - "a cloud coin with a golden sparkle in its center" gave a **star**: name only the shape you want. A feather lying
+    flat came out 0.05 thick: stand it up in the coin template (its face toward -Z).
+  - A whale reads better with an **up-and-down** fluke: FishConfig `stroke: "Vertical"` + design/rigs `"stroke"` (the
+    preview too). An upright seahorse can't use the fish rig (its length is vertical): a box rig with its own branch in
+    FishRigController (found by its `Curl` bone).
+  - Sticker sheets: Studio's axis gizmo (top-right of captures) falls inside rows 1–2 of the sheet; paint x > 1000, y < 340
+    to the backdrop colour in both captures before cutting. Empty rows crash fish-sticker-icons.js (use `rowTop` / `rows`
+    to cover only the filled ones). A Scriptable camera set in the same call as the sheet build may not hold: set it again
+    in a separate call before the capture.
+  - Rejected generations of this step (owner's account, archive in the Creator Dashboard if wanted): Cloud Whale A
+    72791660852423, Pegasus A 111998331410662, crabs 77720864614867 (A, the bumps), 74484774844341, 138048021018014,
+    130734970860281, the star-shaped "cloud" coin 131393861371572.
+

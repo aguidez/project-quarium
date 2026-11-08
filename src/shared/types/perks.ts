@@ -22,7 +22,11 @@ export type Perk =
 	| "Jellyfish3"
 	| "FoodRefill1"
 	| "FoodRefill2"
-	| "FoodSlot1";
+	| "FoodRefill3"
+	| "FoodSlot1"
+	| "HermitCrab1"
+	| "HermitCrab2"
+	| "HermitCrab3";
 
 export interface PerkConfig {
 	displayName: string;
@@ -58,6 +62,8 @@ export interface PerkConfig {
 	foodRefillTime?: number;
 	/** Portions the food reserve holds on top of FOOD_RESERVE_SLOTS. */
 	foodSlots?: number;
+	/** The Hermit Crab's variant luck with its full bonus (instead of HERMIT_CRAB_LUCK); the best one counts. */
+	crabLuck?: number;
 }
 
 export const PERKS: Record<Perk, PerkConfig> = {
@@ -203,6 +209,15 @@ export const PERKS: Record<Perk, PerkConfig> = {
 		bounce: false,
 		foodRefillTime: 8,
 	},
+	// The Quick pantry Ocean milestone (6,000,000 points, ROADMAP_V1.2 §6): the best refill wins
+	FoodRefill3: {
+		displayName: "Quick pantry",
+		label: "7s",
+		description: "A portion of your food reserve comes back in 7 seconds.",
+		groundTimeBonus: 0,
+		bounce: false,
+		foodRefillTime: 7,
+	},
 	FoodSlot1: {
 		displayName: "Bigger reserve",
 		label: "+1",
@@ -211,7 +226,39 @@ export const PERKS: Record<Perk, PerkConfig> = {
 		bounce: false,
 		foodSlots: 1,
 	},
+	// The Hermit Crab's free line (ROADMAP_V1.2 §8): eggs opened with its full bonus
+	HermitCrab1: {
+		displayName: "Lucky shell",
+		label: "x1.35",
+		description: "With your Hermit Crab, your eggs hatch rare variants x1.35 more often.",
+		groundTimeBonus: 0,
+		bounce: false,
+		crabLuck: 1.35,
+	},
+	HermitCrab2: {
+		displayName: "Lucky shell II",
+		label: "x1.45",
+		description: "With your Hermit Crab, your eggs hatch rare variants x1.45 more often.",
+		groundTimeBonus: 0,
+		bounce: false,
+		crabLuck: 1.45,
+	},
+	HermitCrab3: {
+		displayName: "Lucky shell III",
+		label: "x1.6",
+		description: "With your Hermit Crab, your eggs hatch rare variants x1.6 more often.",
+		groundTimeBonus: 0,
+		bounce: false,
+		crabLuck: 1.6,
+	},
 };
+
+/** The Hermit Crab's variant luck with its full bonus (HERMIT_CRAB_LUCK, or its best quest perk). */
+export function getCrabFullLuck(perks: readonly Perk[], base: number): number {
+	let luck = base;
+	for (const perk of perks) luck = math.max(luck, PERKS[perk].crabLuck ?? base);
+	return luck;
+}
 
 /** The player's food reserve: portions it holds and seconds a used one takes to come back (FoodService, the HUD). */
 export function getFoodReserve(perks: readonly Perk[]): { slots: number; refillTime: number } {

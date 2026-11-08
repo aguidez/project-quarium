@@ -13,9 +13,11 @@ import { isGamePass } from "shared/types/gamepasses";
 import {
 	DEFAULT_INCUBATORS,
 	DEFAULT_PLAYER_DATA,
+	EggCrabTime,
 	getCompanionSlots,
 	MAX_MONEY,
 	PlayerData,
+	syncIncubationCrab,
 	syncIncubationSpeed,
 } from "shared/types/playerData";
 import {
@@ -111,6 +113,26 @@ function sanitizeIncubating(incubating: unknown): PlayerData["incubating"] {
 	return result;
 }
 
+/**
+ * The Hermit Crab's time on the incubating eggs, kept parallel to `incubating` (same type, same index); an entry
+ * missing or broken (older saves) starts at its hatch time with no crab time: a share of 0.
+ */
+function sanitizeEggCrab(eggCrab: unknown, incubating: PlayerData["incubating"]): PlayerData["eggCrab"] {
+	const result: PlayerData["eggCrab"] = {};
+	const saved = typeIs(eggCrab, "table") ? (eggCrab as Record<string, unknown>) : {};
+	for (const [eggType, eggs] of pairs(incubating)) {
+		const list = typeIs(saved[eggType], "table") ? (saved[eggType] as unknown[]) : [];
+		const times = new Array<EggCrabTime>();
+		for (let i = 0; i < eggs.size(); i++) {
+			const entry = list[i] as Partial<EggCrabTime> | undefined;
+			const valid = typeIs(entry, "table") && isCount(entry.start) && isCount(entry.crab);
+			times.push(valid ? { start: entry.start!, crab: entry.crab! } : { start: eggs[i], crab: 0 });
+		}
+		result[eggType] = times;
+	}
+	return result;
+}
+
 /** The single story chain of saves made before story lines, in its order. */
 const OLD_STORY_ORDER = ["Story1", "Story2", "Story3", "Story4", "Story5"];
 
@@ -181,6 +203,10 @@ export function sanitizeSave(save: SaveData) {
 	}
 	data.hatchedVariants = hatchedVariants;
 	data.incubating = sanitizeIncubating(data.incubating);
+	// The saved lists are already sorted (DataService keeps them so), so the crab's times stay paired with them
+	data.eggCrab = sanitizeEggCrab(data.eggCrab, data.incubating);
+	if (!typeIs(data.crabEquipped, "boolean")) data.crabEquipped = false;
+	if (!isCount(data.crabSyncedAt)) data.crabSyncedAt = Workspace.GetServerTimeNow();
 	data.incubators = isCount(data.incubators)
 		? math.max(math.floor(data.incubators), DEFAULT_INCUBATORS)
 		: DEFAULT_INCUBATORS;
@@ -224,6 +250,8 @@ export function sanitizeSave(save: SaveData) {
 	data.equippedCompanions = equipped;
 	// The eggs ran offline at the speed they had at the disconnection; from now on, at the speed of what is equipped
 	if (!typeIs(data.incubationMultiplier, "number") || !(data.incubationMultiplier > 0)) data.incubationMultiplier = 1;
+	// The Hermit Crab's time offline first (it stayed equipped while away), then the Water Hen's speed
+	syncIncubationCrab(data, Workspace.GetServerTimeNow());
 	syncIncubationSpeed(data, Workspace.GetServerTimeNow());
 	data.features = data.features.filter((f) => FEATURES[f] !== undefined);
 	// Leaderboard titles are held through leaderboardRanks, never owned

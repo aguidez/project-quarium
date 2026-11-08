@@ -57,6 +57,7 @@ def convert(repo, fish, render=True):
     settings_path = os.path.join(repo, "design", "rigs", fish + ".json")
     settings = json.load(open(settings_path)) if os.path.exists(settings_path) else {}
     speed = settings.pop("speed", 1.0)
+    stroke = settings.pop("stroke", "side")  # "vertical": a whale's up-and-down beat (preview only, the rig is the same)
     # A companion that isn't a fish has its own rig script ("rig": "jellyfish" -> rig_jellyfish.py, with
     # rig_<kind>(obj, settings) and add_preview_action(arm, speed))
     kind = settings.pop("rig", "fish")
@@ -78,7 +79,7 @@ def convert(repo, fish, render=True):
         elif special:
             special["add_preview_action"](arm, speed)
         else:
-            preview["add_swim_action"](arm, speed)
+            preview["add_swim_action"](arm, speed, {"stroke": stroke})
         if render:
             preview["render_preview"](obj, arm, os.path.join(work, fish + "_frames"), view="three_quarter",
                                       size=(480, 300))

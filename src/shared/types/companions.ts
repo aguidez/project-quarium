@@ -3,7 +3,7 @@
  * Immortal, they never eat and don't drop coins like a fish: each one has its own ability
  * that changes how the player plays. Only `companionSlots` of them can be equipped at once.
  */
-export type CompanionType = "Snail" | "Pelican" | "WaterHen" | "Swordfish" | "Jellyfish";
+export type CompanionType = "Snail" | "Pelican" | "WaterHen" | "Swordfish" | "Jellyfish" | "HermitCrab";
 
 export interface CompanionConfig {
 	displayName: string;
@@ -46,6 +46,14 @@ export const COMPANION_TYPES: Record<CompanionType, CompanionConfig> = {
 		image: "rbxassetid://96894492239649", // design/ui/companions/Companion_Jellyfish.png
 		ability: "Drifts in the water and drops food right above your hungry fish, as soon as they need it.",
 	},
+	// V1.2 (ROADMAP_V1.2 §8): free from the Ocean (2,500,000 points), its own free quest line
+	HermitCrab: {
+		displayName: "Hermit Crab",
+		icon: "",
+		image: "rbxassetid://80684129801833", // design/ui/companions/Companion_HermitCrab.png
+		ability:
+			"Strolls on the sand of your aquarium. The eggs that incubate while it is equipped hatch rare variants more often.",
+	},
 };
 
 /** Seconds between two pellets the Pelican throws into its owner's aquarium. */
@@ -73,6 +81,17 @@ export const SWORDFISH_CRUISE_SPEED = 2;
 export const PELICAN_LEAN = math.rad(32);
 export const JELLYFISH_CHARGES = 2;
 export const JELLYFISH_PELLETS = 2;
+
+/**
+ * The Hermit Crab's variant luck (ROADMAP_V1.2 §8): the eggs that incubate with it equipped get x(1 + bonus x the
+ * share of their incubation spent with it) on every rare variant's chance, Galaxy included (getCrabLuck in
+ * playerData.ts). Its free quests raise the bonus (perks.ts crabLuck: x1.35, x1.45, x1.6).
+ */
+export const HERMIT_CRAB_LUCK = 1.25;
+/** Share of an egg's incubation spent with the crab from which it got "its full bonus" (its quests count those eggs). */
+export const HERMIT_CRAB_FULL_SHARE = 0.999;
+/** Studs/s the Hermit Crab strolls at on the sand (CompanionService; FishRigController reads its pace). */
+export const HERMIT_CRAB_STROLL_SPEED = 1.1;
 
 /** Companions a player can have in their aquarium at first; PlayerData.companionSlots grows with progression. */
 export const DEFAULT_COMPANION_SLOTS = 1;

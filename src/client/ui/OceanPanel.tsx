@@ -6,6 +6,7 @@ import { FISH_VARIANTS, FishVariant, getOceanPoints, VARIANT_ORDER } from "share
 import { formatSize } from "shared/types/size";
 import { getPassOceanMultiplier } from "shared/types/gamepasses";
 import { COMPANION_TYPES } from "shared/types/companions";
+import { PERKS } from "shared/types/perks";
 import {
 	OCEAN_MILESTONES,
 	OceanMilestone,
@@ -298,7 +299,9 @@ function MilestoneCard(props: {
 					? `x${reward.multiplier}`
 					: reward.kind === "Cosmetic"
 						? "NEW"
-						: "+1";
+						: reward.kind === "Perk"
+							? PERKS[reward.perk].label
+							: "+1";
 	const progress = math.clamp(props.oceanPoints / milestone.points, 0, 1);
 	const descriptionHeight = getWrappedHeight(milestone.description, 13, FONT_BOLD, MILESTONE_INFO_WIDTH);
 	return (

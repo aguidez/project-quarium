@@ -1,7 +1,12 @@
 import { CollectionService, RunService, Workspace } from "@rbxts/services";
 import { Lifecycle } from "shared/framework";
 import { TAGS } from "shared/tags";
-import { PELICAN_LEAN, SNAIL_STROLL_SPEED, SWORDFISH_CRUISE_SPEED } from "shared/types/companions";
+import {
+	HERMIT_CRAB_STROLL_SPEED,
+	PELICAN_LEAN,
+	SNAIL_STROLL_SPEED,
+	SWORDFISH_CRUISE_SPEED,
+} from "shared/types/companions";
 import { FISH_TYPES, FishType, HungerState } from "shared/types/fish";
 
 /**
@@ -115,6 +120,24 @@ const HEN_HEAD_NOD = math.rad(6);
 const HEN_WING_RUFFLE = math.rad(3); // at rest, + HEN_WING_PADDLE while paddling
 const HEN_WING_PADDLE = math.rad(5);
 const HEN_TAIL_FLICK = math.rad(10);
+// The Pegasus Seahorse (V1.2, design/rigs/PegasusSeahorse.json, a box rig: Torso the root, Head, WingL/R, Curl): it
+// swims upright, so no spine wave: its body rocks and bobs, its head nods, its small wings flap (on the pectoral
+// beat), its curled tail sways on the swim beat; weak, its wings hang
+const SEAHORSE_ROCK = math.rad(4);
+const SEAHORSE_BOB = 0.04; // × its height
+const SEAHORSE_HEAD_NOD = math.rad(5);
+const SEAHORSE_WING_FLAP = math.rad(30);
+const SEAHORSE_WING_SWEEP = math.rad(10);
+const SEAHORSE_WING_RATE = 2; // × the pectoral phase (a whole number: the phase wraps at 2π without a jump)
+const SEAHORSE_WING_DROOP = math.rad(25);
+const SEAHORSE_CURL_SWAY = math.rad(10);
+// The Hermit Crab companion (V1.2, design/rigs/HermitCrab.json, a box rig: Torso the root, Head, ClawL/R, LegsL/R):
+// as it strolls (the Snail's crawl phase, at its pace), its legs shuffle in turn; its head nods and its claws pinch
+// gently all the time, always low (CLAUDE.md §7: never raised). Its shell never moves (the owner's rule): it is on
+// the root, which nothing turns
+const CRAB_LEG_SHUFFLE = math.rad(12);
+const CRAB_HEAD_NOD = math.rad(4);
+const CRAB_CLAW_PINCH = math.rad(9);
 // Side letter of a rim / tentacle bone -> its direction from the axis, in mesh space (front -Z, right +X)
 const JELLY_SIDES: Record<string, Vector3> = {
 	F: new Vector3(0, 0, -1),
@@ -263,7 +286,7 @@ class FishRigControllerSingleton implements Lifecycle {
 		task.spawn(() => {
 			const mesh = model.WaitForChild("Mesh", 10);
 			if (!mesh || !mesh.IsA("MeshPart") || !model.Parent) return;
-			const bones = this.findBones(mesh, model.GetAttribute("CompanionType"));
+			const bones = this.findBones(mesh, model.GetAttribute("CompanionType"), model.GetAttribute("FishType"));
 			if (bones.size() === 0) {
 				warn(`[Client] ${model.Name} says Rig = "Bones" but its Mesh has no bones: it won't swim.`);
 				return;
@@ -313,14 +336,20 @@ class FishRigControllerSingleton implements Lifecycle {
 		const companion = model.GetAttribute("CompanionType");
 		if (companion === "Swordfish") return SWORDFISH_CRUISE_SPEED;
 		if (companion === "Snail") return SNAIL_STROLL_SPEED;
+		if (companion === "HermitCrab") return HERMIT_CRAB_STROLL_SPEED;
 		const config = FISH_TYPES[model.GetAttribute("FishType") as FishType] as (typeof FISH_TYPES)[FishType] | undefined;
 		if (config) return (config.speedMin + config.speedMax) / 2;
 		return math.max(mesh.Size.Z * 0.8, 1);
 	}
 
 	/** The bones of the fish rig (tools/blender/rig_fish.py names), with their axis and motion. */
-	private findBones(mesh: MeshPart, companion: unknown): DrivenBone[] {
+	private findBones(mesh: MeshPart, companion: unknown, fishType: unknown): DrivenBone[] {
 		if (companion === "Pelican" || companion === "WaterHen") return this.findBirdBones(mesh, companion);
+		if (companion === "HermitCrab") return this.findCrabBones(mesh);
+		if (mesh.FindFirstChild("Curl", true)?.IsA("Bone")) return this.findSeahorseBones(mesh);
+		// A whale (FishConfig.stroke "Vertical"): its spine wave beats up and down, its turns still bend it sideways
+		const config = FISH_TYPES[fishType as FishType] as (typeof FISH_TYPES)[FishType] | undefined;
+		const vertical = config?.stroke === "Vertical";
 		const found = new Array<DrivenBone>();
 		const finTop = mesh.FindFirstChild("FinTop", true);
 		const finT = finTop?.IsA("Bone") ? boneT(mesh, finTop) : 0.5;
@@ -336,16 +365,25 @@ class FishRigControllerSingleton implements Lifecycle {
 				const peak = spinePeak(t, spine.size());
 				const lag = t * BODY_WAVE;
 				const share = tSum > 0 ? t / tSum : 1 / spine.size();
-				found.push({
-					bone,
-					axis: boneAxis(mesh, bone, UP),
-					drive: (f) =>
-						f.amount * peak * math.sin(f.swim - lag) +
-						f.wiggleAmount * peak * math.sin(f.wiggle - lag) +
-						(f.bend + f.jerk) * share,
-					tiltAxis: boneAxis(mesh, bone, SIDE),
-					tilt: (f) => f.droop * WEAK_TAIL_SAG * share,
-				});
+				const wave = (f: RiggedFish) =>
+					f.amount * peak * math.sin(f.swim - lag) + f.wiggleAmount * peak * math.sin(f.wiggle - lag);
+				found.push(
+					vertical
+						? {
+								bone,
+								axis: boneAxis(mesh, bone, SIDE),
+								drive: (f) => wave(f) + f.droop * WEAK_TAIL_SAG * share,
+								tiltAxis: boneAxis(mesh, bone, UP),
+								tilt: (f) => (f.bend + f.jerk) * share,
+							}
+						: {
+								bone,
+								axis: boneAxis(mesh, bone, UP),
+								drive: (f) => wave(f) + (f.bend + f.jerk) * share,
+								tiltAxis: boneAxis(mesh, bone, SIDE),
+								tilt: (f) => f.droop * WEAK_TAIL_SAG * share,
+							},
+				);
 			} else if (name === "Bell") {
 				// the root: the whole jellyfish rises with each squeeze and sways slowly
 				const up = boneAxis(mesh, bone, UP);
@@ -433,6 +471,83 @@ class FishRigControllerSingleton implements Lifecycle {
 					bone,
 					axis: boneAxis(mesh, bone, SIDE),
 					drive: (f) => -(f.amount * JAW_OPEN * math.max(0, math.sin(f.mouth)) ** 2 + f.bite * BITE_JAW),
+				});
+			}
+		}
+		return found;
+	}
+
+	/** The Hermit Crab's bones (tools/blender/rig_boxes.py, design/rigs/HermitCrab.json). */
+	private findCrabBones(mesh: MeshPart): DrivenBone[] {
+		const found = new Array<DrivenBone>();
+		for (const bone of mesh.GetDescendants()) {
+			if (!bone.IsA("Bone")) continue;
+			const name = bone.Name;
+			if (name === "LegsL" || name === "LegsR") {
+				const offset = name === "LegsR" ? math.pi : 0; // one side then the other
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, LENGTH),
+					drive: (f) => f.crawlAmount * CRAB_LEG_SHUFFLE * math.sin(f.crawl * 2 + offset),
+				});
+			} else if (name === "Head") {
+				found.push({ bone, axis: boneAxis(mesh, bone, SIDE), drive: (f) => CRAB_HEAD_NOD * math.sin(f.nod) });
+			} else if (name === "ClawL" || name === "ClawR") {
+				const sign = name === "ClawR" ? -1 : 1;
+				const lag = name === "ClawR" ? 1.2 : 0;
+				// a small turn around the vertical: the claw opens and closes sideways, it never lifts
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, UP),
+					drive: (f) => sign * CRAB_CLAW_PINCH * math.sin(f.eyes * 2 - lag),
+				});
+			}
+		}
+		return found;
+	}
+
+	/** The Pegasus Seahorse's bones (tools/blender/rig_boxes.py, design/rigs/PegasusSeahorse.json). */
+	private findSeahorseBones(mesh: MeshPart): DrivenBone[] {
+		const found = new Array<DrivenBone>();
+		for (const bone of mesh.GetDescendants()) {
+			if (!bone.IsA("Bone")) continue;
+			const name = bone.Name;
+			if (name === "Torso") {
+				const up = boneAxis(mesh, bone, UP);
+				const bob = SEAHORSE_BOB * mesh.Size.Y;
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, SIDE),
+					drive: (f) => SEAHORSE_ROCK * math.sin(f.breath),
+					offset: (f) => up.mul(bob * math.sin(f.breath * 2)),
+				});
+			} else if (name === "Head") {
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, SIDE),
+					drive: (f) => SEAHORSE_HEAD_NOD * (math.sin(f.nod) + f.bite),
+				});
+			} else if (name === "WingL" || name === "WingR") {
+				const sign = name === "WingR" ? 1 : -1;
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, LENGTH),
+					drive: (f) =>
+						sign *
+						(f.finAmount * (1 + f.flare) * SEAHORSE_WING_FLAP * math.sin(f.fin * SEAHORSE_WING_RATE) -
+							f.droop * SEAHORSE_WING_DROOP),
+					tiltAxis: boneAxis(mesh, bone, UP),
+					tilt: (f) => sign * f.finAmount * SEAHORSE_WING_SWEEP * math.sin(f.fin * SEAHORSE_WING_RATE - 1.2),
+				});
+			} else if (name === "Curl") {
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, SIDE),
+					drive: (f) =>
+						f.amount * SEAHORSE_CURL_SWAY * math.sin(f.swim - 1.5) +
+						f.wiggleAmount * SEAHORSE_CURL_SWAY * math.sin(f.wiggle),
+					tiltAxis: boneAxis(mesh, bone, UP),
+					tilt: (f) => f.bend * 0.5,
 				});
 			}
 		}

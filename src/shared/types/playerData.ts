@@ -1,4 +1,4 @@
-import { CompanionType, DEFAULT_COMPANION_SLOTS, WATER_HEN_HATCH_MULTIPLIER } from "./companions";
+import { CompanionType, DEFAULT_COMPANION_SLOTS, HERMIT_CRAB_LUCK, WATER_HEN_HATCH_MULTIPLIER } from "./companions";
 import { CosmeticId } from "./cosmetics";
 import type { ThemeChoice, TitleChoice } from "./customization";
 import { EGG_TYPES, EggType } from "./eggs";
@@ -7,7 +7,7 @@ import { DEFAULT_FISH_CAPACITY, FishType } from "./fish";
 import { OnboardingStep } from "./onboarding";
 import { createQuestsData, QuestsData } from "./quests";
 import { getVariantLuck, OceanRewardId } from "./oceanRewards";
-import { getPerkHatchMultiplier, Perk } from "./perks";
+import { getCrabFullLuck, getPerkHatchMultiplier, Perk } from "./perks";
 import { FishVariant, GALAXY_PASS_LUCK } from "./variants";
 import type { LeaderboardId } from "./leaderboards";
 import { GamePass, getPassCompanionSlots, getPassVariantLuck } from "./gamepasses";
@@ -46,6 +46,14 @@ export interface PlayerData {
 	 * syncIncubationSpeed): the Water Hen speeds up the eggs live, and they keep running at that speed offline.
 	 */
 	incubationMultiplier: number;
+	/**
+	 * The Hermit Crab's time on each incubating egg (ROADMAP_V1.2 §8), parallel to `incubating` (same type, same
+	 * index): when the egg was bought and the seconds of its incubation spent with the crab equipped. Credited by
+	 * syncIncubationCrab from `crabSyncedAt` while `crabEquipped` (the crab's state since then), so it runs offline too.
+	 */
+	eggCrab: Partial<Record<EggType, EggCrabTime[]>>;
+	crabEquipped: boolean;
+	crabSyncedAt: number;
 	/** Eggs of the same type that can incubate at once (Ocean milestone "Incubator"), kept through rebirths. */
 	incubators: number;
 	/** Eggs bought so far, per type: buying one unlocks the next egg of the shop (see isEggUnlocked). */
@@ -115,6 +123,12 @@ export interface PlayerData {
 	passes: GamePass[];
 }
 
+/** An incubating egg's time with the Hermit Crab: bought at `start` (server time), `crab` seconds with it so far. */
+export interface EggCrabTime {
+	start: number;
+	crab: number;
+}
+
 export const DEFAULT_PLAYER_DATA: PlayerData = {
 	money: 0, // the first egg is free and the onboarding gives ONBOARDING_REWARD
 	fish: {
@@ -137,6 +151,8 @@ export const DEFAULT_PLAYER_DATA: PlayerData = {
 		BunnyShark: 0,
 		MiniLeviathan: 0,
 		FoxBetta: 0,
+		CloudWhale: 0,
+		PegasusSeahorse: 0,
 		FrenchFish: 0,
 		AlienFish: 0,
 		Sugar: 0,
@@ -146,6 +162,9 @@ export const DEFAULT_PLAYER_DATA: PlayerData = {
 	bestSize: {},
 	incubating: {},
 	incubationMultiplier: 1,
+	eggCrab: {},
+	crabEquipped: false,
+	crabSyncedAt: 0,
 	incubators: DEFAULT_INCUBATORS,
 	eggsBought: {},
 	onboarding: "EnterView",
@@ -245,6 +264,51 @@ export function syncIncubationSpeed(
 		}
 	}
 	return true;
+}
+
+type CrabData = Pick<PlayerData, "incubating" | "eggCrab" | "crabEquipped" | "crabSyncedAt" | "equippedCompanions">;
+
+/** Seconds of [from, to] an egg bought at `start` hatching at `hatchAt` spent incubating. */
+function incubationOverlap(start: number, hatchAt: number, from: number, to: number): number {
+	return math.max(0, math.min(to, hatchAt) - math.max(from, start));
+}
+
+/**
+ * Credits the Hermit Crab's time to the incubating eggs (ROADMAP_V1.2 §8): if it was equipped since `crabSyncedAt`,
+ * every egg gets the part of [crabSyncedAt, now] it spent incubating (the wait once ready doesn't count); then the
+ * state follows what is equipped now. DataService.sync runs it on every change (the crab equipped or not), the save's
+ * load runs it for the time offline (the crab stays equipped while away, like the Water Hen's speed).
+ */
+export function syncIncubationCrab(data: CrabData, now: number) {
+	if (data.crabEquipped && now > data.crabSyncedAt) {
+		for (const [eggType, eggs] of pairs(data.incubating)) {
+			const times = data.eggCrab[eggType];
+			if (!times) continue;
+			for (let i = 0; i < eggs.size(); i++) {
+				const time = times[i];
+				if (time) time.crab += incubationOverlap(time.start, eggs[i], data.crabSyncedAt, now);
+			}
+		}
+	}
+	data.crabSyncedAt = now;
+	data.crabEquipped = data.equippedCompanions.includes("HermitCrab");
+}
+
+/** Share (0..1) of an incubating egg's incubation spent with the crab, now included (the egg slot shows it). */
+export function getCrabShare(data: CrabData, eggType: EggType, index: number, now: number): number {
+	const hatchAt = data.incubating[eggType]?.[index];
+	const time = data.eggCrab[eggType]?.[index];
+	if (hatchAt === undefined || !time) return 0;
+	const total = hatchAt - time.start;
+	if (!(total > 0)) return 0;
+	let crab = time.crab;
+	if (data.crabEquipped) crab += incubationOverlap(time.start, hatchAt, data.crabSyncedAt, now);
+	return math.clamp(crab / total, 0, 1);
+}
+
+/** The variant luck the Hermit Crab gives an egg: 1 + its bonus x the share of the incubation spent with it. */
+export function getCrabLuck(data: CrabData & Pick<PlayerData, "perks">, eggType: EggType, index: number, now: number) {
+	return 1 + (getCrabFullLuck(data.perks, HERMIT_CRAB_LUCK) - 1) * getCrabShare(data, eggType, index, now);
 }
 
 export function getTotalFish(data: PlayerData): number {

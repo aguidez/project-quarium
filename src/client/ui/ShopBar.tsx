@@ -3,6 +3,7 @@ import { Workspace } from "@rbxts/services";
 import { EGG_TYPES, EggType, getEggPrice, STARTER_EGG } from "shared/types/eggs";
 import { canBuyEggs } from "shared/types/onboarding";
 import {
+	getCrabShare,
 	getFishAndEggs,
 	getIncubating,
 	getTotalFish,
@@ -10,6 +11,7 @@ import {
 	isEggUnlocked,
 	PlayerData,
 } from "shared/types/playerData";
+import { COMPANION_TYPES } from "shared/types/companions";
 import { EggSlot, SLOT_SIZE } from "./EggSlot";
 import { Button3D, NotifBadge, Outline } from "./kit";
 import { MONEY_COUNTER_SIZE, MoneyCounter } from "./MoneyCounter";
@@ -200,6 +202,12 @@ export function ShopBar(props: ShopBarProps) {
 				onBuy={() => props.onBuy(eggType)}
 				onOpen={() => props.onOpen(eggType)}
 				aquariumFull={aquariumFull}
+				crabShare={
+					data && eggs.size() > 0 && data.companions.includes("HermitCrab")
+						? () => getCrabShare(data, eggType, 0, Workspace.GetServerTimeNow())
+						: undefined
+				}
+				crabImage={COMPANION_TYPES.HermitCrab.image}
 			/>,
 		);
 	});

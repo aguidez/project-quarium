@@ -264,6 +264,30 @@
       0.03
     ]
   },
+  "CloudWhale": {
+    "Anomaly": [
+      120,
+      1,
+      0
+    ],
+    "Shiny": [
+      180,
+      1.15,
+      0.03
+    ]
+  },
+  "PegasusSeahorse": {
+    "Anomaly": [
+      180,
+      1,
+      0
+    ],
+    "Shiny": [
+      300,
+      1.15,
+      0.03
+    ]
+  },
   "_colorMaps": {
     "Basic": {
       "Normal": "rbxassetid://78123515869414",
@@ -373,6 +397,18 @@
       "Anomaly": "rbxassetid://101087417715567",
       "Shiny": "rbxassetid://94337674944982",
       "Galaxy": "rbxassetid://129116268268779"
+    },
+    "CloudWhale": {
+      "Normal": "rbxassetid://76741884060430",
+      "Anomaly": "rbxassetid://96553553714468",
+      "Shiny": "rbxassetid://109527443646643",
+      "Galaxy": "rbxassetid://113525669841437"
+    },
+    "PegasusSeahorse": {
+      "Normal": "rbxassetid://76904054713164",
+      "Anomaly": "rbxassetid://132763601558295",
+      "Shiny": "rbxassetid://114715155542901",
+      "Galaxy": "rbxassetid://119496813416589"
     }
   }
 }

@@ -11,6 +11,32 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.22 — 2026-11-08
+
+**The Voyage goes on: a tenth aquarium, in the sky.**
+
+**New**
+- **Rebirth 10: the Sky Archipelago** (640T, coins x120,000): floating islands with their waterfalls, clouds on the
+  sand and a little marble arch, under a sunset sky.
+- **The Cloud Whale**, a new Legendary species: a baby whale covered in clouds, who beats its tail up and down like a
+  real whale. It drops little clouds worth 33.6M every 20 seconds.
+- **The Pegasus Seahorse**, a new Mythic species: a white seahorse with small wings and a golden mane, swimming
+  upright and flapping its wings. It drops soft feathers worth 100.8M every 30 seconds.
+- Both have their Anomaly, Ghost, Shiny and Galaxy looks.
+- **The Sky Egg** (770T): Fox Betta 25 %, Cloud Whale 55 %, Pegasus Seahorse 20 %.
+- **The Hermit Crab**, a new free companion (Ocean milestone 2,500,000 points): it strolls on the sand, and the eggs
+  that incubate while it is equipped hatch rare variants x1.25 more often (the Galaxy too). Its luck counts the time
+  each egg really spent with it: equipped for half the incubation, half the bonus; equipped only to open a ready egg,
+  nothing. A small crab mark on the egg slot shows how much of the egg's time it was there for.
+- **The Hermit Crab's quest line** (free): open 100 / 300 / 800 eggs that incubated with it all the way, for x1.35 /
+  x1.45 / x1.6.
+- New Ocean milestones: 4,000,000 points, the aquarium holds **29 fish**; 6,000,000 points, **Quick pantry**: a portion
+  of the food reserve comes back in 7 seconds.
+- Voyage quests "Above the Clouds" (rebirth 10: 900,000 Ocean Points) and "Winged Wonder" (hatch a Pegasus Seahorse: 5
+  minutes of income).
+
+---
+
 ## V1.1.21 — 2026-11-08
 
 **The Voyage goes on: a ninth aquarium.**

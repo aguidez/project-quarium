@@ -6,6 +6,8 @@ import { EggHatch, getRemoteEvent } from "shared/network";
 import { EGG_TYPES, EggType, getEggPrice, HATCH_REVEAL_TIME, rollEgg } from "shared/types/eggs";
 import { canBuyEggs, isOnboardingEggStep, ONBOARDING_FISH } from "shared/types/onboarding";
 import {
+	getCrabLuck,
+	getCrabShare,
 	getFishAndEggs,
 	getHatchedVariant,
 	getIncubating,
@@ -14,8 +16,10 @@ import {
 	getTotalFish,
 	hasFreeIncubator,
 	isEggUnlocked,
+	syncIncubationCrab,
 	syncIncubationSpeed,
 } from "shared/types/playerData";
+import { HERMIT_CRAB_FULL_SHARE } from "shared/types/companions";
 import { FishType, isEasterEgg } from "shared/types/fish";
 import { rollStarVariant } from "shared/types/stars";
 import { FishVariant, rollVariant } from "shared/types/variants";
@@ -122,8 +126,14 @@ class EggServiceSingleton implements Lifecycle {
 		const fishType = onboardingEgg ? ONBOARDING_FISH : (forced ?? rollEgg(eggType, this.rng));
 		// Then its variant (the tutorial's fish is always a normal one, so it looks like the tutorial says;
 		// an easter egg fish has none, and leaves the star power for the next egg)
-		const luck = getPlayerVariantLuck(data);
-		const galaxyLuck = getPlayerGalaxyLuck(data);
+		// The Hermit Crab (ROADMAP_V1.2 §8): its luck by the share of this egg's incubation spent with it, credited
+		// up to now (equipping it only to open a ready egg gives nothing)
+		const now = Workspace.GetServerTimeNow();
+		syncIncubationCrab(data, now);
+		const crabShare = getCrabShare(data, eggType, 0, now);
+		const crabLuck = getCrabLuck(data, eggType, 0, now);
+		const luck = getPlayerVariantLuck(data) * crabLuck;
+		const galaxyLuck = getPlayerGalaxyLuck(data) * crabLuck;
 		const plain = onboardingEgg || isEasterEgg(fishType);
 		const starPowered = !plain && data.starPower > 0;
 		const variant: FishVariant = plain
@@ -148,15 +158,18 @@ class EggServiceSingleton implements Lifecycle {
 		// The Water Hen's line counts the eggs opened with it equipped
 		if (data.equippedCompanions.includes("WaterHen"))
 			QuestService.addProgress(player, "CompanionStat", 1, { companion: "WaterHen" });
+		// The Hermit Crab's line counts the eggs that got its full bonus (incubated with it all the way)
+		if (crabShare >= HERMIT_CRAB_FULL_SHARE)
+			QuestService.addProgress(player, "CompanionStat", 1, { companion: "HermitCrab" });
 
 		// The fish joins the tank once its reveal has played, after any reveal still queued
-		const now = os.clock();
-		const revealEnd = math.max(now, this.revealsEndAt.get(player) ?? 0) + HATCH_REVEAL_TIME;
+		const clock = os.clock();
+		const revealEnd = math.max(clock, this.revealsEndAt.get(player) ?? 0) + HATCH_REVEAL_TIME;
 		this.revealsEndAt.set(player, revealEnd);
 
 		const hatch: EggHatch = { eggType, fishType, variant, firstTime, size, newBestSize, starPowered };
 		this.hatchRemote.FireClient(player, hatch);
-		task.delay(revealEnd - now, () =>
+		task.delay(revealEnd - clock, () =>
 			FishService.spawnFish(player, fishType, undefined, variant, undefined, false, size),
 		);
 	}

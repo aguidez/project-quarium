@@ -8,7 +8,7 @@ import { EggType } from "shared/types/eggs";
 import { Feature } from "shared/types/features";
 import { FishType } from "shared/types/fish";
 import { OnboardingStep } from "shared/types/onboarding";
-import { getTotalFish, MAX_MONEY, PlayerData, syncIncubationSpeed } from "shared/types/playerData";
+import { getTotalFish, MAX_MONEY, PlayerData, syncIncubationCrab, syncIncubationSpeed } from "shared/types/playerData";
 import { FishVariant } from "shared/types/variants";
 import { createPlayerStats } from "../playerStats";
 import { SAVE_TEMPLATE, SaveData, sanitizeSave } from "../saveData";
@@ -161,6 +161,8 @@ class DataServiceController implements Lifecycle {
 	public sync(player: Player) {
 		const data = this.getData(player);
 		if (!data) return;
+		// The Hermit Crab's time so far first (with the state it had), then the Water Hen's speed
+		syncIncubationCrab(data, Workspace.GetServerTimeNow());
 		syncIncubationSpeed(data, Workspace.GetServerTimeNow());
 		this.syncRemote.FireClient(player, data);
 	}
@@ -244,10 +246,17 @@ class DataServiceController implements Lifecycle {
 		const data = this.getData(player);
 		if (!data) return;
 
+		// Soonest first, with the Hermit Crab's time on it at the same index (credited from now on)
+		const now = Workspace.GetServerTimeNow();
+		syncIncubationCrab(data, now);
 		const eggs = data.incubating[eggType] ?? [];
-		eggs.push(hatchAt);
-		eggs.sort((a, b) => a < b);
+		const times = data.eggCrab[eggType] ?? [];
+		let index = 0;
+		while (index < eggs.size() && eggs[index] <= hatchAt) index += 1;
+		eggs.insert(index, hatchAt);
+		times.insert(index, { start: now, crab: 0 });
 		data.incubating[eggType] = eggs;
+		data.eggCrab[eggType] = times;
 		data.eggsBought[eggType] = (data.eggsBought[eggType] ?? 0) + 1;
 		this.sync(player);
 	}
@@ -288,7 +297,11 @@ class DataServiceController implements Lifecycle {
 		if (!data || !eggs || eggs.size() === 0) return false;
 
 		eggs.remove(0);
-		if (eggs.size() === 0) data.incubating[eggType] = undefined;
+		data.eggCrab[eggType]?.remove(0);
+		if (eggs.size() === 0) {
+			data.incubating[eggType] = undefined;
+			data.eggCrab[eggType] = undefined;
+		}
 		data.fish[fishType] += 1;
 		data.hatched[fishType] = (data.hatched[fishType] ?? 0) + 1;
 		// The species' Size record (the Fish Index's "Best", the Big Catch quests)

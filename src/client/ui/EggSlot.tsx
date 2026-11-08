@@ -70,6 +70,13 @@ export interface EggSlotProps {
 	onOpen?: () => void;
 	/** The aquarium has no room for another fish: a ready egg can't be opened (the server refuses it too). */
 	aquariumFull?: boolean;
+	/**
+	 * The Hermit Crab owned and an egg in the slot: the share (0..1) of the soonest egg's incubation spent with it so
+	 * far (playerData getCrabShare), read every frame; its mark shows once above 0 (ROADMAP_V1.2 §8).
+	 */
+	crabShare?: () => number;
+	/** The crab's sticker for that mark. */
+	crabImage?: string;
 }
 
 /**
@@ -208,6 +215,52 @@ function OddsTooltip(props: { name: string; odds: readonly EggOdds[] }) {
 			</textlabel>
 			{rows}
 		</Tooltip>
+	);
+}
+
+/**
+ * The Hermit Crab's mark on the slot's left edge: its sticker and how much of the soonest egg's incubation it was
+ * there for ("62%"), live; hidden while that share is 0.
+ */
+function CrabMark(props: { share: () => number; image: string }) {
+	const [share, setShare] = useBinding(0);
+	useEffect(() => {
+		const update = () => setShare(props.share());
+		update();
+		const connection = RunService.Heartbeat.Connect(update);
+		return () => connection.Disconnect();
+	}, [props.share]);
+	return (
+		<frame
+			key="CrabMark"
+			Position={UDim2.fromOffset(-10, 34)}
+			Size={UDim2.fromOffset(32, 34)}
+			BackgroundTransparency={1}
+			Visible={share.map((value) => value > 0.005)}
+			ZIndex={6}
+		>
+			<imagelabel
+				key="Crab"
+				Size={UDim2.fromOffset(32, 26)}
+				BackgroundTransparency={1}
+				Image={props.image}
+				ScaleType={Enum.ScaleType.Fit}
+				ZIndex={6}
+			/>
+			<textlabel
+				key="Share"
+				Position={UDim2.fromOffset(0, 20)}
+				Size={UDim2.fromOffset(32, 14)}
+				BackgroundTransparency={1}
+				Font={FONT_TITLE}
+				Text={share.map((value) => `${math.floor(value * 100 + 0.5)}%`)}
+				TextSize={13}
+				TextColor3={PALETTES.amber.light}
+				ZIndex={7}
+			>
+				<TextStroke />
+			</textlabel>
+		</frame>
 	);
 }
 
@@ -466,6 +519,9 @@ export function EggSlot(props: EggSlotProps) {
 				)}
 			</Button3D>
 			{tag}
+			{props.crabShare && props.crabImage !== undefined && (
+				<CrabMark share={props.crabShare} image={props.crabImage} />
+			)}
 			{props.canBuyAnother && (
 				<Button3D
 					key="BuyAnother"

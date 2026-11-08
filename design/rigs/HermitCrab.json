@@ -1,0 +1,19 @@
+{
+	"//": "The Hermit Crab companion (V1.2 M4, Assets.Companions, candidate C: a smooth striped conch), a box rig (tools/blender/rig_boxes.py) driven by FishRigController's crab branch. The owner's rule: the shell never moves. It stays on the root (Torso), which nothing animates; the moving boxes stay under it: the head's at h 0.36 (the shell's front rim starts at 0.44), the claws' and legs' at h 0.26 with a 0.02 fade (the shell's spiral comes down to h 0.28 on the +X side; found by a scan of the vertices coloured by their texture, checked in Blender: no shell-coloured vertex above h 0.25 gets a moving weight). Its legs shuffle while it strolls, its head nods a little, its claws pinch gently and stay low (CLAUDE.md §7). Its mesh faces -Z as generated.",
+	"rig": "boxes",
+	"root": { "name": "Torso", "head": [0, 0.5, 0.3], "tail": [0, 0.5, 0.7] },
+	"bones": [
+		{ "name": "Head", "head": [0, 0.3, 0.2], "tail": [0, 0.05, 0.3], "box": { "side": [-0.42, 0.42], "t": [-0.05, 0.32], "h": [0.12, 0.36] }, "fade": 0.03 },
+		{ "name": "ClawL", "head": [-0.35, 0.3, 0.15], "tail": [-0.6, 0.02, 0.1], "box": { "side": [-1.05, -0.3], "t": [-0.05, 0.36], "h": [-0.05, 0.26] }, "fade": 0.02 },
+		{ "name": "ClawR", "head": [0.35, 0.3, 0.15], "tail": [0.6, 0.02, 0.1], "box": { "side": [0.3, 1.05], "t": [-0.05, 0.36], "h": [-0.05, 0.26] }, "fade": 0.02 },
+		{ "name": "LegsL", "head": [-0.3, 0.6, 0.22], "tail": [-0.8, 0.65, 0.03], "box": { "side": [-1.05, -0.12], "t": [0.38, 1.05], "h": [-0.05, 0.26] }, "fade": 0.02 },
+		{ "name": "LegsR", "head": [0.3, 0.6, 0.22], "tail": [0.8, 0.65, 0.03], "box": { "side": [0.12, 1.05], "t": [0.38, 1.05], "h": [-0.05, 0.26] }, "fade": 0.02 }
+	],
+	"preview": [
+		{ "bone": "Head", "axis": [1, 0, 0], "deg": 4, "cycles": 1, "phase": 0.6 },
+		{ "bone": "ClawL", "axis": [0, 0, 1], "deg": 9, "cycles": 2 },
+		{ "bone": "ClawR", "axis": [0, 0, 1], "deg": -9, "cycles": 2, "phase": 1.2 },
+		{ "bone": "LegsL", "axis": [0, 1, 0], "deg": 12, "cycles": 4 },
+		{ "bone": "LegsR", "axis": [0, 1, 0], "deg": 12, "cycles": 4, "phase": 3.14159 }
+	]
+}

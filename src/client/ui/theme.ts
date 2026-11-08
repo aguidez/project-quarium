@@ -249,6 +249,21 @@ export const FISH_ICONS: Record<FishType, Record<FishVariant, string>> = {
 		Shiny: "rbxassetid://117762708621771",
 		Galaxy: "rbxassetid://116190822973865",
 	},
+	// V1.2 M4: Anomaly / Shiny / Galaxy recoloured from the Normal sticker (as the Fox Betta's)
+	CloudWhale: {
+		Normal: "rbxassetid://136341011149009",
+		Anomaly: "rbxassetid://116797501138276",
+		Ghost: "rbxassetid://78095495495435",
+		Shiny: "rbxassetid://127312954234543",
+		Galaxy: "rbxassetid://130086456932980",
+	},
+	PegasusSeahorse: {
+		Normal: "rbxassetid://117371370665401",
+		Anomaly: "rbxassetid://108379785780117",
+		Ghost: "rbxassetid://86355718901496",
+		Shiny: "rbxassetid://129354053593771",
+		Galaxy: "rbxassetid://120747197093307",
+	},
 	// Easter egg: no variant, every column is its one icon
 	FrenchFish: {
 		Normal: FRENCH_FISH_ICON,
@@ -285,6 +300,7 @@ export const THEME_PALETTES: Record<AquariumTheme, Palette> = {
 	CrystalCaverns: palette("#E2C4FF", "#A87CF0", "#7E55C8", "#3E2470"),
 	CosmicSanctuary: palette("#9A7CFF", "#5A3CC8", "#3A2490", "#140A40"),
 	AuroraGlacier: palette("#BFFFEA", "#4FE3C4", "#2E9FB0", "#0E3A5A"),
+	SkyArchipelago: palette("#FFE2B8", "#7FC4FF", "#4A8BE0", "#1E3C78"),
 };
 
 /** Face colours of a found variant's slot (FigCraft: ItemSlot_<Variant>). */
@@ -396,6 +412,11 @@ export const EGG_SPRITES: Record<EggType, EggSprites> = {
 		icon: "rbxassetid://127367727163206", // AuroraEgg.png
 		top: "rbxassetid://119578569426748", // AuroraEggTop.png
 		bottom: "rbxassetid://84836307409890", // AuroraEggBottom.png
+	},
+	Sky: {
+		icon: "rbxassetid://92767387584946", // SkyEgg.png
+		top: "rbxassetid://75625389768762", // SkyEggTop.png
+		bottom: "rbxassetid://108227475855841", // SkyEggBottom.png
 	},
 };
 

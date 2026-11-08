@@ -30,5 +30,8 @@
 	"Pelican": { "path": "ServerStorage.Assets.Companions.Pelican.Mesh", "staticMeshId": 108939782374580, "rigModelId": 75998351288979, "rigMeshId": 91973489078888 },
 	"WaterHen": { "path": "ServerStorage.Assets.Companions.WaterHen.Mesh", "staticMeshId": 89972735209509, "rigModelId": 129139808874486, "rigMeshId": 127474025831906 },
 	"Fisherman": { "path": "Workspace.Lobby.FishingHutEast.Fisherman.body.body_geom (and FishingHutWest)", "staticMeshId": 126711733460664, "rigModelId": 111172765239479, "rigMeshId": 113823837049881, "textureId": 121733854259095 },
-	"FoxBetta": { "path": "ServerStorage.Assets.Fish.FoxBetta.Mesh", "staticMeshId": 139155457907098, "rigModelId": 75150656716071, "rigMeshId": 86050887259467 }
+	"FoxBetta": { "path": "ServerStorage.Assets.Fish.FoxBetta.Mesh", "staticMeshId": 139155457907098, "rigModelId": 75150656716071, "rigMeshId": 86050887259467 },
+	"CloudWhale": { "path": "ServerStorage.Assets.Fish.CloudWhale.Mesh", "staticMeshId": 73180984682389, "rigModelId": 73741521953011, "rigMeshId": 110790999289888 },
+	"PegasusSeahorse": { "path": "ServerStorage.Assets.Fish.PegasusSeahorse.Mesh", "staticMeshId": 133466535863384, "rigModelId": 104273546921494, "rigMeshId": 136120262534860 },
+	"HermitCrab": { "path": "ServerStorage.Assets.Companions.HermitCrab.Mesh", "staticMeshId": 99461476452331, "rigModelId": 135338980369328, "rigMeshId": 112633381339276 }
 }

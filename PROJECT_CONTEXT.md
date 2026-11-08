@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-08 (V1.1.21: rebirth 9 and the Aurora Glacier, the Fox Betta (species 19), the Aurora Egg, the Frost coin, tank 27 (ROADMAP_V1.2 M3); V1.1.20 Galaxy and the starfall's 4th bar).
+> Last updated: 2026-11-08 (V1.1.22: rebirth 10 and the Sky Archipelago, the Cloud Whale and the Pegasus Seahorse (species 20–21), the Sky Egg, tank 29, the Hermit Crab with its live variant luck, the Quick pantry (ROADMAP_V1.2 M4)).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -15,7 +15,7 @@ coins. Around that core loop:
 - a quest book: story lines (the "Voyage" main line to the end of the content, companion lines, free side lines)
   and daily / weekly boards rewarded by a coin boost;
 - companions (the Snail picks up coins on the sand, the Swordfish in the water, the Pelican and the Jellyfish feed, the
-  Water Hen speeds up hatching);
+  Water Hen speeds up hatching, the Hermit Crab brings rare variants to the eggs that incubate with it);
 - fish variants: every hatch can be an Anomaly (10 %), a Ghost (5 %) or a Shiny (1 %), rarer and richer;
 - a Fish Index (collection): one row per species, one column per variant, plus the easter eggs;
 - the Ocean: release fish (the player picks the kind and the variant) for Ocean Points, a progression score that
@@ -30,8 +30,9 @@ coins. Around that core loop:
   global tops of 100 kept in OrderedDataStores;
 - gamepasses, sold by the fisherman's shop in the lobby (never part of the balance): Third Companion Slot, x2 Ocean
   Points, Lucky, +50% Coins, and the Water Hen / Swordfish / Jellyfish passes sold from their quest lines;
-- rebirths: restart the run for a permanent coin multiplier and a new aquarium theme (8 levels: Lagoon, Neon Coral,
-  Pirate Wreck, Atlantis, Mariana Trench, Volcanic Temple, Crystal Caverns, Cosmic Sanctuary);
+- rebirths: restart the run for a permanent coin multiplier and a new aquarium theme (10 levels: Lagoon, Neon Coral,
+  Pirate Wreck, Atlantis, Mariana Trench, Volcanic Temple, Crystal Caverns, Cosmic Sanctuary, then V1.2's Aurora
+  Glacier and Sky Archipelago);
 - cosmetics: titles above the head, decor in the tank, Pearl rims; the player can pick the theme, title and shown
   decor (Customize button); the leaderboard titles are held, not earned: the day's top 10 of each board wears its
   title on a nameplate (gold #1, silver #2, bronze #3, navy #4–#10) until the next day's ranking;
@@ -248,7 +249,12 @@ ProjectQuarium/
    │     │                   companionSlots alone), getHatchMultiplier (Water Hen equipped: 0.85, or its perk's),
    │     │                   starPower / starCharge (the starfall), getPlayerVariantLuck (Lucky ocean x the Lucky pass: EggService's draw and the chances the UI
    │     │                   shows), syncIncubationSpeed (rescales the incubating timers to a new hatch speed, progress
-   │     │                   kept; run by DataService.sync, buyEgg and sanitizeSave)
+   │     │                   kept; run by DataService.sync, buyEgg and sanitizeSave); the Hermit Crab's live luck:
+   │     │                   EggCrabTime {start, crab}, syncIncubationCrab (credits [crabSyncedAt, now] to every
+   │     │                   incubating egg while crabEquipped, then follows what is equipped; run before
+   │     │                   syncIncubationSpeed by DataService.sync, startIncubation, openEgg and sanitizeSave: offline
+   │     │                   included), getCrabShare (share of an egg's incubation with the crab, now included),
+   │     │                   getCrabLuck (1 + bonus x share)
    │     ├─ companionStats.ts getCompanionStats(companion, data): what a companion does now with its bonuses (Ocean
    │     │                   upgrades, its perks): the line under its ability on the companion card
    │     ├─ customization.ts ThemeChoice (a reached theme or "Auto"), TitleChoice (a title held, "Auto" = the best,
@@ -263,12 +269,12 @@ ProjectQuarium/
    │     │                   getPassById, getPassCoinMultiplier (x1.5) / getPassOceanMultiplier (x2) /
    │     │                   getPassVariantLuck (x2) / getPassCompanionSlots (+1). The companion passes (WaterHenPass,
    │     │                   SwordfishPass, JellyfishPass) are sold from their quest line, picture = the companion's sticker
-   │     ├─ quests.ts        QUESTS (Story1–9, Voyage1–16 the main line, WaterHen1–3 / Swordfish1–3 / Jellyfish1–3 the paid
-   │     │                   companion lines, Hatchery1–5 / Collector1–6 / Ocean1–2 / BigCatch1–5 / FishKeeper1–3 the free side lines,
+   │     ├─ quests.ts        QUESTS (Story1–9, Voyage1–20 the main line, WaterHen1–3 / Swordfish1–3 / Jellyfish1–3 the paid
+   │     │                   companion lines, HermitCrab1–3 the free one (eggs with its full bonus), Hatchery1–5 / Collector1–6 / Ocean1–2 / BigCatch1–5 / FishKeeper1–3 the free side lines,
    │     │                   Daily* / Weekly*), DAILY_QUEST_POOL / WEEKLY_QUEST_POOL (7 each, 3 drawn per period),
    │     │                   STORY_LINES (Start / Ocean / Rebirth (shown "Voyage") / Snail / Pelican / Hatchery /
    │     │                   Collector / BigCatch (opens with Story2, like the Collector) / FishKeeper (with Voyage2, rebirth 2) / WaterHen / Swordfish /
-   │     │                   Jellyfish: quests in order, requires (a quest), requiresCompanion, requiresPass, order),
+   │     │                   Jellyfish / HermitCrab (free): quests in order, requires (a quest), requiresCompanion, requiresPass, order),
    │     │                   refreshStoryLines, getActiveStoryQuests, getStoryLine, isQuestLocked,
    │     │                   BOARD_UNLOCK_REBIRTHS / isBoardUnlocked (dailies from rebirth 2, weeklies from 3);
    │     │                   counter stats CoinMoney, CoinsCollected, FishFed, LikesGiven, OceanPoints, EggsOpened,
@@ -279,13 +285,15 @@ ProjectQuarium/
    │     │                   (PlayerStats.mealsByHand, all time; QuestService reads it from the save); rewards Money / Companion / Feature /
    │     │                   Perk / IncomeMinutes / OceanPoints / Title / Decor / CoinBoost; daily/weekly periods (UTC)
    │     ├─ perks.ts         Perk (CoinLinger1–2, CoinBounce, FishSatiety, PelicanDouble, PelicanCharges, WaterHen1–3,
-   │     │                   Swordfish1–3, Jellyfish1–3, FoodRefill1–2 / FoodSlot1 the Fish Keeper line), PERKS,
-   │     │                   getFoodReserve (portions and refill time: 5 / 10 s, 6 / 8 s at best), COIN_BOUNCE_TIME, getGroundTimeBonus, hasCoinBounce,
+   │     │                   Swordfish1–3, Jellyfish1–3, FoodRefill1–2 / FoodSlot1 the Fish Keeper line, FoodRefill3 the
+   │     │                   Quick pantry milestone, HermitCrab1–3 crabLuck), PERKS, getCrabFullLuck,
+   │     │                   getFoodReserve (portions and refill time: 5 / 10 s, 6 / 7 s at best), COIN_BOUNCE_TIME, getGroundTimeBonus, hasCoinBounce,
    │     │                   getSatietyBonus, getPelicanPellets, getPelicanCharges, getPerkHatchMultiplier,
    │     │                   getSwordfishStats, getJellyfishStats
-   │     ├─ companions.ts    CompanionType (Snail, Pelican, WaterHen, Swordfish, Jellyfish), COMPANION_TYPES (+ sticker
+   │     ├─ companions.ts    CompanionType (Snail, Pelican, WaterHen, Swordfish, Jellyfish, HermitCrab), COMPANION_TYPES (+ sticker
    │     │                   `image`), DEFAULT_COMPANION_SLOTS, PELICAN_FEED_INTERVAL, WATER_HEN_HATCH_MULTIPLIER,
-   │     │                   JELLYFISH_FEED_INTERVAL / JELLYFISH_CHARGES / JELLYFISH_PELLETS
+   │     │                   JELLYFISH_FEED_INTERVAL / JELLYFISH_CHARGES / JELLYFISH_PELLETS, HERMIT_CRAB_LUCK (1.25),
+   │     │                   HERMIT_CRAB_FULL_SHARE (0.999: its quests' eggs), HERMIT_CRAB_STROLL_SPEED
    │     ├─ food.ts          The food reserve: FOOD_RESERVE_SLOTS (5), FOOD_REFILL_TIME (10 s, each slot its own timer),
    │     │                   FOOD_RESERVE_ATTRIBUTES (Player `FoodSlots`, `FoodRefillTime`, `FoodRefills` = the used portions' return times,
    │     │                   comma-separated), encodeFoodRefills / decodeFoodRefills, getFoodReady
@@ -293,7 +301,7 @@ ProjectQuarium/
    │     │                   meal feeds (perks' satiety bonus), the more filling the food looks
    │     ├─ oceanRewards.ts  OCEAN_MILESTONES (id, points, title, description, reward: Companion / CompanionSlot /
    │     │                   CompanionUpgrade {companion, multiplier} / Capacity {capacity} / Incubator {count} /
-   │     │                   VariantLuck {multiplier} / Cosmetic {cosmetics}), getOceanMilestone, hasClaimableOceanReward,
+   │     │                   VariantLuck {multiplier} / Cosmetic {cosmetics} / Perk {perk}: the Quick pantry), getOceanMilestone, hasClaimableOceanReward,
    │     │                   getCompanionMultiplier (Snail: speed, Pelican: feeding rate), getVariantLuck (from the claimed list)
    │     ├─ features.ts      Feature ("Ocean" and "Rebirth", unlocked by quests), FEATURES (drawn `image` per feature),
    │     │                   MIN_FISH_KEPT
@@ -320,7 +328,7 @@ ProjectQuarium/
    │     │                   EVENT_ATTRIBUTES, LURKING_ATTRIBUTE, ADMIN_EVENT_ORDER, getActiveEvent,
    │     │                   getEventCoinMultiplier(owner), EventSource, getRecurringEvents, getRecurringChance,
    │     │                   EVENT_IMMUNE_ATTRIBUTE + isEventImmune (tutorial)
-   │     ├─ rebirths.ts      REBIRTHS (price, multiplier, start money, theme; 9 since V1.1.21), AQUARIUM_THEMES (Basic + the 9 themes, AuroraGlacier the V1.2 one),
+   │     ├─ rebirths.ts      REBIRTHS (price, multiplier, start money, theme; 10 since V1.1.22), AQUARIUM_THEMES (Basic + the 10 themes, AuroraGlacier and SkyArchipelago the V1.2 ones),
    │     │                   getNextRebirth, getRebirthMultiplier, getAquariumTheme, getRebirthOceanPoints
    │     ├─ likes.ts         Like rules (1 per hour given, x2 coins for 5 min, restarted by each like), board offset, helpers
    │     ├─ onboarding.ts    Onboarding steps + rules (what is allowed / free at each step), ONBOARDING_REWARD,
@@ -399,7 +407,9 @@ ProjectQuarium/
    │     │                   (or the star power, then spent: EggHatch.starPowered),
    │     │                   the Size score (rollSize; none for an easter egg; EggHatch.size / newBestSize, bestSize kept by
    │     │                   DataService.hatchEgg),
-   │     │                   quest stats EggsOpened / VariantHatched / SizeHatched (+ CompanionStat WaterHen when it is equipped), hatch
+   │     │                   the Hermit Crab's luck (getCrabLuck on the egg opened, x the player's luck and Galaxy luck),
+   │     │                   quest stats EggsOpened / VariantHatched / SizeHatched (+ CompanionStat WaterHen when it is equipped,
+   │     │                   HermitCrab when the egg got its full share), hatch
    │     │                   time x PlayerData.incubationMultiplier, reveal timing, then FishService.spawnFish; isRevealing
    │     ├─ OnboardingService  Drives onboarding steps from server facts; scripted first coin / first hunger; reward
    │     ├─ EventService     Events: recurring clock (per server; never the last event again), admin events ("/event <name>" / "/event stop", admins
@@ -542,7 +552,12 @@ ProjectQuarium/
       │  │                   and the Water Hen (rig_boxes.py: Torso, Head, WingL / R, TailFan; the Pelican's Neck, Beak,
       │  │                   LegL / R): breath, nod, wing ruffle, tail flick; the Pelican's lean (its Body's forward
       │  │                   tilt / PELICAN_LEAN) stretches the neck, dips the beak, opens the wings; the Hen rocks /
-      │  │                   nods / bobs on its Torso, faster while it paddles (> 0.4 studs/s on the flat); every frame
+      │  │                   nods / bobs on its Torso, faster while it paddles (> 0.4 studs/s on the flat). A fish whose
+      │  │                   FishConfig.stroke is "Vertical" (the Cloud Whale) beats its spine wave around the side axis,
+      │  │                   its turns still bend it sideways. The Pegasus Seahorse (rig_boxes.py, found by its `Curl`
+      │  │                   bone: Torso rock + bob, Head nod, WingL / R flap on the pectoral beat, Curl sway). The Hermit
+      │  │                   Crab (rig_boxes.py: LegsL / R shuffle on the crawl phase, ClawL / R pinch sideways, Head nod;
+      │  │                   its shell on the root, never moved); every frame
       │  │                   within 60 studs, every 2nd to 110, every 4th beyond, frozen off screen; no budget
       │  ├─ PelicanChargesController  Charge gauge above the local player's on-demand Pelican / Jellyfish (BillboardGui): one
       │  │                   slot per charge, a pellet growing while it refills; hidden while MaxCharges is 0
@@ -601,7 +616,8 @@ ProjectQuarium/
          │                   money pill. Arrows on the shelf's sides move the window one egg at a time (navy at the ends,
          │                   red "!" when a ready egg is out of view); it follows the best unlocked egg + the next gated
          │                   one until moved. Several incubators: a slot shows its soonest egg, a "n/N" chip and a gold
-         │                   "+" that buys one more
+         │                   "+" that buys one more. With the Hermit Crab owned: a crab mark on the slot's left edge with
+         │                   the share of the soonest egg's incubation spent with it (live, hidden at 0)
          ├─ EggReveal        Hatch animation (rarity, odds (never an easter egg's: "SECRET"; "STAR POWER" for a variant
          │                   drawn with star power), the Size pill (FigCraft size.figcraft: "SIZE +12%  •  HUGE" in its
          │                   tier's colour, popping after the caption; a Titan: gold-pink pill, glow, sparkles, a second
@@ -705,16 +721,17 @@ ProjectQuarium/
   GoldenGuppy, BlueNeon, ZebraDanio, RedTetra, Clownfish, FlameGourami, SilverAngelfish, ImperialDiscus, FrenchFish,
   Catfish, PirateFish (a new model since V1.1.3, its tricorn rigid on the head), BlueTang, BabySunfish, Lanternfish,
   Lionfish, Dragonfish (7-bone spine), WolfDogfish (the Husky Dogfish), BunnyShark (EarL / EarR), MiniLeviathan (rigged
-  in its own space, the template keeps its -30° pitch), FoxBetta (V1.2, EarL / EarR): every species of the 9 aquariums, plus Sugar, AlienFish and the
+  in its own space, the template keeps its -30° pitch), FoxBetta (V1.2, EarL / EarR), CloudWhale (V1.2, vertical stroke, its cloud
+  rigid), PegasusSeahorse (V1.2, a box rig): every species of the 10 aquariums, plus Sugar, AlienFish and the
   abyss `LanternFish` (EventFish; work files `AbyssLantern`; its stalk rigid under the welded lit Lure, no jaw). Still
   without bones: the K-pop idol (its template lost its texture, see §4: it only puffs on the beat until it is rigged)
   and the UFO (a ship the server glides, spins and tilts: no rig needed, tag `Ufo`, never a fish). The Swordfish companion too
   (`Assets.Companions`, no jaw: its bill; FishRigController tracks `Companion` models with `Rig`), and every other
-  companion on its own rig: Jellyfish, Snail, Pelican, WaterHen; the shop's Fisherman (both huts' `body_geom`, no
+  companion on its own rig: Jellyfish, Snail, Pelican, WaterHen, HermitCrab (V1.2); the shop's Fisherman (both huts' `body_geom`, no
   `Rig` attribute: ShopKeeperController finds his bones) (rig settings per species in design/rigs/<Fish>.json; ids in design/meshes/manifest.json:
   `rigModelId`, `rigMeshId`, `staticMeshId`).
 - **`ServerStorage.Assets`**:
-  - `Fish/` (tag `FishTemplate`, attr `FishType`): the 18 species + `FrenchFish`, `AlienFish` and `Sugar` (no
+  - `Fish/` (tag `FishTemplate`, attr `FishType`): the 21 species + `FrenchFish`, `AlienFish` and `Sugar` (no
     FishVariants).
     Copied on demand into `ReplicatedStorage.Assets.Fish` (server/fishAssets); `ReplicatedStorage.Assets` is an empty
     folder in the place, filled at runtime. Oddities: the Golden Guppy's ColorMap is a 1024² copy (the generated one
@@ -738,7 +755,7 @@ ProjectQuarium/
     Attachment); no `Mesh` MeshPart, so no swim deformation or beat puff). The saxophone has no mouthpiece and stays away from the face (moderation,
     CLAUDE.md §7).
   - `Companions/` (tag `CompanionTemplate`, attr `CompanionType`): `Snail`, `Pelican`, `WaterHen`, `Swordfish`,
-    `Jellyfish`; `Lobby/` (decor).
+    `Jellyfish`, `HermitCrab` (V1.2); `Lobby/` (decor).
   - `Food/` (tag `FoodTemplate`, attr `FoodLook`; a single anchored MeshPart, its size is the food's): `Shrimp`.
   - `LikeBoards/LikeBoard` (tag `LikeBoardTemplate`): driftwood lectern, PrimaryPart `Root` at ground level, front
     −Z, invisible `Board` part whose Front face carries the counter (SurfaceGui density = BOARD_CANVAS_WIDTH / the
@@ -803,6 +820,7 @@ ProjectQuarium/
   | `incubating` | Per egg type, the hatch times of its eggs (soonest first, at most `incubators`) |
   | `incubators` | Eggs of the same type that can incubate at once (1; Ocean milestone kind `Incubator`), kept through rebirths |
   | `incubationMultiplier` | Hatch speed the `incubating` timers run at (1, or the Water Hen's): `syncIncubationSpeed` rescales them when `getHatchMultiplier` changes, the progress made is kept |
+  | `eggCrab`, `crabEquipped`, `crabSyncedAt` | The Hermit Crab's time on each incubating egg (`{start, crab}`, parallel to `incubating`: same type, same index; DataService inserts / removes both, RebirthService clears both, `sanitizeSave` rebuilds missing entries with a share of 0), whether it was equipped since `crabSyncedAt` (server time): `syncIncubationCrab` credits the time |
   | `eggsBought` | Eggs bought per type (unlocks the next egg) |
   | `onboarding` | Current onboarding step |
   | `capacity` | Max living fish in the tank |
@@ -931,10 +949,13 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   (surface as pickup height), 0.95x the Snail's speed across the tank, dives / climbs at 6 studs/s, grabs within its
   reach (perks: getSwordfishStats; the reach also covers the gap to the closest point its body may go), cruises at
   2 studs/s otherwise. **Jellyfish**: drifts in the top 35 % of the water; on demand like the Smart Pelican, swoops over
-  the hungriest fish and releases its pellets 1.4 studs apart (getJellyfishStats).
+  the hungriest fish and releases its pellets 1.4 studs apart (getJellyfishStats). **Hermit Crab** (V1.2): strolls on
+  the sand with long rests (HERMIT_CRAB_STROLL_SPEED); its ability is EggService's luck by egg (playerData
+  getCrabLuck), shown on the egg slot as a crab mark with the share of the soonest egg's incubation (EggSlot CrabMark).
 - **Quests.** `QuestService.addProgress(stat, amount, subject)` handles the counters (CoinMoney excludes the
   onboarding coin; CoinsCollected counts every coin; FishFed only food the player dropped; CompanionStat per
-  companion: Snail / Swordfish coins, Pelican / Jellyfish feeds, eggs opened with the Water Hen equipped): a quest
+  companion: Snail / Swordfish coins, Pelican / Jellyfish feeds, eggs opened with the Water Hen equipped, eggs opened
+  with the Hermit Crab's full share): a quest
   with a `fishType` / `variant` / `companion` only counts its own. `reportGauges` reads every gauge from PlayerData on
   each coin, spawn, claim, rebirth and every 5 s: a gauge quest already met completes as it opens (the Voyage line
   never blocks). A completed quest gets a notification and a badge; `ClaimQuest` grants the reward. **Story lines run

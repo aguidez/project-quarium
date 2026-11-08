@@ -65,6 +65,7 @@ const LINE_PALETTES: Record<StoryLine, Palette> = {
 	WaterHen: PALETTES.pink,
 	Swordfish: PALETTES.lagoon,
 	Jellyfish: PALETTES.purple,
+	HermitCrab: PALETTES.amber,
 };
 
 export interface QuestPanelProps {

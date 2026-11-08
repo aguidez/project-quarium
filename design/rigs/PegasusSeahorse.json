@@ -1,0 +1,20 @@
+{
+	"//": "The Pegasus Seahorse (V1.2 M4, species 21): an upright seahorse, a box rig (tools/blender/rig_boxes.py) driven by FishRigController's seahorse branch: the body bobs and rocks, the head nods, the small wings flap, the curled tail sways. Boxes from a t / side / height scan of the mesh: head + mane above h 0.68, wings on the sides at h 0.38-0.68, the curled tail below h 0.3.",
+	"rig": "boxes",
+	"root": { "name": "Torso", "head": [0, 0.5, 0.35], "tail": [0, 0.5, 0.65] },
+	"bones": [
+		{ "name": "Curl", "head": [0, 0.45, 0.32], "tail": [0, 0.7, 0.05], "box": { "t": [-0.05, 1.05], "h": [-0.05, 0.3] }, "fade": 0.06 },
+		{ "name": "Head", "head": [0, 0.45, 0.66], "tail": [0, 0.35, 0.98], "box": { "t": [-0.05, 1.05], "h": [0.68, 1.05] }, "fade": 0.05 },
+		{ "name": "WingL", "head": [-0.42, 0.6, 0.52], "tail": [-0.95, 0.8, 0.6], "box": { "side": [-1.1, -0.48], "t": [0.25, 1.05], "h": [0.38, 0.7] }, "fade": 0.05 },
+		{ "name": "WingR", "head": [0.42, 0.6, 0.52], "tail": [0.95, 0.8, 0.6], "box": { "side": [0.48, 1.1], "t": [0.25, 1.05], "h": [0.38, 0.7] }, "fade": 0.05 }
+	],
+	"preview": [
+		{ "bone": "Torso", "axis": [1, 0, 0], "deg": 4, "cycles": 1 },
+		{ "bone": "Head", "axis": [1, 0, 0], "deg": 5, "cycles": 2, "phase": 0.8 },
+		{ "bone": "WingL", "axis": [0, 1, 0], "deg": 30, "cycles": 4 },
+		{ "bone": "WingL", "axis": [0, 0, 1], "deg": 10, "cycles": 4, "phase": 1.2 },
+		{ "bone": "WingR", "axis": [0, 1, 0], "deg": -30, "cycles": 4 },
+		{ "bone": "WingR", "axis": [0, 0, 1], "deg": -10, "cycles": 4, "phase": 1.2 },
+		{ "bone": "Curl", "axis": [1, 0, 0], "deg": 10, "cycles": 2, "phase": 1.5 }
+	]
+}

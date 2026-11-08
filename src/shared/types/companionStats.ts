@@ -6,6 +6,7 @@ import {
 	PELICAN_FEED_INTERVAL,
 	SWORDFISH_REACH,
 	SWORDFISH_SPEED,
+	HERMIT_CRAB_LUCK,
 	WATER_HEN_HATCH_MULTIPLIER,
 } from "./companions";
 import { getCompanionMultiplier } from "./oceanRewards";
@@ -13,6 +14,7 @@ import {
 	getJellyfishStats,
 	getPelicanCharges,
 	getPelicanPellets,
+	getCrabFullLuck,
 	getPerkHatchMultiplier,
 	getSwordfishStats,
 	Perk,
@@ -54,6 +56,10 @@ export function getCompanionStats(
 	if (companion === "WaterHen") {
 		const multiplier = getPerkHatchMultiplier(perks) ?? WATER_HEN_HATCH_MULTIPLIER;
 		return `Eggs hatch ${percent(1 - multiplier)} faster while equipped`;
+	}
+	if (companion === "HermitCrab") {
+		const luck = math.floor(getCrabFullLuck(perks, HERMIT_CRAB_LUCK) * 100 + 0.5) / 100; // x1.25, x1.35: two decimals
+		return `Rare variants x${luck} on the eggs that incubate with it`;
 	}
 	if (companion === "Swordfish") {
 		const stats = getSwordfishStats(perks, SWORDFISH_SPEED, SWORDFISH_REACH);

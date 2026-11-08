@@ -84,6 +84,7 @@ def add_swim_action(arm, speed=1.0, behaviour=None):
     beat, amount, paddle = b.get("beat", 1.0), b.get("amount", 1.0), b.get("paddle", 1.0)
     bend, droop = b.get("bend", 0.0), b.get("droop", 0.0)
     moment = b.get("moment")
+    vertical = b.get("stroke") == "vertical"  # design/rigs/<Fish>.json "stroke" (the Cloud Whale), FishConfig.stroke
     if moment == "Released":
         beat, amount = RELEASE_BEAT, RELEASE_AMOUNT
     fin_amount = max(amount, 0.75)
@@ -129,9 +130,11 @@ def add_swim_action(arm, speed=1.0, behaviour=None):
             t = _bone_t(arm, name, nose, length)
             share = t / t_sum
             peak = spine_peak(t, len(spine))
-            poses[name] = ((0, 0, 1), amount * peak * math.sin(swim - t * BODY_WAVE)
-                           + wiggle_amount * peak * math.sin(wiggle - t * BODY_WAVE) + (bend + jerk) * share,
-                           (1, 0, 0), droop * WEAK_TAIL_SAG * share)
+            wave = amount * peak * math.sin(swim - t * BODY_WAVE) + wiggle_amount * peak * math.sin(wiggle - t * BODY_WAVE)
+            if vertical:  # a whale: the wave beats up and down (around the side axis), the turns still bend it sideways
+                poses[name] = ((1, 0, 0), wave + droop * WEAK_TAIL_SAG * share, (0, 0, 1), (bend + jerk) * share)
+            else:
+                poses[name] = ((0, 0, 1), wave + (bend + jerk) * share, (1, 0, 0), droop * WEAK_TAIL_SAG * share)
         for bn in bones:
             if bn.name.startswith("Ear"):
                 poses[bn.name] = ((1, 0, 0), amount * EAR_FLOP * math.sin(swim - 1.8))

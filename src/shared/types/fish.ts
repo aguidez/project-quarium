@@ -18,6 +18,8 @@ export type FishType =
 	| "BunnyShark"
 	| "MiniLeviathan"
 	| "FoxBetta"
+	| "CloudWhale"
+	| "PegasusSeahorse"
 	| "FrenchFish"
 	| "AlienFish"
 	| "Sugar";
@@ -56,6 +58,8 @@ export type CoinType =
 	| "Star"
 	| "Planet"
 	| "Frost"
+	| "Cloud"
+	| "Feather"
 	| "Croissant"
 	| "Sugar";
 export const COIN_TYPES: readonly CoinType[] = [
@@ -78,6 +82,8 @@ export const COIN_TYPES: readonly CoinType[] = [
 	"Star",
 	"Planet",
 	"Frost",
+	"Cloud",
+	"Feather",
 	"Croissant",
 	"Sugar",
 ];
@@ -134,6 +140,11 @@ export interface FishConfig {
 	oceanPoints: number;
 	/** A secret fish (Fish Index category "Easter eggs"): no variant, coins worth a share of the tank's income. */
 	easterEgg?: EasterEggConfig;
+	/**
+	 * How its bone rig swims (FishRigController): "Vertical" beats the spine up and down (a whale's fluke, the Cloud
+	 * Whale), the turns still bend it sideways; default: side to side like a fish.
+	 */
+	stroke?: "Vertical";
 }
 
 /**
@@ -447,6 +458,35 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 		scaleMax: 1.1,
 		speedMin: 1.8,
 		speedMax: 3,
+		hunger: DEFAULT_HUNGER,
+	},
+	// V1.2 (ROADMAP_V1.2 §3.2), species 20-21, the Sky Archipelago's (rebirth 10, the Sky Egg). Income x2 the previous
+	// species', Ocean Points x1.6
+	CloudWhale: {
+		displayName: "Cloud Whale",
+		rarity: "Legendary",
+		income: 33600000, // 1,680,000/s
+		oceanPoints: 82000,
+		coin: "Cloud",
+		incomeInterval: 20, // a baby whale covered in clouds: little puffy clouds
+		scaleMin: 0.95,
+		scaleMax: 1.1,
+		speedMin: 1.5,
+		speedMax: 2.5,
+		hunger: DEFAULT_HUNGER,
+		stroke: "Vertical",
+	},
+	PegasusSeahorse: {
+		displayName: "Pegasus Seahorse",
+		rarity: "Mythic",
+		income: 100800000, // 3,360,000/s
+		oceanPoints: 131000,
+		coin: "Feather",
+		incomeInterval: 30, // a winged white seahorse with a golden mane: soft white feathers
+		scaleMin: 0.95,
+		scaleMax: 1.1,
+		speedMin: 1.3,
+		speedMax: 2.3,
 		hunger: DEFAULT_HUNGER,
 	},
 	// Easter egg (see EasterEggConfig): its coin is a croissant worth half the tank's income per minute

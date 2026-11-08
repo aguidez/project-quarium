@@ -55,6 +55,7 @@ class RebirthServiceSingleton implements Lifecycle {
 		data.fish = { ...DEFAULT_PLAYER_DATA.fish };
 		data.fishVariants = {};
 		data.incubating = {};
+		data.eggCrab = {};
 		data.eggsBought = {};
 		data.rebirths += 1;
 		if (!data.features.includes("Rebirth")) data.features.push("Rebirth");
