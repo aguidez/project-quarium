@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-08 (V1.2.13; the update relay retries failed teleports, never keeps a player).
+> Last updated: 2026-11-08 (V1.2.14; players walk through each other: PlayerCollisionService).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -446,6 +446,9 @@ ProjectQuarium/
    │     ├─ PlayerListService  Roblox player list (top right): a `leaderstats` folder per player, every 1 s: "$/s"
    │     │                   (StringValue, formatShort of the aquarium's IncomePerSecond, the plaque's number) and "Rebirth"
    │     │                   (IntValue, PlayerData.rebirths)
+   │     ├─ PlayerCollisionService  Players walk through each other: every BasePart of a character (accessories and tools
+   │     │                   too, as they appear) joins the collision group "Players", not collidable with itself; the
+   │     │                   world (Default) still collides with them
    │     ├─ TitleService     Polls every 1 s: a BillboardGui "PlayerTitle" on each character's Head with getDisplayedTitle:
    │     │                   an earned title is gold LuckiestGuy text (4.2 × 0.65 studs); a leaderboard title a nameplate in
    │     │                   its rank's tier (pill + rank badge + board icon, laid out in design px and drawn in scale, 0.65

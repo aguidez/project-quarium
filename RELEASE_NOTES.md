@@ -11,6 +11,14 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.2.14 — 2026-11-08
+
+**Changes**
+- Players no longer collide with each other: they walk through one another (no more pushing or blocking someone in
+  front of their tank or the shop).
+
+---
+
 ## V1.2.13 — 2026-11-08
 
 **Fixes**

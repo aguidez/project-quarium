@@ -18,6 +18,7 @@ import { LeaderboardService } from "./services/LeaderboardService";
 import { LikeService } from "./services/LikeService";
 import { OnboardingService } from "./services/OnboardingService";
 import { OceanService } from "./services/OceanService";
+import { PlayerCollisionService } from "./services/PlayerCollisionService";
 import { PlayerListService } from "./services/PlayerListService";
 import { QuestService } from "./services/QuestService";
 import { RebirthService } from "./services/RebirthService";
@@ -54,6 +55,7 @@ else bootstrap([
 	StatsService,
 	LeaderboardService,
 	PlayerListService,
+	PlayerCollisionService,
 	DevCommandService,
 	ServerUpdateService,
 ]);
