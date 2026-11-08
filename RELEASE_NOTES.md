@@ -11,6 +11,15 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.2.4 — 2026-11-08
+
+**Fixes**
+- The Ocean panel always shows on top the fish that earns the least: its rows are now sorted by what their next fish
+  really earns (species, variant and Size together) instead of by species. A Galaxy or a +15 % fish can earn more than
+  a fish of the next species (a Galaxy Silver Angelfish earns more than a Pirate Fish), and it used to come first.
+
+---
+
 ## V1.2.3 — 2026-11-08
 
 **New**

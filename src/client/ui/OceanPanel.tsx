@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { MIN_FISH_KEPT } from "shared/types/features";
-import { FISH_TYPES, FishType, getFishIndexOrder } from "shared/types/fish";
+import { FISH_TYPES, FishType, getFishIndexOrder, getIncomePerSecond, isEasterEgg } from "shared/types/fish";
 import { getLivingVariant, PlayerData } from "shared/types/playerData";
-import { FISH_VARIANTS, FishVariant, getOceanPoints, VARIANT_ORDER } from "shared/types/variants";
-import { formatSize } from "shared/types/size";
+import { FISH_VARIANTS, FishVariant, getOceanPoints, getVariantIncomeMultiplier, VARIANT_ORDER } from "shared/types/variants";
+import { formatSize, getSizeMultiplier } from "shared/types/size";
 import { getPassOceanMultiplier } from "shared/types/gamepasses";
 import { COMPANION_TYPES } from "shared/types/companions";
 import { PERKS } from "shared/types/perks";
@@ -45,7 +45,7 @@ const COACH_TEXT =
 	"Press Release to send a fish back to the ocean. It frees a spot in your tank, and rarer fish give more points!";
 /** Reassures the player: the server releases the fish of the row that earns the least (FishService.releaseFish). */
 const RELEASE_RULE =
-	"Each row is a kind and a variant: Release lets go of its smallest fish (the lowest Size, marked NEXT). Rare variants give more points and ask you to confirm.";
+	"Each row is a kind and a variant, the one that earns the least on top: Release lets go of its smallest fish (the lowest Size, marked NEXT). Rare variants give more points and ask you to confirm.";
 /** Size chips shown per row (the smallest ones), then "+N more" (FigCraft size.figcraft: OceanRow). */
 const MAX_SIZE_CHIPS = 6;
 /** A rare variant's Release button stays armed ("Sure?") this long after the first click. */
@@ -494,27 +494,35 @@ export function OceanPanel(props: OceanPanelProps) {
 	for (const [, count] of pairs(props.tank.fish)) total += count;
 	const canRelease = total > MIN_FISH_KEPT;
 
-	// One row per kind and variant in the tank: the player picks exactly which fish goes
-	const rows = new Array<React.Element>();
+	// One row per kind and variant in the tank: the player picks exactly which fish goes. The rows run from the one
+	// whose NEXT fish (its smallest) earns the least $/s: species, variant and Size together (a Galaxy or a +15 %
+	// fish can earn more than a fish of the next species); the special fish (no income) last, the Fish Index order on ties
+	const entries = new Array<{ fishType: FishType; variant: FishVariant; count: number; sizes: number[]; income: number; index: number }>();
 	for (const fishType of getFishIndexOrder()) {
 		for (const variant of VARIANT_ORDER) {
 			const count = getLivingVariant(props.tank, fishType, variant);
 			if (count <= 0) continue;
-			rows.push(
-				<FishRow
-					key={`${fishType}_${variant}`}
-					order={rows.size()}
-					fishType={fishType}
-					variant={variant}
-					count={count}
-					sizes={props.tank.tankSizes[fishType]?.[variant] ?? []}
-					canRelease={canRelease}
-					pointsMultiplier={getPassOceanMultiplier(props.tank.passes)}
-					onRelease={() => props.onRelease(fishType, variant)}
-				/>,
-			);
+			const sizes = props.tank.tankSizes[fishType]?.[variant] ?? [];
+			const income = isEasterEgg(fishType)
+				? math.huge
+				: getIncomePerSecond(fishType) * getVariantIncomeMultiplier(variant) * getSizeMultiplier(sizes[0] ?? 0);
+			entries.push({ fishType, variant, count, sizes, income, index: entries.size() });
 		}
 	}
+	entries.sort((a, b) => (a.income !== b.income ? a.income < b.income : a.index < b.index));
+	const rows = entries.map((entry, order) => (
+		<FishRow
+			key={`${entry.fishType}_${entry.variant}`}
+			order={order}
+			fishType={entry.fishType}
+			variant={entry.variant}
+			count={entry.count}
+			sizes={entry.sizes}
+			canRelease={canRelease}
+			pointsMultiplier={getPassOceanMultiplier(props.tank.passes)}
+			onRelease={() => props.onRelease(entry.fishType, entry.variant)}
+		/>
+	));
 	const visible = math.max(math.min(rows.size(), VISIBLE_ROWS), 1);
 	const listHeight = visible * (ROW_HEIGHT + ROW_GAP) - ROW_GAP + LIST_INSET * 2;
 

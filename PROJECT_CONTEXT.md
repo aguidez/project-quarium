@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-08 (V1.2.3: the admin panel adds a fish in any variant (Galaxy too) and Size; V1.2.2: admins give gamepasses (SaveData.grantedPasses)).
+> Last updated: 2026-11-08 (V1.2.4: the Ocean rows sorted by the $/s of their NEXT fish; V1.2.3: the admin panel adds a fish in any variant and Size).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -684,7 +684,8 @@ ProjectQuarium/
          │                   Normal cell, out of the "Discovered" count, their source / perk texts); hovering a column
          │                   header or a cell shows the variant's description (VariantTooltip); next to the rarity chip,
          │                   the species' best Size (BestSizeChip: "BEST +14%  •  GIANT", or "BEST: NONE YET")
-         ├─ OceanPanel       Two columns: left, one row per kind *and* variant in the tank (a rare variant's Release asks
+         ├─ OceanPanel       Two columns: left, one row per kind *and* variant in the tank, sorted by the $/s of the row's
+         │                   NEXT fish (species x variant x Size: the weakest fish on top; special fish last) (a rare variant's Release asks
          │                   "Sure?" for 3 s; under its name, its fish's Size chips, smallest first, the first one "NEXT"
          │                   (the one Release lets go), 6 at most then "+N more"); right, the Ocean milestones (progress bar / CLAIM! / Claimed) in a 470 px
          │                   scrolling list that opens on the first one not claimed
