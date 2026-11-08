@@ -1,10 +1,21 @@
 import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { MIN_FISH_KEPT } from "shared/types/features";
-import { FISH_TYPES, FishType, getFishIndexOrder, getIncomePerSecond, isEasterEgg } from "shared/types/fish";
+import {
+	FISH_TYPES,
+	FishType,
+	getFishIndexOrder,
+	getGrowthStages,
+	getIncomePerSecond,
+	isEasterEgg,
+	SPECIAL_COIN_MULTIPLIER,
+	SPECIAL_COIN_ODDS,
+} from "shared/types/fish";
+import { formatShort } from "shared/format";
+import { getRebirthMultiplier } from "shared/types/rebirths";
 import { getLivingVariant, PlayerData } from "shared/types/playerData";
 import { FISH_VARIANTS, FishVariant, getOceanPoints, getVariantIncomeMultiplier, VARIANT_ORDER } from "shared/types/variants";
 import { formatSize, getSizeMultiplier } from "shared/types/size";
-import { getPassOceanMultiplier } from "shared/types/gamepasses";
+import { getPassCoinMultiplier, getPassOceanMultiplier } from "shared/types/gamepasses";
 import { COMPANION_TYPES } from "shared/types/companions";
 import { PERKS } from "shared/types/perks";
 import {
@@ -46,6 +57,22 @@ const COACH_TEXT =
 /** Reassures the player: the server releases the fish of the row that earns the least (FishService.releaseFish). */
 const RELEASE_RULE =
 	"Each row is a kind and a variant, the one that earns the least on top: Release lets go of its smallest fish (the lowest Size, marked NEXT). Rare variants give more points and ask you to confirm.";
+/**
+ * What a grown fish of this kind, variant and Size earns per second, sparkling coins on average (FishService
+ * getFishIncomePerMinute at its last growth stage): before the player's multipliers (rebirth, Coins pass).
+ */
+function getGrownIncome(fishType: FishType, variant: FishVariant, size: number): number {
+	const stages = getGrowthStages(fishType);
+	const sparkling = 1 + (SPECIAL_COIN_MULTIPLIER - 1) / SPECIAL_COIN_ODDS;
+	return (
+		getIncomePerSecond(fishType) *
+		stages[stages.size() - 1].coinMultiplier *
+		getVariantIncomeMultiplier(variant) *
+		getSizeMultiplier(size) *
+		sparkling
+	);
+}
+
 /** Size chips shown per row (the smallest ones), then "+N more" (FigCraft size.figcraft: OceanRow). */
 const MAX_SIZE_CHIPS = 6;
 /** A rare variant's Release button stays armed ("Sure?") this long after the first click. */
@@ -71,7 +98,7 @@ const COACH_BUTTON_ROOM = 108; // "Got it!" button and the gap before it
 
 export interface OceanPanelProps {
 	/** Living fish per type and rare variant (PlayerData.fish, fishVariants). */
-	tank: Pick<PlayerData, "fish" | "fishVariants" | "passes" | "tankSizes">;
+	tank: Pick<PlayerData, "fish" | "fishVariants" | "passes" | "tankSizes" | "rebirths">;
 	oceanPoints: number;
 	/** First visit after unlocking it: a short explanation on top (FigCraft: PanelCoach). */
 	showTutorial: boolean;
@@ -115,6 +142,8 @@ function FishRow(props: {
 	canRelease: boolean;
 	/** The x2 Ocean Points pass. */
 	pointsMultiplier: number;
+	/** What the NEXT fish earns per second once grown, with the player's lasting multipliers (rebirth, Coins pass). */
+	nextIncome: number;
 	onRelease: () => void;
 }) {
 	const fish = FISH_TYPES[props.fishType];
@@ -206,7 +235,11 @@ function FishRow(props: {
 					BackgroundTransparency={1}
 					Font={FONT_BOLD}
 					RichText={true}
-					Text={`<font color="#${rarity.color.ToHex()}">${rarity.label}</font>  •  ×${props.count} in your tank`}
+					Text={`<font color="#${rarity.color.ToHex()}">${rarity.label}</font>  •  ×${props.count}${
+						props.nextIncome > 0
+							? `  •  <font color="#${PALETTES.gold.light.ToHex()}">${formatShort(props.nextIncome)} $/s</font>`
+							: ""
+					}`}
 					TextSize={14}
 					TextColor3={NAVY.muted}
 					TextXAlignment={Enum.TextXAlignment.Left}
@@ -503,13 +536,12 @@ export function OceanPanel(props: OceanPanelProps) {
 			const count = getLivingVariant(props.tank, fishType, variant);
 			if (count <= 0) continue;
 			const sizes = props.tank.tankSizes[fishType]?.[variant] ?? [];
-			const income = isEasterEgg(fishType)
-				? math.huge
-				: getIncomePerSecond(fishType) * getVariantIncomeMultiplier(variant) * getSizeMultiplier(sizes[0] ?? 0);
+			const income = isEasterEgg(fishType) ? math.huge : getGrownIncome(fishType, variant, sizes[0] ?? 0);
 			entries.push({ fishType, variant, count, sizes, income, index: entries.size() });
 		}
 	}
 	entries.sort((a, b) => (a.income !== b.income ? a.income < b.income : a.index < b.index));
+	const playerMultiplier = getRebirthMultiplier(props.tank.rebirths) * getPassCoinMultiplier(props.tank.passes);
 	const rows = entries.map((entry, order) => (
 		<FishRow
 			key={`${entry.fishType}_${entry.variant}`}
@@ -520,6 +552,7 @@ export function OceanPanel(props: OceanPanelProps) {
 			sizes={entry.sizes}
 			canRelease={canRelease}
 			pointsMultiplier={getPassOceanMultiplier(props.tank.passes)}
+			nextIncome={entry.income === math.huge ? 0 : math.floor(entry.income * playerMultiplier + 0.5)}
 			onRelease={() => props.onRelease(entry.fishType, entry.variant)}
 		/>
 	));

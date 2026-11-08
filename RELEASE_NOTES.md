@@ -11,6 +11,14 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.2.5 — 2026-11-08
+
+**New**
+- The Ocean panel shows, on each row, what its next fish (the one Release lets go) earns per second once grown, with
+  your rebirth and +50% Coins multipliers: you see what you give up before releasing it.
+
+---
+
 ## V1.2.4 — 2026-11-08
 
 **Fixes**
