@@ -4,10 +4,32 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 **Rules**
 - Each patch is a sub-patch: +0.0.1 since the alpha (V0.60.0 → V0.60.1 → V0.60.2…; +0.01 up to V0.59), unless a bigger
-  version step is asked for.
+  version step is asked for (a whole update published at once: V1.2.0).
 - Every task that changes the game opens a new patch, and all its changes go into it.
 - Old versions are never deleted or rewritten: they are the history of the game.
 - Each patch lists its changes under **New**, **Changes**, **Balance** and **Fixes**. Leave out the sections that are empty.
+
+---
+
+## V1.2.0 — 2026-11-08
+
+**V1.2, the Voyage goes on: the update in one patch (V1.1.15 to V1.1.25, published together).**
+
+**New**
+- **Four new aquariums**: rebirths 9 to 12, the Aurora Glacier, the Sky Archipelago, the Rainbow Dreamland and the
+  Heart of the Ocean, with their eggs (Aurora, Sky, Dreamland, Heart).
+- **Six new species**: the Fox Betta, the Cloud Whale, the Pegasus Seahorse, the Kitty Koi, the Sea Turtle and the
+  Baby Kraken, each with its Anomaly, Ghost, Shiny and Galaxy looks.
+- **The Size score**: every fish hatches a little smaller or bigger (-15 to +15), and the big ones drop richer coins.
+- **The Galaxy variant**, rarer than the Shiny, and the starfall's 4th bar.
+- **The Hermit Crab**, a new companion that brings rare variants, with its own pass for its quests.
+- The aquarium grows up to **33 fish**; new Ocean milestones up to 40,000,000 points; the Aurora, Galaxy rims; new
+  titles and decor (Ocean Sovereign, Grand Aquarist, Variant Master, Pearl Diver; Giant Pearl, Pearl Throne, Diamond
+  Incubator, Titan Trophy).
+- New quests on every line and more daily and weekly quests.
+
+**Changes**
+- The version number moves to V1.2.0: the patches of V1.1.15 to V1.1.25 below are the details of this update.
 
 ---
 

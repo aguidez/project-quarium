@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-08 (V1.1.25: V1.2 complete (ROADMAP_V1.2 M7 checked); formatMultiplier shortens the late rebirths' multipliers (x1.2M)).
+> Last updated: 2026-11-08 (V1.2.0: V1.2 complete and published as one update (ROADMAP_V1.2 M0–M7); formatMultiplier shortens the late rebirths' multipliers (x1.2M)).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
