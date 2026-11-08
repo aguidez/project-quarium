@@ -3,7 +3,8 @@ import { Lifecycle } from "shared/framework";
 import {
 	COSMETICS,
 	CosmeticId,
-	CREATOR_AURA_COLOR,
+	CREATOR_RAY_CENTER_COLOR,
+	CREATOR_RAY_TIP_COLOR,
 	CREATOR_TITLE,
 	CREATOR_TITLE_COLOR,
 	EARNED_TITLE_COLOR,
@@ -28,6 +29,13 @@ const CHECK_INTERVAL = 1;
 const BILLBOARD_NAME = "PlayerTitle";
 const OUTLINE = Color3.fromHex("#071320");
 const WHITE = new Color3(1, 1, 1);
+// The creator's title (studs): its text as tall as the earned ones' a bit bigger, in a taller billboard for the sun rays
+const CREATOR_TEXT_WIDTH = 4.8;
+const CREATOR_TEXT_HEIGHT = 0.75;
+const CREATOR_BILLBOARD_WIDTH = 6;
+const CREATOR_BILLBOARD_HEIGHT = 3.6; // the rays' span
+/** Bars through the centre for each ray length: twice as many ray tips per length. */
+const CREATOR_RAY_BARS = 4;
 
 // Leaderboard nameplate, laid out in design pixels (FigCraft leaderboards.figcraft, Plate_*) and drawn in scale, so the
 // billboard keeps its size in studs: a pill of PLATE_HEIGHT px, a rank badge overhanging its left end, the board's icon
@@ -111,37 +119,74 @@ class TitleServiceSingleton implements Lifecycle {
 	}
 
 	/**
-	 * The creator's title: bright red letters with a dark outline, over the same text drawn with a wide, soft, lighter red
-	 * stroke (its aura, tagged TitleAura: each client pulses it, TitleAuraController). A little bigger than the earned ones.
+	 * The creator's title: bright red letters with a dark outline over a burst of sun rays (16 tips: 4 long and 4 short
+	 * bars through the centre, each fading toward its ends, tagged TitleRay: each client turns and shimmers them,
+	 * TitleRaysController). The billboard is taller for the rays; the text sits in its middle, where the others' does.
 	 */
 	private buildCreator(head: BasePart, title: CosmeticId) {
-		const billboard = this.billboard(UDim2.fromScale(4.8, 0.75));
-		const text = COSMETICS[title].displayName.upper();
-		const layer = (name: string, zIndex: number) => {
-			const label = new Instance("TextLabel");
-			label.Name = name;
-			label.Size = UDim2.fromScale(1, 1);
-			label.BackgroundTransparency = 1;
-			label.Font = Enum.Font.LuckiestGuy;
-			label.Text = text;
-			label.TextScaled = true;
-			label.ZIndex = zIndex;
-			label.Parent = billboard;
-			return label;
-		};
-		const aura = layer("Aura", 1);
-		aura.TextColor3 = CREATOR_AURA_COLOR;
-		aura.TextTransparency = 0.35;
-		const glow = new Instance("UIStroke");
-		glow.Color = CREATOR_AURA_COLOR;
-		glow.Thickness = 7;
-		glow.Transparency = 0.55;
-		glow.LineJoinMode = Enum.LineJoinMode.Round;
-		glow.Parent = aura;
-		glow.AddTag(TAGS.TitleAura);
-		const front = layer("Title", 2);
-		front.TextColor3 = CREATOR_TITLE_COLOR;
-		this.stroke(front, Color3.fromHex("#3A0505"), 2);
+		const billboard = this.billboard(UDim2.fromScale(CREATOR_BILLBOARD_WIDTH, CREATOR_BILLBOARD_HEIGHT));
+		const rays = new Instance("Frame");
+		rays.Name = "Rays";
+		rays.AnchorPoint = new Vector2(0.5, 0.5);
+		rays.Position = UDim2.fromScale(0.5, 0.5);
+		rays.Size = UDim2.fromScale(1, 1);
+		rays.BackgroundTransparency = 1;
+		rays.ZIndex = 1;
+		const square = new Instance("UIAspectRatioConstraint");
+		square.AspectRatio = 1;
+		square.DominantAxis = Enum.DominantAxis.Height;
+		square.Parent = rays;
+		rays.Parent = billboard;
+		for (let i = 0; i < CREATOR_RAY_BARS * 2; i++) {
+			const long = i % 2 === 0;
+			const ray = new Instance("Frame");
+			ray.Name = `Ray${i}`;
+			ray.AnchorPoint = new Vector2(0.5, 0.5);
+			ray.Position = UDim2.fromScale(0.5, 0.5);
+			ray.Size = long ? UDim2.fromScale(0.07, 1) : UDim2.fromScale(0.05, 0.66);
+			ray.BackgroundColor3 = WHITE;
+			ray.BorderSizePixel = 0;
+			const angle = (i * 180) / (CREATOR_RAY_BARS * 2);
+			ray.Rotation = angle;
+			ray.SetAttribute("Angle", angle);
+			ray.ZIndex = 1;
+			const corner = new Instance("UICorner");
+			corner.CornerRadius = new UDim(0.5, 0);
+			corner.Parent = ray;
+			const gradient = new Instance("UIGradient");
+			gradient.Rotation = 90; // along the bar
+			gradient.Color = new ColorSequence([
+				new ColorSequenceKeypoint(0, CREATOR_RAY_TIP_COLOR),
+				new ColorSequenceKeypoint(0.5, CREATOR_RAY_CENTER_COLOR),
+				new ColorSequenceKeypoint(1, CREATOR_RAY_TIP_COLOR),
+			]);
+			gradient.Transparency = new NumberSequence([
+				new NumberSequenceKeypoint(0, 1),
+				new NumberSequenceKeypoint(0.3, 0.6),
+				new NumberSequenceKeypoint(0.5, 0.2),
+				new NumberSequenceKeypoint(0.7, 0.6),
+				new NumberSequenceKeypoint(1, 1),
+			]);
+			gradient.Parent = ray;
+			ray.AddTag(TAGS.TitleRay);
+			ray.Parent = rays;
+		}
+		const label = new Instance("TextLabel");
+		label.Name = "Title";
+		label.AnchorPoint = new Vector2(0.5, 0.5);
+		label.Position = UDim2.fromScale(0.5, 0.5);
+		label.Size = UDim2.fromScale(
+			CREATOR_TEXT_WIDTH / CREATOR_BILLBOARD_WIDTH,
+			CREATOR_TEXT_HEIGHT / CREATOR_BILLBOARD_HEIGHT,
+		);
+		label.BackgroundTransparency = 1;
+		label.Font = Enum.Font.LuckiestGuy;
+		label.Text = COSMETICS[title].displayName.upper();
+		label.TextScaled = true;
+		label.TextColor3 = CREATOR_TITLE_COLOR;
+		label.ZIndex = 3;
+		this.stroke(label, Color3.fromHex("#3A0505"), 2);
+		label.Parent = billboard;
 		billboard.Parent = head;
 	}
 

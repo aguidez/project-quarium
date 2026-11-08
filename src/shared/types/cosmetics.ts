@@ -239,10 +239,14 @@ export const TITLE_RANK_ATTRIBUTE = "TitleRank";
 /** Gold of the earned titles: their text above the head and their tag in the chat. */
 export const EARNED_TITLE_COLOR = Color3.fromHex("#FFD54A");
 
-/** The creator's title (COSMETICS creator): bright red text, its aura a lighter red that pulses (TitleAuraController). */
+/**
+ * The creator's title (COSMETICS creator): bright red text over a burst of sun rays, warm yellow at the centre and
+ * orange toward their tips, that turn slowly and shimmer (TitleRaysController).
+ */
 export const CREATOR_TITLE: CosmeticId = "TitleOceanCreator";
 export const CREATOR_TITLE_COLOR = Color3.fromHex("#FF2B2B");
-export const CREATOR_AURA_COLOR = Color3.fromHex("#FF6A4D");
+export const CREATOR_RAY_CENTER_COLOR = Color3.fromHex("#FFF1A8");
+export const CREATOR_RAY_TIP_COLOR = Color3.fromHex("#FF9A3C");
 
 export function isCreatorTitle(id: CosmeticId): boolean {
 	return COSMETICS[id].creator === true;

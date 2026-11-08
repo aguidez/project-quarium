@@ -8,10 +8,10 @@ export const TAGS = {
 	 */
 	GlowRim: "GlowRim",
 	/**
-	 * The aura of the creator's title above their head (TitleService, a TextLabel's UIStroke): each client pulses it
-	 * (TitleAuraController).
+	 * One sun ray behind the creator's title above their head (TitleService, a Frame; attribute "Angle": its resting
+	 * rotation in degrees): each client turns and shimmers them (TitleRaysController).
 	 */
-	TitleAura: "TitleAura",
+	TitleRay: "TitleRay",
 	/** The water volume of an aquarium. Clicking it drops food. */
 	AquariumWater: "AquariumWater",
 	/**

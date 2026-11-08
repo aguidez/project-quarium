@@ -11,6 +11,14 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.2.9 — 2026-11-08
+
+**Changes**
+- The Ocean Creator title shines over a burst of sun rays, yellow to orange, that turn slowly and shimmer (instead of
+  a red aura).
+
+---
+
 ## V1.2.8 — 2026-11-08
 
 **New**
