@@ -28,6 +28,9 @@ const SLICE_OVERLAP = 2;
 
 /** Set locally by UiController once the first PlayerData snapshot arrived (the save is loaded). */
 const DATA_LOADED_ATTRIBUTE = "DataLoaded";
+/** Set on Workspace by the update relay (server/services/ServerUpdateService: UPDATE_RELAY_ATTRIBUTE): no game runs
+ * there, the server sends the player on (or kicks them) in a few seconds. */
+const UPDATE_RELAY_ATTRIBUTE = "UpdateRelay";
 
 const MIN_TIME = 2.5; // seconds: the screen never just flashes by
 const MAX_TIME = 45; // seconds: never trap a player behind it (a failed data load kicks them anyway)
@@ -162,6 +165,28 @@ function layoutLogo() {
 	logo.Size = UDim2.fromOffset(LOGO_RECT.w * scale, LOGO_RECT.h * scale);
 }
 
+// On the update relay: says where the player is going, under the logo
+const status = make(
+	"TextLabel",
+	{
+		Name: "Status",
+		AnchorPoint: new Vector2(0.5, 1),
+		Position: new UDim2(0.5, 0, 0.92, 0),
+		Size: new UDim2(0.8, 0, 0.06, 0),
+		BackgroundTransparency: 1,
+		Font: Enum.Font.FredokaOne,
+		Text: "A new version of the game is out: taking you there...",
+		TextColor3: new Color3(1, 1, 1),
+		TextScaled: true,
+		Visible: false,
+		ZIndex: 4,
+	},
+	artwork,
+);
+make("UIStroke", { Thickness: 2, Color: Color3.fromHex("#0B2545") }, status);
+make("UITextSizeConstraint", { MaxTextSize: 34 }, status);
+const onRelay = () => game.GetService("Workspace").GetAttribute(UPDATE_RELAY_ATTRIBUTE) === true;
+
 gui.Parent = player.WaitForChild("PlayerGui");
 ReplicatedFirst.RemoveDefaultLoadingScreen();
 
@@ -233,7 +258,14 @@ for (let i = 0; i < items.size() && !timedOut(); i++) {
 target = math.max(target, 0.8);
 
 // 3. The player's save (ProfileStore can take a moment)
-creep(0.97, () => player.GetAttribute(DATA_LOADED_ATTRIBUTE) !== true);
+creep(0.97, () => player.GetAttribute(DATA_LOADED_ATTRIBUTE) !== true && !onRelay());
+
+// The update relay has no game to show: the screen stays, with its message, until the teleport (the server tries
+// again, then kicks with a message, so it never lasts)
+if (onRelay()) {
+	status.Visible = true;
+	while (true) task.wait(1);
+}
 
 target = 1;
 while (shown < 0.995 || os.clock() - startedAt < MIN_TIME || !artworkSeen()) task.wait();

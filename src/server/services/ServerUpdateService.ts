@@ -1,4 +1,12 @@
-import { HttpService, MemoryStoreService, MessagingService, Players, RunService, TeleportService } from "@rbxts/services";
+import {
+	HttpService,
+	MemoryStoreService,
+	MessagingService,
+	Players,
+	RunService,
+	TeleportService,
+	Workspace,
+} from "@rbxts/services";
 import { t } from "@rbxts/t";
 import { Lifecycle } from "shared/framework";
 import { AdminServerInfo, AdminServersSync } from "shared/types/admin";
@@ -25,6 +33,13 @@ const MOVE_NOTICE = 5; // seconds between the notice and the move
 const RELAY_HOLD = 6;
 const TELEPORT_TRIES = 3;
 const TELEPORT_RETRY_DELAY = 4;
+/**
+ * Seconds a player may still be on the relay after being sent on: a teleport TeleportAsync accepted can still fail on
+ * the way (the target full or just closed), sometimes without TeleportInitFailed; past this, the relay tries again.
+ */
+const RELAY_STUCK_TIME = 20;
+/** Workspace attribute the relay sets: the loading screen says the player is being moved instead of loading forever. */
+export const UPDATE_RELAY_ATTRIBUTE = "UpdateRelay";
 
 const isUpdateMessage = t.strictInterface({ version: t.integer });
 const isEntry = t.interface({ version: t.integer, gameVersion: t.string, players: t.integer, closed: t.optional(t.boolean) });
@@ -68,13 +83,11 @@ class ServerUpdateServiceSingleton implements Lifecycle {
 			return;
 		}
 		Players.PlayerAdded.Connect((player) => {
-			// Matchmaking may still send someone to a server that is moving its players: they move too
-			if (this.moving) task.spawn(() => this.moveToRelay([player]));
-			// A closed server takes no one new: on to the newest version (unless they already hopped enough)
-			else if (this.closed) {
-				const hops = getUpdateHops(player);
-				if (hops < MAX_UPDATE_HOPS) task.spawn(() => this.moveToRelay([player], hops + 1));
-			}
+			// Matchmaking (or joining a friend) may still send someone to a server that is moving its players, or closed
+			// to newcomers: on to the newest version, unless they already hopped enough (never a loop of teleports)
+			if (!this.moving && !this.closed) return;
+			const hops = getUpdateHops(player);
+			if (hops < MAX_UPDATE_HOPS) task.spawn(() => this.moveToRelay([player], hops + 1));
 		});
 	}
 
@@ -270,34 +283,67 @@ class ServerUpdateServiceSingleton implements Lifecycle {
 
 	/**
 	 * The relay server: holds whoever arrives for RELAY_HOLD seconds, then sends them to a server of the newest version
-	 * with room (else to a public server), with their hop count.
+	 * with room (else to a public server), with their hop count. Nothing runs here (no save, no game), so no player may
+	 * stay: a teleport that fails on the way (TeleportInitFailed, or the player still here RELAY_STUCK_TIME later) is
+	 * tried again, to any public server, and after TELEPORT_TRIES sends the player is kicked with a message.
 	 */
 	private runRelay() {
+		Workspace.SetAttribute(UPDATE_RELAY_ATTRIBUTE, true);
 		const waiting = new Array<Player>();
-		const sendOn = () => {
-			const group = waiting.filter((player) => player.IsDescendantOf(Players));
-			waiting.clear();
-			let hops = 0;
-			for (const player of group) hops = math.max(hops, getUpdateHops(player));
-			for (let attempt = 1; attempt <= TELEPORT_TRIES && group.size() > 0; attempt++) {
-				const [ok, problem] = pcall(() => {
-					const options = new Instance("TeleportOptions");
-					options.SetTeleportData({ updateHops: hops });
-					const target = this.findNewestServer(group.size());
-					if (target !== undefined) options.ServerInstanceId = target;
-					TeleportService.TeleportAsync(game.PlaceId, group, options);
-				});
-				if (ok) return;
-				warn(`[Server] Update relay: teleport failed (${problem}), try ${attempt}/${TELEPORT_TRIES}.`);
-				task.wait(TELEPORT_RETRY_DELAY);
+		/** Per player: the sends tried so far and when the last one went. */
+		const sends = new Map<Player, { tries: number; at: number }>();
+		const giveUp = (player: Player) => {
+			// Nothing to play here: better a clear message than a loading screen forever
+			if (player.IsDescendantOf(Players)) player.Kick("The game was updated: join again to play the new version.");
+		};
+		/** One teleport of `group`; `anyServer`: public matchmaking, not the registry's pick (after a failed try). */
+		const send = (group: Player[], anyServer: boolean) => {
+			const present = group.filter((player) => player.IsDescendantOf(Players));
+			if (present.size() === 0) return;
+			const out = new Array<Player>();
+			for (const player of present) {
+				const tries = (sends.get(player)?.tries ?? 0) + 1;
+				if (tries > TELEPORT_TRIES) giveUp(player);
+				else {
+					sends.set(player, { tries, at: os.clock() });
+					out.push(player);
+				}
 			}
-			// Nothing to play here (no game runs on the relay): better a clear message than a loading screen forever
-			for (const player of group)
-				if (player.IsDescendantOf(Players)) player.Kick("The game was updated: join again to play the new version.");
+			if (out.size() === 0) return;
+			let hops = 0;
+			for (const player of out) hops = math.max(hops, getUpdateHops(player));
+			const [ok, problem] = pcall(() => {
+				const options = new Instance("TeleportOptions");
+				options.SetTeleportData({ updateHops: hops });
+				const target = anyServer ? undefined : this.findNewestServer(out.size());
+				if (target !== undefined) options.ServerInstanceId = target;
+				TeleportService.TeleportAsync(game.PlaceId, out, options);
+			});
+			if (ok) return;
+			warn(`[Server] Update relay: teleport failed (${problem}).`);
+			task.delay(TELEPORT_RETRY_DELAY, () => send(out, true));
+		};
+		const sendOn = () => {
+			const group = [...waiting];
+			waiting.clear();
+			send(group, false);
 		};
 		Players.PlayerAdded.Connect((player) => {
 			waiting.push(player);
 			if (waiting.size() === 1) task.delay(RELAY_HOLD, sendOn);
+		});
+		Players.PlayerRemoving.Connect((player) => sends.delete(player));
+		TeleportService.TeleportInitFailed.Connect((player, result, message) => {
+			warn(`[Server] Update relay: ${player.Name}'s teleport failed on the way (${result.Name}: ${message}).`);
+			task.delay(TELEPORT_RETRY_DELAY, () => send([player], true));
+		});
+		// The teleports that neither arrived nor reported a failure
+		task.spawn(() => {
+			while (true) {
+				task.wait(5);
+				for (const [player, sent] of sends)
+					if (os.clock() - sent.at > RELAY_STUCK_TIME) send([player], true);
+			}
 		});
 	}
 }

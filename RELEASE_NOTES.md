@@ -11,6 +11,18 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.2.13 — 2026-11-08
+
+**Fixes**
+- After a server update, joining a friend could leave the loading screen up forever: the in-between server (the
+  relay) didn't try again when a teleport failed on the way. It now tries again (to any server), and after 3 tries
+  kicks with a message instead of keeping the player. Its loading screen says "taking you there..." instead of
+  looking stuck.
+- A server moving its players to the new version now stops sending on a player who already hopped twice (no loop of
+  teleports), like a closed server.
+
+---
+
 ## V1.2.12 — 2026-11-08
 
 **New**

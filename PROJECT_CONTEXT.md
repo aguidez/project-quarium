@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-08 (V1.2.12; the owner's Achievement jingle and menu open / close sounds).
+> Last updated: 2026-11-08 (V1.2.13; the update relay retries failed teleports, never keeps a player).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -180,7 +180,8 @@ ProjectQuarium/
    │                         image once filled); imports NOTHING (no ReplicatedStorage yet). Waits for its artwork (≤ 8 s) and
    │                         shows it ≥ 1.5 s. Steps: game.IsLoaded → preload
    │                         ReplicatedStorage.Assets models → wait for the local "DataLoaded" attribute (UiController, first
-   │                         sync). 2.5 s min, 45 s max, then fades
+   │                         sync). 2.5 s min, 45 s max, then fades. On the update relay (Workspace attribute
+   │                         UpdateRelay) it never fades: "taking you there..." until the teleport or the kick
    ├─ shared/                Code + config used by both sides (ReplicatedStorage)
    │  ├─ framework.ts        Lifecycle + bootstrap
    │  ├─ version.ts          GAME_VERSION (the top patch of RELEASE_NOTES.md: bump it with each patch), getVersionLabel
@@ -473,10 +474,11 @@ ProjectQuarium/
    │     │                   players, 5 s later teleports them to a ReserveServer (the relay: a new server runs the newest
    │     │                   version) and moves whoever joins it afterwards; the relay (reserved, no private-server owner)
    │     │                   runs nothing else and sends them 6 s later to a server of the newest version with room
-   │     │                   (registry, not closed), else a public one (kick with a message if every teleport fails).
+   │     │                   (registry, not closed), else a public one; a teleport failing on the way (TeleportInitFailed,
+   │     │                   or still there 20 s later) is tried again to any public server, kick with a message after 3.
    │     │                   closeOldServers (the soft update, topic QuariumClose: servers on V1.2.6 code or newer): an
    │     │                   old server stays for its players (told once), registers `closed`, and sends every newcomer
-   │     │                   through the relay (teleport data updateHops: after 2 hops a player stays). No teleport in
+   │     │                   through the relay; a moving server too (teleport data updateHops: after 2 hops a player stays). No teleport in
    │     │                   Studio (a notice instead)
    │     └─ DevCommandService  Studio-only chat commands (TextChatCommands created only when RunService.IsStudio(), only
    │                         for the game's admins, server/admins.ts): "/datareset" then "/datareset confirm" within 15 s (wipes the save,
