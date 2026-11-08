@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-08 (V1.1.24: rebirth 12 and the Heart of the Ocean, the Sea Turtle and the Baby Kraken (species 23–24), the Heart Egg, tank 33, the V1.2 finale's quests and cosmetics, test stores off the leaderboards, the Hermit Crab Pass (ROADMAP_V1.2 M6)).
+> Last updated: 2026-11-08 (V1.1.25: V1.2 complete (ROADMAP_V1.2 M7 checked); formatMultiplier shortens the late rebirths' multipliers (x1.2M)).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -329,7 +329,7 @@ ProjectQuarium/
    │     │                   getEventCoinMultiplier(owner), EventSource, getRecurringEvents, getRecurringChance,
    │     │                   EVENT_IMMUNE_ATTRIBUTE + isEventImmune (tutorial)
    │     ├─ rebirths.ts      REBIRTHS (price, multiplier, start money, theme; 12 since V1.1.24), AQUARIUM_THEMES (Basic + the 12 themes, AuroraGlacier, SkyArchipelago, RainbowDreamland and HeartOfTheOcean the V1.2 ones),
-   │     │                   getNextRebirth, getRebirthMultiplier, getAquariumTheme, getRebirthOceanPoints
+   │     │                   getNextRebirth, getRebirthMultiplier, getAquariumTheme, getRebirthOceanPoints, formatMultiplier ("x2.5", "x8,000", "x1.2M")
    │     ├─ likes.ts         Like rules (1 per hour given, x2 coins for 5 min, restarted by each like), board offset, helpers
    │     ├─ onboarding.ts    Onboarding steps + rules (what is allowed / free at each step), ONBOARDING_REWARD,
    │     │                   STORY_QUEST_HINT_DELAY

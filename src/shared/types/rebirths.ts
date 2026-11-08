@@ -1,3 +1,4 @@
+import { formatNumber, formatShort } from "../format";
 import { FISH_TYPES, FishType } from "./fish";
 import { getPassOceanMultiplier } from "./gamepasses";
 import { getLivingVariant, PlayerData } from "./playerData";
@@ -114,7 +115,9 @@ export function getRebirthOceanPoints(data: Pick<PlayerData, "fish" | "fishVaria
 	return points * getPassOceanMultiplier(data.passes);
 }
 
-/** "x2.5" */
+/** "x2.5", "x8,000", "x25K", "x1.2M": the late rebirths' multipliers read short (V1.1.25: "x1200000" before). */
 export function formatMultiplier(multiplier: number): string {
+	if (multiplier >= 10000) return `x${formatShort(multiplier)}`;
+	if (multiplier >= 1000) return `x${formatNumber(multiplier)}`;
 	return `x${math.floor(multiplier * 10 + 0.5) / 10}`;
 }

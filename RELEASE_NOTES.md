@@ -11,6 +11,16 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.25 — 2026-11-08
+
+**V1.2 is complete: checked from rebirth 7 to the Heart of the Ocean.**
+
+**Changes**
+- The coin multipliers of the late rebirths read short: "x1.2M" instead of "x1200000" (Rebirth menu, rebirth reward,
+  the tank's income plaque); from x1,000 to x9,999 they get a separator ("x8,000").
+
+---
+
 ## V1.1.24 — 2026-11-08
 
 **The Voyage reaches its heart: a twelfth aquarium, the finale of V1.2.**

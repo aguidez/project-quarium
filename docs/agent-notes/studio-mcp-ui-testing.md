@@ -58,6 +58,14 @@ Related: [[lobby-decor-constraints]]
   tank. A test store never writes to the leaderboards (`DataService.isLiveStore`). Afterwards revert both, rebuild,
   check the sync, `RemoveAsync("Player_<UserId>")`. A Server execute_luau `require` of a service gets a fresh copy (the
   plugin's VM): read the game's state from attributes / instances instead.
+- **Playing several late rebirths in one sitting** (2026-11-08, V1.2 M7): a synthetic profile skips the story (quests
+  back to "Coin Collector", a 10-fish tank), so copy the owner's real save into the test store (Edit: `GetAsync`, JSON
+  deep copy, `ActiveSession = nil`, `testSpeedUsed = true`, money 1e18, empty `tank`, `SetAsync` with `{userId}`). Add a
+  `// TEMP TEST` line in RebirthService after `data.money = upcoming.startMoney` (money 1e18 again) and send `/speed 10`:
+  each run is then a Client script of ~1 min (Rebirth, `BuyEgg` along the egg chain, which resets every run, then
+  `OpenEgg` the run's egg every 4 s). Send chat commands from execute_luau inside `task.spawn` + `pcall`:
+  `SendAsync` can block until the call times out. "Asset content representation is being generated" lines when a new
+  species first spawns are Studio's asset processing, not a game error.
 - **Playing the onboarding on a fresh profile** (2026-11-03, the food reserve): point `STORE_NAME` at an empty test store (`"PlayerData_<Name>Test"; // TEMP TEST`), build, check the sync, play: the owner starts from step 1. Drive it with intents (`BuyEgg "Common"`, then `OpenEgg "Common"` every second until the frozen coin shows, `Interact:FireServer("CollectCoin", coin)`), then wait for the Feed step. Afterwards stop, restore `PlayerData_v1`, rebuild, check the sync, `RemoveAsync("Player_<UserId>")` in the test store from Edit. Such a profile has no `testSpeedUsed`: it does send one onboarding funnel to the Creator Dashboard. Real clicks with `user_mouse_input` use viewport coordinates (the capture is scaled down, see above): a click "above the water" in capture pixels lands outside the tank and silently does nothing. A 0.7 s UI flash is shorter than a capture's delay: record it from a watcher loop started in a Client script (texts / colours into a local attribute), click, then read the attribute.
 - **Previewing the UI on a phone** (2026-11-04, V0.60.8): Studio's device emulator can't be driven by MCP. TEMP
   harness (`// TEMP TEST`, reverted with `git checkout` + a grep for TEMP TEST): `screenScale.getViewportSize` returns

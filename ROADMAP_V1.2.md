@@ -5,7 +5,7 @@
 > the food reserve and a sixth companion (the Hermit Crab). Everything here is a **plan**: the economy's numbers
 > are tuned with the simulator (M1, `tools/balance-v1.2-plan.js`), nothing is built yet. Tick the boxes as tasks ship, and move what a
 > step ships into `PROJECT_CONTEXT.md` / `RELEASE_NOTES.md` / `BALANCE.md` as usual.
-> Last updated: 2026-11-08 (M6 done, V1.1.24: the Sea Turtle replaced the Panda Manta, the Hermit Crab Pass, all 24 species ~25h16; M5 done, V1.1.23: the Kitty Koi without whiskers, the Kitty Koi ~22h49; M4 done, V1.1.22: the Hermit Crab live, the Pegasus Seahorse ~50 min ahead of the plan; M3 done, V1.1.21: the Fox Betta replaced the Penguin Puffer; M2c done, V1.1.20; M2 done, V1.1.19; M2b done: the Size score live in V1.1.16; M1 done: prices tuned, end of V1.2 at ~25h15, the 4th bar at 0.9; owner's decisions: themes, 4 species per rarity, tank 33 (50 later), Size and its table,
+> Last updated: 2026-11-08 (M7 done, V1.1.25: V1.2 complete; M6 done, V1.1.24: the Sea Turtle replaced the Panda Manta, the Hermit Crab Pass, all 24 species ~25h16; M5 done, V1.1.23: the Kitty Koi without whiskers, the Kitty Koi ~22h49; M4 done, V1.1.22: the Hermit Crab live, the Pegasus Seahorse ~50 min ahead of the plan; M3 done, V1.1.21: the Fox Betta replaced the Penguin Puffer; M2c done, V1.1.20; M2 done, V1.1.19; M2b done: the Size score live in V1.1.16; M1 done: prices tuned, end of V1.2 at ~25h15, the 4th bar at 0.9; owner's decisions: themes, 4 species per rarity, tank 33 (50 later), Size and its table,
 > Galaxy at 0.2 % with the Lucky pass x3 on it, the 4th bar at 2.5 %, the Hermit Crab's live luck, boosts unchanged;
 > nothing built yet. Groundwork done: money up to 1e300, V1.1.15).
 
@@ -467,8 +467,11 @@ last live rebirth.
       took over every generation: replaced by a Sea Turtle whose shell never moves; the Hermit Crab's line behind its pass;
       measured: rebirth 12 ~23h09, all 24 species ~25h16): theme, Heart Egg, Sea Turtle, Baby Kraken, rebirth 12, tank 33, Voyage up to "Grand
       Aquarist", milestones 20M / 40M, the side lines' new quests, the new daily / weekly entries, the end message.
-- [ ] **M7 Check**: full simulator run, BALANCE.md §2 rewritten up to ~25h30, a playtest of a late profile (admin
-      tools: a rebirth 8 save in a test store) through rebirth 12.
+- [x] **M7 Check** (V1.1.25, 2026-11-08: the V1.1.24 run gives all 24 species ~25h16 (24h15–26h36), the plan's 25h15;
+      the playtest used a copy of the owner's rebirth 7 save in a test store, money refilled by a TEMP hook, x10 speed:
+      rebirths 8 → 12, every new egg opened, quests and milestones claimed, the end message shown; found the raw
+      multipliers ("x1200000"), now short): full simulator run, BALANCE.md §2 rewritten up to ~25h30, a playtest of a
+      late profile through rebirth 12.
 - [ ] **Later: a lighter simulator** (owner, 2026-11-08): `tools/economy-sim.js` (~700 lines, 2,000 players x 32 h)
       now takes several minutes for a full run and prints nothing until the end. Rework it: split it into modules
       (config mirror, one player's run, quests / Ocean / variants, the report) and add quicker runs (a step's slice of
