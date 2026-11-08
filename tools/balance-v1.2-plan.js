@@ -34,7 +34,7 @@ const V1_FISH = {
 };
 // Species 19–24 (ROADMAP_V1.2 §3.2): income x2 per species, Ocean Points x1.6, quick / slow intervals
 const V12_FISH = {
-	PenguinPuffer: { income: 10.08e6, interval: 12, ocean: 51000 },
+	FoxBetta: { income: 10.08e6, interval: 12, ocean: 51000 },
 	CloudWhale: { income: 33.6e6, interval: 20, ocean: 82000 },
 	PegasusSeahorse: { income: 100.8e6, interval: 30, ocean: 131000 },
 	KittyKoi: { income: 53.76e6, interval: 8, ocean: 210000 },
@@ -80,8 +80,8 @@ const V12_REBIRTHS = [
 	{ price: 80e15, mult: 1200000, start: 300 },
 ];
 const V12_EGGS = [
-	{ name: "Aurora", price: 400e12, hatch: 180, odds: { MiniLeviathan: 55, PenguinPuffer: 45 } },
-	{ name: "Sky", price: 770e12, hatch: 180, odds: { PenguinPuffer: 25, CloudWhale: 55, PegasusSeahorse: 20 } },
+	{ name: "Aurora", price: 400e12, hatch: 180, odds: { MiniLeviathan: 55, FoxBetta: 45 } },
+	{ name: "Sky", price: 770e12, hatch: 180, odds: { FoxBetta: 25, CloudWhale: 55, PegasusSeahorse: 20 } },
 	{ name: "Dreamland", price: 50e15, hatch: 180, odds: { PegasusSeahorse: 55, KittyKoi: 45 } },
 	{ name: "Heart", price: 96e15, hatch: 180, odds: { KittyKoi: 25, PandaManta: 55, BabyKraken: 20 } },
 ];
@@ -130,7 +130,7 @@ module.exports = {
 			Dragonfish: 5,
 			WolfDogfish: 5,
 			MiniLeviathan: 5,
-			PenguinPuffer: 5,
+			FoxBetta: 5,
 			PegasusSeahorse: 5,
 			KittyKoi: 5,
 			BabyKraken: 5,

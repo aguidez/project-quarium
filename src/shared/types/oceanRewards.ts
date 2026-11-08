@@ -23,7 +23,8 @@ export type OceanRewardId =
 	| "Jellyfish"
 	| "PearlRims"
 	| "Aquarium25"
-	| "OceanGuardian";
+	| "OceanGuardian"
+	| "Aquarium27";
 
 /**
  * A companion upgrade multiplies what the companion does: the Snail's crawling speed, the Pelican's
@@ -175,7 +176,7 @@ export const OCEAN_MILESTONES: readonly OceanMilestone[] = [
 		id: "Aquarium25",
 		points: 450000,
 		title: "Biggest aquarium",
-		description: "Your aquarium holds 25 fish, the biggest tank of the ocean.",
+		description: "Your aquarium holds 25 fish.",
 		reward: { kind: "Capacity", capacity: 25 },
 	},
 	{
@@ -184,6 +185,14 @@ export const OCEAN_MILESTONES: readonly OceanMilestone[] = [
 		title: "Ocean Guardian",
 		description: "The title Ocean Guardian above your head, and a whale statue in your aquarium.",
 		reward: { kind: "Cosmetic", cosmetics: ["TitleOceanGuardian", "DecorWhaleStatue"] },
+	},
+	// V1.2 (ROADMAP_V1.2 §6): one step of 2 per rebirth, reached with rebirth 9's release (~13h29)
+	{
+		id: "Aquarium27",
+		points: 1500000,
+		title: "Glacier aquarium",
+		description: "Your aquarium holds 27 fish.",
+		reward: { kind: "Capacity", capacity: 27 },
 	},
 ];
 

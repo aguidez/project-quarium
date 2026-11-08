@@ -9,6 +9,10 @@
 //   node fish-variant-recolor.js sheet <Type>    -> TEX_DIR/out/sheet_<Type>.png: the texture at hues 0, 60 ... 300
 //                                                  (to choose the angles)
 //   node fish-variant-recolor.js build <json>    -> TEX_DIR/out/<Type>_<Variant>.png
+//   node fish-variant-recolor.js sticker <in.png> <out.png> <deg> [sat] [light]
+//                                                 a sticker of tools/fish-sticker-icons.js recoloured like its texture
+//                                                 (its white / gold outline, sparkles and shadow kept): the Anomaly /
+//                                                 Shiny stickers without uploading the textures first (V1.1.21)
 const path = require("path");
 const fs = require("fs");
 // jimp 0.22 is a devDependency (npm install); JIMP=<path> still points to another copy
@@ -109,6 +113,32 @@ async function build(spec) {
 	}
 }
 
+// The Shiny stickers' gold outline and sparkles (fish-sticker-icons.js OUTLINE_COLORS.Shiny and its sparkles)
+const STICKER_GOLD = [255, 213, 74];
+
+async function sticker(input, output, deg, sat = 1, light = 0) {
+	const image = await Jimp.read(input);
+	const data = image.bitmap.data;
+	const keep = [];
+	for (let i = 0; i < data.length; i += 4) {
+		const d = Math.abs(data[i] - STICKER_GOLD[0]) + Math.abs(data[i + 1] - STICKER_GOLD[1]) + Math.abs(data[i + 2] - STICKER_GOLD[2]);
+		// the outline, the sparkles and the soft shadow stay (neutrals are kept by recolor itself)
+		if (data[i + 3] < 200 || d < 60) keep.push([i, data[i], data[i + 1], data[i + 2]]);
+	}
+	recolor(data, deg, sat, light);
+	for (const [i, r, g, b] of keep) {
+		data[i] = r;
+		data[i + 1] = g;
+		data[i + 2] = b;
+	}
+	await image.writeAsync(output);
+	console.log(`sticker -> ${output}`);
+}
+
 const [mode, arg] = process.argv.slice(2);
 if (mode === "sheet") sheet(arg);
+else if (mode === "sticker") {
+	const [, , inFile, outFile, deg, sat, light] = process.argv.slice(1);
+	sticker(inFile, outFile, Number(deg), sat === undefined ? 1 : Number(sat), light === undefined ? 0 : Number(light));
+}
 else if (mode === "build") build(JSON.parse(fs.readFileSync(arg, "utf8")));

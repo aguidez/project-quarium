@@ -252,6 +252,18 @@
       ]
     ]
   },
+  "FoxBetta": {
+    "Anomaly": [
+      180,
+      1,
+      0
+    ],
+    "Shiny": [
+      300,
+      1.15,
+      0.03
+    ]
+  },
   "_colorMaps": {
     "Basic": {
       "Normal": "rbxassetid://78123515869414",
@@ -355,6 +367,12 @@
       "Anomaly": "rbxassetid://96900490657264",
       "Shiny": "rbxassetid://85424297201130",
       "Galaxy": "rbxassetid://86262848353804"
+    },
+    "FoxBetta": {
+      "Normal": "rbxassetid://99721070570779",
+      "Anomaly": "rbxassetid://101087417715567",
+      "Shiny": "rbxassetid://94337674944982",
+      "Galaxy": "rbxassetid://129116268268779"
     }
   }
 }

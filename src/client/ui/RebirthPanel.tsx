@@ -8,6 +8,7 @@ import {
 	getNextRebirth,
 	getRebirthMultiplier,
 	getRebirthOceanPoints,
+	REBIRTHS,
 } from "shared/types/rebirths";
 import { Button3D, Card, Plate, ProgressBar, TextStroke } from "./kit";
 import { formatNumber, getWrappedHeight, Panel, PANEL_INNER_WIDTH } from "./Panel";
@@ -186,7 +187,7 @@ export function RebirthPanel(props: RebirthPanelProps) {
 					order={2}
 					image={V2_IMAGES.iconRebirth}
 					title="Voyage complete!"
-					body="You reached the Cosmic Sanctuary, the last aquarium of the ocean for now. More aquariums arrive with the next update!"
+					body={`You reached the ${AQUARIUM_THEMES[REBIRTHS[REBIRTHS.size() - 1].theme].displayName}, the last aquarium of the ocean for now. More aquariums arrive with the next update!`}
 				/>
 			</Panel>
 		);

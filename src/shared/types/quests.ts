@@ -342,7 +342,7 @@ export const QUESTS: Record<string, QuestConfig> = {
 	Voyage16: {
 		category: "Story",
 		title: "Master Aquarist",
-		description: "Find all 18 species of the ocean.",
+		description: "Find 18 different species of the ocean.",
 		stat: "SpeciesFound",
 		target: 18,
 		rewards: [
@@ -350,6 +350,24 @@ export const QUESTS: Record<string, QuestConfig> = {
 			{ kind: "Decor", decor: "DecorGoldenTrophy" },
 			{ kind: "OceanPoints", amount: 300000 },
 		],
+	},
+	// V1.2 (ROADMAP_V1.2 §7.1): the Voyage goes on, two quests per aquarium; Ocean Points x2.5 per rebirth
+	Voyage17: {
+		category: "Story",
+		title: "Beyond the Stars",
+		description: "Rebirth into the Aurora Glacier (rebirth 9).",
+		stat: "Rebirths",
+		target: 9,
+		rewards: [{ kind: "OceanPoints", amount: 375000 }],
+	},
+	Voyage18: {
+		category: "Story",
+		title: "Fox of the North",
+		description: "Hatch a Fox Betta.",
+		stat: "SpeciesHatched",
+		fishType: "FoxBetta",
+		target: 1,
+		rewards: [{ kind: "IncomeMinutes", minutes: 5 }],
 	},
 	// The Water Hen's line (Water Hen pass, BALANCE.md §5.9): eggs opened with it equipped. Slow on purpose: its
 	// effect is the smallest
@@ -824,6 +842,8 @@ export const STORY_LINES: Record<StoryLine, StoryLineConfig> = {
 			"Voyage14",
 			"Voyage15",
 			"Voyage16",
+			"Voyage17",
+			"Voyage18",
 		],
 		requires: "Story1",
 		order: 3,

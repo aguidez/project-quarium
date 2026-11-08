@@ -1,0 +1,7 @@
+{
+	"//": "A round fox-fish (V1.2, species 19). Its two fox ears stand on the head (height 0.75-1.05, t 0.25-0.45, one on each side of x = 0, found with a t / side / height scan): each gets its own bone (EarL / EarR) that FishRigController lets flop and trail the turns, like the Bunny Shark's.",
+	"extras": [
+		{ "name": "EarL", "parent": "Head", "t": [0.24, 0.46], "height": [0.72, 1.05], "side": [-0.8, -0.28], "fade": 0.05 },
+		{ "name": "EarR", "parent": "Head", "t": [0.24, 0.46], "height": [0.72, 1.05], "side": [0.28, 0.8], "fade": 0.05 }
+	]
+}

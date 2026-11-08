@@ -5,7 +5,7 @@
 > the food reserve and a sixth companion (the Hermit Crab). Everything here is a **plan**: the economy's numbers
 > are tuned with the simulator (M1, `tools/balance-v1.2-plan.js`), nothing is built yet. Tick the boxes as tasks ship, and move what a
 > step ships into `PROJECT_CONTEXT.md` / `RELEASE_NOTES.md` / `BALANCE.md` as usual.
-> Last updated: 2026-11-07 (M2c done, V1.1.20; M2 done, V1.1.19; M2b done: the Size score live in V1.1.16; M1 done: prices tuned, end of V1.2 at ~25h15, the 4th bar at 0.9; owner's decisions: themes, 4 species per rarity, tank 33 (50 later), Size and its table,
+> Last updated: 2026-11-08 (M3 done, V1.1.21: the Fox Betta replaced the Penguin Puffer; M2c done, V1.1.20; M2 done, V1.1.19; M2b done: the Size score live in V1.1.16; M1 done: prices tuned, end of V1.2 at ~25h15, the 4th bar at 0.9; owner's decisions: themes, 4 species per rarity, tank 33 (50 later), Size and its table,
 > Galaxy at 0.2 % with the Lucky pass x3 on it, the 4th bar at 2.5 %, the Hermit Crab's live luck, boosts unchanged;
 > nothing built yet. Groundwork done: money up to 1e300, V1.1.15).
 
@@ -43,7 +43,7 @@ score included; medians, p10–p90):
 | ~10h45 | 9h58–11h12 | Rebirth 8 (V1 numbers; 10h55 today, the Size score brings it ~10 min earlier) | — |
 | ~11h55 | 11h10–12h41 | All eighteen species (12h19 today) | — |
 | **~13h37** | 12h38–14h24 | **Rebirth 9**: Aurora Glacier; tank 27 | run 8: 2h52 |
-| ~16h27 | 14h42–17h52 | Species 19, Penguin Puffer | |
+| ~16h27 | 14h42–17h52 | Species 19, Fox Betta | |
 | **~16h28** | 15h24–17h08 | **Rebirth 10**: Sky Archipelago; tank 29 | run 9: 2h51 |
 | ~17h45 / ~18h41 | 16h37–19h49 | Species 20–21, Cloud Whale and Pegasus Seahorse | |
 | **~19h53** | 18h47–20h45 | **Rebirth 11**: Rainbow Dreamland; tank 31 | run 10: 3h25 |
@@ -56,7 +56,7 @@ score included; medians, p10–p90):
   from ~1h05–2h15 (V1's last ones) to **2h50–3h25**; the last one is shorter (2 h) because it ends on a species, not
   on a rebirth.
 - **The model's average player rebirths as soon as it can**: like V1's Husky Dogfish (10h55, after rebirth 8), the
-  Penguin Puffer and the Kitty Koi mostly hatch right around the next rebirth (in the next run, from the next egg,
+  Fox Betta and the Kitty Koi mostly hatch right around the next rebirth (in the next run, from the next egg,
   which still holds them at 25 %). Real players who wait for the species before rebirthing get them in their own run.
 - **What shaped the prices** (the cliffs of BALANCE.md §4, measured here): an even rebirth (10, 12) must stay at
   ≤ ~1.6x the egg its run farms, or the average player keeps buying that egg to swap its baby fish and never saves up
@@ -109,7 +109,7 @@ label (Fish Index order, colours), so V1 species changing label moves no number:
 | Uncommon | Clownfish, Zebra Danio, Flame Gourami | Zebra Danio, Flame Gourami, **Silver Angelfish, Pirate Fish** |
 | Rare | Silver Angelfish, Pirate Fish, Imperial Discus | Imperial Discus, **Catfish, Blue Tang, Baby Sunfish** |
 | Epic | Catfish, Blue Tang, Baby Sunfish | **Lanternfish, Lionfish, Dragonfish, Husky Dogfish** |
-| Legendary | Lanternfish, Lionfish, Dragonfish | **Bunny Shark, Mini Leviathan**, Penguin Puffer, Cloud Whale |
+| Legendary | Lanternfish, Lionfish, Dragonfish | **Bunny Shark, Mini Leviathan**, Fox Betta, Cloud Whale |
 | Mythic | Husky Dogfish, Bunny Shark, Mini Leviathan | Pegasus Seahorse, Kitty Koi, Panda Manta, Baby Kraken |
 | Celestial, Eternal | — | none yet (species 25–32, next updates) |
 
@@ -118,14 +118,14 @@ notes say so. The quests that name a rarity (§7) use the new labels.
 
 | # | Species | Rarity | Look | Coin | Coin value / interval | Income/s (baby) | Ocean Points |
 |---|---|---|---|---|---|---|---|
-| 19 | **Penguin Puffer** | Legendary | A round pufferfish in a penguin's black and white, tiny flippers, soft rounded spikes | Snowflake | 10.1M / 12 s | 840,000 | 51,000 |
+| 19 | **Fox Betta** (built, V1.1.21; it replaced the Fox Betta: two candidates failed moderation at generation, the others didn't read as penguins) | Legendary | A round fox-fish: fox face with upright ears, white muzzle, orange body, big cream-tipped tail and veil fins | Frost crystal | 10.1M / 12 s | 840,000 | 51,000 |
 | 20 | **Cloud Whale** | Legendary | A small fluffy white whale, a cloud on its back | Cloud | 33.6M / 20 s | 1,680,000 | 82,000 |
 | 21 | **Pegasus Seahorse** | Mythic | A white seahorse with small feathered wings, golden mane | Wing feather | 101M / 30 s | 3,360,000 | 131,000 |
 | 22 | **Kitty Koi** | Mythic | A koi with cat ears and whiskers, calico orange-white-black | Paw print | 53.8M / 8 s | 6,720,000 | 210,000 |
 | 23 | **Panda Manta** | Mythic | A manta ray in panda colours, round black eye patches | Bubble heart | 269M / 20 s | 13,440,000 | 336,000 |
 | 24 | **Baby Kraken** | Mythic | A cute round octopus, big eyes, short curled tentacles, a tiny pearl on its head | Ocean heart gem | 806M / 30 s | 26,880,000 | 537,000 |
 
-- Moderation checks for the meshes: the Penguin Puffer's spikes stay short round bumps; the Pegasus has no horn; no
+- Moderation checks for the meshes: the Fox Betta's spikes stay short round bumps; the Pegasus has no horn; no
   species holds anything in its mouth; the Baby Kraken's tentacles stay short and curled (nothing that reads as a
   weapon or as suggestive).
 - Spare ideas: Bear Grouper, Fox Betta, Hamster Blowfish, Owl Ray, Sheep Jellyfish (a fluffy bell), Teddy Turtle.
@@ -139,8 +139,8 @@ Prices tuned in M1 (§2 explains the rules that shaped them):
 
 | Egg | Price | vs its rebirth | Hatch | Odds | Unlocked by |
 |---|---|---|---|---|---|
-| Aurora | **400T** | 2x rebirth 9 | 180 s | Mini Leviathan 55, Penguin Puffer 45 | a Cosmic Egg |
-| Sky | **770T** | 1.2x rebirth 10 | 180 s | Penguin Puffer 25, Cloud Whale 55, Pegasus Seahorse 20 | an Aurora Egg |
+| Aurora | **400T** | 2x rebirth 9 | 180 s | Mini Leviathan 55, Fox Betta 45 | a Cosmic Egg |
+| Sky | **770T** | 1.2x rebirth 10 | 180 s | Fox Betta 25, Cloud Whale 55, Pegasus Seahorse 20 | an Aurora Egg |
 | Dreamland | **50Qa** | ~17x rebirth 11 | 180 s | Pegasus Seahorse 55, Kitty Koi 45 | a Sky Egg |
 | Heart | **96Qa** | 1.2x rebirth 12 | 180 s | Kitty Koi 25, Panda Manta 55, Baby Kraken 20 | a Dreamland Egg |
 
@@ -347,7 +347,7 @@ signature species, then reach the next aquarium. Ocean Points rewards x2.5 per r
 | Aquarium | Quest | Goal | Reward |
 |---|---|---|---|
 | Cosmic Sanctuary | Beyond the Stars | Rebirth 9 | 375,000 Ocean Points |
-| Aurora Glacier | Snowball | Hatch a Penguin Puffer | 5 min of income |
+| Aurora Glacier | Fox of the North | Hatch a Fox Betta | 5 min of income |
 | | Above the Clouds | Rebirth 10 | 900,000 Ocean Points |
 | Sky Archipelago | Winged Wonder | Hatch a Pegasus Seahorse | 5 min of income |
 | | Over the Rainbow | Rebirth 11 | 2,200,000 Ocean Points |
@@ -450,7 +450,9 @@ last live rebirth.
       the Collector's 100 / 120-cell quests wait for V1.2's species): the variant (look, coin, Fish Index column, release order), the
       4th bar of the gauge (mockup first), the Collector's new quests. Its uploads (one texture, one coin) previewed
       first.
-- [ ] **M3 Aurora Glacier**: theme, Aurora Egg, Penguin Puffer (mesh, bones, sticker, Fish Index), rebirth 9, tank 27,
+- [x] **M3 Aurora Glacier** (V1.1.21, 2026-11-08: the Fox Betta instead of the Penguin Puffer, its coin a frost crystal;
+      the theme built from a copy of Crystal Caverns with an aurora painting, no upload; the props of both themes set on
+      the sand): theme, Aurora Egg, Fox Betta (mesh, bones, sticker, Fish Index), rebirth 9, tank 27,
       Voyage "Beyond the Stars" / "Snowball", milestones 1.5M.
 - [ ] **M4 Sky Archipelago**: theme, Sky Egg, Cloud Whale, Pegasus Seahorse, rebirth 10, tank 29, Voyage, milestones
       4M / 6M, the Hermit Crab with its live luck (§8) and its quests.

@@ -17,6 +17,7 @@ export type FishType =
 	| "WolfDogfish"
 	| "BunnyShark"
 	| "MiniLeviathan"
+	| "FoxBetta"
 	| "FrenchFish"
 	| "AlienFish"
 	| "Sugar";
@@ -54,6 +55,7 @@ export type CoinType =
 	| "Moon"
 	| "Star"
 	| "Planet"
+	| "Frost"
 	| "Croissant"
 	| "Sugar";
 export const COIN_TYPES: readonly CoinType[] = [
@@ -75,6 +77,7 @@ export const COIN_TYPES: readonly CoinType[] = [
 	"Moon",
 	"Star",
 	"Planet",
+	"Frost",
 	"Croissant",
 	"Sugar",
 ];
@@ -429,6 +432,21 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 		scaleMax: 1.1,
 		speedMin: 1.6,
 		speedMax: 2.8,
+		hunger: DEFAULT_HUNGER,
+	},
+	// V1.2 (ROADMAP_V1.2 §3.2), species 19, the Aurora Glacier's: a round fox-fish (it replaced the planned Penguin
+	// Puffer). Income x2 the Mini Leviathan's, Ocean Points x1.6
+	FoxBetta: {
+		displayName: "Fox Betta",
+		rarity: "Legendary",
+		income: 10080000, // 840,000/s
+		oceanPoints: 51000,
+		coin: "Frost",
+		incomeInterval: 12,
+		scaleMin: 0.95,
+		scaleMax: 1.1,
+		speedMin: 1.8,
+		speedMax: 3,
 		hunger: DEFAULT_HUNGER,
 	},
 	// Easter egg (see EasterEggConfig): its coin is a croissant worth half the tank's income per minute

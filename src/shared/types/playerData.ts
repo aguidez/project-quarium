@@ -136,6 +136,7 @@ export const DEFAULT_PLAYER_DATA: PlayerData = {
 		WolfDogfish: 0,
 		BunnyShark: 0,
 		MiniLeviathan: 0,
+		FoxBetta: 0,
 		FrenchFish: 0,
 		AlienFish: 0,
 		Sugar: 0,

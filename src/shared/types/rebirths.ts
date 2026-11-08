@@ -23,7 +23,8 @@ export type AquariumTheme =
 	| "MarianaTrench"
 	| "VolcanicTemple"
 	| "CrystalCaverns"
-	| "CosmicSanctuary";
+	| "CosmicSanctuary"
+	| "AuroraGlacier";
 
 export interface AquariumThemeConfig {
 	displayName: string;
@@ -42,6 +43,7 @@ export const AQUARIUM_THEMES: Record<AquariumTheme, AquariumThemeConfig> = {
 	VolcanicTemple: { displayName: "Volcanic Temple" },
 	CrystalCaverns: { displayName: "Crystal Caverns" },
 	CosmicSanctuary: { displayName: "Cosmic Sanctuary" },
+	AuroraGlacier: { displayName: "Aurora Glacier" },
 };
 
 export interface RebirthConfig {
@@ -69,6 +71,8 @@ export const REBIRTHS: readonly RebirthConfig[] = [
 	{ price: 1e12, multiplier: 2500, startMoney: 300, theme: "CrystalCaverns" },
 	// The last aquarium of V1
 	{ price: 2.2e12, multiplier: 8000, startMoney: 300, theme: "CosmicSanctuary" },
+	// V1.2 (ROADMAP_V1.2 §3.4, tuned with tools/balance-v1.2-plan.js): rebirth 9 at ~13h37
+	{ price: 200e12, multiplier: 25000, startMoney: 300, theme: "AuroraGlacier" },
 ];
 
 /** The rebirth a player who has done `rebirths` of them can do next (undefined once all are done). */

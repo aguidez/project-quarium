@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-07 (V1.1.20: the Galaxy variant, its animated look and star coins, the starfall's 4th bar, 5 Fish Index columns (ROADMAP_V1.2 M2c); V1.1.19 rarities 4 per label, Fish Keeper; V1.1.18 the two trophies share one spot; V1.1.16 the Size score and the Big Catch line, ROADMAP_V1.2 M2b done).
+> Last updated: 2026-11-08 (V1.1.21: rebirth 9 and the Aurora Glacier, the Fox Betta (species 19), the Aurora Egg, the Frost coin, tank 27 (ROADMAP_V1.2 M3); V1.1.20 Galaxy and the starfall's 4th bar).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -320,7 +320,7 @@ ProjectQuarium/
    │     │                   EVENT_ATTRIBUTES, LURKING_ATTRIBUTE, ADMIN_EVENT_ORDER, getActiveEvent,
    │     │                   getEventCoinMultiplier(owner), EventSource, getRecurringEvents, getRecurringChance,
    │     │                   EVENT_IMMUNE_ATTRIBUTE + isEventImmune (tutorial)
-   │     ├─ rebirths.ts      REBIRTHS (price, multiplier, start money, theme), AQUARIUM_THEMES (Basic + the 8 themes),
+   │     ├─ rebirths.ts      REBIRTHS (price, multiplier, start money, theme; 9 since V1.1.21), AQUARIUM_THEMES (Basic + the 9 themes, AuroraGlacier the V1.2 one),
    │     │                   getNextRebirth, getRebirthMultiplier, getAquariumTheme, getRebirthOceanPoints
    │     ├─ likes.ts         Like rules (1 per hour given, x2 coins for 5 min, restarted by each like), board offset, helpers
    │     ├─ onboarding.ts    Onboarding steps + rules (what is allowed / free at each step), ONBOARDING_REWARD,
@@ -705,7 +705,7 @@ ProjectQuarium/
   GoldenGuppy, BlueNeon, ZebraDanio, RedTetra, Clownfish, FlameGourami, SilverAngelfish, ImperialDiscus, FrenchFish,
   Catfish, PirateFish (a new model since V1.1.3, its tricorn rigid on the head), BlueTang, BabySunfish, Lanternfish,
   Lionfish, Dragonfish (7-bone spine), WolfDogfish (the Husky Dogfish), BunnyShark (EarL / EarR), MiniLeviathan (rigged
-  in its own space, the template keeps its -30° pitch): every species of the 8 aquariums, plus Sugar, AlienFish and the
+  in its own space, the template keeps its -30° pitch), FoxBetta (V1.2, EarL / EarR): every species of the 9 aquariums, plus Sugar, AlienFish and the
   abyss `LanternFish` (EventFish; work files `AbyssLantern`; its stalk rigid under the welded lit Lure, no jaw). Still
   without bones: the K-pop idol (its template lost its texture, see §4: it only puffs on the beat until it is rigged)
   and the UFO (a ship the server glides, spins and tilts: no rig needed, tag `Ufo`, never a fish). The Swordfish companion too

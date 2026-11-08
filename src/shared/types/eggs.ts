@@ -13,7 +13,8 @@ export type EggType =
 	| "Trench"
 	| "Volcano"
 	| "Crystal"
-	| "Cosmic";
+	| "Cosmic"
+	| "Aurora";
 
 export interface EggOdds {
 	fishType: FishType;
@@ -182,6 +183,18 @@ export const EGG_TYPES: Record<EggType, EggConfig> = {
 		],
 		order: 12,
 		requires: "Crystal",
+	},
+	// V1.2 (ROADMAP_V1.2 §3.3): 2x rebirth 9, the wall of run 9 (tools/balance-v1.2-plan.js)
+	Aurora: {
+		displayName: "Aurora Egg",
+		price: 400e12,
+		hatchTime: 180,
+		odds: [
+			{ fishType: "MiniLeviathan", chance: 55 },
+			{ fishType: "FoxBetta", chance: 45 },
+		],
+		order: 13,
+		requires: "Cosmic",
 	},
 };
 

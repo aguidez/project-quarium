@@ -29,7 +29,11 @@ Static meshes (decor, coins) and images show whoever owns them.
    SurfaceAppearance 512²); then its mesh goes to the group (the clients animate it): [[fish-asset-pipeline]] "Meshes the
    group owns".
 3. Variants: `tools/fish-variant-recolor.js` (`sheet <Type>` to pick the hues, then `build`) → upload the Anomaly /
-   Shiny textures → `ServerStorage.Assets.FishVariants`, ids in design/ui/fish/variants/variant-spec.json.
+   Shiny textures → `ServerStorage.Assets.FishVariants`, ids in design/ui/fish/variants/variant-spec.json; Galaxy:
+   `tools/fish-galaxy.js texture`. The species' texture comes from the thumbnails API (fish-asset-pipeline, V1.1.20).
+   Stickers (V1.1.21, the Fox Betta): capture Normal and Ghost in Studio (the sticker tool's 4-row sheet, Normal in
+   rows 2 and 4), then `fish-variant-recolor.js sticker` for Anomaly / Shiny (keeps the outline, the gold rim and the
+   sparkles) and `fish-galaxy.js sticker`: nothing uploaded before the owner has seen all five.
 4. Sticker icons (`tools/fish-sticker-icons.js`, 4 variants), checked at 256×160 as a moderator, uploaded once → ids
    in `theme.ts` FISH_ICONS.
 5. Coin model in `ServerStorage.Assets.Coins` (+ `CoinType`), front facing the glass.

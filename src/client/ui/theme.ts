@@ -241,6 +241,14 @@ export const FISH_ICONS: Record<FishType, Record<FishVariant, string>> = {
 		Shiny: "rbxassetid://122761530150036",
 		Galaxy: "rbxassetid://73730807845628",
 	},
+	// V1.2: Anomaly / Shiny / Galaxy recoloured from the Normal sticker (fish-variant-recolor.js sticker, fish-galaxy.js)
+	FoxBetta: {
+		Normal: "rbxassetid://99345350334616",
+		Anomaly: "rbxassetid://103899281977579",
+		Ghost: "rbxassetid://105985644518262",
+		Shiny: "rbxassetid://117762708621771",
+		Galaxy: "rbxassetid://116190822973865",
+	},
 	// Easter egg: no variant, every column is its one icon
 	FrenchFish: {
 		Normal: FRENCH_FISH_ICON,
@@ -276,6 +284,7 @@ export const THEME_PALETTES: Record<AquariumTheme, Palette> = {
 	VolcanicTemple: palette("#FFA27A", "#E0502A", "#B0361A", "#5E1608"),
 	CrystalCaverns: palette("#E2C4FF", "#A87CF0", "#7E55C8", "#3E2470"),
 	CosmicSanctuary: palette("#9A7CFF", "#5A3CC8", "#3A2490", "#140A40"),
+	AuroraGlacier: palette("#BFFFEA", "#4FE3C4", "#2E9FB0", "#0E3A5A"),
 };
 
 /** Face colours of a found variant's slot (FigCraft: ItemSlot_<Variant>). */
@@ -382,6 +391,11 @@ export const EGG_SPRITES: Record<EggType, EggSprites> = {
 		icon: "rbxassetid://120088132643070", // CosmicEgg.png
 		top: "rbxassetid://106958821477467", // CosmicEggTop.png
 		bottom: "rbxassetid://77857068011328", // CosmicEggBottom.png
+	},
+	Aurora: {
+		icon: "rbxassetid://127367727163206", // AuroraEgg.png
+		top: "rbxassetid://119578569426748", // AuroraEggTop.png
+		bottom: "rbxassetid://84836307409890", // AuroraEggBottom.png
 	},
 };
 

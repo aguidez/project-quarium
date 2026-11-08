@@ -82,3 +82,10 @@ with `tools/blender/studio/export_fish.luau` + `tools/obj-receiver.js`, upload w
   white, attributes FishType / Variant, tag FishVariantAppearance, in ServerStorage.Assets.FishVariants (save the
   place). Stickers: the same transform on the Normal sticker (outline and shadow kept), no new render needed.
   A preview of an animated look as a GIF: draw the frames offline and run tools/blender/frames-to-gif.js on them.
+- **2026-11-07 (V1.2 M3, species 19)**: `generate_mesh` answered "Moderation failed" twice, both prompts holding
+  **"snow white"** (a penguin pufferfish, an arctic fox betta); the same arctic prompt with "white body with light icy
+  blue" passed at once. Never write "snow" in a prompt (drug slang for the filter): "white", "icy", "frost". The refusal
+  happens at generation (nothing is published, no notice reached the owner). Hybrid fish: put the animal first ("a fish
+  with the head of a fox: two large triangular fox ears standing straight up ...") or the generator draws a plain fish
+  in the animal's colours; check every candidate for a thin dark stick at the face (a fox-fish had one: rejected).
+  The owner dropped the Penguin Puffer for a Fox Betta.

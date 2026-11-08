@@ -11,6 +11,29 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.21 — 2026-11-08
+
+**The Voyage goes on: a ninth aquarium.**
+
+**New**
+- **Rebirth 9: the Aurora Glacier** (200T, coins x25,000): an aquarium of ice and frost, with the northern lights
+  waving behind the water.
+- **The Fox Betta**, a new Legendary species: a round fox-fish with fox ears, a white muzzle and a big cream-tipped
+  tail. It drops frost crystals worth 10M every 12 seconds, and has its Anomaly (arctic blue), Ghost, Shiny (pink) and
+  Galaxy looks.
+- **The Aurora Egg** (400T): Mini Leviathan 55 %, Fox Betta 45 %.
+- New Ocean milestone at 1,500,000 points: the aquarium holds **27 fish**.
+- Voyage quests "Beyond the Stars" (rebirth 9: 375,000 Ocean Points) and "Fox of the North" (hatch a Fox Betta: 5
+  minutes of income).
+
+**Changes**
+- "Master Aquarist" asks for 18 different species (there are more than 18 now).
+
+**Fixes**
+- The crystals and rocks of the Crystal Caverns floated a little above the sand: they stand on it now.
+
+---
+
 ## V1.1.20 — 2026-11-07
 
 **The Galaxy variant**: a new variant, rarer than the Shiny.

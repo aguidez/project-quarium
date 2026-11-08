@@ -259,6 +259,28 @@ const EGGS = {
 				.join("") +
 			sparkle(30, 26, 6, "#FFFFFF") + sparkle(70, 34, 4, "#FFD6F2") + sparkle(54, 18, 3, "#BFF6FF"),
 	},
+	// Aurora Glacier (V1.2): night-blue shell, two northern-light veils (green, violet), white ice peaks, stars
+	Aurora: {
+		outline: "#0A1C3A",
+		defs: `<radialGradient id="shell" cx="0.38" cy="0.3" r="0.8">
+			<stop offset="0" stop-color="#BFF6FF"/><stop offset="0.45" stop-color="#2E6FB0"/><stop offset="1" stop-color="#0B1E4A"/>
+		</radialGradient>
+		<linearGradient id="veilA" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0" stop-color="#7CFFB2" stop-opacity="0"/><stop offset="0.6" stop-color="#5CF2C0" stop-opacity="0.9"/><stop offset="1" stop-color="#3AD6C9" stop-opacity="0"/>
+		</linearGradient>
+		<linearGradient id="veilB" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0" stop-color="#B98CFF" stop-opacity="0"/><stop offset="0.6" stop-color="#A98BFF" stop-opacity="0.85"/><stop offset="1" stop-color="#FF8AD8" stop-opacity="0"/>
+		</linearGradient>`,
+		decor:
+			`<path d="M-4 46 C16 30 34 58 54 42 C72 28 88 48 104 36 L104 62 C88 74 72 54 54 68 C34 84 16 56 -4 72 Z" fill="url(#veilA)"/>` +
+			`<path d="M-4 64 C18 52 36 74 58 62 C76 52 90 66 104 58 L104 76 C90 84 76 70 58 80 C36 92 18 70 -4 82 Z" fill="url(#veilB)"/>` +
+			`<path d="M0 104 L16 86 L28 98 L44 80 L60 98 L74 84 L90 100 L100 92 V120 H0 Z" fill="#E6F4FB" stroke="#7FB3D8" stroke-width="1.6" stroke-linejoin="round"/>` +
+			`<path d="M44 80 L50 88 L40 88 Z M74 84 L79 91 L70 91 Z" fill="#FFFFFF"/>` +
+			[[24, 26, 1.4], [70, 22, 1.2], [84, 36, 1.5], [14, 40, 1.1], [58, 32, 1]]
+				.map(([cx, cy, r]) => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#FFFFFF"/>`)
+				.join("") +
+			sparkle(30, 26, 6, "#FFFFFF") + sparkle(78, 70, 3.5, "#BFF6FF"),
+	},
 	// Cosmic Sanctuary: midnight shell with a nebula, stars and a small ringed planet (no faces, no creatures)
 	Cosmic: {
 		outline: "#0A0820",
