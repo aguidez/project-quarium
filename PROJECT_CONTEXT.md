@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-08 (V1.2.11; simulator in segments of 3 rebirths, ROADMAP_V1.2 removed, context trimmed).
+> Last updated: 2026-11-08 (V1.2.12; the owner's Achievement jingle and menu open / close sounds).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -82,6 +82,8 @@ ProjectQuarium/
 ├─ .gitattributes            LF everywhere (CRLF for .bat/.cmd), binaries marked; .gitignore keeps local config out
 ├─ docs/agent-notes/         The agent's shared working knowledge (owner preferences, asset pipeline, Studio MCP
 │                            testing, lobby decor, moderation, player stats), index in its README
+├─ design/audio/            Source .ogg of the owner's own sounds (Achievement, Open / Close Menu 1-2), the folder
+│                            approved for Studio uploads; ids in shared/sounds.ts
 ├─ design/meshes/           OBJ source of the 25 animated meshes (exported V0.60.5; Sugar V0.60.14) + manifest.json
 │                            (template, old id)
 ├─ design/previews/          Images shown to the owner: FigCraft mock-ups (*-mockup.png) and Studio captures
@@ -189,7 +191,8 @@ ProjectQuarium/
    │  ├─ network.ts          Remote contracts + getRemoteEvent(name) (Remotes folder in ReplicatedStorage), FishView (with its Size) / FishMessage
    │  ├─ swim.ts             SwimSegment + getSwimPose: fish movement computed identically by server and clients
    │  ├─ tags.ts             CollectionService tags and the attributes they carry
-   │  ├─ sounds.ts           Music id + SFX ids, played in 2D by AudioController (CoinStolen = the lantern's gulp, StarCatch, UfoBeam,
+   │  ├─ sounds.ts           Music id + SFX ids, played in 2D by AudioController (FishObtained = the owner's Achievement
+   │  │                      jingle, MenuOpen1/2 + MenuClose1/2 = App's menu clicks, CoinStolen = the lantern's gulp, StarCatch, UfoBeam,
    │  │                      AlienScream = the owner's "tchiki" (2.65-3.32 s of a player's upload, old scream as fallback),
    │  │                      WeakBubble = a weak fish's bubble, CoinCollect / CompanionCoin = the coin chime); SfxConfig
    │  │                      `region` (PlaybackRegion) and `fallback` (played when the id fails to preload, AudioController)

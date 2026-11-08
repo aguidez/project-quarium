@@ -176,6 +176,15 @@ export function App(props: AppProps) {
 		if (props.shopNearby) setOpenPanel("Shop");
 		else setOpenPanel((panel) => (panel === "Shop" ? undefined : panel));
 	}, [props.shopNearby]);
+	// A click as a menu opens (or another one replaces it) and as it closes, one of two takes picked at random
+	const shownPanel = useRef<MenuPanel>();
+	useEffect(() => {
+		const previous = shownPanel.current;
+		shownPanel.current = openPanel;
+		if (openPanel === previous) return;
+		if (openPanel !== undefined) props.playSfx(math.random() < 0.5 ? "MenuOpen1" : "MenuOpen2");
+		else props.playSfx(math.random() < 0.5 ? "MenuClose1" : "MenuClose2");
+	}, [openPanel]);
 	// The menus show up once the tutorial is over, so they never distract from it
 	const menusVisible = data !== undefined && isOnboardingDone(data.onboarding);
 	// Something to customize: a theme, a cosmetic, or a leaderboard title held today

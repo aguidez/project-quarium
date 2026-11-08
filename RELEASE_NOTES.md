@@ -11,6 +11,18 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.2.12 — 2026-11-08
+
+**New**
+- Menus click as they open and as they close (two takes of each, picked at random).
+
+**Changes**
+- New reward jingle (hatched fish, reward popups): the game's own "Achievement" sound replaces the old "TaDa", which
+  stays as a fallback if it can't load. Each new sound is played louder to make up for its quieter file, so it
+  matches the other sounds.
+
+---
+
 ## V1.2.11 — 2026-11-08
 
 **Changes**

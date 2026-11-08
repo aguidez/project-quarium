@@ -37,8 +37,16 @@ export const SFX = {
 	EggCrack: { id: "rbxassetid://126409451844008", volume: 0.8 },
 	/** The egg breaks open ("Egg hatching Sound" by CaspDaPast Studios). */
 	EggHatch: { id: "rbxassetid://121871959493028", volume: 0.7 },
-	/** Congratulation jingle when the hatched fish is revealed ("TaDa"). */
-	FishObtained: { id: "rbxassetid://4757565956", volume: 0.6 },
+	/** Congratulation jingle: a hatched fish revealed, a reward popup (the owner's "Achievement"; the old "TaDa" if it
+	 * can't load). Its file is mixed ~3x quieter than the TaDa (PlaybackLoudness peak 76 vs 248), hence the volume. */
+	FishObtained: { id: "rbxassetid://106569108654071", volume: 3.5, fallback: "rbxassetid://4757565956" },
+	/** A menu opens, or another one replaces it: one of the owner's two takes, picked at random (App). The four menu
+	 * clicks have uneven files (peaks 41 / 86 / 50 / 120): each volume brings them to the same ~125. */
+	MenuOpen1: { id: "rbxassetid://75564118684402", volume: 3 },
+	MenuOpen2: { id: "rbxassetid://93172061244688", volume: 1.5 },
+	/** A menu closes: one of the owner's two takes, picked at random (App). */
+	MenuClose1: { id: "rbxassetid://90572052538966", volume: 2.5 },
+	MenuClose2: { id: "rbxassetid://88093077578000", volume: 1.1 },
 	/** The lantern fish of the abyssal raid snatches a coin ("Bubble Pops" by Daily Sounds, played low: a gulp). */
 	CoinStolen: { id: "rbxassetid://86074928120719", volume: 0.8 },
 	/** A UFO beams a fish up or drops it back ("Fun & Quirky - Space tones" by APM Music): kept low under the event's music. */

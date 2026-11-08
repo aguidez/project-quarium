@@ -17,6 +17,17 @@ the fisherman) is uploaded **as the group** by the batch checklist of [[blender-
 without a bone rig doesn't swim at all (a warning in the output; a local fish sways): rig every new fish or guest.
 Static meshes (decor, coins) and images show whoever owns them.
 
+**Audio the owner supplies** (.ogg / .mp3): copy it to `design/audio/` (the folder approved for Studio uploads, with
+short names). The Studio MCP `open_cloud_invoke` **can't upload audio** (`POST /assets/v1/assets` → 403 "User not
+authenticated", on 2026-11-08, scopes granted): the owner imports the files (Creator Hub → Audio → Import) and gives
+the ids. It **can** share them with the game, with no local key: `PATCH /asset-permissions-api/v1/assets/permissions`
+(body as in `tools/share-assets.js`, scope `asset-permissions:write`); check `successAssetIds`, then preload them in
+Edit with `ContentProvider:PreloadAsync` (status Success).
+Then **match its loudness** before choosing a volume: the owner's files came ~3x quieter than the Creator Store
+ones (heard as "on l'entend pas du tout" at 0.6). In a Client playtest play each one at Volume 1 next to a known
+sound (the old TaDa 4757565956, peak ~250) and read the peak of `PlaybackLoudness` frame by frame; set the volume
+to even them out (Sound.Volume goes up to 10).
+
 ## A new species
 
 0. Prompts that work with generate_mesh: "fish swimming horizontally, side view, <shape> body longer than tall, ...,
