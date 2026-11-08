@@ -154,6 +154,8 @@ export const DEFAULT_PLAYER_DATA: PlayerData = {
 		CloudWhale: 0,
 		PegasusSeahorse: 0,
 		KittyKoi: 0,
+		SeaTurtle: 0,
+		BabyKraken: 0,
 		FrenchFish: 0,
 		AlienFish: 0,
 		Sugar: 0,

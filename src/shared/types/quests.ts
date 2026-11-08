@@ -123,6 +123,8 @@ export interface QuestConfig {
 	companion?: CompanionType;
 	/** The least Size score a SizeHatched / SizeFound / BigFishInTank quest counts. */
 	minSize?: number;
+	/** The species a VariantFound quest counts (none: every species), e.g. the Shiny Mythics of V1.2. */
+	fishTypes?: readonly FishType[];
 }
 
 export const QUESTS: Record<string, QuestConfig> = {
@@ -403,6 +405,35 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 1,
 		rewards: [{ kind: "IncomeMinutes", minutes: 5 }],
 	},
+	Voyage23: {
+		category: "Story",
+		title: "Back to the Heart",
+		description: "Rebirth into the Heart of the Ocean (rebirth 12).",
+		stat: "Rebirths",
+		target: 12,
+		rewards: [{ kind: "OceanPoints", amount: 5000000 }],
+	},
+	Voyage24: {
+		category: "Story",
+		title: "The Little Kraken",
+		description: "Hatch a Baby Kraken.",
+		stat: "SpeciesHatched",
+		fishType: "BabyKraken",
+		target: 1,
+		rewards: [{ kind: "IncomeMinutes", minutes: 5 }],
+	},
+	Voyage25: {
+		category: "Story",
+		title: "Grand Aquarist",
+		description: "Find all 24 species of the ocean.",
+		stat: "SpeciesFound",
+		target: 24,
+		rewards: [
+			{ kind: "Title", title: "TitleGrandAquarist" },
+			{ kind: "Decor", decor: "DecorPearlThrone" },
+			{ kind: "OceanPoints", amount: 8000000 },
+		],
+	},
 	// The Water Hen's line (Water Hen pass, BALANCE.md §5.9): eggs opened with it equipped. Slow on purpose: its
 	// effect is the smallest
 	WaterHen1: {
@@ -432,7 +463,7 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 400,
 		rewards: [{ kind: "Perk", perk: "WaterHen3" }],
 	},
-	// The Hermit Crab's line (free, ROADMAP_V1.2 §8): eggs opened with its full bonus (incubated with it all the way)
+	// The Hermit Crab's line (Hermit Crab Pass since V1.1.24, ROADMAP_V1.2 §8): eggs opened with its full bonus (incubated with it all the way)
 	HermitCrab1: {
 		category: "Story",
 		title: "Shell Seeker",
@@ -562,6 +593,34 @@ export const QUESTS: Record<string, QuestConfig> = {
 			{ kind: "IncomeMinutes", minutes: 2 },
 		],
 	},
+	// V1.2 (ROADMAP_V1.2 §7.2): the line goes on, its last goal a diamond incubator
+	Hatchery6: {
+		category: "Story",
+		title: "Busy Nursery",
+		description: "Hatch 1,800 fish (all time).",
+		stat: "TotalHatched",
+		target: 1800,
+		rewards: [{ kind: "IncomeMinutes", minutes: 2 }],
+	},
+	Hatchery7: {
+		category: "Story",
+		title: "Egg Master",
+		description: "Hatch 2,500 fish (all time).",
+		stat: "TotalHatched",
+		target: 2500,
+		rewards: [{ kind: "IncomeMinutes", minutes: 2 }],
+	},
+	Hatchery8: {
+		category: "Story",
+		title: "Diamond Incubator",
+		description: "Hatch 3,500 fish (all time).",
+		stat: "TotalHatched",
+		target: 3500,
+		rewards: [
+			{ kind: "Decor", decor: "DecorDiamondIncubator" },
+			{ kind: "IncomeMinutes", minutes: 2 },
+		],
+	},
 	// Collector: the rare variants and the Fish Index (cells = species x variant), a rare find between two cell goals.
 	// Income before ~3 h, Ocean Points after: points early would bring the first milestones forward (BALANCE.md §5.9)
 	Collector1: {
@@ -633,6 +692,33 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 1,
 		rewards: [{ kind: "IncomeMinutes", minutes: 3 }],
 	},
+	// V1.2 (ROADMAP_V1.2 §7.2): past the end of the content for most players, like the Golden Incubator
+	Collector9: {
+		category: "Story",
+		title: "Mythic Shine",
+		description: "Find a Shiny Pegasus Seahorse, Kitty Koi, Sea Turtle or Baby Kraken.",
+		stat: "VariantFound",
+		variant: "Shiny",
+		fishTypes: ["PegasusSeahorse", "KittyKoi", "SeaTurtle", "BabyKraken"],
+		target: 1,
+		rewards: [{ kind: "OceanPoints", amount: 5000000 }],
+	},
+	Collector10: {
+		category: "Story",
+		title: "Index Master",
+		description: "Fill 100 entries of the Fish Index.",
+		stat: "IndexCells",
+		target: 100,
+		rewards: [{ kind: "Decor", decor: "FinishGalaxyRims" }],
+	},
+	Collector11: {
+		category: "Story",
+		title: "Variant Master",
+		description: "Fill all 120 entries of the Fish Index: every species in every variant.",
+		stat: "IndexCells",
+		target: 120,
+		rewards: [{ kind: "Title", title: "TitleVariantMaster" }],
+	},
 	// Ocean: after "Full House" (which opens the Ocean menu), give fish back to the sea
 	Ocean1: {
 		category: "Story",
@@ -650,6 +736,25 @@ export const QUESTS: Record<string, QuestConfig> = {
 		variant: "Shiny",
 		target: 1,
 		rewards: [{ kind: "Title", title: "TitleOceanFriend" }],
+	},
+	// V1.2 (ROADMAP_V1.2 §7.2)
+	Ocean3: {
+		category: "Story",
+		title: "Tide Keeper",
+		description: "Release 500 fish into the ocean.",
+		stat: "FishReleased",
+		target: 500,
+		rewards: [{ kind: "IncomeMinutes", minutes: 5 }],
+	},
+	Ocean4: {
+		category: "Story",
+		title: "Pearl Diver",
+		description: "Release a Shiny Baby Kraken into the ocean.",
+		stat: "FishReleased",
+		fishType: "BabyKraken",
+		variant: "Shiny",
+		target: 1,
+		rewards: [{ kind: "Title", title: "TitlePearlDiver" }],
 	},
 	// Big Catch (V1.1.16, the Size score: ROADMAP_V1.2 §3.5): opens with "Full House" like the Collector, so early: its
 	// money rewards are minutes of income (BALANCE.md §4). Huge = +10 % or more, Giant +13, Titan +15 (shared/types/size)
@@ -777,6 +882,23 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 1,
 		rewards: [{ kind: "CoinBoost", minutes: 5 }],
 	},
+	// V1.2 (ROADMAP_V1.2 §7.3): more variety for the late game, same reward
+	DailyFeedBig: {
+		category: "Daily",
+		title: "Busy Keeper",
+		description: "Feed your fish 60 times (food you drop).",
+		stat: "FishFed",
+		target: 60,
+		rewards: [{ kind: "CoinBoost", minutes: 5 }],
+	},
+	DailyRelease: {
+		category: "Daily",
+		title: "Gentle Goodbye",
+		description: "Release 5 fish into the ocean.",
+		stat: "FishReleased",
+		target: 5,
+		rewards: [{ kind: "CoinBoost", minutes: 5 }],
+	},
 	DailySize: {
 		category: "Daily",
 		title: "Big Fish",
@@ -826,6 +948,24 @@ export const QUESTS: Record<string, QuestConfig> = {
 		description: "Release 25 fish into the ocean.",
 		stat: "FishReleased",
 		target: 25,
+		rewards: [{ kind: "CoinBoost", minutes: 15 }],
+	},
+	// V1.2 (ROADMAP_V1.2 §7.3). The planned "hatch a fish of V1.2" left out: the boards are the same for every player
+	// and most of them are far from rebirth 9, so it would be impossible for them
+	WeeklyFeedBig: {
+		category: "Weekly",
+		title: "Feast Week",
+		description: "Feed your fish 500 times (food you drop).",
+		stat: "FishFed",
+		target: 500,
+		rewards: [{ kind: "CoinBoost", minutes: 15 }],
+	},
+	WeeklyEggsBig: {
+		category: "Weekly",
+		title: "Hatching Season",
+		description: "Open 250 eggs.",
+		stat: "EggsOpened",
+		target: 250,
 		rewards: [{ kind: "CoinBoost", minutes: 15 }],
 	},
 	WeeklySize: {
@@ -883,7 +1023,7 @@ export interface StoryLineConfig {
 
 export const STORY_LINES: Record<StoryLine, StoryLineConfig> = {
 	Start: { displayName: "First steps", quests: ["Story1"], order: 1 },
-	Ocean: { displayName: "Ocean", quests: ["Story2", "Ocean1", "Ocean2"], requires: "Story1", order: 2 },
+	Ocean: { displayName: "Ocean", quests: ["Story2", "Ocean1", "Ocean2", "Ocean3", "Ocean4"], requires: "Story1", order: 2 },
 	// The main line: the rebirth, then the "Voyage" through the aquariums (its key stays "Rebirth" for the saves)
 	Rebirth: {
 		displayName: "Voyage",
@@ -911,6 +1051,9 @@ export const STORY_LINES: Record<StoryLine, StoryLineConfig> = {
 			"Voyage20",
 			"Voyage21",
 			"Voyage22",
+			"Voyage23",
+			"Voyage24",
+			"Voyage25",
 		],
 		requires: "Story1",
 		order: 3,
@@ -920,13 +1063,25 @@ export const STORY_LINES: Record<StoryLine, StoryLineConfig> = {
 	// The free side lines (ROADMAP M7): the Collector waits for "Full House", so a new player has 4 story quests at once
 	Hatchery: {
 		displayName: "Hatchery",
-		quests: ["Hatchery1", "Hatchery2", "Hatchery3", "Hatchery4", "Hatchery5"],
+		quests: ["Hatchery1", "Hatchery2", "Hatchery3", "Hatchery4", "Hatchery5", "Hatchery6", "Hatchery7", "Hatchery8"],
 		requires: "Story1",
 		order: 6,
 	},
 	Collector: {
 		displayName: "Collector",
-		quests: ["Collector1", "Collector2", "Collector3", "Collector4", "Collector5", "Collector6", "Collector7", "Collector8"],
+		quests: [
+			"Collector1",
+			"Collector2",
+			"Collector3",
+			"Collector4",
+			"Collector5",
+			"Collector6",
+			"Collector7",
+			"Collector8",
+			"Collector9",
+			"Collector10",
+			"Collector11",
+		],
 		requires: "Story2",
 		order: 7,
 	},
@@ -965,11 +1120,12 @@ export const STORY_LINES: Record<StoryLine, StoryLineConfig> = {
 		requiresPass: "JellyfishPass",
 		order: 12,
 	},
-	// Free (ROADMAP_V1.2 §8): shown from the moment the crab is owned
+	// The crab itself is free (Ocean 2,500,000); its upgrade line is paid like the others' (owner, V1.1.24)
 	HermitCrab: {
 		displayName: "Hermit Crab",
 		quests: ["HermitCrab1", "HermitCrab2", "HermitCrab3"],
 		requiresCompanion: "HermitCrab",
+		requiresPass: "HermitCrabPass",
 		order: 13,
 	},
 };
@@ -1050,6 +1206,8 @@ export const DAILY_QUEST_POOL: readonly string[] = [
 	"DailyFeed",
 	"DailyAnomaly",
 	"DailySize",
+	"DailyFeedBig",
+	"DailyRelease",
 ];
 export const WEEKLY_QUEST_POOL: readonly string[] = [
 	"WeeklyCoins",
@@ -1059,6 +1217,8 @@ export const WEEKLY_QUEST_POOL: readonly string[] = [
 	"WeeklyRelease",
 	"WeeklyLikes",
 	"WeeklySize",
+	"WeeklyFeedBig",
+	"WeeklyEggsBig",
 ];
 /**
  * Rebirths a player needs before their daily / weekly boards open (decided by the owner, V0.48): the first hours stay

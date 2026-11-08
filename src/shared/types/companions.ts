@@ -85,7 +85,7 @@ export const JELLYFISH_PELLETS = 2;
 /**
  * The Hermit Crab's variant luck (ROADMAP_V1.2 §8): the eggs that incubate with it equipped get x(1 + bonus x the
  * share of their incubation spent with it) on every rare variant's chance, Galaxy included (getCrabLuck in
- * playerData.ts). Its free quests raise the bonus (perks.ts crabLuck: x1.35, x1.45, x1.6).
+ * playerData.ts). Its quests (Hermit Crab Pass) raise the bonus (perks.ts crabLuck: x1.35, x1.45, x1.6).
  */
 export const HERMIT_CRAB_LUCK = 1.25;
 /** Share of an egg's incubation spent with the crab from which it got "its full bonus" (its quests count those eggs). */

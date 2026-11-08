@@ -30,7 +30,9 @@ export type OceanRewardId =
 	| "Aquarium29"
 	| "QuickPantry"
 	| "Aquarium31"
-	| "AuroraRims";
+	| "AuroraRims"
+	| "Aquarium33"
+	| "OceanSovereign";
 
 /**
  * A companion upgrade multiplies what the companion does: the Snail's crawling speed, the Pelican's
@@ -238,6 +240,21 @@ export const OCEAN_MILESTONES: readonly OceanMilestone[] = [
 		title: "Aurora rims",
 		description: "The rims of your aquarium glow with the colours of the northern lights, whatever its theme.",
 		reward: { kind: "Cosmetic", cosmetics: ["FinishAuroraRims"] },
+	},
+	// Rebirth 12 (ROADMAP_V1.2 M6): the tank 33 (the new maximum) with its release, then the last goal of the ocean
+	{
+		id: "Aquarium33",
+		points: 20000000,
+		title: "Heart aquarium",
+		description: "Your aquarium holds 33 fish, the biggest tank of the ocean.",
+		reward: { kind: "Capacity", capacity: 33 },
+	},
+	{
+		id: "OceanSovereign",
+		points: 40000000,
+		title: "Ocean Sovereign",
+		description: "The title Ocean Sovereign above your head, and a giant glowing pearl in your aquarium.",
+		reward: { kind: "Cosmetic", cosmetics: ["TitleOceanSovereign", "DecorGiantPearl"] },
 	},
 ];
 

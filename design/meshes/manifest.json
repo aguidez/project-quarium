@@ -34,5 +34,7 @@
 	"CloudWhale": { "path": "ServerStorage.Assets.Fish.CloudWhale.Mesh", "staticMeshId": 73180984682389, "rigModelId": 73741521953011, "rigMeshId": 110790999289888 },
 	"PegasusSeahorse": { "path": "ServerStorage.Assets.Fish.PegasusSeahorse.Mesh", "staticMeshId": 133466535863384, "rigModelId": 104273546921494, "rigMeshId": 136120262534860 },
 	"HermitCrab": { "path": "ServerStorage.Assets.Companions.HermitCrab.Mesh", "staticMeshId": 99461476452331, "rigModelId": 135338980369328, "rigMeshId": 112633381339276 },
-	"KittyKoi": { "path": "ServerStorage.Assets.Fish.KittyKoi.Mesh", "staticMeshId": 112913726790054, "rigModelId": 91728970591430, "rigMeshId": 78028203556316 }
+	"KittyKoi": { "path": "ServerStorage.Assets.Fish.KittyKoi.Mesh", "staticMeshId": 112913726790054, "rigModelId": 91728970591430, "rigMeshId": 78028203556316 },
+	"BabyKraken": { "path": "ServerStorage.Assets.Fish.BabyKraken.Mesh", "staticMeshId": 138161004676959, "rigModelId": 129681979733282, "rigMeshId": 111132564612963 },
+	"SeaTurtle": { "path": "ServerStorage.Assets.Fish.SeaTurtle.Mesh", "staticMeshId": 136260882321703, "rigModelId": 83770952861213, "rigMeshId": 119243036973673 }
 }

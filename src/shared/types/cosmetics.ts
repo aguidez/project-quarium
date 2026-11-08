@@ -20,6 +20,10 @@ export type CosmeticId =
 	| "TitleOceanFriend"
 	| "TitleTitanTamer"
 	| "TitleSizeCollector"
+	| "TitleOceanSovereign"
+	| "TitleGrandAquarist"
+	| "TitleVariantMaster"
+	| "TitlePearlDiver"
 	| "TitleAlphaPioneer"
 	| "TitleOceanLegend"
 	| "TitleTankTycoon"
@@ -28,8 +32,12 @@ export type CosmeticId =
 	| "DecorGoldenTrophy"
 	| "DecorIncubator"
 	| "DecorTitanTrophy"
+	| "DecorGiantPearl"
+	| "DecorPearlThrone"
+	| "DecorDiamondIncubator"
 	| "FinishPearlRims"
-	| "FinishAuroraRims";
+	| "FinishAuroraRims"
+	| "FinishGalaxyRims";
 
 export interface CosmeticConfig {
 	kind: CosmeticKind;
@@ -75,6 +83,27 @@ export const COSMETICS: Record<CosmeticId, CosmeticConfig> = {
 		displayName: "Size Collector",
 		description: "A title for those who hatched a Huge fish of 18 species.",
 	},
+	// V1.2 (ROADMAP_V1.2 §6, §7)
+	TitleOceanSovereign: {
+		kind: "Title",
+		displayName: "Ocean Sovereign",
+		description: "A title for those who earned 40,000,000 Ocean Points.",
+	},
+	TitleGrandAquarist: {
+		kind: "Title",
+		displayName: "Grand Aquarist",
+		description: "A title for those who found all 24 species of the ocean.",
+	},
+	TitleVariantMaster: {
+		kind: "Title",
+		displayName: "Variant Master",
+		description: "A title for those who found every species in every variant.",
+	},
+	TitlePearlDiver: {
+		kind: "Title",
+		displayName: "Pearl Diver",
+		description: "A title for those who set a Shiny Baby Kraken free.",
+	},
 	TitleAlphaPioneer: {
 		kind: "Title",
 		displayName: "Alpha Pioneer",
@@ -101,7 +130,8 @@ export const COSMETICS: Record<CosmeticId, CosmeticConfig> = {
 	DecorWhaleStatue: {
 		kind: "Decor",
 		displayName: "Whale Statue",
-		description: "A whale statue for your aquarium.",
+		description: "A whale statue for your aquarium. It shares its spot with the Pearl Throne: show one or the other.",
+		group: "Statue",
 	},
 	DecorGoldenTrophy: {
 		kind: "Decor",
@@ -118,19 +148,45 @@ export const COSMETICS: Record<CosmeticId, CosmeticConfig> = {
 	DecorIncubator: {
 		kind: "Decor",
 		displayName: "Golden Incubator",
-		description: "A golden incubator for your aquarium.",
+		description: "A golden incubator for your aquarium. It shares its spot with the Diamond Incubator: show one or the other.",
+		group: "Incubator",
+	},
+	// V1.2
+	DecorGiantPearl: {
+		kind: "Decor",
+		displayName: "Giant Pearl",
+		description: "A giant glowing pearl for the Ocean Sovereigns.",
+	},
+	DecorPearlThrone: {
+		kind: "Decor",
+		displayName: "Pearl Throne",
+		description: "A pearl throne for the Grand Aquarists. It shares its spot with the Whale Statue: show one or the other.",
+		group: "Statue",
+	},
+	DecorDiamondIncubator: {
+		kind: "Decor",
+		displayName: "Diamond Incubator",
+		description: "A diamond incubator for those who hatched 3,500 fish. It shares its spot with the Golden Incubator.",
+		group: "Incubator",
 	},
 	FinishPearlRims: {
 		kind: "Finish",
 		displayName: "Pearl Rims",
-		description: "A pearly finish on the rims of your aquarium, whatever its theme. Show it or the Aurora Rims.",
+		description: "A pearly finish on the rims of your aquarium, whatever its theme. One rims finish shows at a time.",
 		group: "Rims",
 	},
 	// V1.2 (ROADMAP_V1.2 §6, Ocean 14,000,000): the rims glow and drift through the northern lights' colours (client)
 	FinishAuroraRims: {
 		kind: "Finish",
 		displayName: "Aurora Rims",
-		description: "The rims of your aquarium glow with the colours of the northern lights. Show them or the Pearl Rims.",
+		description: "The rims of your aquarium glow with the colours of the northern lights. One rims finish shows at a time.",
+		group: "Rims",
+	},
+	// V1.2 (Collector, 100 Fish Index cells): night-blue rims drifting through the Galaxy variant's colours (client)
+	FinishGalaxyRims: {
+		kind: "Finish",
+		displayName: "Galaxy Rims",
+		description: "The rims of your aquarium glow with the colours of the Galaxy. One rims finish shows at a time.",
 		group: "Rims",
 	},
 };
@@ -144,12 +200,16 @@ export function isCosmeticId(value: unknown): value is CosmeticId {
  * they own (customization.ts getBestTitle).
  */
 export const TITLE_ORDER: readonly CosmeticId[] = [
+	"TitleGrandAquarist",
+	"TitleOceanSovereign",
+	"TitleVariantMaster",
 	"TitleMasterAquarist",
 	"TitleOceanGuardian",
 	"TitleAlphaPioneer",
 	"TitleCollector",
 	"TitleTitanTamer",
 	"TitleSizeCollector",
+	"TitlePearlDiver",
 	"TitleOceanFriend",
 ];
 
@@ -180,6 +240,9 @@ export const DECOR_SLOTS: Partial<Record<CosmeticId, Vector3>> = {
 	DecorGoldenTrophy: new Vector3(19, 4, -6),
 	DecorIncubator: new Vector3(15.2, 4, -5.6), // next to the trophy (Hatchery line, ROADMAP M7)
 	DecorTitanTrophy: new Vector3(19, 4, -6), // the golden trophy's spot: one or the other shows (group "Trophy")
+	DecorGiantPearl: new Vector3(-14.8, 4, -5.6), // next to the whale statue (Ocean 40,000,000, V1.2)
+	DecorPearlThrone: new Vector3(-18.5, 4, -6), // the whale statue's spot (group "Statue")
+	DecorDiamondIncubator: new Vector3(15.2, 4, -5.6), // the golden incubator's spot (group "Incubator")
 };
 
 /** The other cosmetics of the same group (one spot of the tank), none for a cosmetic without a group. */

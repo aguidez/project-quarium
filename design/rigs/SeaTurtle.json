@@ -1,0 +1,294 @@
+{
+	"//": "The Sea Turtle (V1.2 M6, species 23; it replaced the planned Panda Manta, which never read as a swimming manta), a box rig (tools/blender/rig_boxes.py) driven by FishRigController's turtle branch: its big front flippers row in slow strokes, mostly a sweep forward and back with a small up-and-down beat, the back flippers steer, the head nods a little. The shell never moves (owner): it stays on the root, which nothing turns or moves; the front flipper boxes stop under its rim (h 0.30 with a 0.04 fade; a child tip bone takes each flipper's outer part, |side| > 0.72, over its whole height), the back ones at h 0.36, the head at t < 0.22. Checked in Blender: the shell's vertices (its colours, behind the head) move by 0 over the whole loop. A colour cut (rig_boxes exclude_hue) was tried and dropped: the front flippers carry the shell's greens too. A strong vertical beat tore the top of the flippers near the body (it shares the shell rim's height): the stroke is mostly a sweep. Boxes from a t / side / height scan: head at the front top, front flippers low at the front (t 0.08-0.45, |side| > 0.3), back flippers low at the back (t > 0.68).",
+	"rig": "boxes",
+	"root": {
+		"name": "Torso",
+		"head": [
+			0,
+			0.5,
+			0.45
+		],
+		"tail": [
+			0,
+			0.5,
+			0.75
+		]
+	},
+	"bones": [
+		{
+			"name": "Head",
+			"head": [
+				0,
+				0.27,
+				0.6
+			],
+			"tail": [
+				0,
+				0.05,
+				0.85
+			],
+			"box": {
+				"side": [
+					-0.45,
+					0.45
+				],
+				"t": [
+					-0.05,
+					0.22
+				],
+				"h": [
+					0.58,
+					1.05
+				]
+			},
+			"fade": 0.03
+		},
+		{
+			"name": "FlipperFL",
+			"head": [
+				-0.3,
+				0.25,
+				0.42
+			],
+			"tail": [
+				-0.95,
+				0.35,
+				0.15
+			],
+			"box": {
+				"side": [
+					-1.05,
+					-0.3
+				],
+				"t": [
+					0.08,
+					0.45
+				],
+				"h": [
+					-0.05,
+					0.3
+				]
+			},
+			"fade": 0.04
+		},
+		{
+			"name": "FlipperTipFL",
+			"parent": "FlipperFL",
+			"head": [
+				-0.68,
+				0.3,
+				0.3
+			],
+			"tail": [
+				-0.98,
+				0.38,
+				0.15
+			],
+			"box": {
+				"side": [
+					-1.1,
+					-0.72
+				],
+				"t": [
+					0.05,
+					0.5
+				],
+				"h": [
+					-0.05,
+					0.7
+				]
+			},
+			"fade": 0.03
+		},
+		{
+			"name": "FlipperFR",
+			"head": [
+				0.3,
+				0.25,
+				0.42
+			],
+			"tail": [
+				0.95,
+				0.35,
+				0.15
+			],
+			"box": {
+				"side": [
+					0.3,
+					1.05
+				],
+				"t": [
+					0.08,
+					0.45
+				],
+				"h": [
+					-0.05,
+					0.3
+				]
+			},
+			"fade": 0.04
+		},
+		{
+			"name": "FlipperTipFR",
+			"parent": "FlipperFR",
+			"head": [
+				0.68,
+				0.3,
+				0.3
+			],
+			"tail": [
+				0.98,
+				0.38,
+				0.15
+			],
+			"box": {
+				"side": [
+					0.72,
+					1.1
+				],
+				"t": [
+					0.05,
+					0.5
+				],
+				"h": [
+					-0.05,
+					0.7
+				]
+			},
+			"fade": 0.03
+		},
+		{
+			"name": "FlipperBL",
+			"head": [
+				-0.2,
+				0.75,
+				0.3
+			],
+			"tail": [
+				-0.6,
+				0.95,
+				0.15
+			],
+			"box": {
+				"side": [
+					-1.05,
+					-0.15
+				],
+				"t": [
+					0.68,
+					1.05
+				],
+				"h": [
+					-0.05,
+					0.36
+				]
+			},
+			"fade": 0.03
+		},
+		{
+			"name": "FlipperBR",
+			"head": [
+				0.2,
+				0.75,
+				0.3
+			],
+			"tail": [
+				0.6,
+				0.95,
+				0.15
+			],
+			"box": {
+				"side": [
+					0.15,
+					1.05
+				],
+				"t": [
+					0.68,
+					1.05
+				],
+				"h": [
+					-0.05,
+					0.36
+				]
+			},
+			"fade": 0.03
+		}
+	],
+	"preview": [
+		{
+			"bone": "FlipperFL",
+			"axis": [
+				0,
+				1,
+				0
+			],
+			"deg": 14,
+			"cycles": 1
+		},
+		{
+			"bone": "FlipperFL",
+			"axis": [
+				0,
+				0,
+				1
+			],
+			"deg": 24,
+			"cycles": 1,
+			"phase": 1.57
+		},
+		{
+			"bone": "FlipperFR",
+			"axis": [
+				0,
+				1,
+				0
+			],
+			"deg": -14,
+			"cycles": 1
+		},
+		{
+			"bone": "FlipperFR",
+			"axis": [
+				0,
+				0,
+				1
+			],
+			"deg": -24,
+			"cycles": 1,
+			"phase": 1.57
+		},
+		{
+			"bone": "FlipperBL",
+			"axis": [
+				0,
+				0,
+				1
+			],
+			"deg": 10,
+			"cycles": 1,
+			"phase": 0.8
+		},
+		{
+			"bone": "FlipperBR",
+			"axis": [
+				0,
+				0,
+				1
+			],
+			"deg": -10,
+			"cycles": 1,
+			"phase": 0.8
+		},
+		{
+			"bone": "Head",
+			"axis": [
+				1,
+				0,
+				0
+			],
+			"deg": 5,
+			"cycles": 1,
+			"phase": 0.4
+		}
+	]
+}

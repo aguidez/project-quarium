@@ -271,6 +271,20 @@ export const FISH_ICONS: Record<FishType, Record<FishVariant, string>> = {
 		Shiny: "rbxassetid://99781367267600",
 		Galaxy: "rbxassetid://115123884947132",
 	},
+	SeaTurtle: {
+		Normal: "rbxassetid://127488887202211",
+		Anomaly: "rbxassetid://131567471307178",
+		Ghost: "rbxassetid://123350224666337",
+		Shiny: "rbxassetid://88949528544736",
+		Galaxy: "rbxassetid://132620621988808",
+	},
+	BabyKraken: {
+		Normal: "rbxassetid://101976012238562",
+		Anomaly: "rbxassetid://74568180822939",
+		Ghost: "rbxassetid://106661495978817",
+		Shiny: "rbxassetid://73729800436373",
+		Galaxy: "rbxassetid://124374978640524",
+	},
 	// Easter egg: no variant, every column is its one icon
 	FrenchFish: {
 		Normal: FRENCH_FISH_ICON,
@@ -309,6 +323,7 @@ export const THEME_PALETTES: Record<AquariumTheme, Palette> = {
 	AuroraGlacier: palette("#BFFFEA", "#4FE3C4", "#2E9FB0", "#0E3A5A"),
 	SkyArchipelago: palette("#FFE2B8", "#7FC4FF", "#4A8BE0", "#1E3C78"),
 	RainbowDreamland: palette("#FFD6F5", "#FF8FD6", "#C46BE0", "#5A2A7A"),
+	HeartOfTheOcean: palette("#FFF1D6", "#F2C75C", "#C99A3A", "#5A3A12"),
 };
 
 /** Face colours of a found variant's slot (FigCraft: ItemSlot_<Variant>). */
@@ -430,6 +445,11 @@ export const EGG_SPRITES: Record<EggType, EggSprites> = {
 		icon: "rbxassetid://113174128597054", // DreamlandEgg.png
 		top: "rbxassetid://114356555623611", // DreamlandEggTop.png
 		bottom: "rbxassetid://75858565090660", // DreamlandEggBottom.png
+	},
+	Heart: {
+		icon: "rbxassetid://110943863331180", // HeartEgg.png
+		top: "rbxassetid://78652527612716", // HeartEggTop.png
+		bottom: "rbxassetid://86516586693505", // HeartEggBottom.png
 	},
 };
 

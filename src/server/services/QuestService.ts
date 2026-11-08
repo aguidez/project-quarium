@@ -228,6 +228,7 @@ class QuestServiceSingleton implements Lifecycle {
 			if (variant === undefined) return 0;
 			let species = 0;
 			for (const fishType of getFishIndexOrder()) {
+				if (config.fishTypes && !config.fishTypes.includes(fishType)) continue;
 				if (!isEasterEgg(fishType) && getHatchedVariant(data, fishType, variant) > 0) species += 1;
 			}
 			return species;

@@ -10,7 +10,8 @@ export type GamePass =
 	| "Coins"
 	| "WaterHenPass"
 	| "SwordfishPass"
-	| "JellyfishPass";
+	| "JellyfishPass"
+	| "HermitCrabPass";
 
 export interface GamePassConfig {
 	displayName: string;
@@ -78,6 +79,12 @@ export const GAME_PASSES: Record<GamePass, GamePassConfig> = {
 		description: "Unlocks the Jellyfish's quests: it feeds faster, with more charges and pellets, up to 25 fish.",
 		id: 2068729703,
 		image: "rbxassetid://96894492239649", // design/ui/companions/Companion_Jellyfish.png
+	},
+	HermitCrabPass: {
+		displayName: "Hermit Crab Pass",
+		description: "Unlocks the Hermit Crab's quests: the eggs that incubate with it hatch rare variants up to x1.6 more often.",
+		id: 2076088247,
+		image: "rbxassetid://80684129801833", // design/ui/companions/Companion_HermitCrab.png
 	},
 };
 

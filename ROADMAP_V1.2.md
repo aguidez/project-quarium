@@ -5,7 +5,7 @@
 > the food reserve and a sixth companion (the Hermit Crab). Everything here is a **plan**: the economy's numbers
 > are tuned with the simulator (M1, `tools/balance-v1.2-plan.js`), nothing is built yet. Tick the boxes as tasks ship, and move what a
 > step ships into `PROJECT_CONTEXT.md` / `RELEASE_NOTES.md` / `BALANCE.md` as usual.
-> Last updated: 2026-11-08 (M5 done, V1.1.23: the Kitty Koi without whiskers, the Kitty Koi ~22h49; M4 done, V1.1.22: the Hermit Crab live, the Pegasus Seahorse ~50 min ahead of the plan; M3 done, V1.1.21: the Fox Betta replaced the Penguin Puffer; M2c done, V1.1.20; M2 done, V1.1.19; M2b done: the Size score live in V1.1.16; M1 done: prices tuned, end of V1.2 at ~25h15, the 4th bar at 0.9; owner's decisions: themes, 4 species per rarity, tank 33 (50 later), Size and its table,
+> Last updated: 2026-11-08 (M6 done, V1.1.24: the Sea Turtle replaced the Panda Manta, the Hermit Crab Pass, all 24 species ~25h16; M5 done, V1.1.23: the Kitty Koi without whiskers, the Kitty Koi ~22h49; M4 done, V1.1.22: the Hermit Crab live, the Pegasus Seahorse ~50 min ahead of the plan; M3 done, V1.1.21: the Fox Betta replaced the Penguin Puffer; M2c done, V1.1.20; M2 done, V1.1.19; M2b done: the Size score live in V1.1.16; M1 done: prices tuned, end of V1.2 at ~25h15, the 4th bar at 0.9; owner's decisions: themes, 4 species per rarity, tank 33 (50 later), Size and its table,
 > Galaxy at 0.2 % with the Lucky pass x3 on it, the 4th bar at 2.5 %, the Hermit Crab's live luck, boosts unchanged;
 > nothing built yet. Groundwork done: money up to 1e300, V1.1.15).
 
@@ -49,7 +49,7 @@ score included; medians, p10–p90):
 | **~19h53** | 18h47–20h45 | **Rebirth 11**: Rainbow Dreamland; tank 31 | run 10: 3h25 |
 | **~23h14** | 22h05–24h10 | **Rebirth 12**: Heart of the Ocean, the last aquarium of V1.2; tank 33 | run 11: 3h21 |
 | ~23h42 | 21h41–25h26 | Species 22, Kitty Koi | |
-| ~24h45 | 23h40–25h31 | Species 23, Panda Manta | |
+| ~24h45 | 23h40–25h31 | Species 23, Sea Turtle | |
 | **~25h15** | **24h18–26h34** | **All twenty-four species** (Baby Kraken): the end of V1.2 | 2h01 after rebirth 12 |
 
 - **+~13 h of play** after V1's end (12h19 → 25h15), **~13 more days** at 1 h a day (day 13 → ~day 26). The runs grow
@@ -110,7 +110,7 @@ label (Fish Index order, colours), so V1 species changing label moves no number:
 | Rare | Silver Angelfish, Pirate Fish, Imperial Discus | Imperial Discus, **Catfish, Blue Tang, Baby Sunfish** |
 | Epic | Catfish, Blue Tang, Baby Sunfish | **Lanternfish, Lionfish, Dragonfish, Husky Dogfish** |
 | Legendary | Lanternfish, Lionfish, Dragonfish | **Bunny Shark, Mini Leviathan**, Fox Betta, Cloud Whale |
-| Mythic | Husky Dogfish, Bunny Shark, Mini Leviathan | Pegasus Seahorse, Kitty Koi, Panda Manta, Baby Kraken |
+| Mythic | Husky Dogfish, Bunny Shark, Mini Leviathan | Pegasus Seahorse, Kitty Koi, Sea Turtle, Baby Kraken |
 | Celestial, Eternal | — | none yet (species 25–32, next updates) |
 
 A player sees a few V1 species move down one label (the Clownfish becomes Common, the Husky Dogfish Epic): the release
@@ -122,7 +122,7 @@ notes say so. The quests that name a rarity (§7) use the new labels.
 | 20 | **Cloud Whale** | Legendary | A small fluffy white whale, a cloud on its back | Cloud | 33.6M / 20 s | 1,680,000 | 82,000 |
 | 21 | **Pegasus Seahorse** | Mythic | A white seahorse with small feathered wings, golden mane | Wing feather | 101M / 30 s | 3,360,000 | 131,000 |
 | 22 | **Kitty Koi** | Mythic | A koi with cat ears and whiskers, calico orange-white-black | Paw print | 53.8M / 8 s | 6,720,000 | 210,000 |
-| 23 | **Panda Manta** | Mythic | A manta ray in panda colours, round black eye patches | Bubble heart | 269M / 20 s | 13,440,000 | 336,000 |
+| 23 | **Sea Turtle** | Mythic | A little green sea turtle rowing with its big front flippers, its shell still (replaced the Panda Manta in M6: it never read as a swimming manta) | Bubble heart | 269M / 20 s | 13,440,000 | 336,000 |
 | 24 | **Baby Kraken** | Mythic | A cute round octopus, big eyes, short curled tentacles, a tiny pearl on its head | Ocean heart gem | 806M / 30 s | 26,880,000 | 537,000 |
 
 - Moderation checks for the meshes: the Fox Betta's spikes stay short round bumps; the Pegasus has no horn; no
@@ -142,7 +142,7 @@ Prices tuned in M1 (§2 explains the rules that shaped them):
 | Aurora | **400T** | 2x rebirth 9 | 180 s | Mini Leviathan 55, Fox Betta 45 | a Cosmic Egg |
 | Sky | **770T** | 1.2x rebirth 10 | 180 s | Fox Betta 25, Cloud Whale 55, Pegasus Seahorse 20 | an Aurora Egg |
 | Dreamland | **50Qa** | ~17x rebirth 11 | 180 s | Pegasus Seahorse 55, Kitty Koi 45 | a Sky Egg |
-| Heart | **96Qa** | 1.2x rebirth 12 | 180 s | Kitty Koi 25, Panda Manta 55, Baby Kraken 20 | a Dreamland Egg |
+| Heart | **96Qa** | 1.2x rebirth 12 | 180 s | Kitty Koi 25, Sea Turtle 55, Baby Kraken 20 | a Dreamland Egg |
 
 - The Heart Egg sits on a cliff: 86Qa → the end at ~25h06, 95Qa (with rebirth 12 at 72Qa) → ~26h43. Never move it,
   rebirth 12 or the Dreamland Egg by more than ~5 % without re-running the simulator.
@@ -365,7 +365,7 @@ signature species, then reach the next aquarium. Ocean Points rewards x2.5 per r
 | **Collector** (continued) | in order: 75 Fish Index cells → 3 min of income (~20h53); first Shiny Mythic of V1.2 (species 21–24) → 5,000,000 Ocean Points; first **Galaxy** → 3 min of income; 100 cells → **Galaxy rims** (cosmetic); 120 cells (every species in every variant) → title **"Variant Master"**. Measured: only ~38 % of the players get the Shiny Mythic and the first Galaxy before the end (~24h51 for them): from there the line is a goal past the end, like the Golden Incubator |
 | **Big Catch** (new, size §3.5; opens with "Full House", so early: its rewards are minutes of income, BALANCE.md §4) | in order: hatch a Huge fish (+10) → 3 min of income; have 5 Huge fish (or better) in the tank at once → 5 min; hatch a Giant (+13) → 5 min; hatch a **Titan** (+15) → title **"Titan Tamer"** + the **Titan Trophy** decor (rose gold, V1.1.17; in the golden trophy's spot, one or the other shows, V1.1.18); a best size of +10 or more for 18 species in the Fish Index → title **"Size Collector"** |
 | **Ocean** (continued) | release 500 fish → 5 min of income; release a Shiny Baby Kraken → title **"Pearl Diver"** |
-| **Hermit Crab** (new, free) | its 3 upgrade quests (§8) |
+| **Hermit Crab** (new, free; its line behind the Hermit Crab Pass since V1.1.24) | its 3 upgrade quests (§8) |
 
 Rule kept: no quest reward multiplies the income or the Ocean Points permanently (BALANCE.md §5.9). Before ~3 h quests
 pay income, later Ocean Points: everything here is late, so Ocean Points are fine.
@@ -408,7 +408,7 @@ crab only to open ten ready eggs, then swap it out. So:
 - The egg shop's slot shows the crab's mark on the eggs incubating with it (and how much of their time).
 
 **Balance**: outside the timeline (variants: +3.6 % income on average, a little more with it). It competes for a slot
-with the Water Hen (speed or luck), which keeps both useful. No pass needed; one stays possible later (comfort only).
+with the Water Hen (speed or luck), which keeps both useful. The crab stays free; its 3 upgrade quests need the Hermit Crab Pass since V1.1.24 (owner, 2026-11-08), like the other companions' lines.
 
 - Unlock: the 2,500,000-point Ocean milestone (§6, run 9), free like the Water Hen / Swordfish / Jellyfish.
 - Moderation: a cute crab with a round pastel shell, claws small and down (never raised like weapons).
@@ -463,10 +463,17 @@ last live rebirth.
       thin lines at the mouth), the owner's pick of 6; candy pebbles left out (pill-like), soft glass bubbles instead; the
       Aurora rims a Neon finish drifted by the clients, grouped with the Pearl rims; measured: rebirth 11 ~19h57, the Kitty
       Koi ~22h49): theme, Dreamland Egg, Kitty Koi, rebirth 11, tank 31, Voyage, milestones 9M / 14M.
-- [ ] **M6 Heart of the Ocean**: theme, Heart Egg, Panda Manta, Baby Kraken, rebirth 12, tank 33, Voyage up to "Grand
+- [x] **M6 Heart of the Ocean** (V1.1.24, 2026-11-08: the Panda Manta never read as a swimming manta and the word "panda"
+      took over every generation: replaced by a Sea Turtle whose shell never moves; the Hermit Crab's line behind its pass;
+      measured: rebirth 12 ~23h09, all 24 species ~25h16): theme, Heart Egg, Sea Turtle, Baby Kraken, rebirth 12, tank 33, Voyage up to "Grand
       Aquarist", milestones 20M / 40M, the side lines' new quests, the new daily / weekly entries, the end message.
 - [ ] **M7 Check**: full simulator run, BALANCE.md §2 rewritten up to ~25h30, a playtest of a late profile (admin
       tools: a rebirth 8 save in a test store) through rebirth 12.
+- [ ] **Later: a lighter simulator** (owner, 2026-11-08): `tools/economy-sim.js` (~700 lines, 2,000 players x 32 h)
+      now takes several minutes for a full run and prints nothing until the end. Rework it: split it into modules
+      (config mirror, one player's run, quests / Ocean / variants, the report) and add quicker runs (a step's slice of
+      the timeline, e.g. `--from-rebirth 11`, fewer players for a first look, progress output), keeping the full run as
+      the reference for BALANCE.md.
 
 How to add each piece: `docs/agent-notes/content-recipes.md` (species, theme, companion, egg).
 

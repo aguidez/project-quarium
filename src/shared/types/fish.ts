@@ -21,6 +21,8 @@ export type FishType =
 	| "CloudWhale"
 	| "PegasusSeahorse"
 	| "KittyKoi"
+	| "SeaTurtle"
+	| "BabyKraken"
 	| "FrenchFish"
 	| "AlienFish"
 	| "Sugar";
@@ -62,6 +64,8 @@ export type CoinType =
 	| "Cloud"
 	| "Feather"
 	| "PawPrint"
+	| "BubbleHeart"
+	| "HeartGem"
 	| "Croissant"
 	| "Sugar";
 export const COIN_TYPES: readonly CoinType[] = [
@@ -87,6 +91,8 @@ export const COIN_TYPES: readonly CoinType[] = [
 	"Cloud",
 	"Feather",
 	"PawPrint",
+	"BubbleHeart",
+	"HeartGem",
 	"Croissant",
 	"Sugar",
 ];
@@ -504,6 +510,33 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 		scaleMax: 1.1,
 		speedMin: 1.8,
 		speedMax: 3,
+		hunger: DEFAULT_HUNGER,
+	},
+	// Species 23-24, the Heart of the Ocean's (rebirth 12, the Heart Egg): the last two of V1.2
+	SeaTurtle: {
+		displayName: "Sea Turtle",
+		rarity: "Mythic",
+		income: 268800000, // 13,440,000/s
+		oceanPoints: 336000,
+		coin: "BubbleHeart",
+		incomeInterval: 20, // a little sea turtle: heart-shaped bubbles
+		scaleMin: 0.95,
+		scaleMax: 1.1,
+		speedMin: 1.4,
+		speedMax: 2.4,
+		hunger: DEFAULT_HUNGER,
+	},
+	BabyKraken: {
+		displayName: "Baby Kraken",
+		rarity: "Mythic",
+		income: 806400000, // 26,880,000/s
+		oceanPoints: 537000,
+		coin: "HeartGem",
+		incomeInterval: 30, // a round little octopus with a pearl: the ocean's heart gems
+		scaleMin: 0.95,
+		scaleMax: 1.1,
+		speedMin: 1.2,
+		speedMax: 2.2,
 		hunger: DEFAULT_HUNGER,
 	},
 	// Easter egg (see EasterEggConfig): its coin is a croissant worth half the tank's income per minute

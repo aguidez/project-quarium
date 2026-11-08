@@ -9,7 +9,7 @@
 //   node fish-variant-recolor.js sheet <Type>    -> TEX_DIR/out/sheet_<Type>.png: the texture at hues 0, 60 ... 300
 //                                                  (to choose the angles)
 //   node fish-variant-recolor.js build <json>    -> TEX_DIR/out/<Type>_<Variant>.png
-//   node fish-variant-recolor.js sticker <in.png> <out.png> <deg> [sat] [light]
+//   node fish-variant-recolor.js sticker <in.png> <out.png> <deg> [sat] [light] [tintHue tintSat]
 //                                                 a sticker of tools/fish-sticker-icons.js recoloured like its texture
 //                                                 (its white / gold outline, sparkles and shadow kept): the Anomaly /
 //                                                 Shiny stickers without uploading the textures first (V1.1.21)
@@ -116,7 +116,7 @@ async function build(spec) {
 // The Shiny stickers' gold outline and sparkles (fish-sticker-icons.js OUTLINE_COLORS.Shiny and its sparkles)
 const STICKER_GOLD = [255, 213, 74];
 
-async function sticker(input, output, deg, sat = 1, light = 0) {
+async function sticker(input, output, deg, sat = 1, light = 0, tint) {
 	const image = await Jimp.read(input);
 	const data = image.bitmap.data;
 	const keep = [];
@@ -125,7 +125,7 @@ async function sticker(input, output, deg, sat = 1, light = 0) {
 		// the outline, the sparkles and the soft shadow stay (neutrals are kept by recolor itself)
 		if (data[i + 3] < 200 || d < 60) keep.push([i, data[i], data[i + 1], data[i + 2]]);
 	}
-	recolor(data, deg, sat, light);
+	recolor(data, deg, sat, light, tint);
 	for (const [i, r, g, b] of keep) {
 		data[i] = r;
 		data[i + 1] = g;
@@ -138,7 +138,9 @@ async function sticker(input, output, deg, sat = 1, light = 0) {
 const [mode, arg] = process.argv.slice(2);
 if (mode === "sheet") sheet(arg);
 else if (mode === "sticker") {
-	const [, , inFile, outFile, deg, sat, light] = process.argv.slice(1);
-	sticker(inFile, outFile, Number(deg), sat === undefined ? 1 : Number(sat), light === undefined ? 0 : Number(light));
+	const [, , inFile, outFile, deg, sat, light, tintHue, tintSat] = process.argv.slice(1);
+	// a grey fish (a black and white one, V1.1.24) is tinted like its texture: [hue, saturation]
+	const tint = tintHue === undefined ? undefined : [Number(tintHue), Number(tintSat)];
+	sticker(inFile, outFile, Number(deg), sat === undefined ? 1 : Number(sat), light === undefined ? 0 : Number(light), tint);
 }
 else if (mode === "build") build(JSON.parse(fs.readFileSync(arg, "utf8")));

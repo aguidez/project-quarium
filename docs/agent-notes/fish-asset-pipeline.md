@@ -121,4 +121,18 @@ with `tools/blender/studio/export_fish.luau` + `tools/obj-receiver.js`, upload w
   replaced by glass sphere Parts (bubbles), nothing uploaded. A theme can reuse another theme's generated props by
   re-tinting their SurfaceAppearance (the Sky clouds in pastel). Rejected generations (owner's account): Kitty Koi
   71788116537992, 98527050185153, 95784287651571, 91853431735806, 125390009512075; pebbles 135588567495428.
+- **2026-11-08 (V1.2 M6: Sea Turtle, Baby Kraken, Heart of the Ocean)**:
+  - **"Panda" overrides the shape**: a "panda manta" came out as a panda with fins or a flat disc with a panda face, 7
+    generations in all; the owner refused the best one ("it doesn't look like it swims": a manta's flap needs wide, thin
+    wings) and then asked for another species with no hybrid. A plain animal (a little cartoon sea turtle) passed on the
+    first batch. When a hybrid fails twice, propose a plain species rather than a 3rd prompt.
+  - **The turtle's shell must not move** (owner: "remove the animation on the shell"): no Torso drive at all (root = shell),
+    flipper boxes stop under the shell's rim (front h 0.30 + fade 0.04, back h 0.36), a child tip bone takes the flipper's
+    outer part (|side| > 0.72) over its whole height. Measured in Blender: shell vertices (hue 111–150, h > 0.42,
+    t > 0.26) move by 0 over the 30 frames. Two dead ends: `rig_boxes` `exclude_hue` (zero weight on a hue range)
+    tore the front flippers into spikes, because they carry the shell's greens too; and a strong vertical flap
+    stretched the flipper tops near the body. A sweep (24°) with a small beat (14°) reads well and stays clean. Check
+    the front view for tearing, not only the three-quarter one.
+  - The ids of the rejected generations of this step (mantas, turtles B / C, kraken A) weren't recorded: the owner
+    can find them in the Creator Dashboard (Development Items > Meshes, 2026-11-08) if they want to archive them.
 

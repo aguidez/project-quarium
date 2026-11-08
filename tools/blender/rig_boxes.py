@@ -6,11 +6,14 @@
 #   h     0 bottom .. 1 top
 # Settings:
 #   "root":  {"name", "head": [side, t, h], "tail": [side, t, h]}           everything starts on it
-#   "bones": [{"name", "parent", "head", "tail", "box": {"side", "t", "h"}, "fade"}]   in order: a later box takes its
-#            vertices from the earlier ones (children after their parents), with a soft edge `fade` (0.05)
+#   "bones": [{"name", "parent", "head", "tail", "box": {"side", "t", "h", "exclude_hue"}, "fade"}]   in order: a later
+#            box takes its vertices from the earlier ones (children after their parents), with a soft edge `fade` (0.05);
+#            "exclude_hue": [lo, hi] (degrees) leaves out the vertices whose texture colour has that hue: a part that must
+#            stay still where a moving one touches it at the same height (the Sea Turtle's shell rim above its flippers)
 #   "preview": [{"bone", "axis": [x, y, z] (Blender world), "deg", "cycles" (whole cycles over the loop), "phase"}]
 #            the preview loop only; FishRigController / ShopKeeperController play the game's motions
 # Use: convert_fish.convert(repo, name) picks this script from the settings' "rig".
+import colorsys
 import math
 
 import bpy
@@ -29,8 +32,33 @@ def _inside(value, lo_hi, fade):
     return smoothstep(lo - fade, lo + fade, value) * (1 - smoothstep(hi - fade, hi + fade, value))
 
 
+def _vertex_hues(obj):
+    """Hue (degrees) of each vertex's texture colour (the preview material's image, the active UV map); None without."""
+    mat = obj.data.materials[0] if obj.data.materials else None
+    nodes = [n for n in mat.node_tree.nodes if n.type == "TEX_IMAGE"] if mat and mat.use_nodes else []
+    if not nodes or not nodes[0].image or not obj.data.uv_layers.active:
+        return None
+    image = nodes[0].image
+    w, h = image.size
+    px = image.pixels[:]
+    uv = obj.data.uv_layers.active.data
+    hues = {}
+    for poly in obj.data.polygons:
+        for li in poly.loop_indices:
+            vi = obj.data.loops[li].vertex_index
+            if vi in hues:
+                continue
+            u, v = uv[li].uv
+            x = min(w - 1, max(0, int(u * w)))
+            y = min(h - 1, max(0, int(v * h)))
+            k = (y * w + x) * 4
+            hues[vi] = colorsys.rgb_to_hsv(px[k], px[k + 1], px[k + 2])[0] * 360
+    return hues
+
+
 def rig_boxes(obj, settings):
     vs = obj.data.vertices
+    hues = _vertex_hues(obj) if any("exclude_hue" in b["box"] for b in settings["bones"]) else None
     xs = [v.co.x for v in vs]
     ys = [v.co.y for v in vs]
     zs = [v.co.z for v in vs]
@@ -75,6 +103,9 @@ def rig_boxes(obj, settings):
             box = spec["box"]
             f = spec.get("fade", 0.05)
             w = _inside(side, box.get("side", [-2, 2]), f) * _inside(t, box["t"], f) * _inside(h, box["h"], f)
+            excluded = box.get("exclude_hue")
+            if excluded and hues is not None and excluded[0] <= hues.get(v.index, -1) <= excluded[1]:
+                w = 0.0
             if w > 0.001:
                 weights = {k: x * (1 - w) for k, x in weights.items()}
                 weights[spec["name"]] = weights.get(spec["name"], 0.0) + w

@@ -26,7 +26,8 @@ export type AquariumTheme =
 	| "CosmicSanctuary"
 	| "AuroraGlacier"
 	| "SkyArchipelago"
-	| "RainbowDreamland";
+	| "RainbowDreamland"
+	| "HeartOfTheOcean";
 
 export interface AquariumThemeConfig {
 	displayName: string;
@@ -48,6 +49,7 @@ export const AQUARIUM_THEMES: Record<AquariumTheme, AquariumThemeConfig> = {
 	AuroraGlacier: { displayName: "Aurora Glacier" },
 	SkyArchipelago: { displayName: "Sky Archipelago" },
 	RainbowDreamland: { displayName: "Rainbow Dreamland" },
+	HeartOfTheOcean: { displayName: "Heart of the Ocean" },
 };
 
 export interface RebirthConfig {
@@ -81,6 +83,8 @@ export const REBIRTHS: readonly RebirthConfig[] = [
 	{ price: 640e12, multiplier: 120000, startMoney: 300, theme: "SkyArchipelago" },
 	// Rebirth 11 at ~19h53
 	{ price: 3e15, multiplier: 375000, startMoney: 300, theme: "RainbowDreamland" },
+	// Rebirth 12 at ~23h14: the last aquarium of V1.2
+	{ price: 80e15, multiplier: 1200000, startMoney: 300, theme: "HeartOfTheOcean" },
 ];
 
 /** The rebirth a player who has done `rebirths` of them can do next (undefined once all are done). */

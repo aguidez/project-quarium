@@ -226,7 +226,7 @@ export const PERKS: Record<Perk, PerkConfig> = {
 		bounce: false,
 		foodSlots: 1,
 	},
-	// The Hermit Crab's free line (ROADMAP_V1.2 §8): eggs opened with its full bonus
+	// The Hermit Crab's line (Hermit Crab Pass, ROADMAP_V1.2 §8): eggs opened with its full bonus
 	HermitCrab1: {
 		displayName: "Lucky shell",
 		label: "x1.35",

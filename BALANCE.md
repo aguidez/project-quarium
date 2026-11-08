@@ -3,7 +3,7 @@
 > The game's balance: what an average player reaches after how long, and why. **Update it in the same task whenever a
 > number of the economy changes** (fish income, eggs, odds, rebirths, Ocean milestones, variants, food, capacity,
 > companions…): run the simulators, copy their results here, add a line to the history (§6).
-> Last updated: 2026-11-08 (V1.1.23: rebirth 11, the Dreamland Egg and the Kitty Koi, tank 31, the Aurora rims: §2, §3, §6).
+> Last updated: 2026-11-08 (V1.1.24: rebirth 12, the Heart Egg, the Sea Turtle and the Baby Kraken, tank 33, Ocean 20M / 40M, the V1.2 finale's side quests: §2, §3, §6).
 
 
 **Where the numbers live**: `src/shared/types/fish.ts` (species), `eggs.ts` (eggs), `rebirths.ts` (rebirths),
@@ -111,10 +111,17 @@ player's calendar. A player who never stops (no daily quest) needs longer, one w
 | ~16h36 (14h53–17h55) | Species 19, **Fox Betta** (Aurora Egg 400T 45 %, Sky Egg 25 %) | Voyage "Fox of the North" (5 min of income). Most players rebirth before their first Fox Betta and hatch it from the Sky Egg |
 | ~17h54 (16h40–19h11) | Species 20, **Cloud Whale** (Sky Egg 770T, 55 %) |  |
 | ~18h47 (17h33–19h58) | Species 21, **Pegasus Seahorse** (Sky Egg 20 %, Dreamland Egg 55 %) | Voyage "Winged Wonder" (5 min of income). Many players rebirth 11 first and hatch it from the Dreamland Egg (as the V1.2 plan said: 18h41) |
-| ~19h20 | 6,000,000 Ocean Points: **Quick pantry** (food refill 7 s) | With rebirth 11's release (plan ~19h08) |
-| **~19h57** (18h55–20h56) | **Rebirth 11** (3Qa, V1.1.23): coins x375,000, **Rainbow Dreamland**; 9,000,000 Ocean Points: **31 fish** | Voyage "Over the Rainbow" (2,200,000 points). x3.1 rebirth 10 |
-| ~21h30 | 14,000,000 Ocean Points: **Aurora rims** (cosmetic) | Plan ~22h20 |
-| **~22h49** (21h39–24h42) | Species 22, **Kitty Koi** (Dreamland Egg 50Qa, 45 %): the end of the content for now | Voyage "Lucky Cat" (5 min of income). The Dreamland Egg costs ~17x rebirth 11: run 11's wall; 5 players in 2,000 don't hatch one within 28 h |
+| ~19h09 | 6,000,000 Ocean Points: **Quick pantry** (food refill 7 s) | With rebirth 11's release (plan ~19h08) |
+| **~19h51** (18h43–20h45) | **Rebirth 11** (3Qa, V1.1.23): coins x375,000, **Rainbow Dreamland**; 9,000,000 Ocean Points: **31 fish** | Voyage "Over the Rainbow" (2,200,000 points). x3.1 rebirth 10 |
+| ~19h53 (18h13–20h52) | Hatchery: 1,800 fish hatched (2 min of income) | |
+| ~22h31 | 14,000,000 Ocean Points: **Aurora rims** (cosmetic) | Plan ~22h20 |
+| **~23h09** (21h55–24h10) | **Rebirth 12** (80Qa, V1.1.24): coins x1,200,000, **Heart of the Ocean**, the last aquarium of V1.2; 20,000,000 Ocean Points: **33 fish** | Voyage "Back to the Heart" (5,000,000 points). x3.2 rebirth 11; plan 23h14 |
+| ~23h39 (21h38–25h25) | Species 22, **Kitty Koi** (Dreamland Egg 50Qa 45 %, Heart Egg 25 %) | Voyage "Lucky Cat" (5 min of income). Most players rebirth 12 first and hatch it from the Heart Egg |
+| ~24h07 (22h42–25h21) | Hatchery: 2,500 fish hatched (2 min of income) | Only 1 player in 25 before the end: a goal past it |
+| ~24h44 (23h36–25h30) | Species 23, **Sea Turtle** (Heart Egg 96Qa, 55 %) | |
+| **~25h16** (24h15–26h36) | **All twenty-four species** (Baby Kraken, Heart Egg 20 %, ~25h07): **the end of V1.2** | Day 26. Voyages "The Little Kraken" (5 min of income) and "Grand Aquarist" (title + Pearl Throne + 8,000,000 points); the Rebirth menu says more aquariums are coming. Plan 25h15 |
+| after | 40,000,000 Ocean Points: **Ocean Sovereign** title + Giant Pearl | Median 24.7M at the end: a goal past it (plan ~26h39) |
+| after | Hatchery 3,500 (the **Diamond Incubator**), Collector 100 cells (**Galaxy rims**) and 120 (**Variant Master**), a Shiny Mythic of V1.2 (5,000,000 points), Ocean "Pearl Diver" (a Shiny Baby Kraken released) | Goals past the end; the Shiny Mythic is not modelled (the roadmap's estimate: ~38 % of the players before the end) |
 | after | Hatchery: 1,200 fish hatched, the **Golden Incubator** (1 player in 3 before the end, median ~11h35 for them) | A goal past the end, with the variants |
 | any time | The French Fish (secret, 0.1 % of any egg): ~2 players in 3 hatch one in the run (median first one ~5h40) | See §3 Easter eggs |
 | after | Variants (Anomaly 10 %, Ghost 5 %, Shiny 1 %; x1.5 with Lucky ocean) to complete the Fish Index, Ocean Points | Nothing new to buy: the end of V1 |
@@ -158,6 +165,8 @@ time; hatch speed matters little, §5.8).
 | Cloud Whale (V1.2) | Legendary | Cloud | 33,600,000 $ / 20 s | 1,680,000 | 2,520,000 | 82,000 |
 | Pegasus Seahorse (V1.2) | Mythic | Wing feather | 100,800,000 $ / 30 s | 3,360,000 | 5,040,000 | 131,000 |
 | Kitty Koi (V1.2) | Mythic | Paw print | 53,760,000 $ / 8 s | 6,720,000 | 10,080,000 | 210,000 |
+| Sea Turtle (V1.2) | Mythic | Bubble heart | 268,800,000 $ / 20 s | 13,440,000 | 20,160,000 | 336,000 |
+| Baby Kraken (V1.2) | Mythic | Heart gem | 806,400,000 $ / 30 s | 26,880,000 | 40,320,000 | 537,000 |
 
 Growth (default): x1 at birth, x1.2 after 5 min, x1.5 after 10 min in the water. One coin out of 15 sparkles (x2).
 Rarity is only a label (Fish Index order, colours).
@@ -272,6 +281,7 @@ cells fill faster. The power waits for an egg (no hurry), the best of two starfa
 | Aurora (V1.2) | 400T | 180 s | Mini Leviathan 55, Fox Betta 45 | a Cosmic Egg |
 | Sky (V1.2) | 770T | 180 s | Fox Betta 25, Cloud Whale 55, Pegasus Seahorse 20 | an Aurora Egg |
 | Dreamland (V1.2) | 50Qa | 180 s | Pegasus Seahorse 55, Kitty Koi 45 | a Sky Egg |
+| Heart (V1.2) | 96Qa | 180 s | Kitty Koi 25, Sea Turtle 55, Baby Kraken 20 | a Dreamland Egg |
 
 One egg of each type incubates at a time, two from the 5,000-point Ocean milestone (~2h44): the hatch time paces the
 farming of the best egg. Eggs bought while the **Water Hen** is equipped hatch 15 % faster (up to 35 % with its pass
@@ -292,6 +302,7 @@ quests).
 | 9 (V1.2) | 200T | x25,000 | 300 $ | Aurora Glacier |
 | 10 (V1.2) | 640T | x120,000 | 300 $ | Sky Archipelago |
 | 11 (V1.2) | 3Qa | x375,000 | 300 $ | Rainbow Dreamland |
+| 12 (V1.2) | 80Qa | x1,200,000 | 300 $ | Heart of the Ocean |
 
 Rebirths 3–8 and their eggs cost 1.45x the V1 plan's since V0.46: the daily / weekly coin boosts are part of the
 reference player's game, and without it V1 ended at ~9h45 for 1 h a day (§2). A rebirth resets money, fish, eggs and egg unlocks; it keeps the Fish Index, quests, companions, Ocean Points,
@@ -325,7 +336,9 @@ When each one is reached: §2.
 | 4,000,000 (V1.2) | Aquarium holds 29 fish |
 | 6,000,000 (V1.2) | Quick pantry: a portion of the food reserve comes back in 7 s |
 | 9,000,000 (V1.2) | Aquarium holds 31 fish |
-| 14,000,000 (V1.2) | Aurora rims (cosmetic: the rims glow through the northern lights' colours, every theme; shares the rims with the Pearl rims) |
+| 14,000,000 (V1.2) | Aurora rims (cosmetic: the rims glow through the northern lights' colours, every theme; shares the rims with the Pearl and Galaxy rims) |
+| 20,000,000 (V1.2) | Aquarium holds 33 fish (the V1.2 maximum) |
+| 40,000,000 (V1.2) | "Ocean Sovereign" title + a Giant Pearl in the tank (cosmetics) |
 
 A release earns the species' points x 1 / 2 / 3 / 5 (Normal / Anomaly / Ghost / Shiny).
 
@@ -490,7 +503,7 @@ on the sand). Reference coin rate: **1 coin/s ≈ a full V1 tank of 15 fish**, 1
 | Water Hen | Eggs hatch faster | free (Ocean 85,000) | **Water Hen pass**: 3 quests | ~6h15 |
 | Swordfish | Collects coins in the water (replaces the Snail) | free (Ocean 120,000) | **Swordfish pass**: 3 quests | ~7h15 |
 | Jellyfish | Feeds the fish (replaces the Pelican) | free (Ocean 200,000) | **Jellyfish pass**: 3 quests | ~8h05 |
-| Hermit Crab (V1.2) | Rare variants more often on the eggs that incubate with it (x1.25) | free (Ocean 2,500,000) | free quests: 100 / 300 / 800 eggs with its full bonus → x1.35 / x1.45 / x1.6 | ~14h03 |
+| Hermit Crab (V1.2) | Rare variants more often on the eggs that incubate with it (x1.25) | free (Ocean 2,500,000) | Hermit Crab pass (V1.1.24): 100 / 300 / 800 eggs with its full bonus → x1.35 / x1.45 / x1.6 | ~14h03 |
 
 **The Hermit Crab's luck is live** (ROADMAP_V1.2 §8, V1.1.22): each incubating egg counts the seconds of its incubation
 spent with the crab equipped (offline included, the wait once ready excluded); at opening its luck is 1 + bonus x that
@@ -604,7 +617,7 @@ when it opens completes at once (e.g. a Dogfish hatched before rebirth 8), so th
 | **Water Hen** (owning it) | eggs opened with it equipped: 50 / 150 / 400 → hatch -22 / -28 / -35 % | Water Hen pass |
 | **Swordfish** (owning it) | coins picked up: 300 / 1,000 / 3,000 → speed x1.4 reach 2.5, x1.8 reach 3, x2.2 reach 3.2 | Swordfish pass |
 | **Jellyfish** (owning it) | feeds: 300 / 1,000 / 3,000 → 3 charges every 6 s, every 5 s, 3 pellets | Jellyfish pass |
-| **Hermit Crab** (owning it, V1.2) | eggs opened with its full bonus (incubated with it all the way): 100 / 300 / 800 → rare variants x1.35 / x1.45 / x1.6 | free |
+| **Hermit Crab** (owning it, V1.2) | eggs opened with its full bonus (incubated with it all the way): 100 / 300 / 800 → rare variants x1.35 / x1.45 / x1.6 | Hermit Crab pass (free up to V1.1.23) |
 | **Hatchery** (Story1) | hatch 100 / 300 / 600 / 900 / 1,200 fish, all time (gauge TotalHatched) → 2 min of income each, the last one also the Golden Incubator decor | free |
 | **Collector** ("Full House") | in order: first Anomaly → 2 min of income, 10 Fish Index cells → 2 min, first Ghost → 3 min, 25 cells → 2,500 Ocean Points, first Shiny → 2,500 points, 50 cells → the "Collector" title (no sticker frames: decided by the owner; income before ~3 h: §4) | free |
 | **Ocean** ("Full House") | release 50 fish → 3 min of income; release a Shiny → "Ocean Friend" title | free |
@@ -656,6 +669,7 @@ content (species, eggs, aquariums, capacity, companions themselves) away from fr
 | Water Hen pass | Its 3 upgrade quests (hatch up to -35 %) | 12h16 → ~11h54 |
 | Swordfish pass | Its 3 upgrade quests (~96 % of the coins AFK) | none on the timeline (an active player); AFK income ~x1.6 |
 | Jellyfish pass | Its 3 upgrade quests (25 fish fed AFK) | none on the timeline; AFK income +6–35 % on 17–25 fish |
+| Hermit Crab pass (V1.1.24) | Its 3 upgrade quests (rare variants x1.25 → up to x1.6 on the eggs incubated with it) | none on the timeline (variants are outside it) |
 | Third companion slot | Collector + feeder + Water Hen at once | none on the timeline; AFK and hatch speed together |
 | x2 Ocean Points | Fish released and rebirths give x2 (fixed quest points don't): milestones earlier (tank 25 at ~8h09 instead of ~9h48) | 12h15 → ~12h08 |
 | Lucky | Variant chances x2 | none (variants are outside the 12 h) |
@@ -703,6 +717,7 @@ content (species, eggs, aquariums, capacity, companions themselves) away from fr
 | V1.1.21 | ROADMAP_V1.2 M3: rebirth 9 (200T, x25,000, Aurora Glacier), Aurora Egg (400T, Mini Leviathan 55 / Fox Betta 45), the Fox Betta (Legendary, 10.08M / 12 s, 51,000 points; the planned Penguin Puffer replaced), Ocean milestone 1,500,000 → 27 fish, Voyage 17 (rebirth 9: 375,000 points) and 18 (Fox Betta: 5 min). Simulator: the live config mirrors them, horizon 20 h | V1 unchanged (rebirth 8 ~10h46, all eighteen ~12h00); rebirth 9 **~13h40** (12h45–14h32) as the V1.2 plan said (13h37); 27 fish ~13h33; the Fox Betta, the end of the content for now, **~15h57** (14h46–17h40) |
 | V1.1.22 | ROADMAP_V1.2 M4: rebirth 10 (640T, x120,000, Sky Archipelago), Sky Egg (770T, Fox Betta 25 / Cloud Whale 55 / Pegasus Seahorse 20), Cloud Whale (Legendary, 33.6M / 20 s, 82,000 points), Pegasus Seahorse (Mythic, 100.8M / 30 s, 131,000 points), Ocean milestones 2,500,000 (Hermit Crab), 4,000,000 (29 fish), 6,000,000 (Quick pantry: food refill 7 s), Voyage 19 (rebirth 10: 900,000 points) and 20 (Pegasus Seahorse: 5 min); the Hermit Crab (live variant luck x1.25, free quests to x1.6). Simulator: the live config mirrors them (the crab and the refill not modelled), horizon 24 h | Earlier steps unchanged (rebirth 9 ~13h39); rebirth 10 **~16h31** (15h33–17h11), plan 16h28; 29 fish ~16h30; the Fox Betta ~15h57 → ~16h30 (now mostly from the Sky Egg); Cloud Whale ~17h35; the Pegasus Seahorse, the end of the content for now, **~17h49** (16h47–18h39), ~50 min ahead of the plan; Hermit Crab ~14h03; Quick pantry ~17h18 for those who reach 6M (median 5.1M at the end) |
 | V1.1.23 | ROADMAP_V1.2 M5: rebirth 11 (3Qa, x375,000, Rainbow Dreamland), Dreamland Egg (50Qa, Pegasus Seahorse 55 / Kitty Koi 45), the Kitty Koi (Mythic, 53.76M / 8 s, 210,000 points), Ocean milestones 9,000,000 (31 fish) and 14,000,000 (Aurora rims), Voyage 21 (rebirth 11: 2,200,000 points) and 22 (Kitty Koi: 5 min). Simulator: the live config mirrors them, horizon 28 h | Earlier steps unchanged (rebirth 10 ~16h31); the Pegasus Seahorse ~17h49 → ~18h47 (now often from the Dreamland Egg), Quick pantry ~19h20; rebirth 11 **~19h57** (18h55–20h56), plan 19h53; Aurora rims ~21h30; the Kitty Koi, the end of the content for now, **~22h49** (21h39–24h42), plan 23h42 |
+| V1.1.24 | ROADMAP_V1.2 M6: rebirth 12 (80Qa, x1,200,000, Heart of the Ocean), Heart Egg (96Qa, Kitty Koi 25 / Sea Turtle 55 / Baby Kraken 20), the Sea Turtle (Mythic, 268.8M / 20 s, 336,000 points; the planned Panda Manta replaced) and the Baby Kraken (Mythic, 806.4M / 30 s, 537,000 points), Ocean milestones 20,000,000 (33 fish) and 40,000,000 (title + Giant Pearl), Voyage 23 (rebirth 12: 5,000,000 points), 24 (Baby Kraken: 5 min), 25 (all 24 species: title, Pearl Throne, 8,000,000 points), Hatchery 1,800 / 2,500 / 3,500, Collector to 120 cells, Ocean 500 released, dailies and weeklies 9 each (coin boosts, unchanged). Simulator: the live config mirrors them (the Shiny Mythic quest not modelled), horizon 32 h (a full run ~15 min) | Earlier steps unchanged within the noise (rebirth 11 ~19h51); rebirth 12 **~23h09** (21h55–24h10), plan 23h14; 33 fish with it; the Kitty Koi ~22h49 → ~23h39 (now mostly from the Heart Egg); Sea Turtle ~24h44; **all 24 species ~25h16 (24h15–26h36)**, plan 25h15; Ocean Points at the end 24.7M (40M after the end); Hatchery 2,500 for 1 player in 25 before the end |
 | V1.2 (plan) | ROADMAP_V1.2.md M1, not in the game: rebirths 9–12 (200T x25,000 / 640T x120,000 / 3Qa x375,000 / 80Qa x1.2M), eggs Aurora 400T, Sky 770T, Dreamland 50Qa, Heart 96Qa (180 s), 6 species (income x2, points x1.6), tank 27–33 at 1.5M / 4M / 9M / 20M Ocean Points, Voyage 375k / 900k / 2.2M / 5M points, side lines (Hatchery 1,800–3,500, Collector to 120 cells, Ocean 500 released, Big Catch); **Size score** (-15…+15, triangular, coins x(1 + size/100)); **Galaxy** (0.2 %, ~x2 income, x10 points); starfall 4th bar at 0.9 bar of stars. Simulator: `P.sizeMax`, plan `VARIANTS`, Ocean line as a list, Big Catch line; starfall `--fourthBar` | Rebirths 9–12 at ~13h37 / 16h28 / 19h53 / 23h14, **all 24 species ~25h15 (24h18–26h34)**, ~day 26; runs 2h50–3h25. Size: V1 ~2–3 % faster (all eighteen 12h11 → 11h55), income +15–30 %. 4th bar: 2.6 % of perfect starfalls (0.3 % at 75 % caught) |
 
 ---

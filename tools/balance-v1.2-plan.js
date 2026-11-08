@@ -38,7 +38,7 @@ const V12_FISH = {
 	CloudWhale: { income: 33.6e6, interval: 20, ocean: 82000 },
 	PegasusSeahorse: { income: 100.8e6, interval: 30, ocean: 131000 },
 	KittyKoi: { income: 53.76e6, interval: 8, ocean: 210000 },
-	PandaManta: { income: 268.8e6, interval: 20, ocean: 336000 },
+	SeaTurtle: { income: 268.8e6, interval: 20, ocean: 336000 },
 	BabyKraken: { income: 806.4e6, interval: 30, ocean: 537000 },
 };
 
@@ -83,7 +83,7 @@ const V12_EGGS = [
 	{ name: "Aurora", price: 400e12, hatch: 180, odds: { MiniLeviathan: 55, FoxBetta: 45 } },
 	{ name: "Sky", price: 770e12, hatch: 180, odds: { FoxBetta: 25, CloudWhale: 55, PegasusSeahorse: 20 } },
 	{ name: "Dreamland", price: 50e15, hatch: 180, odds: { PegasusSeahorse: 55, KittyKoi: 45 } },
-	{ name: "Heart", price: 96e15, hatch: 180, odds: { KittyKoi: 25, PandaManta: 55, BabyKraken: 20 } },
+	{ name: "Heart", price: 96e15, hatch: 180, odds: { KittyKoi: 25, SeaTurtle: 55, BabyKraken: 20 } },
 ];
 
 // Variants (variants.ts) + Galaxy (§3.6): coins 1.5x as often, one coin out of 5 a star coin worth 3 coins
@@ -148,7 +148,7 @@ module.exports = {
 			{ cells: 50, ocean: 0 },
 			// §7.2
 			{ cells: 75, minutes: 3 },
-			{ variant: "Shiny", species: ["PegasusSeahorse", "KittyKoi", "PandaManta", "BabyKraken"], label: "Mythic", ocean: 5e6 },
+			{ variant: "Shiny", species: ["PegasusSeahorse", "KittyKoi", "SeaTurtle", "BabyKraken"], label: "Mythic", ocean: 5e6 },
 			{ variant: "Galaxy", minutes: 3 },
 			{ cells: 100, ocean: 0 },
 			{ cells: 120, ocean: 0 },

@@ -138,6 +138,19 @@ const SEAHORSE_CURL_SWAY = math.rad(10);
 const CRAB_LEG_SHUFFLE = math.rad(12);
 const CRAB_HEAD_NOD = math.rad(4);
 const CRAB_CLAW_PINCH = math.rad(9);
+// The Sea Turtle (V1.2, design/rigs/SeaTurtle.json, a box rig: Torso, Head, FlipperFL/FR, FlipperBL/BR): it rows with
+// its big front flippers in slow strokes (the nod phase, ~0.85 a second: down while sweeping back, up while sweeping
+// forward), the back flippers steer, the head nods; the shell never moves (owner): the root (Torso) is not driven
+const TURTLE_FLAP = math.rad(14); // small: a strong vertical beat tore the flippers' tops near the body
+const TURTLE_SWEEP = math.rad(24); // the stroke is mostly a sweep, as a sea turtle seen from the side
+const TURTLE_BACK_STEER = math.rad(10);
+const TURTLE_HEAD_NOD = math.rad(5);
+
+// The Baby Kraken (V1.2, design/rigs/BabyKraken.json: Torso, ArmsL/R): the body bobs and rocks softly, its short curled
+// tentacles sway in turn, gently, never raised toward the face (CLAUDE.md §7)
+const KRAKEN_BOB = 0.03; // × its height
+const KRAKEN_ROCK = math.rad(4);
+const KRAKEN_ARM_SWAY = math.rad(8);
 // Side letter of a rim / tentacle bone -> its direction from the axis, in mesh space (front -Z, right +X)
 const JELLY_SIDES: Record<string, Vector3> = {
 	F: new Vector3(0, 0, -1),
@@ -347,6 +360,8 @@ class FishRigControllerSingleton implements Lifecycle {
 		if (companion === "Pelican" || companion === "WaterHen") return this.findBirdBones(mesh, companion);
 		if (companion === "HermitCrab") return this.findCrabBones(mesh);
 		if (mesh.FindFirstChild("Curl", true)?.IsA("Bone")) return this.findSeahorseBones(mesh);
+		if (fishType === "SeaTurtle") return this.findTurtleBones(mesh);
+		if (fishType === "BabyKraken") return this.findKrakenBones(mesh);
 		// A whale (FishConfig.stroke "Vertical"): its spine wave beats up and down, its turns still bend it sideways
 		const config = FISH_TYPES[fishType as FishType] as (typeof FISH_TYPES)[FishType] | undefined;
 		const vertical = config?.stroke === "Vertical";
@@ -471,6 +486,68 @@ class FishRigControllerSingleton implements Lifecycle {
 					bone,
 					axis: boneAxis(mesh, bone, SIDE),
 					drive: (f) => -(f.amount * JAW_OPEN * math.max(0, math.sin(f.mouth)) ** 2 + f.bite * BITE_JAW),
+				});
+			}
+		}
+		return found;
+	}
+
+	/** The Sea Turtle's bones (tools/blender/rig_boxes.py, design/rigs/SeaTurtle.json). */
+	private findTurtleBones(mesh: MeshPart): DrivenBone[] {
+		const found = new Array<DrivenBone>();
+		// Strength of the strokes: calmer at rest, wider in a rush; weak, the flippers hang
+		const stroke = (f: RiggedFish) => math.max(f.amount, 0.6) * (1 + f.flare);
+		for (const bone of mesh.GetDescendants()) {
+			if (!bone.IsA("Bone")) continue;
+			const name = bone.Name;
+			if (name === "FlipperFL" || name === "FlipperFR") {
+				const sign = name === "FlipperFR" ? 1 : -1;
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, LENGTH),
+					drive: (f) => sign * (stroke(f) * TURTLE_FLAP * math.sin(f.nod) - f.droop * TURTLE_FLAP),
+					tiltAxis: boneAxis(mesh, bone, UP),
+					tilt: (f) => sign * stroke(f) * TURTLE_SWEEP * math.cos(f.nod),
+				});
+			} else if (name === "FlipperBL" || name === "FlipperBR") {
+				const sign = name === "FlipperBR" ? 1 : -1;
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, UP),
+					drive: (f) => sign * stroke(f) * TURTLE_BACK_STEER * math.sin(f.nod - 0.8) + f.bend,
+				});
+			} else if (name === "Head") {
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, SIDE),
+					drive: (f) => TURTLE_HEAD_NOD * math.sin(f.nod - 0.4) + f.bite * TURTLE_HEAD_NOD,
+				});
+			}
+		}
+		return found;
+	}
+
+	/** The Baby Kraken's bones (tools/blender/rig_boxes.py, design/rigs/BabyKraken.json). */
+	private findKrakenBones(mesh: MeshPart): DrivenBone[] {
+		const found = new Array<DrivenBone>();
+		for (const bone of mesh.GetDescendants()) {
+			if (!bone.IsA("Bone")) continue;
+			const name = bone.Name;
+			if (name === "Torso") {
+				const up = boneAxis(mesh, bone, UP);
+				const bob = KRAKEN_BOB * mesh.Size.Y;
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, SIDE),
+					drive: (f) => KRAKEN_ROCK * math.sin(f.breath),
+					offset: (f) => up.mul(bob * math.sin(f.breath * 2)),
+				});
+			} else if (name === "ArmsL" || name === "ArmsR") {
+				const lag = name === "ArmsR" ? 1.5 : 0;
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, LENGTH),
+					drive: (f) => (name === "ArmsR" ? -1 : 1) * f.amount * KRAKEN_ARM_SWAY * math.sin(f.swim - lag),
 				});
 			}
 		}

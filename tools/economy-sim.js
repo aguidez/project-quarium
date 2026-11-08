@@ -63,6 +63,9 @@ let FISH = {
 	PegasusSeahorse: { income: 100800000, interval: 30, ocean: 131000 },
 	// V1.2 M5 (V1.1.23): the Rainbow Dreamland's
 	KittyKoi: { income: 53760000, interval: 8, ocean: 210000 },
+	// V1.2 M6 (V1.1.24): the Heart of the Ocean's, the last two of V1.2
+	SeaTurtle: { income: 268800000, interval: 20, ocean: 336000 },
+	BabyKraken: { income: 806400000, interval: 30, ocean: 537000 },
 };
 if (plan.FISH) FISH = plan.FISH;
 // Easter egg fish (fish.ts FishConfig.easterEgg): hidden chance (percent) per egg opened, taken from the egg's
@@ -124,6 +127,7 @@ let EGGS = [
 	{ name: "Aurora", price: 400e12, hatch: 180, odds: { MiniLeviathan: 55, FoxBetta: 45 } },
 	{ name: "Sky", price: 770e12, hatch: 180, odds: { FoxBetta: 25, CloudWhale: 55, PegasusSeahorse: 20 } },
 	{ name: "Dreamland", price: 50e15, hatch: 180, odds: { PegasusSeahorse: 55, KittyKoi: 45 } },
+	{ name: "Heart", price: 96e15, hatch: 180, odds: { KittyKoi: 25, SeaTurtle: 55, BabyKraken: 20 } },
 ];
 if (plan.EGGS) EGGS = plan.EGGS;
 // Rebirth n is REBIRTHS[n - 1] (rebirths.ts): price, total coin multiplier, start money
@@ -139,6 +143,7 @@ let REBIRTHS = [
 	{ price: 200e12, mult: 25000, start: 300 },
 	{ price: 640e12, mult: 120000, start: 300 },
 	{ price: 3e15, mult: 375000, start: 300 },
+	{ price: 80e15, mult: 1200000, start: 300 },
 ];
 if (plan.REBIRTHS) REBIRTHS = plan.REBIRTHS;
 // Capacity milestones (oceanRewards.ts, kind "Capacity"): the tank holds `capacity` fish from `points` Ocean Points
@@ -152,11 +157,12 @@ let CAPACITY = [
 	{ points: 1.5e6, capacity: 27 },
 	{ points: 4e6, capacity: 29 },
 	{ points: 9e6, capacity: 31 },
+	{ points: 20e6, capacity: 33 },
 ];
 if (plan.CAPACITY) CAPACITY = plan.CAPACITY;
 let OCEAN_MILESTONES = [
 	50, 100, 200, 500, 1500, 5000, 8000, 25000, 40000, 70000, 85000, 120000, 180000, 200000, 300000, 450000, 1000000,
-	1500000, 2500000, 4000000, 6000000, 9000000, 14000000,
+	1500000, 2500000, 4000000, 6000000, 9000000, 14000000, 20000000, 40000000,
 ]; // oceanRewards.ts (only reported, except the capacity / incubator ones)
 if (plan.OCEAN_MILESTONES) OCEAN_MILESTONES = plan.OCEAN_MILESTONES;
 // Incubator milestones (oceanRewards.ts, kind "Incubator"): from `points` Ocean Points, `count` eggs of the same type
@@ -180,8 +186,9 @@ const LIVE_QUEST_REWARDS = {
 		FoxBetta: 5,
 		PegasusSeahorse: 5,
 		KittyKoi: 5,
+		BabyKraken: 5,
 	},
-	rebirth: { 2: 500, 3: 1500, 4: 4000, 5: 10000, 6: 25000, 7: 60000, 8: 150000, 9: 375000, 10: 900000, 11: 2200000 },
+	rebirth: { 2: 500, 3: 1500, 4: 4000, 5: 10000, 6: 25000, 7: 60000, 8: 150000, 9: 375000, 10: 900000, 11: 2200000, 12: 5000000 },
 };
 const QUEST_REWARDS = Object.assign({ discover: {}, rebirth: {} }, plan.QUEST_REWARDS || LIVE_QUEST_REWARDS);
 // The free side lines (quests.ts, live since V0.46). Hatchery: minutes of income at each total of fish hatched.
@@ -190,7 +197,7 @@ const QUEST_REWARDS = Object.assign({ discover: {}, rebirth: {} }, plan.QUEST_RE
 // released to make room (a rebirth's release doesn't count). Titles and decor are not modelled.
 const SIDE_QUESTS = overrides.SIDE_QUESTS ||
 	plan.SIDE_QUESTS || {
-		hatchery: { at: [100, 300, 600, 900, 1200], minutes: 2 },
+		hatchery: { at: [100, 300, 600, 900, 1200, 1800, 2500, 3500], minutes: 2 }, // 1,800+ since V1.1.24
 		collector: [
 			{ variant: "Anomaly", minutes: 2 },
 			{ cells: 10, minutes: 2 },
@@ -200,8 +207,15 @@ const SIDE_QUESTS = overrides.SIDE_QUESTS ||
 			{ cells: 50, ocean: 0 },
 			{ cells: 75, minutes: 3 }, // V1.1.20 (90 cells with the Galaxy column)
 			{ variant: "Galaxy", minutes: 3 },
+			// V1.1.24: the Shiny of species 21-24 (5,000,000 points) is not modelled (the line's variants are any species'),
+			// so the cells goals after it wait for nothing: the Galaxy rims and the title cost nothing
+			{ cells: 100, ocean: 0 },
+			{ cells: 120, ocean: 0 },
 		],
-		ocean: { releases: 50, minutes: 3 },
+		ocean: [
+			{ releases: 50, minutes: 3 },
+			{ releases: 500, minutes: 5 }, // V1.1.24
+		],
 		// Big Catch (quests.ts, V1.1.16): hatch a fish of `size` or more, or hold `count` of them at once
 		bigCatch: [
 			{ size: 10, minutes: 3 },
@@ -241,7 +255,7 @@ const P = Object.assign(
 		weeklyFromRebirth: 3,
 		boostMult: 2,
 		checkpoints: [15, 30, 60, 90, 120, 150, 180, 240, 300, 360],
-		horizon: 28 * 3600, // V1.2 so far ends with the Kitty Koi after rebirth 11 (~23h40 in the plan); room for the slowest players
+		horizon: 32 * 3600, // V1.2 ends with the 24 species after rebirth 12 (~25h15 in the plan); room for the slowest players
 		players: 2000,
 		sizeMax: 15, // the Size score's range (shared/types/size SIZE_MAX, live since V1.1.16); 0 = none
 	},

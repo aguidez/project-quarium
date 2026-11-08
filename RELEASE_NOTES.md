@@ -11,6 +11,44 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.24 — 2026-11-08
+
+**The Voyage reaches its heart: a twelfth aquarium, the finale of V1.2.**
+
+**New**
+- **Rebirth 12: the Heart of the Ocean** (80Qa, coins x1,200,000): a pearl palace glowing behind golden domes, pearl
+  arches and pearls on the sand.
+- **The Sea Turtle**, a new Mythic species: a little green sea turtle rowing with its big front flippers (its shell
+  stays perfectly still). It drops heart-shaped bubbles worth 268.8M every 20 seconds.
+- **The Baby Kraken**, a new Mythic species: a small round kraken swaying its arms. It drops heart gems worth 806.4M
+  every 30 seconds.
+- Both have their Anomaly, Ghost, Shiny and Galaxy looks.
+- **The Heart Egg** (96Qa): Kitty Koi 25 %, Sea Turtle 55 %, Baby Kraken 20 %.
+- New Ocean milestones: 20,000,000 points, the aquarium holds **33 fish**; 40,000,000 points, the **Ocean Sovereign**
+  title and a **Giant Pearl** for the aquarium.
+- Voyage quests "Back to the Heart" (rebirth 12: 5,000,000 Ocean Points), "The Little Kraken" (hatch a Baby Kraken: 5
+  minutes of income) and "Grand Aquarist" (find all 24 species: the Grand Aquarist title, the **Pearl Throne** and
+  8,000,000 Ocean Points).
+- Hatchery quests: hatch 1,800 / 2,500 / 3,500 fish; the last one gives the **Diamond Incubator**.
+- Collector quests: "Mythic Shine" (a Shiny Pegasus Seahorse, Kitty Koi, Sea Turtle or Baby Kraken: 5,000,000 Ocean
+  Points), "Index Master" (100 Fish Index entries: the **Galaxy Rims**, night-blue rims drifting through the Galaxy's
+  colours) and "Variant Master" (all 120 entries: the Variant Master title).
+- Ocean quests: "Tide Keeper" (release 500 fish: 5 minutes of income) and "Pearl Diver" (release a Shiny Baby Kraken:
+  the Pearl Diver title).
+- New daily quests (feed your fish 60 times, release 5 fish) and weekly quests (feed 500 times, open 250 eggs): 9 of
+  each now.
+
+**Changes**
+- **The Hermit Crab Pass**: the Hermit Crab stays free (Ocean milestone 2,500,000), but its 3 quests (rare variants up to
+  x1.6) now need its pass, like the Water Hen's, the Swordfish's and the Jellyfish's. The bonuses already earned are kept.
+- The Pearl Throne shares the Whale Statue's spot, the Diamond Incubator the Golden Incubator's, and the Galaxy Rims
+  the rims with the Pearl and Aurora Rims: one of each shows, picked in Customize.
+
+**Fixes**
+- Studio test saves can no longer write to the leaderboards.
+
+---
+
 ## V1.1.23 — 2026-11-08
 
 **The Voyage goes on: an eleventh aquarium, over the rainbow.**

@@ -241,6 +241,8 @@ class LeaderboardServiceSingleton implements Lifecycle {
 	}
 
 	private write(userId: number, scores: Scores, written: Partial<Scores>) {
+		// A Studio test store's profiles are not the players' (V1.1.24: a test profile reached the boards)
+		if (!DataService.isLiveStore()) return;
 		for (const board of LEADERBOARD_IDS) {
 			const store = this.stores.get(board);
 			const value = encodeScore(scores[board]);
@@ -252,6 +254,7 @@ class LeaderboardServiceSingleton implements Lifecycle {
 	}
 
 	private remove(userId: number) {
+		if (!DataService.isLiveStore()) return; // a test profile's exclusion must not remove the real entries
 		for (const [board, store] of this.stores) {
 			const [ok, err] = pcall(() => store.RemoveAsync(tostring(userId)));
 			if (!ok) this.warnOnce(`removal from ${board} failed: ${err}`);

@@ -343,6 +343,27 @@ const EGGS = {
 				.join("") +
 			sparkle(30, 26, 6, "#FFFFFF") + sparkle(82, 62, 3.5, "#FFF1C8") + sparkle(16, 66, 3, "#FFFFFF"),
 	},
+	// Heart of the Ocean (V1.2, the finale): a pearly shell, a gold band with little pearls, a big glowing pearl
+	Heart: {
+		outline: "#5A3A12",
+		defs: `<radialGradient id="shell" cx="0.38" cy="0.3" r="0.85">
+			<stop offset="0" stop-color="#FFFFFF"/><stop offset="0.5" stop-color="#F6E6F2"/><stop offset="1" stop-color="#C9B6E6"/>
+		</radialGradient>
+		<radialGradient id="pearl" cx="0.38" cy="0.35" r="0.7">
+			<stop offset="0" stop-color="#FFFFFF"/><stop offset="0.6" stop-color="#F3ECF7"/><stop offset="1" stop-color="#C9D6F2"/>
+		</radialGradient>
+		<radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+			<stop offset="0" stop-color="#FFF6D8" stop-opacity="0.9"/><stop offset="1" stop-color="#FFF6D8" stop-opacity="0"/>
+		</radialGradient>`,
+		decor:
+			`<path d="M0 84 C20 76 80 76 100 84 L100 96 C80 88 20 88 0 96 Z" fill="#F2C75C" stroke="#C99A3A" stroke-width="1.6"/>` +
+			[12, 26, 40, 54, 68, 82].map((x) => `<circle cx="${x + 3}" cy="86" r="2.4" fill="#FFFFFF" stroke="#E2D6C0" stroke-width="0.8"/>`).join("") +
+			`<circle cx="50" cy="60" r="26" fill="url(#glow)"/>` +
+			`<circle cx="50" cy="60" r="15" fill="url(#pearl)" stroke="#B9A6D8" stroke-width="1.6"/>` +
+			`<ellipse cx="45" cy="54" rx="4.5" ry="3" fill="#FFFFFF" opacity="0.9"/>` +
+			[[22, 36, 3], [78, 40, 2.5], [70, 24, 2]].map(([cx, cy, r]) => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#FFFFFF" fill-opacity="0.4" stroke="#FFFFFF" stroke-width="1"/>`).join("") +
+			sparkle(30, 26, 6, "#FFFFFF") + sparkle(74, 64, 3.5, "#FFE7A0") + sparkle(26, 70, 3, "#FFFFFF"),
+	},
 };
 
 function svg(body, defs = "") {

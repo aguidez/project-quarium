@@ -1,0 +1,14 @@
+{
+	"//": "The Baby Kraken (V1.2 M6, species 24): a round baby octopus, a box rig (tools/blender/rig_boxes.py) driven by FishRigController's kraken branch: the whole body bobs softly on its root, its short curled tentacles (everything under h 0.36, from a height scan) sway gently in two groups, left and right, in turn. Nothing ever reaches up toward the face (CLAUDE.md §7).",
+	"rig": "boxes",
+	"root": { "name": "Torso", "head": [0, 0.5, 0.4], "tail": [0, 0.5, 0.8] },
+	"bones": [
+		{ "name": "ArmsL", "head": [-0.25, 0.5, 0.34], "tail": [-0.8, 0.5, 0.05], "box": { "side": [-1.1, -0.02], "t": [-0.05, 1.05], "h": [-0.05, 0.34] }, "fade": 0.04 },
+		{ "name": "ArmsR", "head": [0.25, 0.5, 0.34], "tail": [0.8, 0.5, 0.05], "box": { "side": [0.02, 1.1], "t": [-0.05, 1.05], "h": [-0.05, 0.34] }, "fade": 0.04 }
+	],
+	"preview": [
+		{ "bone": "Torso", "axis": [1, 0, 0], "deg": 4, "cycles": 1 },
+		{ "bone": "ArmsL", "axis": [0, 1, 0], "deg": 8, "cycles": 2 },
+		{ "bone": "ArmsR", "axis": [0, 1, 0], "deg": -8, "cycles": 2, "phase": 1.5 }
+	]
+}

@@ -17,7 +17,12 @@ type ActionHandler = (player: Player, payload: unknown) => void;
 type SaveCallback = (player: Player, save: SaveData) => void;
 
 /** Bump the suffix to start every player from scratch (old profiles stay in the old store). */
-const STORE_NAME = "PlayerData_v1";
+const LIVE_STORE_NAME = "PlayerData_v1";
+/**
+ * The store the profiles load from: LIVE_STORE_NAME, or a test store during a Studio test (agent note
+ * fish-asset-pipeline: a profile preset in a test store). Only the live one writes the leaderboards (isLiveStore).
+ */
+const STORE_NAME: string = LIVE_STORE_NAME;
 /** Seconds between two auto-saves of a profile (ProfileStore default: 300). Limits what a server crash can lose. */
 const AUTO_SAVE_PERIOD = 60;
 
@@ -146,6 +151,14 @@ class DataServiceController implements Lifecycle {
 	/** Called right before every save of a profile (auto-save, leaving, shutdown): write runtime state in it. */
 	public onSave(callback: SaveCallback) {
 		this.saveCallbacks.push(callback);
+	}
+
+	/**
+	 * Whether the profiles are the real ones (not a Studio test store): LeaderboardService writes nothing otherwise,
+	 * so a test profile (its money, Ocean Points, income) never reaches the global boards under the tester's UserId.
+	 */
+	public isLiveStore(): boolean {
+		return STORE_NAME === LIVE_STORE_NAME;
 	}
 
 	/** The profile of a player whose session is open (undefined before it loads and once saved for good). */

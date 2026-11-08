@@ -75,6 +75,8 @@ Blender already open. Blender stays open after the session. `get_screenshot_of_w
    the vertices (`int(h / 0.04)` bins): an extremity that pokes out of its limb's box stays behind and stretches
    (the Fisherman's hand lay below the sleeve's box: a `HandR` child box fixed it). Look at a raised limb from the
    front *and* the side (the "front" view of preview_swim.py).
+   A box's `"exclude_hue": [lo, hi]` zeroes the vertices whose texture hue (UV -> pixel) falls in that range; it tore
+   the turtle's flippers (same greens as its shell, 2026-11-08): cut by height and a child tip box instead.
 4. *Owner preview*: `node tools/blender/frames-to-gif.js design/previews/v1.1-batch<N>.gif design/rigs/work/<Fish>_frames
    ...` (one labelled tile per fish), linked in the reply. **Wait for the owner's go before any upload.**
 5. *Upload* (Studio MCP, once per fish, never again for the same file): `open_cloud_invoke` POST `/assets/v1/assets`

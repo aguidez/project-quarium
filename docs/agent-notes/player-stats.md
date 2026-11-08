@@ -19,6 +19,10 @@ metadata:
   info:GetMetadata() end)` (returning nil cancels if they are online), then `RemoveAsync(tostring(userId))` on the
   three OrderedDataStores `Leaderboard_OceanPoints_v1`, `Leaderboard_Income_v1`, `Leaderboard_PlayTime_v1` so they
   leave the boards at once (LeaderboardService also removes them at their next join). `false` lifts it.
+- **"Someone on the leaderboard looks like your test account"** (2026-11-08): the agent has no separate account; its
+  Studio playtests run as the owner (DOT_Pinpin). Since V1.1.24 a playtest on a test store writes nothing to the
+  boards (`DataService.isLiveStore()`); on the live store it writes the owner's real score like any session. Before
+  banning anyone, look the name up and ask the owner: the 2026-11-08 suspect was Secret_Lokii, the group's owner.
 - **DataStore version history keeps one version per UTC hour** (the last write of that hour): `ListVersionsAsync` +
   `GetVersionAsync` show what a save looked like hour by hour, and `MetaData.SessionLoadCount` tells sessions apart.
   On 2026-11-01 it showed the owner's save turned into a fresh one: the owner had reset it on purpose,

@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-08 (V1.1.23: rebirth 11 and the Rainbow Dreamland, the Kitty Koi (species 22), the Dreamland Egg, tank 31, the Aurora rims (ROADMAP_V1.2 M5)).
+> Last updated: 2026-11-08 (V1.1.24: rebirth 12 and the Heart of the Ocean, the Sea Turtle and the Baby Kraken (species 23–24), the Heart Egg, tank 33, the V1.2 finale's quests and cosmetics, test stores off the leaderboards, the Hermit Crab Pass (ROADMAP_V1.2 M6)).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -30,10 +30,10 @@ coins. Around that core loop:
   global tops of 100 kept in OrderedDataStores;
 - gamepasses, sold by the fisherman's shop in the lobby (never part of the balance): Third Companion Slot, x2 Ocean
   Points, Lucky, +50% Coins, and the Water Hen / Swordfish / Jellyfish passes sold from their quest lines;
-- rebirths: restart the run for a permanent coin multiplier and a new aquarium theme (10 levels: Lagoon, Neon Coral,
+- rebirths: restart the run for a permanent coin multiplier and a new aquarium theme (12 levels: Lagoon, Neon Coral,
   Pirate Wreck, Atlantis, Mariana Trench, Volcanic Temple, Crystal Caverns, Cosmic Sanctuary, then V1.2's Aurora
-  Glacier, Sky Archipelago and Rainbow Dreamland);
-- cosmetics: titles above the head, decor in the tank, Pearl or Aurora rims; the player can pick the theme, title and shown
+  Glacier, Sky Archipelago, Rainbow Dreamland and Heart of the Ocean);
+- cosmetics: titles above the head, decor in the tank, Pearl, Aurora or Galaxy rims; the player can pick the theme, title and shown
   decor (Customize button); the leaderboard titles are held, not earned: the day's top 10 of each board wears its
   title on a nameplate (gold #1, silver #2, bronze #3, navy #4–#10) until the next day's ranking;
 - easter eggs: secret fish hidden in every egg (the French Fish), made by an event (the Alien Fish of the UFO
@@ -259,22 +259,22 @@ ProjectQuarium/
    │     │                   upgrades, its perks): the line under its ability on the companion card
    │     ├─ customization.ts ThemeChoice (a reached theme or "Auto"), TitleChoice (a title held, "Auto" = the best,
    │     │                   "None"); getUnlockedThemes / getThemeOrder, getDisplayedTheme, isHideable (Decor / Finish),
-   │     │                   isCosmeticShown (finishes: Pearl rims and, V1.2, Aurora rims, grouped "Rims": one shows); titles: TitleData, getOwnedTitles (leaderboard titles held, best rank first,
+   │     │                   isCosmeticShown (finishes: Pearl rims and, V1.2, Aurora and Galaxy rims, grouped "Rims": one shows); titles: TitleData, getOwnedTitles (leaderboard titles held, best rank first,
    │     │                   then the earned ones in TITLE_ORDER), getBestTitle, getTitleRank, getDisplayedTitle
    │     ├─ cosmetics.ts     CosmeticId / COSMETICS (kind Title / Decor / Finish; `leaderboard` on the three leaderboard
    │     │                   titles TitleOceanLegend / TitleTankTycoon / TitleDevotedKeeper, never in PlayerData.cosmetics),
    │     │                   TITLE_ORDER (earned titles), LEADERBOARD_TITLES, isLeaderboardTitle, DECOR_SLOTS (tank-local
-   │     │                   position per decor id), isDecor, TITLE_ATTRIBUTE / TITLE_RANK_ATTRIBUTE, EARNED_TITLE_COLOR
+   │     │                   position per decor id; a group's decor share one spot: Statue = Whale Statue / Pearl Throne, Trophy, Incubator = Golden / Diamond), isDecor, TITLE_ATTRIBUTE / TITLE_RANK_ATTRIBUTE, EARNED_TITLE_COLOR
    │     ├─ gamepasses.ts    GamePass / GAME_PASSES (name, shop text, Roblox id, icon, badge, shopOrder), getShopPasses,
    │     │                   getPassById, getPassCoinMultiplier (x1.5) / getPassOceanMultiplier (x2) /
    │     │                   getPassVariantLuck (x2) / getPassCompanionSlots (+1). The companion passes (WaterHenPass,
-   │     │                   SwordfishPass, JellyfishPass) are sold from their quest line, picture = the companion's sticker
-   │     ├─ quests.ts        QUESTS (Story1–9, Voyage1–22 the main line, WaterHen1–3 / Swordfish1–3 / Jellyfish1–3 the paid
-   │     │                   companion lines, HermitCrab1–3 the free one (eggs with its full bonus), Hatchery1–5 / Collector1–6 / Ocean1–2 / BigCatch1–5 / FishKeeper1–3 the free side lines,
-   │     │                   Daily* / Weekly*), DAILY_QUEST_POOL / WEEKLY_QUEST_POOL (7 each, 3 drawn per period),
+   │     │                   SwordfishPass, JellyfishPass, HermitCrabPass) are sold from their quest line, picture = the companion's sticker
+   │     ├─ quests.ts        QUESTS (Story1–9, Voyage1–25 the main line, WaterHen1–3 / Swordfish1–3 / Jellyfish1–3 / HermitCrab1–3 (eggs with its full bonus) the paid
+   │     │                   companion lines, Hatchery1–8 / Collector1–11 / Ocean1–4 / BigCatch1–5 / FishKeeper1–3 the free side lines,
+   │     │                   Daily* / Weekly*), DAILY_QUEST_POOL / WEEKLY_QUEST_POOL (9 each, 3 drawn per period), `fishTypes` (a VariantFound quest limited to some species),
    │     │                   STORY_LINES (Start / Ocean / Rebirth (shown "Voyage") / Snail / Pelican / Hatchery /
    │     │                   Collector / BigCatch (opens with Story2, like the Collector) / FishKeeper (with Voyage2, rebirth 2) / WaterHen / Swordfish /
-   │     │                   Jellyfish / HermitCrab (free): quests in order, requires (a quest), requiresCompanion, requiresPass, order),
+   │     │                   Jellyfish / HermitCrab: quests in order, requires (a quest), requiresCompanion, requiresPass, order),
    │     │                   refreshStoryLines, getActiveStoryQuests, getStoryLine, isQuestLocked,
    │     │                   BOARD_UNLOCK_REBIRTHS / isBoardUnlocked (dailies from rebirth 2, weeklies from 3);
    │     │                   counter stats CoinMoney, CoinsCollected, FishFed, LikesGiven, OceanPoints, EggsOpened,
@@ -328,7 +328,7 @@ ProjectQuarium/
    │     │                   EVENT_ATTRIBUTES, LURKING_ATTRIBUTE, ADMIN_EVENT_ORDER, getActiveEvent,
    │     │                   getEventCoinMultiplier(owner), EventSource, getRecurringEvents, getRecurringChance,
    │     │                   EVENT_IMMUNE_ATTRIBUTE + isEventImmune (tutorial)
-   │     ├─ rebirths.ts      REBIRTHS (price, multiplier, start money, theme; 11 since V1.1.23), AQUARIUM_THEMES (Basic + the 11 themes, AuroraGlacier, SkyArchipelago and RainbowDreamland the V1.2 ones),
+   │     ├─ rebirths.ts      REBIRTHS (price, multiplier, start money, theme; 12 since V1.1.24), AQUARIUM_THEMES (Basic + the 12 themes, AuroraGlacier, SkyArchipelago, RainbowDreamland and HeartOfTheOcean the V1.2 ones),
    │     │                   getNextRebirth, getRebirthMultiplier, getAquariumTheme, getRebirthOceanPoints
    │     ├─ likes.ts         Like rules (1 per hour given, x2 coins for 5 min, restarted by each like), board offset, helpers
    │     ├─ onboarding.ts    Onboarding steps + rules (what is allowed / free at each step), ONBOARDING_REWARD,
@@ -363,8 +363,8 @@ ProjectQuarium/
    │     ├─ AquariumService  Registers Studio tanks, assigns one per player, owner nameplate (OwnerPlate SurfaceGui on the
    │     │                   Base), runtime folders (Fish/Food/Coins/Companions), focus reports ("SetFocus") + isTending /
    │     │                   isAtOwnAquarium; dresses each tank in its owner's displayed theme (polled every second; free
-   │     │                   tanks Basic), a rims finish (Pearl: pearly F3ECF7 rims, Reflectance 0.3; Aurora, V1.2: Neon
-   │     │                   rims tagged `AuroraRim`, coloured by the clients; any theme; Aurora wins in a broken save) and the
+   │     │                   tanks Basic), a rims finish (Pearl: pearly F3ECF7 rims, Reflectance 0.3; Aurora / Galaxy, V1.2: Neon
+   │     │                   rims tagged `GlowRim` with attribute `RimFinish`, coloured by the clients; any theme; the rarest wins in a broken save) and the
    │     │                   decor cosmetics (DecorTemplate clones at DECOR_SLOTS), rebuilt when any of them changes; `decorCovers`
    │     │                   (each decor piece's footprint and top in the tank's frame, from its visible parts);
    │     │                   clears the INCOME_ATTRIBUTES of a freed tank
@@ -461,7 +461,8 @@ ProjectQuarium/
    │     │                   (Leaderboard_<Id>_v1, key = UserId; value = encodeScore: raw below 1e15, above it
    │     │                   1e15 + (log10 - 15) x 1e12, as an OrderedDataStore holds int64 only; decodeScore on read),
    │     │                   writes its players' scores every 2 min (changed ones only;
-   │     │                   setBanned: the admin panel's LB BAN, removes at once / writes again at the next tick)
+   │     │                   setBanned: the admin panel's LB BAN, removes at once / writes again at the next tick;
+   │     │                   writes and removes nothing unless DataService.isLiveStore(): a Studio test store never reaches the boards)
    │     │                   and when they leave (sampled in onSave), reads the top 100 every 2 min, names from UserService,
    │     │                   merges its players' live scores and sends LeaderboardSync every 30 s and at join; the titles'
    │     │                   daily snapshot (DataStore LeaderboardTitles_v1, key Daily) → PlayerData.leaderboardRanks (§3.4)
@@ -558,10 +559,14 @@ ProjectQuarium/
       │  │                   its turns still bend it sideways. The Pegasus Seahorse (rig_boxes.py, found by its `Curl`
       │  │                   bone: Torso rock + bob, Head nod, WingL / R flap on the pectoral beat, Curl sway). The Hermit
       │  │                   Crab (rig_boxes.py: LegsL / R shuffle on the crawl phase, ClawL / R pinch sideways, Head nod;
-      │  │                   its shell on the root, never moved); every frame
+      │  │                   its shell on the root, never moved). The Sea Turtle (rig_boxes.py, found by its `FlipperFL`
+      │  │                   bone: FlipperFL / FR row, mostly a sweep with a small beat, their FlipperTip* children follow,
+      │  │                   FlipperBL / BR steer, Head nods; no Torso drive: the shell never moves). The Baby Kraken
+      │  │                   (found by `ArmsL`: Torso rock + bob, ArmsL / R sway); every frame
       │  │                   within 60 studs, every 2nd to 110, every 4th beyond, frozen off screen; no budget
-      │  ├─ AuroraRimsController  The Aurora rims cosmetic (V1.2): drifts the Neon colour of every rim tagged `AuroraRim`
-      │  │                   (AquariumService.applyTheme tags them) through the northern lights' colours, 20 updates a second
+      │  ├─ AuroraRimsController  The glowing rims cosmetics (V1.2): drifts the Neon colour of every rim tagged `GlowRim`
+      │  │                   (AquariumService.applyTheme tags them) through its `RimFinish` palette (Aurora: the northern
+      │  │                   lights; Galaxy: night blue, violet, pink), 20 updates a second
       │  ├─ PelicanChargesController  Charge gauge above the local player's on-demand Pelican / Jellyfish (BillboardGui): one
       │  │                   slot per charge, a pellet growing while it refills; hidden while MaxCharges is 0
       │  ├─ ChatTitleController  TextChatService.OnIncomingMessage: the sender's title as a coloured tag before their name in
@@ -725,7 +730,7 @@ ProjectQuarium/
   Catfish, PirateFish (a new model since V1.1.3, its tricorn rigid on the head), BlueTang, BabySunfish, Lanternfish,
   Lionfish, Dragonfish (7-bone spine), WolfDogfish (the Husky Dogfish), BunnyShark (EarL / EarR), MiniLeviathan (rigged
   in its own space, the template keeps its -30° pitch), FoxBetta (V1.2, EarL / EarR), CloudWhale (V1.2, vertical stroke, its cloud
-  rigid), PegasusSeahorse (V1.2, a box rig), KittyKoi (V1.2, EarL / EarR, no jaw): every species of the 11 aquariums, plus Sugar, AlienFish and the
+  rigid), PegasusSeahorse (V1.2, a box rig), KittyKoi (V1.2, EarL / EarR, no jaw), SeaTurtle (V1.2, a box rig, shell rigid), BabyKraken (V1.2, a box rig): every species of the 12 aquariums, plus Sugar, AlienFish and the
   abyss `LanternFish` (EventFish; work files `AbyssLantern`; its stalk rigid under the welded lit Lure, no jaw). Still
   without bones: the K-pop idol (its template lost its texture, see §4: it only puffs on the beat until it is rigged)
   and the UFO (a ship the server glides, spins and tilts: no rig needed, tag `Ufo`, never a fish). The Swordfish companion too
@@ -734,7 +739,7 @@ ProjectQuarium/
   `Rig` attribute: ShopKeeperController finds his bones) (rig settings per species in design/rigs/<Fish>.json; ids in design/meshes/manifest.json:
   `rigModelId`, `rigMeshId`, `staticMeshId`).
 - **`ServerStorage.Assets`**:
-  - `Fish/` (tag `FishTemplate`, attr `FishType`): the 22 species + `FrenchFish`, `AlienFish` and `Sugar` (no
+  - `Fish/` (tag `FishTemplate`, attr `FishType`): the 24 species + `FrenchFish`, `AlienFish` and `Sugar` (no
     FishVariants).
     Copied on demand into `ReplicatedStorage.Assets.Fish` (server/fishAssets); `ReplicatedStorage.Assets` is an empty
     folder in the place, filled at runtime. Oddities: the Golden Guppy's ColorMap is a 1024² copy (the generated one
@@ -763,7 +768,7 @@ ProjectQuarium/
   - `LikeBoards/LikeBoard` (tag `LikeBoardTemplate`): driftwood lectern, PrimaryPart `Root` at ground level, front
     −Z, invisible `Board` part whose Front face carries the counter (SurfaceGui density = BOARD_CANVAS_WIDTH / the
     Board's width, so it can be rescaled). LikeService clones it at `aquarium frame × LIKE_BOARD_OFFSET`.
-  - `Decor/` (tag `DecorTemplate`, attr `Cosmetic`, PrimaryPart Mesh): `WhaleStatue`, `GoldenTrophy`, `Incubator`, `TitanTrophy` (a copy of the golden one, SurfaceAppearance tint rose gold: no upload; same spot as the golden one, CosmeticConfig `group` "Trophy": at most one of a group shows, `getGroupMates`; showing one hides its owned mates (CustomizationService), a new one takes the spot (DataService.addCosmetic), sanitizeSave keeps the latest earned)
+  - `Decor/` (tag `DecorTemplate`, attr `Cosmetic`, PrimaryPart Mesh): `WhaleStatue`, `GoldenTrophy`, `Incubator`, `GiantPearl`, `PearlThrone`, `DiamondIncubator` (an `Incubator` copy tinted ice blue, no upload), `TitanTrophy` (a copy of the golden one, SurfaceAppearance tint rose gold: no upload; same spot as the golden one, CosmeticConfig `group` "Trophy": at most one of a group shows, `getGroupMates`; showing one hides its owned mates (CustomizationService), a new one takes the spot (DataService.addCosmetic), sanitizeSave keeps the latest earned)
     (the Golden Incubator).
   - `AquariumThemes/<Theme>` (tag `AquariumThemeTemplate`, attr `Theme`): PrimaryPart `Origin` = the tank frame,
     `Style/` parts named like the tank's (Sand, Backdrop, Base, Plinth, Rim*, `Water`: every theme has one, so a tank

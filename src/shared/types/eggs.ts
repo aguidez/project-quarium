@@ -16,7 +16,8 @@ export type EggType =
 	| "Cosmic"
 	| "Aurora"
 	| "Sky"
-	| "Dreamland";
+	| "Dreamland"
+	| "Heart";
 
 export interface EggOdds {
 	fishType: FishType;
@@ -222,6 +223,19 @@ export const EGG_TYPES: Record<EggType, EggConfig> = {
 		],
 		order: 15,
 		requires: "Sky",
+	},
+	// 1.2x rebirth 12: the last egg of V1.2
+	Heart: {
+		displayName: "Heart Egg",
+		price: 96e15,
+		hatchTime: 180,
+		odds: [
+			{ fishType: "KittyKoi", chance: 25 },
+			{ fishType: "SeaTurtle", chance: 55 },
+			{ fishType: "BabyKraken", chance: 20 },
+		],
+		order: 16,
+		requires: "Dreamland",
 	},
 };
 
