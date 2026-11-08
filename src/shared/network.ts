@@ -37,7 +37,7 @@ export interface ClientToServerEvents {
 	 * "BuyEgg" | "OpenEgg" (payload: EggType) | "SetFocus" (payload: boolean, 2.5D view entered / left)
 	 * | "RequestSync" (no payload) | "AdminStartEvent" (payload: GameEventType) | "AdminStopEvent" (no payload)
 	 *   | "AdminRequestTanks" (no payload) | "AdminRemoveFish" ({ userId, fishId }) | "AdminAddFish" ({ userId,
-	 *   fishType, variant }) | "AdminSetLeaderboardBan" ({ userId, banned }) | "AdminSetPass" ({ userId, pass,
+	 *   fishType, variant, size? }) | "AdminSetLeaderboardBan" ({ userId, banned }) | "AdminSetPass" ({ userId, pass,
 	 *   granted }) | "AdminRequestServers" (no payload)
 	 *   | "AdminUpdateOldServers" (no payload) (admin panel, see AdminService: refused
 	 *   without its right)

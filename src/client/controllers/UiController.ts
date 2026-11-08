@@ -214,8 +214,8 @@ class UiControllerSingleton implements Lifecycle {
 								},
 								onRemoveFish: (userId, fishId) =>
 									this.actionRemote.FireServer("AdminRemoveFish", { userId, fishId }),
-								onAddFish: (userId, fishType, variant) =>
-									this.actionRemote.FireServer("AdminAddFish", { userId, fishType, variant }),
+								onAddFish: (userId, fishType, variant, size) =>
+									this.actionRemote.FireServer("AdminAddFish", { userId, fishType, variant, size }),
 								onSetLeaderboardBan: (userId, banned) =>
 									this.actionRemote.FireServer("AdminSetLeaderboardBan", { userId, banned }),
 								onSetPass: (userId, pass, granted) =>

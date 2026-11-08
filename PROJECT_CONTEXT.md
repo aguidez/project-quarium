@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-08 (V1.2.2: admins give or take back gamepasses from the admin panel (SaveData.grantedPasses); V1.2.1: theme paintings clipped).
+> Last updated: 2026-11-08 (V1.2.3: the admin panel adds a fish in any variant (Galaxy too) and Size; V1.2.2: admins give gamepasses (SaveData.grantedPasses)).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -423,7 +423,7 @@ ProjectQuarium/
    │     │                   runs its actions, checking the right again: "AdminStartEvent", "AdminStopEvent";
    │     │                   Aquariums tab (this server's players): "AdminRequestTanks" → AdminTanks, "AdminRemoveFish"
    │     │                   (FishService.adminRemoveFish: no points), "AdminAddFish" (adminAddFish: even into a full tank,
-   │     │                   easter eggs Normal; DataService.addFish with its variant), "AdminSetLeaderboardBan"
+   │     │                   easter eggs Normal; DataService.addFish with its variant; an optional Size score, else drawn), "AdminSetLeaderboardBan"
    │     │                   (LeaderboardService.setBanned), "AdminSetPass" ({userId, pass, granted}: GamePassService.setGranted,
    │     │                   saved in SaveData.grantedPasses); every action answers with the tanks again. Servers tab:
    │     │                   "AdminRequestServers" → AdminServers, "AdminUpdateOldServers" (ServerUpdateService)
@@ -653,7 +653,8 @@ ProjectQuarium/
          │                   (name, time left, STOP) and one row per event (ADMIN_EVENT_ORDER: badge, RECURRING / ADMIN
          │                   ONLY, length, START); Aquariums tab (AdminAquariumsTab.tsx, AquariumsTab): the players
          │                   (headshot, rebirth / fish / income chips, LB BAN checkbox, MANAGE), then one tank (BACK, its
-         │                   fish as ItemSlots with a red X → REMOVE? for 3 s, ADD A FISH: species strip, variants, ADD,
+         │                   fish as ItemSlots with a red X → REMOVE? for 3 s, size on each slot, ADD A FISH: species strip, the 5 variants, SIZE
+         │                   (RANDOM, -5 / -1 / +1 / +5 from -15 to +15), ADD,
          │                   GAMEPASSES: every pass BOUGHT / GIVEN (→ TAKE? for 3 s) / GIVE);
          │                   asks for the tanks on open and every ADMIN_TANKS_REFRESH s while open; Servers tab
          │                   (AdminServersTab.tsx, ServersTab): NEWEST VERSION card (patch, place version, servers / old /
@@ -866,7 +867,7 @@ ProjectQuarium/
 | | `SetAquariumTheme` (theme or "Auto"), `SetCosmeticShown` ({id, shown}), `SetTitle` (title, "Auto" or "None"), `SetSoundVolume` (0–1) | CustomizationService |
 | | `EquipCompanion` / `UnequipCompanion` (CompanionType) | CompanionService |
 | | `ReleaseFish` ({fishType, variant}), `FinishTutorial` (Feature), `ClaimOceanReward` (milestone id) | OceanService |
-| | `AdminStartEvent` (GameEventType), `AdminStopEvent` (no payload), `AdminRequestTanks` (no payload), `AdminRemoveFish` ({userId, fishId}), `AdminAddFish` ({userId, fishType, variant}), `AdminSetLeaderboardBan` ({userId, banned}), `AdminSetPass` ({userId, pass, granted}), `AdminRequestServers`, `AdminUpdateOldServers` (no payload): admin panel, refused without `canUseAdminPanel` | AdminService |
+| | `AdminStartEvent` (GameEventType), `AdminStopEvent` (no payload), `AdminRequestTanks` (no payload), `AdminRemoveFish` ({userId, fishId}), `AdminAddFish` ({userId, fishType, variant, size?}), `AdminSetLeaderboardBan` ({userId, banned}), `AdminSetPass` ({userId, pass, granted}), `AdminRequestServers`, `AdminUpdateOldServers` (no payload): admin panel, refused without `canUseAdminPanel` | AdminService |
 | | `WatchAquariums` (PlotIndex[], ≤ 6, debounced 0.25 s): only changes what this client receives | FishService |
 | | `GiveLike` (PlotIndex, from the board's prompt) | LikeService |
 | | `Rebirth` (no payload) | RebirthService |

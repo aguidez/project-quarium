@@ -26,6 +26,8 @@ export interface AdminTankFish {
 	id: number;
 	fishType: FishType;
 	variant: FishVariant;
+	/** Its Size score (shared/types/size; 0 for a special fish). */
+	size: number;
 }
 
 /** A player of this server as the Aquariums tab shows them (the "AdminTanks" remote). */

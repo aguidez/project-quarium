@@ -817,7 +817,7 @@ class FishServiceSingleton implements Lifecycle {
 		const fishes = this.fishByOwner.get(owner);
 		if (!fishes) return list;
 		for (const fish of fishes)
-			if (fish.alive) list.push({ id: fish.id, fishType: fish.fishType, variant: fish.variant });
+			if (fish.alive) list.push({ id: fish.id, fishType: fish.fishType, variant: fish.variant, size: fish.size });
 		list.sort((a, b) => a.id < b.id);
 		return list;
 	}
@@ -834,12 +834,14 @@ class FishServiceSingleton implements Lifecycle {
 	 * Drops a new fish of the admin's choice in the owner's tank, even a full one (a newborn; an easter egg is always
 	 * Normal), found in the Fish Index like a hatch. Returns whether it came.
 	 */
-	public adminAddFish(owner: Player, fishType: FishType, variant: FishVariant): boolean {
+	/** The admin panel's ADD: that variant and Size score (undefined: drawn like an egg's; a special fish has neither). */
+	public adminAddFish(owner: Player, fishType: FishType, variant: FishVariant, size?: number): boolean {
 		if (!AquariumService.getAquarium(owner) || !this.templates.has(fishType) || !DataService.getData(owner))
 			return false;
 		const kept = isEasterEgg(fishType) ? "Normal" : variant;
 		DataService.addFish(owner, fishType, kept);
-		return this.spawnFish(owner, fishType, undefined, kept) !== undefined;
+		const hatchedSize = size !== undefined ? toSize(size) : undefined;
+		return this.spawnFish(owner, fishType, undefined, kept, undefined, false, hatchedSize) !== undefined;
 	}
 
 	/** Whether one of the owner's fish is hungry (or weak). */

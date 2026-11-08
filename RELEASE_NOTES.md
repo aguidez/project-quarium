@@ -11,6 +11,17 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.2.3 — 2026-11-08
+
+**New**
+- **Admin panel, ADD A FISH**: a SIZE row picks the fish's Size, from -15 % to +15 % (RANDOM: drawn like an egg's;
+  -5 / -1 / +1 / +5, with its tier, up to +15 % TITAN). Each fish of the tank shows its Size on its slot.
+
+**Fixes**
+- Admin panel, ADD A FISH: the GALAXY variant button was cut off the card; the five variants now fit on one row.
+
+---
+
 ## V1.2.2 — 2026-11-08
 
 **New**

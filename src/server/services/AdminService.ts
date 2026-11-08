@@ -17,7 +17,12 @@ import { ServerUpdateService } from "./ServerUpdateService";
 
 const isEventType = t.keyOf(GAME_EVENTS);
 const isRemoveFish = t.strictInterface({ userId: t.integer, fishId: t.integer });
-const isAddFish = t.strictInterface({ userId: t.integer, fishType: t.keyOf(FISH_TYPES), variant: t.keyOf(FISH_VARIANTS) });
+const isAddFish = t.strictInterface({
+	userId: t.integer,
+	fishType: t.keyOf(FISH_TYPES),
+	variant: t.keyOf(FISH_VARIANTS),
+	size: t.optional(t.integer), // undefined: drawn like an egg's; clamped to the Size range (FishService)
+});
 const isLeaderboardBan = t.strictInterface({ userId: t.integer, banned: t.boolean });
 const isSetPass = t.strictInterface({ userId: t.integer, pass: isGamePass, granted: t.boolean });
 
@@ -29,8 +34,8 @@ const isSetPass = t.strictInterface({ userId: t.integer, pass: isGamePass, grant
  * Events tab: "AdminStartEvent" (payload: GameEventType) starts an admin event like "/event <name>",
  * "AdminStopEvent" ends the running event like "/event stop".
  * Aquariums tab (this server's players only): "AdminRequestTanks" answers with "AdminTanks"; "AdminRemoveFish"
- * ({ userId, fishId }) takes a fish out (no Ocean Points), "AdminAddFish" ({ userId, fishType, variant }) drops a new
- * one (even into a full tank), "AdminSetLeaderboardBan" ({ userId, banned }) is the LB BAN checkbox (saved),
+ * ({ userId, fishId }) takes a fish out (no Ocean Points), "AdminAddFish" ({ userId, fishType, variant, size? }) drops
+ * a new one (even into a full tank; size: its Size score, drawn when absent), "AdminSetLeaderboardBan" ({ userId, banned }) is the LB BAN checkbox (saved),
  * "AdminSetPass" ({ userId, pass, granted }) gives a gamepass for good or takes a given one back (saved:
  * SaveData.grantedPasses; a bought pass stays). Each action answers with the tanks again.
  * Servers tab: "AdminRequestServers" answers with "AdminServers"; "AdminUpdateOldServers" moves the players of every
@@ -81,11 +86,12 @@ class AdminServiceSingleton implements Lifecycle {
 			else DataService.notify(player, "That fish can't be removed now.", "warning");
 			this.sendTanks(player);
 		});
-		DataService.registerAction("AdminAddFish", isAddFish, (player, { userId, fishType, variant }) => {
+		DataService.registerAction("AdminAddFish", isAddFish, (player, { userId, fishType, variant, size }) => {
 			if (!this.allowed(player, "AdminAddFish")) return;
 			const target = Players.GetPlayerByUserId(userId);
-			if (target && FishService.adminAddFish(target, fishType, variant)) {
-				print(`[Server] Admin ${player.Name} added a ${variant} ${fishType} to ${target.Name}'s tank.`);
+			if (target && FishService.adminAddFish(target, fishType, variant, size)) {
+				const sized = size !== undefined ? ` (size ${size})` : "";
+				print(`[Server] Admin ${player.Name} added a ${variant} ${fishType}${sized} to ${target.Name}'s tank.`);
 				DataService.notify(player, `${FISH_TYPES[fishType].displayName} added to ${target.DisplayName}'s aquarium.`, "info");
 			} else DataService.notify(player, "That fish can't be added now.", "warning");
 			this.sendTanks(player);

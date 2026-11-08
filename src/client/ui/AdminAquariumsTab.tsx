@@ -3,6 +3,7 @@ import { formatShort } from "shared/format";
 import { ADMIN_TANKS_REFRESH, AdminTankFish, AdminTankInfo } from "shared/types/admin";
 import { FISH_TYPES, FishType, getFishIndexOrder, isEasterEgg } from "shared/types/fish";
 import { GAME_PASSES, GamePass, getShopPasses } from "shared/types/gamepasses";
+import { formatSize, getSizeTier, SIZE_MAX, SIZE_TIERS } from "shared/types/size";
 import { FishVariant, VARIANT_ORDER } from "shared/types/variants";
 import { Button3D, Card, Chip, ItemSlot, TextStroke } from "./kit";
 import { PANEL_INNER_WIDTH } from "./Panel";
@@ -25,7 +26,11 @@ const ARMED_TIME = 3; // seconds a REMOVE? cover waits for its confirmation
 const PICK = 64;
 const PICK_GAP = 9;
 const STRIP_HEIGHT = PICK + 16;
-const VARIANT_BUTTON = new Vector2(94, 40);
+const VARIANT_BUTTON = new Vector2(70, 36); // five in a row: Normal to Galaxy
+// Add a fish: the Size row (RANDOM, -5, -1, the value, +1, +5)
+const SIZE_STEP = new Vector2(44, 32);
+const SIZE_VALUE_WIDTH = 118;
+const ADD_FISH_HEIGHT = 262;
 // Gamepasses: two columns of rows
 const PASS_ROW = 56;
 const PASS_GAP = 10;
@@ -37,7 +42,8 @@ export interface AdminTankActions {
 	onRequestTanks: () => void;
 	subscribeTanks: (listener: (tanks: AdminTankInfo[]) => void) => () => void;
 	onRemoveFish: (userId: number, fishId: number) => void;
-	onAddFish: (userId: number, fishType: FishType, variant: FishVariant) => void;
+	/** size: the fish's Size score; undefined, drawn like an egg's. */
+	onAddFish: (userId: number, fishType: FishType, variant: FishVariant, size?: number) => void;
 	onSetLeaderboardBan: (userId: number, banned: boolean) => void;
 	onSetPass: (userId: number, pass: GamePass, granted: boolean) => void;
 }
@@ -274,6 +280,22 @@ function FishSlot(props: { fish: AdminTankFish; armed: boolean; onArm: () => voi
 				shiny={fish.variant === "Shiny" || fish.variant === "Galaxy"}
 				zIndex={2}
 			/>
+			{!isEasterEgg(fish.fishType) && (
+				<textlabel
+					key="Size"
+					AnchorPoint={new Vector2(0.5, 1)}
+					Position={UDim2.fromOffset(SLOT / 2, SLOT - 3)}
+					Size={UDim2.fromOffset(SLOT - 8, 16)}
+					BackgroundTransparency={1}
+					Font={FONT_TITLE}
+					Text={formatSize(fish.size)}
+					TextSize={14}
+					TextColor3={WHITE}
+					ZIndex={6}
+				>
+					<TextStroke thickness={2} />
+				</textlabel>
+			)}
 			{props.armed ? (
 				<textbutton
 					key="Confirm"
@@ -342,17 +364,44 @@ function SpeciesPick(props: { fishType: FishType; order: number; selected: boole
 	);
 }
 
-/** ADD A FISH (FigCraft admin-panel: AddFish): the species strip, the variants (an easter egg is Normal only), ADD. */
-function AddFish(props: { order: number; onAdd: (fishType: FishType, variant: FishVariant) => void }) {
+/** The tier's name of a Size score, for the SIZE row ("HUGE"). */
+function sizeTierName(size: number): string {
+	const tier = getSizeTier(size);
+	for (const [name, config] of SIZE_TIERS) if (name === tier) return config.displayName.upper();
+	return "";
+}
+
+/**
+ * ADD A FISH (FigCraft admin-panel: AddFish): the species strip, the variants (Normal to Galaxy; an easter egg is Normal
+ * only), its Size (RANDOM: drawn like an egg's, or a score from -15 to +15; none for an easter egg), ADD.
+ */
+function AddFish(props: { order: number; onAdd: (fishType: FishType, variant: FishVariant, size?: number) => void }) {
 	const species = getFishIndexOrder();
 	const [fishType, setFishType] = useState<FishType>(species[0]);
 	const [variant, setVariant] = useState<FishVariant>("Normal");
+	const [size, setSize] = useState<number | undefined>(undefined);
 	const secret = isEasterEgg(fishType);
 	const chosen = secret ? "Normal" : variant;
+	const chosenSize = secret ? undefined : size;
 	const rarity = getFishRarity(fishType);
+	const step = (delta: number) => setSize(math.clamp((size ?? 0) + delta, -SIZE_MAX, SIZE_MAX));
+	const stepButton = (key: string, delta: number, order: number) => (
+		<Button3D
+			key={key}
+			layoutOrder={order}
+			palette={PALETTES.navy}
+			size={UDim2.fromOffset(SIZE_STEP.X, SIZE_STEP.Y)}
+			depth={4}
+			zIndex={3}
+			text={delta > 0 ? `+${delta}` : `${delta}`}
+			textSize={16}
+			disabled={secret}
+			onClick={() => step(delta)}
+		/>
+	);
 	return (
 		<Card key="AddFish" layoutOrder={props.order}>
-			<frame key="Body" Size={new UDim2(1, 0, 0, 236)} BackgroundTransparency={1}>
+			<frame key="Body" Size={new UDim2(1, 0, 0, ADD_FISH_HEIGHT)} BackgroundTransparency={1}>
 				<Label text="ADD A FISH" position={UDim2.fromOffset(18, 8)} size={new Vector2(300, 30)} textSize={22} title={true} />
 				<scrollingframe
 					key="Strip"
@@ -392,14 +441,14 @@ function AddFish(props: { order: number; onAdd: (fishType: FishType, variant: Fi
 				/>
 				<frame
 					key="Variants"
-					Position={UDim2.fromOffset(18, 170)}
-					Size={UDim2.fromOffset(410, VARIANT_BUTTON.Y + 6)}
+					Position={UDim2.fromOffset(18, 158)}
+					Size={UDim2.fromOffset(5 * VARIANT_BUTTON.X + 4 * 6, VARIANT_BUTTON.Y + 6)}
 					BackgroundTransparency={1}
 					ZIndex={3}
 				>
 					<uilistlayout
 						FillDirection={Enum.FillDirection.Horizontal}
-						Padding={new UDim(0, 10)}
+						Padding={new UDim(0, 6)}
 						SortOrder={Enum.SortOrder.LayoutOrder}
 					/>
 					{VARIANT_ORDER.map((v, index) => (
@@ -411,23 +460,74 @@ function AddFish(props: { order: number; onAdd: (fishType: FishType, variant: Fi
 							depth={5}
 							zIndex={3}
 							text={v.upper()}
-							textSize={16}
+							textSize={13}
 							textColor={v === chosen ? undefined : NAVY.inactiveText}
 							disabled={secret && v !== "Normal"}
 							onClick={() => setVariant(v)}
 						/>
 					))}
 				</frame>
+				<frame
+					key="Size"
+					Position={UDim2.fromOffset(18, 210)}
+					Size={UDim2.fromOffset(416, SIZE_STEP.Y + 6)}
+					BackgroundTransparency={1}
+					ZIndex={3}
+				>
+					<uilistlayout
+						FillDirection={Enum.FillDirection.Horizontal}
+						VerticalAlignment={Enum.VerticalAlignment.Top}
+						Padding={new UDim(0, 6)}
+						SortOrder={Enum.SortOrder.LayoutOrder}
+					/>
+					<Button3D
+						key="Random"
+						layoutOrder={1}
+						palette={chosenSize === undefined ? PALETTES.purple : PALETTES.navy}
+						size={UDim2.fromOffset(86, SIZE_STEP.Y)}
+						depth={4}
+						zIndex={3}
+						text="RANDOM"
+						textSize={14}
+						textColor={chosenSize === undefined ? undefined : NAVY.inactiveText}
+						disabled={secret}
+						onClick={() => setSize(undefined)}
+					/>
+					{stepButton("Minus5", -5, 2)}
+					{stepButton("Minus1", -1, 3)}
+					<textlabel
+						key="Value"
+						LayoutOrder={4}
+						Size={UDim2.fromOffset(SIZE_VALUE_WIDTH, SIZE_STEP.Y)}
+						BackgroundColor3={PALETTES.navy.dark}
+						Font={FONT_TITLE}
+						Text={
+							secret
+								? "NO SIZE"
+								: chosenSize === undefined
+									? "SIZE: RANDOM"
+									: `${formatSize(chosenSize)} ${sizeTierName(chosenSize)}`
+						}
+						TextSize={15}
+						TextColor3={chosenSize !== undefined && chosenSize >= 10 ? PALETTES.gold.light : WHITE}
+						ZIndex={4}
+					>
+						<uicorner CornerRadius={new UDim(0, 10)} />
+						<TextStroke thickness={2} />
+					</textlabel>
+					{stepButton("Plus1", 1, 5)}
+					{stepButton("Plus5", 5, 6)}
+				</frame>
 				<Button3D
 					key="Add"
 					palette={PALETTES.green}
-					size={UDim2.fromOffset(108, 50)}
-					position={new UDim2(1, -16, 0, 164)}
+					size={UDim2.fromOffset(92, 82)}
+					position={new UDim2(1, -16, 0, 158)}
 					anchorPoint={new Vector2(1, 0)}
 					zIndex={3}
 					text="ADD"
 					textSize={24}
-					onClick={() => props.onAdd(fishType, chosen)}
+					onClick={() => props.onAdd(fishType, chosen, chosenSize)}
 				/>
 			</frame>
 		</Card>
@@ -663,7 +763,10 @@ function TankView(props: { tank: AdminTankInfo; actions: AdminTankActions; onBac
 					/>
 				))}
 			</scrollingframe>
-			<AddFish order={4} onAdd={(fishType, variant) => actions.onAddFish(tank.userId, fishType, variant)} />
+			<AddFish
+				order={4}
+				onAdd={(fishType, variant, size) => actions.onAddFish(tank.userId, fishType, variant, size)}
+			/>
 			<PassesCard tank={tank} order={5} onSetPass={(pass, granted) => actions.onSetPass(tank.userId, pass, granted)} />
 		</>
 	);
