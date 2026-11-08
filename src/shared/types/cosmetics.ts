@@ -240,13 +240,13 @@ export const TITLE_RANK_ATTRIBUTE = "TitleRank";
 export const EARNED_TITLE_COLOR = Color3.fromHex("#FFD54A");
 
 /**
- * The creator's title (COSMETICS creator): bright red text over a burst of sun rays, warm yellow at the centre and
- * orange toward their tips, that turn slowly and shimmer (TitleRaysController).
+ * The creator's title (COSMETICS creator): bright red text with golden four-point sparkles around it that twinkle in
+ * turn (TitleSparklesController); pale gold at their heart, gold toward their tips.
  */
 export const CREATOR_TITLE: CosmeticId = "TitleOceanCreator";
 export const CREATOR_TITLE_COLOR = Color3.fromHex("#FF2B2B");
-export const CREATOR_RAY_CENTER_COLOR = Color3.fromHex("#FFF1A8");
-export const CREATOR_RAY_TIP_COLOR = Color3.fromHex("#FF9A3C");
+export const CREATOR_SPARKLE_COLOR = Color3.fromHex("#FFC928");
+export const CREATOR_SPARKLE_HEART = Color3.fromHex("#FFF6C8");
 
 export function isCreatorTitle(id: CosmeticId): boolean {
 	return COSMETICS[id].creator === true;

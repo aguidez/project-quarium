@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-08 (V1.2.10: the Ocean Creator title lit from its whole length; V1.2.8: the creator's title).
+> Last updated: 2026-11-08 (V1.2.11: the Ocean Creator title with twinkling golden sparkles, mock-up C; V1.2.8: the creator's title).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -266,7 +266,7 @@ ProjectQuarium/
    │     ├─ cosmetics.ts     CosmeticId / COSMETICS (kind Title / Decor / Finish; `leaderboard` on the three leaderboard
    │     │                   titles TitleOceanLegend / TitleTankTycoon / TitleDevotedKeeper, never in PlayerData.cosmetics;
    │     │                   `creator` on TitleOceanCreator, the creator's own: CREATOR_TITLE, CREATOR_TITLE_COLOR red,
-   │     │                   CREATOR_RAY_CENTER_COLOR / CREATOR_RAY_TIP_COLOR its sun rays),
+   │     │                   CREATOR_SPARKLE_COLOR / CREATOR_SPARKLE_HEART its sparkles),
    │     │                   TITLE_ORDER (earned titles), LEADERBOARD_TITLES, isLeaderboardTitle, DECOR_SLOTS (tank-local
    │     │                   position per decor id; a group's decor share one spot: Statue = Whale Statue / Pearl Throne, Trophy, Incubator = Golden / Diamond), isDecor, TITLE_ATTRIBUTE / TITLE_RANK_ATTRIBUTE, EARNED_TITLE_COLOR
    │     ├─ gamepasses.ts    GamePass / GAME_PASSES (name, shop text, Roblox id, icon, badge, shopOrder), getShopPasses,
@@ -481,10 +481,10 @@ ProjectQuarium/
    │     │                   stud tall); MaxDistance 120, rebuilt when the title or its rank changes, removed without one;
    │     │                   also sets the Player attributes `Title` / `TitleRank` (the chat tag). The creator's title
    │     │                   (Ocean Creator): given at each load to isCreator only (worn the first time, taken from anyone
-   │     │                   else), first in getOwnedTitles; bright red text (4.8 × 0.75 studs) lit from its whole length:
-   │     │                   a soft golden band behind it and sun rays along it, above and below, leaning outward (more at
-   │     │                   the ends, two more opening sideways at each end); each ray a bar centred on the text's line
-   │     │                   showing one half (UIGradient), tagged `TitleRay` (attributes Angle, Phase); 6 × 3.6 billboard
+   │     │                   else), first in getOwnedTitles; bright red text (4.8 × 0.75 studs) with 8 golden four-point
+   │     │                   sparkles around it (CREATOR_SPARKLES: square Frames of two bars fading to their tips, tagged
+   │     │                   `TitleSparkle`, attributes Size and Phase), 5.4 × 1.6 billboard (the owner's pick of 5
+   │     │                   mock-ups, design/previews/ocean-creator-mockups.jpg: C)
    │     ├─ GamePassService  The only writer of PlayerData.passes: at join asks Roblox for each pass on sale
    │     │                   (UserOwnsGamePassAsync, 3 tries; no answer keeps the saved state; passes without an id are
    │     │                   dropped), grants a purchase from PromptGamePassPurchaseFinished (thank-you Reward),
@@ -584,8 +584,8 @@ ProjectQuarium/
       │  ├─ AuroraRimsController  The glowing rims cosmetics (V1.2): drifts the Neon colour of every rim tagged `GlowRim`
       │  │                   (AquariumService.applyTheme tags them) through its `RimFinish` palette (Aurora: the northern
       │  │                   lights; Galaxy: night blue, violet, pink), 20 updates a second
-      │  ├─ TitleRaysController  Sways the creator title's sun rays (Frames tagged `TitleRay`, ±5° on a 2.4 s sine) and
-      │  │                   shimmers each one on its own phase (1.4 s), every frame, locally
+      │  ├─ TitleSparklesController  Twinkles the creator title's sparkles (Frames tagged `TitleSparkle`): each grows from
+      │  │                   nothing to its Size and back over 55 % of a 2.2 s cycle, on its own phase, every frame, locally
       │  ├─ PelicanChargesController  Charge gauge above the local player's on-demand Pelican / Jellyfish (BillboardGui): one
       │  │                   slot per charge, a pellet growing while it refills; hidden while MaxCharges is 0
       │  ├─ ChatTitleController  TextChatService.OnIncomingMessage: the sender's title as a coloured tag before their name in

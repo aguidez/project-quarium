@@ -8,10 +8,11 @@ export const TAGS = {
 	 */
 	GlowRim: "GlowRim",
 	/**
-	 * One sun ray behind the creator's title above their head (TitleService, a Frame; attributes "Angle": its resting
-	 * rotation in degrees, "Phase": its index): each client sways and shimmers them (TitleRaysController).
+	 * One sparkle around the creator's title above their head (TitleService, a square Frame holding the star's two bars;
+	 * attributes "Size": its full width as a share of the billboard, "Phase": its index): each client makes them
+	 * twinkle in turn (TitleSparklesController).
 	 */
-	TitleRay: "TitleRay",
+	TitleSparkle: "TitleSparkle",
 	/** The water volume of an aquarium. Clicking it drops food. */
 	AquariumWater: "AquariumWater",
 	/**

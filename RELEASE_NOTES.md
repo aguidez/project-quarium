@@ -11,6 +11,14 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.2.11 — 2026-11-08
+
+**Changes**
+- The Ocean Creator title now twinkles: golden four-point sparkles light up in turn around the red letters (instead
+  of the sun rays).
+
+---
+
 ## V1.2.10 — 2026-11-08
 
 **Changes**

@@ -3,8 +3,8 @@ import { Lifecycle } from "shared/framework";
 import {
 	COSMETICS,
 	CosmeticId,
-	CREATOR_RAY_CENTER_COLOR,
-	CREATOR_RAY_TIP_COLOR,
+	CREATOR_SPARKLE_COLOR,
+	CREATOR_SPARKLE_HEART,
 	CREATOR_TITLE,
 	CREATOR_TITLE_COLOR,
 	EARNED_TITLE_COLOR,
@@ -29,17 +29,25 @@ const CHECK_INTERVAL = 1;
 const BILLBOARD_NAME = "PlayerTitle";
 const OUTLINE = Color3.fromHex("#071320");
 const WHITE = new Color3(1, 1, 1);
-// The creator's title (studs): its text as tall as the earned ones' a bit bigger, in a taller billboard for the sun rays
+// The creator's title (studs): its text a bit bigger than the earned ones', in a billboard with room for the sparkles
 const CREATOR_TEXT_WIDTH = 4.8;
 const CREATOR_TEXT_HEIGHT = 0.75;
-const CREATOR_BILLBOARD_WIDTH = 6;
-const CREATOR_BILLBOARD_HEIGHT = 3.6; // the rays' span
-/** Rays spread along the text, from one end to the other (bars through its line: a tip above and one below). */
-const CREATOR_RAYS_ALONG = 11;
-/** How far (degrees) the rays at the ends of the text lean outward; the ones between lean less. */
-const CREATOR_RAY_FAN = 35;
-/** The extra rays at each end of the text, opening sideways (degrees from upright, above and below). */
-const CREATOR_END_RAY_ANGLES = [55, 75];
+const CREATOR_BILLBOARD_WIDTH = 5.4;
+const CREATOR_BILLBOARD_HEIGHT = 1.6;
+/**
+ * The sparkles around the creator's title (shares of the billboard: x, y of their centre, full width), above and below
+ * the word in turn, from one end to the other (the owner's pick of the mock-ups, 2026-11-08: C).
+ */
+const CREATOR_SPARKLES: readonly [number, number, number][] = [
+	[0.05, 0.2, 0.13],
+	[0.17, 0.86, 0.09],
+	[0.33, 0.1, 0.08],
+	[0.47, 0.9, 0.1],
+	[0.6, 0.1, 0.095],
+	[0.72, 0.88, 0.08],
+	[0.84, 0.12, 0.12],
+	[0.96, 0.76, 0.09],
+];
 
 // Leaderboard nameplate, laid out in design pixels (FigCraft leaderboards.figcraft, Plate_*) and drawn in scale, so the
 // billboard keeps its size in studs: a pill of PLATE_HEIGHT px, a rank badge overhanging its left end, the board's icon
@@ -123,116 +131,73 @@ class TitleServiceSingleton implements Lifecycle {
 	}
 
 	/**
-	 * The creator's title: bright red letters with a dark outline, lit from their whole length: a soft golden band
-	 * behind the text and sun rays spread along it, fanning outward (wider at both ends), each a bar through the text's
-	 * line fading toward its tips (tagged TitleRay, attributes Angle and Phase: each client sways and shimmers them,
-	 * TitleRaysController). The billboard is taller for the rays; the text sits in its middle, where the others' does.
+	 * The creator's title: bright red letters with a dark outline and golden four-point sparkles around the word (each a
+	 * square Frame holding a tall and a wide bar that fade toward their tips, tagged TitleSparkle: each client makes
+	 * them twinkle in turn, TitleSparklesController). The text sits in the billboard's middle, where the others' does.
 	 */
 	private buildCreator(head: BasePart, title: CosmeticId) {
 		const billboard = this.billboard(UDim2.fromScale(CREATOR_BILLBOARD_WIDTH, CREATOR_BILLBOARD_HEIGHT));
-		const textSpan = CREATOR_TEXT_WIDTH / CREATOR_BILLBOARD_WIDTH;
-		// A ray is a bar centred on the text's line (a GuiObject turns around its centre) showing only one half: the one
-		// above the line (up) or below it, so the rays above and below can both lean outward
-		const rayGradient = (parent: Instance, up: boolean) => {
-			const gradient = new Instance("UIGradient");
-			gradient.Rotation = 90; // along the bar, from its top (0) to its bottom (1)
-			gradient.Color = new ColorSequence([
-				new ColorSequenceKeypoint(0, CREATOR_RAY_TIP_COLOR),
-				new ColorSequenceKeypoint(0.5, CREATOR_RAY_CENTER_COLOR),
-				new ColorSequenceKeypoint(1, CREATOR_RAY_TIP_COLOR),
-			]);
-			gradient.Transparency = up
-				? new NumberSequence([
-						new NumberSequenceKeypoint(0, 1),
-						new NumberSequenceKeypoint(0.25, 0.6),
-						new NumberSequenceKeypoint(0.49, 0.2),
-						new NumberSequenceKeypoint(0.5, 1),
-						new NumberSequenceKeypoint(1, 1),
-					])
-				: new NumberSequence([
-						new NumberSequenceKeypoint(0, 1),
-						new NumberSequenceKeypoint(0.5, 1),
-						new NumberSequenceKeypoint(0.51, 0.2),
-						new NumberSequenceKeypoint(0.75, 0.6),
-						new NumberSequenceKeypoint(1, 1),
-					]);
-			gradient.Parent = parent;
-		};
-		/** A ray from the text's line at `x`, leaning `lean` degrees outward (signed: + to the right), up or down. */
-		const addHalfRay = (x: number, lean: number, up: boolean, length: number, width: number, phase: number) => {
-			// Up: the top half shows, so the bar leans its top that way; down: the bottom half, the other way
-			const angle = up ? lean : -lean;
-			const ray = new Instance("Frame");
-			ray.Name = `Ray${phase}`;
-			ray.AnchorPoint = new Vector2(0.5, 0.5);
-			ray.Position = UDim2.fromScale(x, 0.5);
-			ray.Size = UDim2.fromScale(width, length);
-			ray.BackgroundColor3 = WHITE;
-			ray.BorderSizePixel = 0;
-			ray.Rotation = angle;
-			ray.ZIndex = 1;
-			ray.SetAttribute("Angle", angle);
-			ray.SetAttribute("Phase", phase);
-			const corner = new Instance("UICorner");
-			corner.CornerRadius = new UDim(0.5, 0);
-			corner.Parent = ray;
-			rayGradient(ray, up);
-			ray.AddTag(TAGS.TitleRay);
-			ray.Parent = billboard;
-		};
-		// Along the text, above and below it: rays from one end to the other, leaning outward toward the ends, long and
-		// short in turn (above and below alternate the other way)
-		let phase = 0;
-		for (let i = 0; i < CREATOR_RAYS_ALONG; i++) {
-			const side = (i / (CREATOR_RAYS_ALONG - 1)) * 2 - 1; // -1 left end, 1 right end
-			const x = 0.5 + (side * textSpan) / 2;
-			for (const up of [true, false]) {
-				const long = (i % 2 === 0) === up;
-				addHalfRay(x, side * CREATOR_RAY_FAN, up, long ? 0.95 : 0.7, long ? 0.035 : 0.025, phase++);
+		CREATOR_SPARKLES.forEach(([x, y, size], index) => {
+			const sparkle = new Instance("Frame");
+			sparkle.Name = `Sparkle${index}`;
+			sparkle.AnchorPoint = new Vector2(0.5, 0.5);
+			sparkle.Position = UDim2.fromScale(x, y);
+			sparkle.Size = UDim2.fromScale(size, 1);
+			sparkle.BackgroundTransparency = 1;
+			sparkle.ZIndex = 3;
+			sparkle.SetAttribute("Size", size);
+			sparkle.SetAttribute("Phase", index);
+			const square = new Instance("UIAspectRatioConstraint");
+			square.AspectRatio = 1;
+			square.DominantAxis = Enum.DominantAxis.Width;
+			square.Parent = sparkle;
+			for (const tall of [true, false]) {
+				const bar = new Instance("Frame");
+				bar.Name = tall ? "Tall" : "Wide";
+				bar.AnchorPoint = new Vector2(0.5, 0.5);
+				bar.Position = UDim2.fromScale(0.5, 0.5);
+				bar.Size = tall ? UDim2.fromScale(0.22, 1) : UDim2.fromScale(1, 0.22);
+				bar.BackgroundColor3 = WHITE;
+				bar.BorderSizePixel = 0;
+				bar.ZIndex = 3;
+				const corner = new Instance("UICorner");
+				corner.CornerRadius = new UDim(0.5, 0);
+				corner.Parent = bar;
+				const gradient = new Instance("UIGradient");
+				gradient.Rotation = tall ? 90 : 0; // along the bar
+				gradient.Color = new ColorSequence([
+					new ColorSequenceKeypoint(0, CREATOR_SPARKLE_COLOR),
+					new ColorSequenceKeypoint(0.4, CREATOR_SPARKLE_COLOR),
+					new ColorSequenceKeypoint(0.5, CREATOR_SPARKLE_HEART),
+					new ColorSequenceKeypoint(0.6, CREATOR_SPARKLE_COLOR),
+					new ColorSequenceKeypoint(1, CREATOR_SPARKLE_COLOR),
+				]);
+				gradient.Transparency = new NumberSequence([
+					new NumberSequenceKeypoint(0, 1),
+					new NumberSequenceKeypoint(0.5, 0),
+					new NumberSequenceKeypoint(1, 1),
+				]);
+				gradient.Parent = bar;
+				bar.Parent = sparkle;
 			}
-		}
-		// At each end: rays opening sideways, so the light wraps the whole word
-		CREATOR_END_RAY_ANGLES.forEach((angle, index) => {
-			for (const side of [-1, 1]) {
-				const x = 0.5 + (side * textSpan) / 2;
-				for (const up of [true, false])
-					addHalfRay(x, side * angle, up, index % 2 === 0 ? 0.6 : 0.45, 0.025, phase++);
-			}
+			sparkle.AddTag(TAGS.TitleSparkle);
+			sparkle.Parent = billboard;
 		});
-		// The text's own glow: a soft golden band behind it, as long as the word
-		const band = new Instance("Frame");
-		band.Name = "Glow";
-		band.AnchorPoint = new Vector2(0.5, 0.5);
-		band.Position = UDim2.fromScale(0.5, 0.5);
-		band.Size = UDim2.fromScale(textSpan * 1.05, (CREATOR_TEXT_HEIGHT * 1.4) / CREATOR_BILLBOARD_HEIGHT);
-		band.BackgroundColor3 = CREATOR_RAY_CENTER_COLOR;
-		band.BorderSizePixel = 0;
-		band.ZIndex = 2;
-		const bandCorner = new Instance("UICorner");
-		bandCorner.CornerRadius = new UDim(0.5, 0);
-		bandCorner.Parent = band;
-		const bandGradient = new Instance("UIGradient");
-		bandGradient.Rotation = 90;
-		bandGradient.Transparency = new NumberSequence([
-			new NumberSequenceKeypoint(0, 1),
-			new NumberSequenceKeypoint(0.5, 0.45),
-			new NumberSequenceKeypoint(1, 1),
-		]);
-		bandGradient.Parent = band;
-		band.Parent = billboard;
-
 		const label = new Instance("TextLabel");
 		label.Name = "Title";
 		label.AnchorPoint = new Vector2(0.5, 0.5);
 		label.Position = UDim2.fromScale(0.5, 0.5);
-		label.Size = UDim2.fromScale(textSpan, CREATOR_TEXT_HEIGHT / CREATOR_BILLBOARD_HEIGHT);
+		label.Size = UDim2.fromScale(
+			CREATOR_TEXT_WIDTH / CREATOR_BILLBOARD_WIDTH,
+			CREATOR_TEXT_HEIGHT / CREATOR_BILLBOARD_HEIGHT,
+		);
 		label.BackgroundTransparency = 1;
 		label.Font = Enum.Font.LuckiestGuy;
 		label.Text = COSMETICS[title].displayName.upper();
 		label.TextScaled = true;
 		label.TextColor3 = CREATOR_TITLE_COLOR;
-		label.ZIndex = 3;
-		this.stroke(label, Color3.fromHex("#3A0505"), 2);
+		label.ZIndex = 2;
+		this.stroke(label, Color3.fromHex("#3A0505"), 2.5);
 		label.Parent = billboard;
 		billboard.Parent = head;
 	}
