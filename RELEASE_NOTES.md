@@ -11,6 +11,19 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.2.2 — 2026-11-08
+
+**New**
+- **Admin panel: give a gamepass.** In Aquariums → MANAGE, a new GAMEPASSES card lists every pass of the player:
+  BOUGHT (from Roblox), GIVEN (by an admin) or GIVE. A given pass is saved and kept at every join, like a bought one,
+  with a "A gift!" popup for the player; GIVEN → TAKE? (click again within 3 s) takes it back, never a pass the player
+  bought.
+
+**Changes**
+- The Studio test command "/passes off" now hides only the bought passes: the ones an admin gave stay.
+
+---
+
 ## V1.2.1 — 2026-11-08
 
 **Fixes**

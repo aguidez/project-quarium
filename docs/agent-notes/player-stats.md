@@ -19,6 +19,9 @@ metadata:
   info:GetMetadata() end)` (returning nil cancels if they are online), then `RemoveAsync(tostring(userId))` on the
   three OrderedDataStores `Leaderboard_OceanPoints_v1`, `Leaderboard_Income_v1`, `Leaderboard_PlayTime_v1` so they
   leave the boards at once (LeaderboardService also removes them at their next join). `false` lifts it.
+- **Giving a gamepass** (V1.2.2): the admin panel, Aquariums → MANAGE → GAMEPASSES, for a player on the server
+  (saved in `SaveData.grantedPasses`). For an offline player, add the pass id (`"Lucky"`, `"HermitCrabPass"`...) to
+  `Data.grantedPasses` of their profile by hand, like the LB ban below (only while they are offline).
 - **"Someone on the leaderboard looks like your test account"** (2026-11-08): the agent has no separate account; its
   Studio playtests run as the owner (DOT_Pinpin). Since V1.1.24 a playtest on a test store writes nothing to the
   boards (`DataService.isLiveStore()`); on the live store it writes the owner's real score like any session. Before

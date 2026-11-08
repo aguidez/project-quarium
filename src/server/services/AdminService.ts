@@ -5,11 +5,13 @@ import { getRemoteEvent } from "shared/network";
 import { ADMIN_PANEL_ATTRIBUTE, AdminTankInfo } from "shared/types/admin";
 import { GAME_EVENTS } from "shared/types/events";
 import { FISH_TYPES } from "shared/types/fish";
+import { GAME_PASSES, isGamePass } from "shared/types/gamepasses";
 import { FISH_VARIANTS } from "shared/types/variants";
 import { canUseAdminPanel } from "../admins";
 import { DataService } from "./DataService";
 import { EventService } from "./EventService";
 import { FishService } from "./FishService";
+import { GamePassService } from "./GamePassService";
 import { LeaderboardService } from "./LeaderboardService";
 import { ServerUpdateService } from "./ServerUpdateService";
 
@@ -17,6 +19,7 @@ const isEventType = t.keyOf(GAME_EVENTS);
 const isRemoveFish = t.strictInterface({ userId: t.integer, fishId: t.integer });
 const isAddFish = t.strictInterface({ userId: t.integer, fishType: t.keyOf(FISH_TYPES), variant: t.keyOf(FISH_VARIANTS) });
 const isLeaderboardBan = t.strictInterface({ userId: t.integer, banned: t.boolean });
+const isSetPass = t.strictInterface({ userId: t.integer, pass: isGamePass, granted: t.boolean });
 
 /**
  * The admin panel's server side (client: AdminPanel). Tells each player whether they may open it
@@ -27,8 +30,9 @@ const isLeaderboardBan = t.strictInterface({ userId: t.integer, banned: t.boolea
  * "AdminStopEvent" ends the running event like "/event stop".
  * Aquariums tab (this server's players only): "AdminRequestTanks" answers with "AdminTanks"; "AdminRemoveFish"
  * ({ userId, fishId }) takes a fish out (no Ocean Points), "AdminAddFish" ({ userId, fishType, variant }) drops a new
- * one (even into a full tank), "AdminSetLeaderboardBan" ({ userId, banned }) is the LB BAN checkbox (saved). Each
- * action answers with the tanks again.
+ * one (even into a full tank), "AdminSetLeaderboardBan" ({ userId, banned }) is the LB BAN checkbox (saved),
+ * "AdminSetPass" ({ userId, pass, granted }) gives a gamepass for good or takes a given one back (saved:
+ * SaveData.grantedPasses; a bought pass stays). Each action answers with the tanks again.
  * Servers tab: "AdminRequestServers" answers with "AdminServers"; "AdminUpdateOldServers" moves the players of every
  * server on an old place version to the newest one (ServerUpdateService).
  */
@@ -95,6 +99,19 @@ class AdminServiceSingleton implements Lifecycle {
 			}
 			this.sendTanks(player);
 		});
+		DataService.registerAction("AdminSetPass", isSetPass, (player, { userId, pass, granted }) => {
+			if (!this.allowed(player, "AdminSetPass")) return;
+			const target = Players.GetPlayerByUserId(userId);
+			if (target && GamePassService.setGranted(target, pass, granted)) {
+				print(`[Server] Admin ${player.Name} ${granted ? "gave" : "took back"} ${pass} ${granted ? "to" : "from"} ${target.Name}.`);
+				DataService.notify(
+					player,
+					`${GAME_PASSES[pass].displayName} ${granted ? "given to" : "taken back from"} ${target.DisplayName}.`,
+					"info",
+				);
+			}
+			this.sendTanks(player);
+		});
 	}
 
 	public onStart() {
@@ -127,6 +144,8 @@ class AdminServiceSingleton implements Lifecycle {
 				leaderboardBanned: save.leaderboardBanned,
 				testProfile: save.stats.testSpeedUsed,
 				fish: FishService.getFishList(player),
+				passes: [...data.passes],
+				grantedPasses: [...save.grantedPasses],
 			});
 		}
 		this.tanksRemote.FireClient(admin, tanks);

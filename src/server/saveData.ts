@@ -9,7 +9,7 @@ import { FISH_TYPES, FishType, HungerState } from "shared/types/fish";
 import { getOceanMilestone } from "shared/types/oceanRewards";
 import { PERKS } from "shared/types/perks";
 import { ONBOARDING_STEPS } from "shared/types/onboarding";
-import { isGamePass } from "shared/types/gamepasses";
+import { GamePass, isGamePass } from "shared/types/gamepasses";
 import {
 	DEFAULT_INCUBATORS,
 	DEFAULT_PLAYER_DATA,
@@ -61,6 +61,11 @@ export interface SaveData {
 	 * hand on the profile while the player is offline (docs/agent-notes/player-stats.md).
 	 */
 	leaderboardBanned: boolean;
+	/**
+	 * Gamepasses given by an admin (the admin panel's GAMEPASSES card, AdminService): owned like a bought pass, at
+	 * every join, until an admin takes them back. Server only, never synced (PlayerData.passes holds the result).
+	 */
+	grantedPasses: GamePass[];
 }
 
 /** Template of new profiles; ProfileStore copies it and Reconcile() fills fields added since. */
@@ -69,6 +74,7 @@ export const SAVE_TEMPLATE: SaveData = {
 	tank: [],
 	stats: createPlayerStats(),
 	leaderboardBanned: false,
+	grantedPasses: [],
 };
 
 function isFishType(value: unknown): value is FishType {
@@ -186,6 +192,10 @@ function sanitizeStoryLines(quests: QuestsData, companions: readonly CompanionTy
 export function sanitizeSave(save: SaveData) {
 	save.stats = sanitizePlayerStats(save.stats);
 	if (!typeIs(save.leaderboardBanned, "boolean")) save.leaderboardBanned = false;
+	const granted = new Array<GamePass>();
+	if (typeIs(save.grantedPasses, "table"))
+		for (const pass of save.grantedPasses as unknown[]) if (isGamePass(pass) && !granted.includes(pass)) granted.push(pass);
+	save.grantedPasses = granted;
 	const data = save.player;
 
 	const fish = { ...DEFAULT_PLAYER_DATA.fish };

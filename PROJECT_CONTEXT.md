@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-08 (V1.2.1: the theme paintings clipped to their backdrop; V1.2.0: V1.2 complete and published as one update (ROADMAP_V1.2 M0–M7)).
+> Last updated: 2026-11-08 (V1.2.2: admins give or take back gamepasses from the admin panel (SaveData.grantedPasses); V1.2.1: theme paintings clipped).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -424,7 +424,8 @@ ProjectQuarium/
    │     │                   Aquariums tab (this server's players): "AdminRequestTanks" → AdminTanks, "AdminRemoveFish"
    │     │                   (FishService.adminRemoveFish: no points), "AdminAddFish" (adminAddFish: even into a full tank,
    │     │                   easter eggs Normal; DataService.addFish with its variant), "AdminSetLeaderboardBan"
-   │     │                   (LeaderboardService.setBanned); every action answers with the tanks again. Servers tab:
+   │     │                   (LeaderboardService.setBanned), "AdminSetPass" ({userId, pass, granted}: GamePassService.setGranted,
+   │     │                   saved in SaveData.grantedPasses); every action answers with the tanks again. Servers tab:
    │     │                   "AdminRequestServers" → AdminServers, "AdminUpdateOldServers" (ServerUpdateService)
    │     ├─ AbyssService     Abyssal raid: one lantern fish raid loop per owned tank until the event ends (§3.4)
    │     ├─ UfoService       UFO night: one UFO per owned tank (clone of the Ufo template, tag Ufo, anchored, moved by
@@ -478,6 +479,8 @@ ProjectQuarium/
    │     │                   (UserOwnsGamePassAsync, 3 tries; no answer keeps the saved state; passes without an id are
    │     │                   dropped), grants a purchase from PromptGamePassPurchaseFinished (thank-you Reward),
    │     │                   "BuyGamePass" intent → PromptGamePassPurchase; a lost slot pass unequips the extra companion;
+   │     │                   setGranted (the admin panel: a pass given for good, owned at each join without asking Roblox,
+   │     │                   "A gift!" Reward; taking it back keeps a bought one);
    │     │                   setTestPass ("/pass"), setTestNoPasses ("/passes"). The game's creator owns every pass (Studio
    │     │                   shows OWNED)
    │     ├─ LikeService      Places a like board beside each tank, GiveLike (range / own tank / cooldown), onLikeGiven,
@@ -650,7 +653,8 @@ ProjectQuarium/
          │                   (name, time left, STOP) and one row per event (ADMIN_EVENT_ORDER: badge, RECURRING / ADMIN
          │                   ONLY, length, START); Aquariums tab (AdminAquariumsTab.tsx, AquariumsTab): the players
          │                   (headshot, rebirth / fish / income chips, LB BAN checkbox, MANAGE), then one tank (BACK, its
-         │                   fish as ItemSlots with a red X → REMOVE? for 3 s, ADD A FISH: species strip, variants, ADD);
+         │                   fish as ItemSlots with a red X → REMOVE? for 3 s, ADD A FISH: species strip, variants, ADD,
+         │                   GAMEPASSES: every pass BOUGHT / GIVEN (→ TAKE? for 3 s) / GIVE);
          │                   asks for the tanks on open and every ADMIN_TANKS_REFRESH s while open; Servers tab
          │                   (AdminServersTab.tsx, ServersTab): NEWEST VERSION card (patch, place version, servers / old /
          │                   players chips), the live servers (NEWEST / OLD, THIS SERVER, players), UPDATE OLD SERVERS
@@ -792,7 +796,7 @@ ProjectQuarium/
   client), `tank` (the fish: type, adult scale, age, hunger and time left, variant; not a UFO effect), `stats` (`server/playerStats.ts`,
   never synced; read offline by `npm run stats`) and `leaderboardBanned` (moderation, server only: kept off the
   leaderboards; the admin panel's LB BAN for a player on the server, or by hand while they are offline,
-  docs/agent-notes/player-stats.md). On load: `Reconcile()` (fields added to `DEFAULT_PLAYER_DATA`
+  docs/agent-notes/player-stats.md) and `grantedPasses` (the passes an admin gave, server only). On load: `Reconcile()` (fields added to `DEFAULT_PLAYER_DATA`
   since), then `sanitizeSave` (drops ids removed from the config, migrates old shapes, restarts the story where it
   was). A failed load kicks the player (never play on unsaved default data). `getData` is undefined until loaded:
   actions sent before are ignored.
@@ -848,7 +852,7 @@ ProjectQuarium/
   | `rebirths` | Rebirths done: coin multiplier and aquarium theme |
   | `perks` | Permanent quest bonuses (shared/types/perks), kept through rebirths |
   | `cosmetics` | Titles, decor and finishes earned (shared/types/cosmetics), kept forever |
-  | `passes` | Gamepasses owned: written only by GamePassService from Roblox (checked again at each join). Read by FishService (coins x1.5), OceanService / getRebirthOceanPoints (x2), EggService (luck x2), getCompanionSlots (+1), the paid quest lines |
+  | `passes` | Gamepasses owned: written only by GamePassService from Roblox (checked again at each join) or given by an admin (SaveData.grantedPasses). Read by FishService (coins x1.5), OceanService / getRebirthOceanPoints (x2), EggService (luck x2), getCompanionSlots (+1), the paid quest lines |
 
 ### 3.2 Client → server (intents only)
 
@@ -862,7 +866,7 @@ ProjectQuarium/
 | | `SetAquariumTheme` (theme or "Auto"), `SetCosmeticShown` ({id, shown}), `SetTitle` (title, "Auto" or "None"), `SetSoundVolume` (0–1) | CustomizationService |
 | | `EquipCompanion` / `UnequipCompanion` (CompanionType) | CompanionService |
 | | `ReleaseFish` ({fishType, variant}), `FinishTutorial` (Feature), `ClaimOceanReward` (milestone id) | OceanService |
-| | `AdminStartEvent` (GameEventType), `AdminStopEvent` (no payload), `AdminRequestTanks` (no payload), `AdminRemoveFish` ({userId, fishId}), `AdminAddFish` ({userId, fishType, variant}), `AdminSetLeaderboardBan` ({userId, banned}), `AdminRequestServers`, `AdminUpdateOldServers` (no payload): admin panel, refused without `canUseAdminPanel` | AdminService |
+| | `AdminStartEvent` (GameEventType), `AdminStopEvent` (no payload), `AdminRequestTanks` (no payload), `AdminRemoveFish` ({userId, fishId}), `AdminAddFish` ({userId, fishType, variant}), `AdminSetLeaderboardBan` ({userId, banned}), `AdminSetPass` ({userId, pass, granted}), `AdminRequestServers`, `AdminUpdateOldServers` (no payload): admin panel, refused without `canUseAdminPanel` | AdminService |
 | | `WatchAquariums` (PlotIndex[], ≤ 6, debounced 0.25 s): only changes what this client receives | FishService |
 | | `GiveLike` (PlotIndex, from the board's prompt) | LikeService |
 | | `Rebirth` (no payload) | RebirthService |
@@ -1074,7 +1078,8 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
 - **Gamepasses.** Shop card → `BuyGamePass` → GamePassService checks the pass has an id and isn't owned, then
   `MarketplaceService.PromptGamePassPurchase`; Roblox fires `PromptGamePassPurchaseFinished` on the server, which adds
   the pass to `PlayerData.passes`, syncs and sends a thank-you Reward. Passes are asked again from Roblox at each join
-  (a refund takes it away; an outage keeps the save). Effects are read live where they act: coin value x1.5 (every
+  (a refund takes it away; an outage keeps the save). An admin can give a pass from the admin panel (MANAGE →
+  GAMEPASSES): saved in `SaveData.grantedPasses`, owned at every join until taken back (a bought one stays). Effects are read live where they act: coin value x1.5 (every
   coin incl. the croissant; not the 1 $ bubbles nor IncomeMinutes rewards), Ocean Points x2 on fish going to the ocean
   (fixed quest rewards are not doubled), variant luck x2 (stacks with Lucky ocean), +1 companion slot. The client shows
   the same numbers (income plaque, Ocean rows, Rebirth preview).

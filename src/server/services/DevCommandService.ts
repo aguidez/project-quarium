@@ -45,7 +45,8 @@ const MAX_TEST_INCUBATORS = 4;
  *  /speed <x>           the owner's test speed: coins, hatching and Ocean Points x it (1–10), saved, so it also
  *                       applies when the owner plays the published game ("/speed 1" puts it back); the profile is
  *                       then left out of the players' statistics
- *  /passes off|on       the owner plays without their gamepasses (saved, also on the published game) or with them again
+ *  /passes off|on       the owner plays without their bought gamepasses (saved, also on the published game; the ones an
+ *                       admin gave stay) or with them again
  *  /ufo <Outcome>|off   the UFOs of the next UFO nights bring the owner's fish back with that outcome (Sleep, Green, Red,
  *                       Variant, Alien), for this session; "/ufo off" puts the odds back
  *  /lbtitle <Board> <rank>|off  holds that board's leaderboard title at that rank (1–10) to see its nameplate (Board:

@@ -14,6 +14,8 @@ const RETRY_DELAY = 2;
  * player owns (a failed check keeps the saved answer, so an outage never takes a pass away); a purchase is granted
  * at once from PromptGamePassPurchaseFinished. The client only asks for the purchase prompt ("BuyGamePass").
  * The effects are read where they act (shared/types/gamepasses: coins, Ocean Points, variant luck, slots).
+ * An admin can also give a pass (SaveData.grantedPasses, the admin panel): owned at every join like a bought one,
+ * until taken back; taking it back never removes a pass the player bought.
  */
 class GamePassServiceSingleton implements Lifecycle {
 	private rewardRemote = getRemoteEvent("Reward");
@@ -39,6 +41,49 @@ class GamePassServiceSingleton implements Lifecycle {
 	public setTestPass(player: Player, pass: GamePass, owned: boolean) {
 		if (owned) this.grant(player, pass);
 		else this.revoke(player, pass);
+	}
+
+	/** Whether an admin gave this pass (SaveData.grantedPasses). */
+	public isGranted(player: Player, pass: GamePass): boolean {
+		return DataService.getSave(player)?.grantedPasses.includes(pass) ?? false;
+	}
+
+	/**
+	 * The admin panel's GAMEPASSES card: gives a pass for good (saved), or takes back a given one. Taking back asks
+	 * Roblox first (yields): a pass the player bought stays. False when there was nothing to change.
+	 */
+	public setGranted(player: Player, pass: GamePass, granted: boolean): boolean {
+		const save = DataService.getSave(player);
+		if (!save) return false;
+		const index = save.grantedPasses.indexOf(pass);
+		if (granted) {
+			if (index >= 0) return false;
+			save.grantedPasses.push(pass);
+			this.gift(player, pass);
+			return true;
+		}
+		if (index < 0) return false;
+		save.grantedPasses.remove(index);
+		const id = GAME_PASSES[pass].id;
+		const bought = !save.stats.testNoPasses && id > 0 && this.checkOwnership(player, id) === true;
+		if (!bought && player.Parent === Players) this.revoke(player, pass);
+		return true;
+	}
+
+	/** A pass given by an admin: the popup says it's a gift, not a purchase. */
+	private gift(player: Player, pass: GamePass) {
+		const data = DataService.getData(player);
+		if (!data || data.passes.includes(pass)) return;
+		data.passes.push(pass);
+		DataService.sync(player);
+		const config = GAME_PASSES[pass];
+		const reward: Reward = {
+			title: "A gift!",
+			subtitle: config.description,
+			amount: 0,
+			item: { icon: "PASS", name: config.displayName, image: config.image !== "" ? config.image : undefined },
+		};
+		this.rewardRemote.FireClient(player, reward);
 	}
 
 	private prompt(player: Player, pass: GamePass) {
@@ -76,8 +121,9 @@ class GamePassServiceSingleton implements Lifecycle {
 	}
 
 	/**
-	 * The owner's test without passes ("/passes off" in Studio, saved in PlayerStats.testNoPasses): all passes are taken
-	 * now and at each join; "/passes on" asks Roblox again. "/pass" still gives one for the session.
+	 * The owner's test without passes ("/passes off" in Studio, saved in PlayerStats.testNoPasses): the bought passes are
+	 * taken now and at each join (the ones an admin gave stay); "/passes on" asks Roblox again. "/pass" still gives one
+	 * for the session.
 	 */
 	public setTestNoPasses(player: Player, noPasses: boolean) {
 		const stats = DataService.getSave(player)?.stats;
@@ -87,14 +133,25 @@ class GamePassServiceSingleton implements Lifecycle {
 		task.spawn(() => this.refresh(player));
 	}
 
-	/** Asks Roblox again for every pass on sale; passes not on sale (id 0) only live through a Studio test. */
+	/**
+	 * Asks Roblox again for every pass on sale; passes not on sale (id 0) only live through a Studio test. A pass an
+	 * admin gave is owned without asking.
+	 */
 	private refresh(player: Player) {
 		if (DataService.getSave(player)?.stats.testNoPasses) {
 			player.SetAttribute("TestNoPasses", true);
-			for (const [pass] of pairs(GAME_PASSES)) this.revoke(player, pass);
+			// The bought ones only: a pass an admin gave stays (testing as a player who got a gift)
+			for (const [pass] of pairs(GAME_PASSES)) {
+				if (this.isGranted(player, pass)) this.grantSilently(player, pass);
+				else this.revoke(player, pass);
+			}
 			return;
 		}
 		for (const [pass, config] of pairs(GAME_PASSES)) {
+			if (this.isGranted(player, pass)) {
+				this.grantSilently(player, pass);
+				continue;
+			}
 			if (config.id <= 0) {
 				this.revoke(player, pass);
 				continue;

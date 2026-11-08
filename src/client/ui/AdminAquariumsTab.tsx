@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "@rbxts/react";
 import { formatShort } from "shared/format";
 import { ADMIN_TANKS_REFRESH, AdminTankFish, AdminTankInfo } from "shared/types/admin";
 import { FISH_TYPES, FishType, getFishIndexOrder, isEasterEgg } from "shared/types/fish";
+import { GAME_PASSES, GamePass, getShopPasses } from "shared/types/gamepasses";
 import { FishVariant, VARIANT_ORDER } from "shared/types/variants";
 import { Button3D, Card, Chip, ItemSlot, TextStroke } from "./kit";
 import { PANEL_INNER_WIDTH } from "./Panel";
@@ -25,6 +26,11 @@ const PICK = 64;
 const PICK_GAP = 9;
 const STRIP_HEIGHT = PICK + 16;
 const VARIANT_BUTTON = new Vector2(94, 40);
+// Gamepasses: two columns of rows
+const PASS_ROW = 56;
+const PASS_GAP = 10;
+const PASS_ICON = 44;
+const PASS_BUTTON = new Vector2(84, 34);
 
 /** The tab's intents (UiController): the server checks the admin right again for each one (AdminService). */
 export interface AdminTankActions {
@@ -33,6 +39,17 @@ export interface AdminTankActions {
 	onRemoveFish: (userId: number, fishId: number) => void;
 	onAddFish: (userId: number, fishType: FishType, variant: FishVariant) => void;
 	onSetLeaderboardBan: (userId: number, banned: boolean) => void;
+	onSetPass: (userId: number, pass: GamePass, granted: boolean) => void;
+}
+
+/** Every gamepass: the Shop's in its order, then the ones sold from a quest line, by name. */
+function getAllPasses(): GamePass[] {
+	const passes = getShopPasses();
+	const others = new Array<GamePass>();
+	for (const [pass] of pairs(GAME_PASSES)) if (!passes.includes(pass)) others.push(pass);
+	others.sort((a, b) => GAME_PASSES[a].displayName < GAME_PASSES[b].displayName);
+	for (const pass of others) passes.push(pass);
+	return passes;
 }
 
 function headshot(userId: number): string {
@@ -417,7 +434,152 @@ function AddFish(props: { order: number; onAdd: (fishType: FishType, variant: Fi
 	);
 }
 
-/** One player's aquarium: back, the owner and LB BAN, the fish (remove), ADD A FISH. */
+/**
+ * One gamepass of the GAMEPASSES card: its picture, its name and its state. BOUGHT (from Roblox, nothing to do),
+ * GIVEN by an admin (a click arms TAKE?, a second one takes it back) or GIVE.
+ */
+function PassRow(props: {
+	pass: GamePass;
+	order: number;
+	owned: boolean;
+	granted: boolean;
+	armed: boolean;
+	onGive: () => void;
+	onArm: () => void;
+	onTakeBack: () => void;
+}) {
+	const config = GAME_PASSES[props.pass];
+	const bought = props.owned && !props.granted;
+	const buttonPosition = new UDim2(1, -8, 0.5, -2);
+	return (
+		<frame key={props.pass} LayoutOrder={props.order} BackgroundColor3={PALETTES.navy.base} BorderSizePixel={0} ZIndex={3}>
+			<uicorner CornerRadius={new UDim(0, 12)} />
+			<uistroke
+				Color={props.granted ? PALETTES.green.base : bought ? PALETTES.gold.base : OUTLINE}
+				Thickness={props.owned ? 3 : 2}
+				ApplyStrokeMode={Enum.ApplyStrokeMode.Border}
+			/>
+			<imagelabel
+				key="Icon"
+				AnchorPoint={new Vector2(0, 0.5)}
+				Position={new UDim2(0, 8, 0.5, 0)}
+				Size={UDim2.fromOffset(PASS_ICON, PASS_ICON)}
+				BackgroundColor3={PALETTES.navy.light}
+				Image={config.image}
+				ScaleType={Enum.ScaleType.Fit}
+				ZIndex={4}
+			>
+				<uicorner CornerRadius={new UDim(0, 10)} />
+				{config.badge !== undefined && (
+					<textlabel
+						key="Badge"
+						AnchorPoint={new Vector2(0.5, 1)}
+						Position={UDim2.fromScale(0.5, 1)}
+						Size={UDim2.fromScale(1, 0.45)}
+						BackgroundTransparency={1}
+						Font={FONT_TITLE}
+						Text={config.badge}
+						TextScaled={true}
+						TextColor3={WHITE}
+						ZIndex={5}
+					>
+						<TextStroke thickness={2} />
+					</textlabel>
+				)}
+			</imagelabel>
+			<textlabel
+				key="Name"
+				Position={UDim2.fromOffset(PASS_ICON + 16, 4)}
+				Size={new UDim2(1, -(PASS_ICON + 16 + PASS_BUTTON.X + 14), 1, -8)}
+				BackgroundTransparency={1}
+				Font={FONT_BOLD}
+				Text={config.displayName}
+				TextSize={15}
+				TextWrapped={true}
+				TextColor3={WHITE}
+				TextXAlignment={Enum.TextXAlignment.Left}
+				ZIndex={4}
+			/>
+			{bought ? (
+				<Chip
+					key="Bought"
+					text="BOUGHT"
+					color={PALETTES.gold.base}
+					height={26}
+					width={PASS_BUTTON.X}
+					textSize={14}
+					position={new UDim2(1, -8, 0.5, 0)}
+					anchorPoint={new Vector2(1, 0.5)}
+					zIndex={4}
+				/>
+			) : (
+				<Button3D
+					key="Action"
+					palette={props.granted ? (props.armed ? PALETTES.red : PALETTES.green) : PALETTES.lagoon}
+					size={UDim2.fromOffset(PASS_BUTTON.X, PASS_BUTTON.Y)}
+					position={buttonPosition}
+					anchorPoint={new Vector2(1, 0.5)}
+					depth={4}
+					zIndex={4}
+					text={props.granted ? (props.armed ? "TAKE?" : "GIVEN") : "GIVE"}
+					textSize={16}
+					onClick={props.granted ? (props.armed ? props.onTakeBack : props.onArm) : props.onGive}
+				/>
+			)}
+		</frame>
+	);
+}
+
+/** GAMEPASSES: give a player a pass for good (saved, AdminService "AdminSetPass"), or take a given one back. */
+function PassesCard(props: { tank: AdminTankInfo; order: number; onSetPass: (pass: GamePass, granted: boolean) => void }) {
+	const passes = getAllPasses();
+	const [armed, setArmed] = useState<GamePass | undefined>(undefined);
+	useEffect(() => {
+		if (armed === undefined) return;
+		const thread = task.delay(ARMED_TIME, () => setArmed(undefined));
+		return () => task.cancel(thread);
+	}, [armed]);
+	const rows = math.ceil(passes.size() / 2);
+	const gridHeight = rows * PASS_ROW + (rows - 1) * PASS_GAP;
+	return (
+		<Card key="Passes" layoutOrder={props.order}>
+			<frame key="Body" Size={new UDim2(1, 0, 0, 46 + gridHeight + 16)} BackgroundTransparency={1}>
+				<Label text="GAMEPASSES" position={UDim2.fromOffset(18, 8)} size={new Vector2(300, 30)} textSize={22} title={true} />
+				<frame
+					key="Grid"
+					Position={UDim2.fromOffset(12, 46)}
+					Size={new UDim2(1, -24, 0, gridHeight)}
+					BackgroundTransparency={1}
+					ZIndex={3}
+				>
+					<uigridlayout
+						CellSize={new UDim2(0.5, -PASS_GAP / 2, 0, PASS_ROW)}
+						CellPadding={UDim2.fromOffset(PASS_GAP, PASS_GAP)}
+						SortOrder={Enum.SortOrder.LayoutOrder}
+					/>
+					{passes.map((pass, index) => (
+						<PassRow
+							key={pass}
+							pass={pass}
+							order={index}
+							owned={props.tank.passes.includes(pass)}
+							granted={props.tank.grantedPasses.includes(pass)}
+							armed={armed === pass}
+							onGive={() => props.onSetPass(pass, true)}
+							onArm={() => setArmed(pass)}
+							onTakeBack={() => {
+								setArmed(undefined);
+								props.onSetPass(pass, false);
+							}}
+						/>
+					))}
+				</frame>
+			</frame>
+		</Card>
+	);
+}
+
+/** One player's aquarium: back, the owner and LB BAN, the fish (remove), ADD A FISH, GAMEPASSES. */
 function TankView(props: { tank: AdminTankInfo; actions: AdminTankActions; onBack: () => void }) {
 	const { tank, actions } = props;
 	const [armed, setArmed] = useState<number | undefined>(undefined);
@@ -502,6 +664,7 @@ function TankView(props: { tank: AdminTankInfo; actions: AdminTankActions; onBac
 				))}
 			</scrollingframe>
 			<AddFish order={4} onAdd={(fishType, variant) => actions.onAddFish(tank.userId, fishType, variant)} />
+			<PassesCard tank={tank} order={5} onSetPass={(pass, granted) => actions.onSetPass(tank.userId, pass, granted)} />
 		</>
 	);
 }

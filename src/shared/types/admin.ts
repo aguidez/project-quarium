@@ -1,4 +1,5 @@
 import { FishType } from "./fish";
+import { GamePass } from "./gamepasses";
 import { FishVariant } from "./variants";
 
 /**
@@ -40,6 +41,10 @@ export interface AdminTankInfo {
 	/** Off the leaderboards anyway: the profile used the owner's test speed (PlayerStats.testSpeedUsed). */
 	testProfile: boolean;
 	fish: AdminTankFish[];
+	/** The passes the player has now (PlayerData.passes: bought or given). */
+	passes: GamePass[];
+	/** The passes an admin gave (SaveData.grantedPasses): the GAMEPASSES card can take these back. */
+	grantedPasses: GamePass[];
 }
 
 /** A live server as the Servers tab lists it (ServerUpdateService's registry). */
