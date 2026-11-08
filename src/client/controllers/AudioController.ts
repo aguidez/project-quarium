@@ -2,7 +2,7 @@ import { ContentProvider, Players, SoundService, TweenService, Workspace } from 
 import { t } from "@rbxts/t";
 import { Lifecycle } from "shared/framework";
 import { getRemoteEvent } from "shared/network";
-import { MUSIC_ID, SFX, SfxName } from "shared/sounds";
+import { MUSIC_ID, SFX, SfxConfig, SfxName } from "shared/sounds";
 import { GAME_EVENTS } from "shared/types/events";
 
 const MUSIC_VOLUME = 0.3;
@@ -47,11 +47,17 @@ class AudioControllerSingleton implements Lifecycle {
 		this.music.Volume = 0;
 		this.music.Parent = SoundService;
 
-		for (const [name, { id, volume }] of pairs(SFX)) {
+		for (const [name, entry] of pairs(SFX)) {
+			const config = entry as SfxConfig;
 			const sound = new Instance("Sound");
 			sound.Name = name;
-			sound.SoundId = id;
-			sound.Volume = volume;
+			sound.SoundId = config.id;
+			sound.Volume = config.volume;
+			if (config.region) {
+				// Only that part plays (Ended fires at its end)
+				sound.PlaybackRegionsEnabled = true;
+				sound.PlaybackRegion = new NumberRange(config.region[0], config.region[1]);
+			}
 			sound.Parent = SoundService;
 			this.sfxTemplates.set(name, sound);
 		}
@@ -80,7 +86,17 @@ class AudioControllerSingleton implements Lifecycle {
 			track.SoundId = config.musicId;
 			assets.push(track);
 		}
-		ContentProvider.PreloadAsync(assets);
+		ContentProvider.PreloadAsync(assets, (contentId, status) => {
+			if (status !== Enum.AssetFetchStatus.Failure) return;
+			// A sound that can't load plays its fallback, whole (its region was cut for the first one)
+			for (const [name, sound] of this.sfxTemplates) {
+				const config = SFX[name] as SfxConfig;
+				if (sound.SoundId !== contentId || config.fallback === undefined) continue;
+				sound.SoundId = config.fallback;
+				sound.PlaybackRegionsEnabled = false;
+				warn(`[Client] Sound ${name} can't load (${contentId}): its fallback plays instead.`);
+			}
+		});
 	}
 
 	/**

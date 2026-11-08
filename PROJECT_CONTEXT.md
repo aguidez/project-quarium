@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-08 (V1.2.6: the admin panel's CLOSE OLD SERVERS, the soft update; the relay targets a newest server; V1.2.5: Ocean rows show their next fish's $/s).
+> Last updated: 2026-11-08 (V1.2.7: the Alien Fish says "tchiki" (SfxConfig region and fallback); V1.2.6: the admin panel's CLOSE OLD SERVERS).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -223,7 +223,9 @@ ProjectQuarium/
    │  ├─ swim.ts             SwimSegment + getSwimPose: fish movement computed identically by server and clients
    │  ├─ tags.ts             CollectionService tags and the attributes they carry
    │  ├─ sounds.ts           Music id + SFX ids, played in 2D by AudioController (CoinStolen = the lantern's gulp, StarCatch, UfoBeam,
-   │  │                      AlienScream, WeakBubble = a weak fish's bubble, CoinCollect / CompanionCoin = the coin chime)
+   │  │                      AlienScream = the owner's "tchiki" (2.65-3.32 s of a player's upload, old scream as fallback),
+   │  │                      WeakBubble = a weak fish's bubble, CoinCollect / CompanionCoin = the coin chime); SfxConfig
+   │  │                      `region` (PlaybackRegion) and `fallback` (played when the id fails to preload, AudioController)
    │  └─ types/
    │     ├─ fish.ts          FishType, FishRarity (Common … Mythic, 4 species a label since V1.1.19: Mythic waits for V1.2's
    │     │                   species; Secret = easter eggs), CoinType, HungerState

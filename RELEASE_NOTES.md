@@ -11,6 +11,13 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.2.7 — 2026-11-08
+
+**Changes**
+- The Alien Fish has a new scream: "tchiki!". If the sound ever can't load, it screams the old way.
+
+---
+
 ## V1.2.6 — 2026-11-08
 
 **New**
