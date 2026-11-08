@@ -11,6 +11,20 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.2.6 — 2026-11-08
+
+**New**
+- **Admin panel, Servers: CLOSE OLD SERVERS**, a soft update next to MOVE (the old UPDATE button): the servers of an
+  older version keep their players, tell them once that a new version is out, and send anyone new who arrives to the
+  newest version; they end by themselves once empty. Works on the servers running V1.2.6 or newer: the servers of an
+  older version still only understand MOVE. A closed server shows "OLD - CLOSED".
+
+**Changes**
+- A player moved by an update now lands on a server of the newest version with room (the live servers' list) instead
+  of any public server, which could be an old one again; after two hops they stay where they land.
+
+---
+
 ## V1.2.5 — 2026-11-08
 
 **New**

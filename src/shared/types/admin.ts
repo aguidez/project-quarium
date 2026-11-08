@@ -57,6 +57,8 @@ export interface AdminServerInfo {
 	/** Its GAME_VERSION (the patch shown in the corner of the screen). */
 	gameVersion: string;
 	players: number;
+	/** Closed to newcomers by the admin panel's CLOSE OLD SERVERS: its players stay until they leave. */
+	closed: boolean;
 	thisServer: boolean;
 }
 

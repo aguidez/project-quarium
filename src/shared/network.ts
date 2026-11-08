@@ -39,7 +39,7 @@ export interface ClientToServerEvents {
 	 *   | "AdminRequestTanks" (no payload) | "AdminRemoveFish" ({ userId, fishId }) | "AdminAddFish" ({ userId,
 	 *   fishType, variant, size? }) | "AdminSetLeaderboardBan" ({ userId, banned }) | "AdminSetPass" ({ userId, pass,
 	 *   granted }) | "AdminRequestServers" (no payload)
-	 *   | "AdminUpdateOldServers" (no payload) (admin panel, see AdminService: refused
+	 *   | "AdminUpdateOldServers" (no payload) | "AdminCloseOldServers" (no payload) (admin panel, see AdminService: refused
 	 *   without its right)
 	 * | "ClaimQuest" (payload: quest id) | "EquipCompanion" | "UnequipCompanion" (payload: CompanionType)
 	 * | "ReleaseFish" (payload: FishType) | "FinishTutorial" (payload: Feature)

@@ -39,7 +39,8 @@ const isSetPass = t.strictInterface({ userId: t.integer, pass: isGamePass, grant
  * "AdminSetPass" ({ userId, pass, granted }) gives a gamepass for good or takes a given one back (saved:
  * SaveData.grantedPasses; a bought pass stays). Each action answers with the tanks again.
  * Servers tab: "AdminRequestServers" answers with "AdminServers"; "AdminUpdateOldServers" moves the players of every
- * server on an old place version to the newest one (ServerUpdateService).
+ * server on an old place version to the newest one, "AdminCloseOldServers" closes those servers to newcomers (their
+ * players stay until they leave) (ServerUpdateService).
  */
 class AdminServiceSingleton implements Lifecycle {
 	private tanksRemote = getRemoteEvent("AdminTanks");
@@ -71,6 +72,19 @@ class AdminServiceSingleton implements Lifecycle {
 				moved.servers > 0
 					? `${moved.servers} old server(s) are moving ${moved.players} player(s) to version ${moved.latest}.`
 					: "Every server already runs the newest version.",
+				"info",
+			);
+			this.serversRemote.FireClient(player, ServerUpdateService.getServers());
+		});
+		DataService.registerAction("AdminCloseOldServers", t.nil, (player) => {
+			if (!this.allowed(player, "AdminCloseOldServers")) return;
+			const closed = ServerUpdateService.closeOldServers();
+			print(`[Server] Admin ${player.Name}: close the servers below place version ${closed.latest}, ${closed.servers} old server(s).`);
+			DataService.notify(
+				player,
+				closed.servers > 0
+					? `${closed.servers} old server(s) closed to newcomers: their ${closed.players} player(s) stay until they leave.`
+					: "No old server left to close.",
 				"info",
 			);
 			this.serversRemote.FireClient(player, ServerUpdateService.getServers());

@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-08 (V1.2.5: each Ocean row shows its NEXT fish's $/s, rows sorted by it; V1.2.3: the admin panel adds a fish in any variant and Size).
+> Last updated: 2026-11-08 (V1.2.6: the admin panel's CLOSE OLD SERVERS, the soft update; the relay targets a newest server; V1.2.5: Ocean rows show their next fish's $/s).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -426,7 +426,7 @@ ProjectQuarium/
    │     │                   easter eggs Normal; DataService.addFish with its variant; an optional Size score, else drawn), "AdminSetLeaderboardBan"
    │     │                   (LeaderboardService.setBanned), "AdminSetPass" ({userId, pass, granted}: GamePassService.setGranted,
    │     │                   saved in SaveData.grantedPasses); every action answers with the tanks again. Servers tab:
-   │     │                   "AdminRequestServers" → AdminServers, "AdminUpdateOldServers" (ServerUpdateService)
+   │     │                   "AdminRequestServers" → AdminServers, "AdminUpdateOldServers", "AdminCloseOldServers" (ServerUpdateService)
    │     ├─ AbyssService     Abyssal raid: one lantern fish raid loop per owned tank until the event ends (§3.4)
    │     ├─ UfoService       UFO night: one UFO per owned tank (clone of the Ufo template, tag Ufo, anchored, moved by
    │     │                   PivotTo), kidnaps one fish at a time (each once per event), notifies the owner of the outcome;
@@ -492,8 +492,12 @@ ProjectQuarium/
    │     │                   newest version listed on MessagingService topic QuariumUpdate; a server below it notifies its
    │     │                   players, 5 s later teleports them to a ReserveServer (the relay: a new server runs the newest
    │     │                   version) and moves whoever joins it afterwards; the relay (reserved, no private-server owner)
-   │     │                   runs nothing else and sends them to a public server 6 s later (kick with a message if every
-   │     │                   teleport fails). No teleport in Studio (a notice instead)
+   │     │                   runs nothing else and sends them 6 s later to a server of the newest version with room
+   │     │                   (registry, not closed), else a public one (kick with a message if every teleport fails).
+   │     │                   closeOldServers (the soft update, topic QuariumClose: servers on V1.2.6 code or newer): an
+   │     │                   old server stays for its players (told once), registers `closed`, and sends every newcomer
+   │     │                   through the relay (teleport data updateHops: after 2 hops a player stays). No teleport in
+   │     │                   Studio (a notice instead)
    │     └─ DevCommandService  Studio-only chat commands (TextChatCommands created only when RunService.IsStudio(), only
    │                         for the game's admins, server/admins.ts): "/datareset" then "/datareset confirm" within 15 s (wipes the save,
    │                         kicks); "/nextfrench" (next egg hatches a French Fish); "/sugar" (Sugar swims in, as from a like);
@@ -658,8 +662,9 @@ ProjectQuarium/
          │                   GAMEPASSES: every pass BOUGHT / GIVEN (→ TAKE? for 3 s) / GIVE);
          │                   asks for the tanks on open and every ADMIN_TANKS_REFRESH s while open; Servers tab
          │                   (AdminServersTab.tsx, ServersTab): NEWEST VERSION card (patch, place version, servers / old /
-         │                   players chips), the live servers (NEWEST / OLD, THIS SERVER, players), UPDATE OLD SERVERS
-         │                   (armed 4 s: SURE? CLICK AGAIN); refreshed every 5 s while open
+         │                   players chips), the live servers (NEWEST / OLD / OLD - CLOSED, THIS SERVER, players), CLOSE
+         │                   OLD SERVERS (soft) and MOVE N PLAYERS side by side (each armed 4 s: SURE? CLICK AGAIN);
+         │                   refreshed every 5 s while open
          ├─ SoundControl     Top-right, in Roblox's topbar row (TopbarInset, sized like its 44 px buttons): round blue
          │                   speaker button (crossed out at 0) dropping down a navy plate: the volume (0–100, "OFF"),
          │                   a vertical slider (gold fill, white knob, dragged anywhere until released), a mute toggle

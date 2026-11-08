@@ -6,7 +6,9 @@ import { FONT_BOLD, FONT_TITLE, NAVY, PALETTES } from "./theme";
 
 const WHITE = new Color3(1, 1, 1);
 const REFRESH = 5; // seconds between two looks at the servers while the tab is open
-const ARMED_TIME = 4; // seconds the UPDATE button waits for its confirmation
+const ARMED_TIME = 4; // seconds the CLOSE / MOVE buttons wait for their confirmation
+const BUTTON_GAP = 12;
+const BUTTON_HEIGHT = 54;
 const ROW_HEIGHT = 66;
 /** Rows shown before the list scrolls. */
 const MAX_ROWS = 5;
@@ -20,6 +22,7 @@ export interface AdminServerActions {
 	onRequestServers: () => void;
 	subscribeServers: (listener: (sync: AdminServersSync) => void) => () => void;
 	onUpdateOldServers: () => void;
+	onCloseOldServers: () => void;
 }
 
 function Label(props: {
@@ -127,7 +130,7 @@ function Summary(props: { sync: AdminServersSync; old: number; players: number }
 	);
 }
 
-/** One live server: its version, NEWEST / OLD, THIS SERVER, its players. */
+/** One live server: its version, NEWEST / OLD / OLD - CLOSED, THIS SERVER, its players. */
 function ServerRow(props: { server: AdminServerInfo; newest: boolean; order: number }) {
 	const { server, newest } = props;
 	return (
@@ -162,9 +165,9 @@ function ServerRow(props: { server: AdminServerInfo; newest: boolean; order: num
 					<Chip
 						key="State"
 						layoutOrder={1}
-						text={newest ? "NEWEST" : "OLD"}
-						color={newest ? PALETTES.green.base : PALETTES.red.base}
-						textColor={newest ? undefined : WHITE}
+						text={newest ? "NEWEST" : server.closed ? "OLD - CLOSED" : "OLD"}
+						color={newest ? PALETTES.green.base : server.closed ? PALETTES.amber.base : PALETTES.red.base}
+						textColor={newest || server.closed ? undefined : WHITE}
 						height={26}
 						textSize={15}
 						zIndex={3}
@@ -196,13 +199,14 @@ function ServerRow(props: { server: AdminServerInfo; newest: boolean; order: num
 
 /**
  * Servers tab (FigCraft admin-panel: AdminServers_Mockup): the live servers and their versions (ServerUpdateService's
- * registry), and UPDATE OLD SERVERS (click, then click again within ARMED_TIME): the players of every older server move
- * to the newest version. Refreshed every REFRESH seconds while open.
+ * registry), and two ways to update the old ones (click, then click again within ARMED_TIME): CLOSE (the soft one: an
+ * old server takes no one new and ends when its players leave) and MOVE (every player of an old server moves to the
+ * newest version at once). Refreshed every REFRESH seconds while open.
  */
 export function ServersTab(props: { actions: AdminServerActions }) {
 	const { actions } = props;
 	const [sync, setSync] = useState<AdminServersSync | undefined>(undefined);
-	const [armed, setArmed] = useState(false);
+	const [armed, setArmed] = useState<"Close" | "Move" | undefined>(undefined);
 	useEffect(() => {
 		const disconnect = actions.subscribeServers((received) => setSync(received));
 		actions.onRequestServers();
@@ -219,26 +223,29 @@ export function ServersTab(props: { actions: AdminServerActions }) {
 		};
 	}, []);
 	useEffect(() => {
-		if (!armed) return;
-		const thread = task.delay(ARMED_TIME, () => setArmed(false));
+		if (armed === undefined) return;
+		const thread = task.delay(ARMED_TIME, () => setArmed(undefined));
 		return () => task.cancel(thread);
 	}, [armed]);
 
 	let old = 0;
 	let oldPlayers = 0;
+	let open = 0; // old servers not closed yet
 	let players = 0;
 	for (const server of sync?.servers ?? []) {
 		players += server.players;
 		if (sync && server.version < sync.latest) {
 			old += 1;
 			oldPlayers += server.players;
+			if (!server.closed) open += 1;
 		}
 	}
 	const newest = sync?.servers.find((server) => server.version === sync.latest)?.gameVersion ?? "?";
 	const rows = sync?.servers.size() ?? 0;
 	const listHeight = math.min(rows, MAX_ROWS) * (ROW_HEIGHT + 5 + ROW_GAP) + EDGE_ROOM;
-	let hint = "Their players move to the newest version (a short teleport)";
-	if (armed) hint = `Their ${plural(oldPlayers, "player").lower()} move to V${newest} in 5 s`;
+	let hint = "CLOSE: old servers take no one new and end when empty. MOVE: their players go now";
+	if (armed === "Close") hint = `${plural(open, "old server")} take no one new: newcomers go to V${newest}`;
+	else if (armed === "Move") hint = `Their ${plural(oldPlayers, "player").lower()} move to V${newest} in 5 s`;
 	else if (old === 0) hint = "Every server runs the newest version";
 	else if (sync?.studio) hint = "Studio can't teleport: the live servers would move their players";
 
@@ -301,35 +308,64 @@ export function ServersTab(props: { actions: AdminServerActions }) {
 							))}
 						</scrollingframe>
 					</frame>
-					<Button3D
-						key="Update"
-						layoutOrder={4}
-						palette={PALETTES.red}
-						size={UDim2.fromOffset(PANEL_INNER_WIDTH, 58)}
-						disabled={old === 0}
-						text={
-							armed
-								? "SURE? CLICK AGAIN"
-								: old > 0
-									? `UPDATE ${plural(old, "OLD SERVER")}`
-									: "NO OLD SERVER"
-						}
-						textSize={26}
-						onClick={() => {
-							if (!armed) return setArmed(true);
-							setArmed(false);
-							actions.onUpdateOldServers();
-						}}
-					/>
+					<frame
+						key="Buttons"
+						LayoutOrder={4}
+						Size={UDim2.fromOffset(PANEL_INNER_WIDTH, BUTTON_HEIGHT + 6)}
+						BackgroundTransparency={1}
+					>
+						<uilistlayout
+							FillDirection={Enum.FillDirection.Horizontal}
+							Padding={new UDim(0, BUTTON_GAP)}
+							SortOrder={Enum.SortOrder.LayoutOrder}
+						/>
+						<Button3D
+							key="Close"
+							layoutOrder={1}
+							palette={PALETTES.amber}
+							size={UDim2.fromOffset((PANEL_INNER_WIDTH - BUTTON_GAP) / 2, BUTTON_HEIGHT)}
+							disabled={open === 0}
+							text={
+								armed === "Close"
+									? "SURE? CLICK AGAIN"
+									: open > 0
+										? `CLOSE ${plural(open, "OLD SERVER")}`
+										: old > 0
+											? "ALL CLOSED"
+											: "NO OLD SERVER"
+							}
+							textSize={20}
+							onClick={() => {
+								if (armed !== "Close") return setArmed("Close");
+								setArmed(undefined);
+								actions.onCloseOldServers();
+							}}
+						/>
+						<Button3D
+							key="Update"
+							layoutOrder={2}
+							palette={PALETTES.red}
+							size={UDim2.fromOffset((PANEL_INNER_WIDTH - BUTTON_GAP) / 2, BUTTON_HEIGHT)}
+							disabled={old === 0}
+							text={armed === "Move" ? "SURE? CLICK AGAIN" : old > 0 ? `MOVE ${plural(oldPlayers, "PLAYER")}` : "NO OLD SERVER"}
+							textSize={20}
+							onClick={() => {
+								if (armed !== "Move") return setArmed("Move");
+								setArmed(undefined);
+								actions.onUpdateOldServers();
+							}}
+						/>
+					</frame>
 					<textlabel
 						key="Hint"
 						LayoutOrder={5}
-						Size={new UDim2(1, 0, 0, 22)}
+						Size={new UDim2(1, 0, 0, 36)}
 						BackgroundTransparency={1}
 						Font={FONT_BOLD}
 						Text={hint}
-						TextSize={15}
-						TextColor3={armed ? PALETTES.red.light : NAVY.muted}
+						TextSize={14}
+						TextWrapped={true}
+						TextColor3={armed === "Move" ? PALETTES.red.light : armed === "Close" ? PALETTES.amber.light : NAVY.muted}
 					/>
 				</>
 			) : (

@@ -227,6 +227,7 @@ class UiControllerSingleton implements Lifecycle {
 									return () => connection.Disconnect();
 								},
 								onUpdateOldServers: () => this.actionRemote.FireServer("AdminUpdateOldServers"),
+								onCloseOldServers: () => this.actionRemote.FireServer("AdminCloseOldServers"),
 							}
 						: undefined,
 			}),
