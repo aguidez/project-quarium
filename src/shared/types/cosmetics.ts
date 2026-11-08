@@ -28,7 +28,8 @@ export type CosmeticId =
 	| "DecorGoldenTrophy"
 	| "DecorIncubator"
 	| "DecorTitanTrophy"
-	| "FinishPearlRims";
+	| "FinishPearlRims"
+	| "FinishAuroraRims";
 
 export interface CosmeticConfig {
 	kind: CosmeticKind;
@@ -122,7 +123,15 @@ export const COSMETICS: Record<CosmeticId, CosmeticConfig> = {
 	FinishPearlRims: {
 		kind: "Finish",
 		displayName: "Pearl Rims",
-		description: "A pearly finish on the rims of your aquarium, whatever its theme.",
+		description: "A pearly finish on the rims of your aquarium, whatever its theme. Show it or the Aurora Rims.",
+		group: "Rims",
+	},
+	// V1.2 (ROADMAP_V1.2 §6, Ocean 14,000,000): the rims glow and drift through the northern lights' colours (client)
+	FinishAuroraRims: {
+		kind: "Finish",
+		displayName: "Aurora Rims",
+		description: "The rims of your aquarium glow with the colours of the northern lights. Show them or the Pearl Rims.",
+		group: "Rims",
 	},
 };
 

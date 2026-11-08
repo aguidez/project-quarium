@@ -4,6 +4,7 @@ import { UfoEventController } from "./controllers/UfoEventController";
 import { StarfallEventController } from "./controllers/StarfallEventController";
 import { AquariumInteractionController } from "./controllers/AquariumInteractionController";
 import { AudioController } from "./controllers/AudioController";
+import { AuroraRimsController } from "./controllers/AuroraRimsController";
 import { ChatTitleController } from "./controllers/ChatTitleController";
 import { CapacityPlaqueController } from "./controllers/CapacityPlaqueController";
 import { IncomePlaqueController } from "./controllers/IncomePlaqueController";
@@ -48,4 +49,5 @@ bootstrap([
 	ShopKeeperController,
 	StatsReportController,
 	ChatTitleController,
+	AuroraRimsController,
 ]);

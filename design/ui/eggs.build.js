@@ -325,6 +325,24 @@ const EGGS = {
 			`<ellipse cx="76" cy="30" rx="7" ry="3" fill="#FFFFFF" opacity="0.8"/>` +
 			sparkle(30, 26, 6, "#FFFFFF") + sparkle(80, 46, 3.5, "#FFF1C8") + sparkle(20, 74, 3, "#FFFFFF"),
 	},
+	// Rainbow Dreamland (V1.2): a lavender-to-pink shell, a pastel rainbow over a sea of clouds, soft bubbles
+	Dreamland: {
+		outline: "#5A2A7A",
+		defs: `<linearGradient id="shell" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0" stop-color="#B49BF5"/><stop offset="0.55" stop-color="#F0AEEA"/><stop offset="1" stop-color="#FFD3B8"/>
+		</linearGradient>`,
+		decor:
+			["#FF8FB8", "#FFB98A", "#FFE58A", "#9EF0B0", "#8FD3FF", "#B9A2FF"]
+				.map((c, i) => `<path d="M${12 + i * 5} 96 A${38 - i * 5} ${38 - i * 5} 0 0 1 ${88 - i * 5} 96" fill="none" stroke="${c}" stroke-width="5.2"/>`)
+				.join("") +
+			[[0, 104, 14], [18, 100, 13], [36, 106, 12], [56, 100, 14], [76, 104, 13], [96, 100, 14]]
+				.map(([cx, cy, r]) => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#FFFFFF" stroke="#E7CFF2" stroke-width="1.5"/>`)
+				.join("") +
+			[[24, 40, 5], [74, 32, 4], [64, 50, 3], [36, 26, 2.5]]
+				.map(([cx, cy, r]) => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#FFFFFF" fill-opacity="0.35" stroke="#FFFFFF" stroke-width="1.2"/>`)
+				.join("") +
+			sparkle(30, 26, 6, "#FFFFFF") + sparkle(82, 62, 3.5, "#FFF1C8") + sparkle(16, 66, 3, "#FFFFFF"),
+	},
 };
 
 function svg(body, defs = "") {

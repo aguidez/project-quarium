@@ -11,6 +11,27 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.1.23 — 2026-11-08
+
+**The Voyage goes on: an eleventh aquarium, over the rainbow.**
+
+**New**
+- **Rebirth 11: the Rainbow Dreamland** (3Qa, coins x375,000): rainbows over a pastel sea of clouds, rainbow arches and
+  soft bubbles on the sand.
+- **The Kitty Koi**, a new Mythic species: a round calico kitten-fish with cat ears and a little cat smile. It drops
+  paw prints worth 53.8M every 8 seconds, and has its Anomaly (blue calico), Ghost, Shiny (pink calico) and Galaxy
+  looks.
+- **The Dreamland Egg** (50Qa): Pegasus Seahorse 55 %, Kitty Koi 45 %.
+- New Ocean milestones: 9,000,000 points, the aquarium holds **31 fish**; 14,000,000 points, the **Aurora Rims**: the
+  rims of the aquarium glow and slowly drift through the colours of the northern lights, whatever its theme.
+- Voyage quests "Over the Rainbow" (rebirth 11: 2,200,000 Ocean Points) and "Lucky Cat" (hatch a Kitty Koi: 5 minutes
+  of income).
+
+**Changes**
+- The Pearl Rims and the Aurora Rims share the rims: one or the other shows (or none), picked in Customize.
+
+---
+
 ## V1.1.22 — 2026-11-08
 
 **The Voyage goes on: a tenth aquarium, in the sky.**

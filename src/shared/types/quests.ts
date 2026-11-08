@@ -386,6 +386,23 @@ export const QUESTS: Record<string, QuestConfig> = {
 		target: 1,
 		rewards: [{ kind: "IncomeMinutes", minutes: 5 }],
 	},
+	Voyage21: {
+		category: "Story",
+		title: "Over the Rainbow",
+		description: "Rebirth into the Rainbow Dreamland (rebirth 11).",
+		stat: "Rebirths",
+		target: 11,
+		rewards: [{ kind: "OceanPoints", amount: 2200000 }],
+	},
+	Voyage22: {
+		category: "Story",
+		title: "Lucky Cat",
+		description: "Hatch a Kitty Koi.",
+		stat: "SpeciesHatched",
+		fishType: "KittyKoi",
+		target: 1,
+		rewards: [{ kind: "IncomeMinutes", minutes: 5 }],
+	},
 	// The Water Hen's line (Water Hen pass, BALANCE.md §5.9): eggs opened with it equipped. Slow on purpose: its
 	// effect is the smallest
 	WaterHen1: {
@@ -892,6 +909,8 @@ export const STORY_LINES: Record<StoryLine, StoryLineConfig> = {
 			"Voyage18",
 			"Voyage19",
 			"Voyage20",
+			"Voyage21",
+			"Voyage22",
 		],
 		requires: "Story1",
 		order: 3,

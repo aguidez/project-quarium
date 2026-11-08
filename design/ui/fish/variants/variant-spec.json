@@ -288,6 +288,18 @@
       0.03
     ]
   },
+  "KittyKoi": {
+    "Anomaly": [
+      180,
+      1,
+      0
+    ],
+    "Shiny": [
+      300,
+      1.15,
+      0.03
+    ]
+  },
   "_colorMaps": {
     "Basic": {
       "Normal": "rbxassetid://78123515869414",
@@ -409,6 +421,12 @@
       "Anomaly": "rbxassetid://132763601558295",
       "Shiny": "rbxassetid://114715155542901",
       "Galaxy": "rbxassetid://119496813416589"
+    },
+    "KittyKoi": {
+      "Normal": "rbxassetid://108041112345955",
+      "Anomaly": "rbxassetid://98887271281303",
+      "Shiny": "rbxassetid://139182298529701",
+      "Galaxy": "rbxassetid://99550659958226"
     }
   }
 }

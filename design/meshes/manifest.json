@@ -33,5 +33,6 @@
 	"FoxBetta": { "path": "ServerStorage.Assets.Fish.FoxBetta.Mesh", "staticMeshId": 139155457907098, "rigModelId": 75150656716071, "rigMeshId": 86050887259467 },
 	"CloudWhale": { "path": "ServerStorage.Assets.Fish.CloudWhale.Mesh", "staticMeshId": 73180984682389, "rigModelId": 73741521953011, "rigMeshId": 110790999289888 },
 	"PegasusSeahorse": { "path": "ServerStorage.Assets.Fish.PegasusSeahorse.Mesh", "staticMeshId": 133466535863384, "rigModelId": 104273546921494, "rigMeshId": 136120262534860 },
-	"HermitCrab": { "path": "ServerStorage.Assets.Companions.HermitCrab.Mesh", "staticMeshId": 99461476452331, "rigModelId": 135338980369328, "rigMeshId": 112633381339276 }
+	"HermitCrab": { "path": "ServerStorage.Assets.Companions.HermitCrab.Mesh", "staticMeshId": 99461476452331, "rigModelId": 135338980369328, "rigMeshId": 112633381339276 },
+	"KittyKoi": { "path": "ServerStorage.Assets.Fish.KittyKoi.Mesh", "staticMeshId": 112913726790054, "rigModelId": 91728970591430, "rigMeshId": 78028203556316 }
 }

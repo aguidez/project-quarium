@@ -25,7 +25,8 @@ export type AquariumTheme =
 	| "CrystalCaverns"
 	| "CosmicSanctuary"
 	| "AuroraGlacier"
-	| "SkyArchipelago";
+	| "SkyArchipelago"
+	| "RainbowDreamland";
 
 export interface AquariumThemeConfig {
 	displayName: string;
@@ -46,6 +47,7 @@ export const AQUARIUM_THEMES: Record<AquariumTheme, AquariumThemeConfig> = {
 	CosmicSanctuary: { displayName: "Cosmic Sanctuary" },
 	AuroraGlacier: { displayName: "Aurora Glacier" },
 	SkyArchipelago: { displayName: "Sky Archipelago" },
+	RainbowDreamland: { displayName: "Rainbow Dreamland" },
 };
 
 export interface RebirthConfig {
@@ -77,6 +79,8 @@ export const REBIRTHS: readonly RebirthConfig[] = [
 	{ price: 200e12, multiplier: 25000, startMoney: 300, theme: "AuroraGlacier" },
 	// Rebirth 10 at ~16h28: x4.8 only (an even rebirth stays under ~1.6x the egg its run farms, ROADMAP_V1.2 §2)
 	{ price: 640e12, multiplier: 120000, startMoney: 300, theme: "SkyArchipelago" },
+	// Rebirth 11 at ~19h53
+	{ price: 3e15, multiplier: 375000, startMoney: 300, theme: "RainbowDreamland" },
 ];
 
 /** The rebirth a player who has done `rebirths` of them can do next (undefined once all are done). */

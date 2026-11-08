@@ -3,7 +3,7 @@
 > The game's balance: what an average player reaches after how long, and why. **Update it in the same task whenever a
 > number of the economy changes** (fish income, eggs, odds, rebirths, Ocean milestones, variants, food, capacity,
 > companions…): run the simulators, copy their results here, add a line to the history (§6).
-> Last updated: 2026-11-08 (V1.1.22: rebirth 10, the Sky Egg, the Cloud Whale and the Pegasus Seahorse, tank 29, the Hermit Crab and the Quick pantry: §2, §3, §5.8, §6).
+> Last updated: 2026-11-08 (V1.1.23: rebirth 11, the Dreamland Egg and the Kitty Koi, tank 31, the Aurora rims: §2, §3, §6).
 
 
 **Where the numbers live**: `src/shared/types/fish.ts` (species), `eggs.ts` (eggs), `rebirths.ts` (rebirths),
@@ -108,10 +108,13 @@ player's calendar. A player who never stops (no daily quest) needs longer, one w
 | **~13h40** (12h45–14h32) | **Rebirth 9** (200T, V1.1.21): coins x25,000, **Aurora Glacier**; 1,500,000 Ocean Points: **27 fish** (~13h33) | The first V1.2 aquarium (ROADMAP_V1.2 M3). Voyage "Beyond the Stars" (375,000 points) |
 | ~14h03 | 2,500,000 Ocean Points: the **Hermit Crab** (variant luck companion, §5.8) | Outside the timeline: it competes with the Water Hen for a slot (the simulator keeps the Water Hen) |
 | **~16h31** (15h33–17h11) | **Rebirth 10** (640T, V1.1.22): coins x120,000, **Sky Archipelago**; 4,000,000 Ocean Points: **29 fish** (~16h30) | Voyage "Above the Clouds" (900,000 points). Rebirth 10 is only x4.8 rebirth 9 (an even rebirth stays under ~1.6x the egg its run farms) |
-| ~16h30 (14h53–17h59) | Species 19, **Fox Betta** (Aurora Egg 400T 45 %, Sky Egg 25 %) | Voyage "Fox of the North" (5 min of income). Since rebirth 10 most players rebirth before their first Fox Betta and hatch it from the Sky Egg (it came at ~15h57 when it ended the game) |
-| ~17h18 | 6,000,000 Ocean Points: **Quick pantry** (food refill 7 s), for the players who reach it before the end (median 5.1M at the end) | A goal past the end for half the players, as the V1.2 plan said (~19h08 with rebirth 11) |
-| ~17h35 (16h36–18h08) | Species 20, **Cloud Whale** (Sky Egg 770T, 55 %) |  |
-| **~17h49** (16h47–18h39) | Species 21, **Pegasus Seahorse** (Sky Egg 20 %): the end of the content for now | Voyage "Winged Wonder" (5 min of income). ~50 min ahead of the V1.2 plan (18h41): the Sky Egg (1.2x rebirth 10) is bought in numbers right after the rebirth |
+| ~16h36 (14h53–17h55) | Species 19, **Fox Betta** (Aurora Egg 400T 45 %, Sky Egg 25 %) | Voyage "Fox of the North" (5 min of income). Most players rebirth before their first Fox Betta and hatch it from the Sky Egg |
+| ~17h54 (16h40–19h11) | Species 20, **Cloud Whale** (Sky Egg 770T, 55 %) |  |
+| ~18h47 (17h33–19h58) | Species 21, **Pegasus Seahorse** (Sky Egg 20 %, Dreamland Egg 55 %) | Voyage "Winged Wonder" (5 min of income). Many players rebirth 11 first and hatch it from the Dreamland Egg (as the V1.2 plan said: 18h41) |
+| ~19h20 | 6,000,000 Ocean Points: **Quick pantry** (food refill 7 s) | With rebirth 11's release (plan ~19h08) |
+| **~19h57** (18h55–20h56) | **Rebirth 11** (3Qa, V1.1.23): coins x375,000, **Rainbow Dreamland**; 9,000,000 Ocean Points: **31 fish** | Voyage "Over the Rainbow" (2,200,000 points). x3.1 rebirth 10 |
+| ~21h30 | 14,000,000 Ocean Points: **Aurora rims** (cosmetic) | Plan ~22h20 |
+| **~22h49** (21h39–24h42) | Species 22, **Kitty Koi** (Dreamland Egg 50Qa, 45 %): the end of the content for now | Voyage "Lucky Cat" (5 min of income). The Dreamland Egg costs ~17x rebirth 11: run 11's wall; 5 players in 2,000 don't hatch one within 28 h |
 | after | Hatchery: 1,200 fish hatched, the **Golden Incubator** (1 player in 3 before the end, median ~11h35 for them) | A goal past the end, with the variants |
 | any time | The French Fish (secret, 0.1 % of any egg): ~2 players in 3 hatch one in the run (median first one ~5h40) | See §3 Easter eggs |
 | after | Variants (Anomaly 10 %, Ghost 5 %, Shiny 1 %; x1.5 with Lucky ocean) to complete the Fish Index, Ocean Points | Nothing new to buy: the end of V1 |
@@ -154,6 +157,7 @@ time; hatch speed matters little, §5.8).
 | Fox Betta (V1.2) | Legendary | Frost crystal | 10,080,000 $ / 12 s | 840,000 | 1,260,000 | 51,000 |
 | Cloud Whale (V1.2) | Legendary | Cloud | 33,600,000 $ / 20 s | 1,680,000 | 2,520,000 | 82,000 |
 | Pegasus Seahorse (V1.2) | Mythic | Wing feather | 100,800,000 $ / 30 s | 3,360,000 | 5,040,000 | 131,000 |
+| Kitty Koi (V1.2) | Mythic | Paw print | 53,760,000 $ / 8 s | 6,720,000 | 10,080,000 | 210,000 |
 
 Growth (default): x1 at birth, x1.2 after 5 min, x1.5 after 10 min in the water. One coin out of 15 sparkles (x2).
 Rarity is only a label (Fish Index order, colours).
@@ -267,6 +271,7 @@ cells fill faster. The power waits for an egg (no hurry), the best of two starfa
 | Cosmic | 2.6T (1.8T) | 180 s | Husky Dogfish 25, Bunny Shark 55, Mini Leviathan 20 | a Crystal Egg |
 | Aurora (V1.2) | 400T | 180 s | Mini Leviathan 55, Fox Betta 45 | a Cosmic Egg |
 | Sky (V1.2) | 770T | 180 s | Fox Betta 25, Cloud Whale 55, Pegasus Seahorse 20 | an Aurora Egg |
+| Dreamland (V1.2) | 50Qa | 180 s | Pegasus Seahorse 55, Kitty Koi 45 | a Sky Egg |
 
 One egg of each type incubates at a time, two from the 5,000-point Ocean milestone (~2h44): the hatch time paces the
 farming of the best egg. Eggs bought while the **Water Hen** is equipped hatch 15 % faster (up to 35 % with its pass
@@ -286,6 +291,7 @@ quests).
 | 8 | 2.2T (1.5T) | x8,000 | 300 $ | Cosmic Sanctuary |
 | 9 (V1.2) | 200T | x25,000 | 300 $ | Aurora Glacier |
 | 10 (V1.2) | 640T | x120,000 | 300 $ | Sky Archipelago |
+| 11 (V1.2) | 3Qa | x375,000 | 300 $ | Rainbow Dreamland |
 
 Rebirths 3–8 and their eggs cost 1.45x the V1 plan's since V0.46: the daily / weekly coin boosts are part of the
 reference player's game, and without it V1 ended at ~9h45 for 1 h a day (§2). A rebirth resets money, fish, eggs and egg unlocks; it keeps the Fish Index, quests, companions, Ocean Points,
@@ -318,6 +324,8 @@ When each one is reached: §2.
 | 2,500,000 (V1.2) | Hermit Crab (companion: the eggs that incubate with it hatch rare variants x1.25 more often) |
 | 4,000,000 (V1.2) | Aquarium holds 29 fish |
 | 6,000,000 (V1.2) | Quick pantry: a portion of the food reserve comes back in 7 s |
+| 9,000,000 (V1.2) | Aquarium holds 31 fish |
+| 14,000,000 (V1.2) | Aurora rims (cosmetic: the rims glow through the northern lights' colours, every theme; shares the rims with the Pearl rims) |
 
 A release earns the species' points x 1 / 2 / 3 / 5 (Normal / Anomaly / Ghost / Shiny).
 
@@ -694,6 +702,7 @@ content (species, eggs, aquariums, capacity, companions themselves) away from fr
 | V1.1.20 | The Galaxy variant (ROADMAP_V1.2 M2c): 0.2 %, coins 1.5x as often, one out of 5 a star coin worth 3 coins (x1.97), Ocean Points x10; the Lucky pass x3 on it; no Galaxy from a UFO. Starfall: a 4th bar (0.9 bar of stars) guaranteeing a Galaxy, Galaxy 0.5 → 5 % on the way. Collector 75 cells (3 min) and first Galaxy (3 min). Simulators: Galaxy in `VARIANTS`, starfall `--fourthBar` 0.9 by default | Unchanged within the noise: all eighteen species ~11h57 (11h17–12h43); average variant bonus +3.6 → +3.8 %. The 75-cell quest comes after the end of V1 (90 cells). 4 bars in 2.6 % of perfect starfalls, the Shiny's 3 bars unchanged (21 %) |
 | V1.1.21 | ROADMAP_V1.2 M3: rebirth 9 (200T, x25,000, Aurora Glacier), Aurora Egg (400T, Mini Leviathan 55 / Fox Betta 45), the Fox Betta (Legendary, 10.08M / 12 s, 51,000 points; the planned Penguin Puffer replaced), Ocean milestone 1,500,000 → 27 fish, Voyage 17 (rebirth 9: 375,000 points) and 18 (Fox Betta: 5 min). Simulator: the live config mirrors them, horizon 20 h | V1 unchanged (rebirth 8 ~10h46, all eighteen ~12h00); rebirth 9 **~13h40** (12h45–14h32) as the V1.2 plan said (13h37); 27 fish ~13h33; the Fox Betta, the end of the content for now, **~15h57** (14h46–17h40) |
 | V1.1.22 | ROADMAP_V1.2 M4: rebirth 10 (640T, x120,000, Sky Archipelago), Sky Egg (770T, Fox Betta 25 / Cloud Whale 55 / Pegasus Seahorse 20), Cloud Whale (Legendary, 33.6M / 20 s, 82,000 points), Pegasus Seahorse (Mythic, 100.8M / 30 s, 131,000 points), Ocean milestones 2,500,000 (Hermit Crab), 4,000,000 (29 fish), 6,000,000 (Quick pantry: food refill 7 s), Voyage 19 (rebirth 10: 900,000 points) and 20 (Pegasus Seahorse: 5 min); the Hermit Crab (live variant luck x1.25, free quests to x1.6). Simulator: the live config mirrors them (the crab and the refill not modelled), horizon 24 h | Earlier steps unchanged (rebirth 9 ~13h39); rebirth 10 **~16h31** (15h33–17h11), plan 16h28; 29 fish ~16h30; the Fox Betta ~15h57 → ~16h30 (now mostly from the Sky Egg); Cloud Whale ~17h35; the Pegasus Seahorse, the end of the content for now, **~17h49** (16h47–18h39), ~50 min ahead of the plan; Hermit Crab ~14h03; Quick pantry ~17h18 for those who reach 6M (median 5.1M at the end) |
+| V1.1.23 | ROADMAP_V1.2 M5: rebirth 11 (3Qa, x375,000, Rainbow Dreamland), Dreamland Egg (50Qa, Pegasus Seahorse 55 / Kitty Koi 45), the Kitty Koi (Mythic, 53.76M / 8 s, 210,000 points), Ocean milestones 9,000,000 (31 fish) and 14,000,000 (Aurora rims), Voyage 21 (rebirth 11: 2,200,000 points) and 22 (Kitty Koi: 5 min). Simulator: the live config mirrors them, horizon 28 h | Earlier steps unchanged (rebirth 10 ~16h31); the Pegasus Seahorse ~17h49 → ~18h47 (now often from the Dreamland Egg), Quick pantry ~19h20; rebirth 11 **~19h57** (18h55–20h56), plan 19h53; Aurora rims ~21h30; the Kitty Koi, the end of the content for now, **~22h49** (21h39–24h42), plan 23h42 |
 | V1.2 (plan) | ROADMAP_V1.2.md M1, not in the game: rebirths 9–12 (200T x25,000 / 640T x120,000 / 3Qa x375,000 / 80Qa x1.2M), eggs Aurora 400T, Sky 770T, Dreamland 50Qa, Heart 96Qa (180 s), 6 species (income x2, points x1.6), tank 27–33 at 1.5M / 4M / 9M / 20M Ocean Points, Voyage 375k / 900k / 2.2M / 5M points, side lines (Hatchery 1,800–3,500, Collector to 120 cells, Ocean 500 released, Big Catch); **Size score** (-15…+15, triangular, coins x(1 + size/100)); **Galaxy** (0.2 %, ~x2 income, x10 points); starfall 4th bar at 0.9 bar of stars. Simulator: `P.sizeMax`, plan `VARIANTS`, Ocean line as a list, Big Catch line; starfall `--fourthBar` | Rebirths 9–12 at ~13h37 / 16h28 / 19h53 / 23h14, **all 24 species ~25h15 (24h18–26h34)**, ~day 26; runs 2h50–3h25. Size: V1 ~2–3 % faster (all eighteen 12h11 → 11h55), income +15–30 %. 4th bar: 2.6 % of perfect starfalls (0.3 % at 75 % caught) |
 
 ---

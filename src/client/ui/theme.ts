@@ -264,6 +264,13 @@ export const FISH_ICONS: Record<FishType, Record<FishVariant, string>> = {
 		Shiny: "rbxassetid://129354053593771",
 		Galaxy: "rbxassetid://120747197093307",
 	},
+	KittyKoi: {
+		Normal: "rbxassetid://79243929372160",
+		Anomaly: "rbxassetid://139022800198218",
+		Ghost: "rbxassetid://114853168579428",
+		Shiny: "rbxassetid://99781367267600",
+		Galaxy: "rbxassetid://115123884947132",
+	},
 	// Easter egg: no variant, every column is its one icon
 	FrenchFish: {
 		Normal: FRENCH_FISH_ICON,
@@ -301,6 +308,7 @@ export const THEME_PALETTES: Record<AquariumTheme, Palette> = {
 	CosmicSanctuary: palette("#9A7CFF", "#5A3CC8", "#3A2490", "#140A40"),
 	AuroraGlacier: palette("#BFFFEA", "#4FE3C4", "#2E9FB0", "#0E3A5A"),
 	SkyArchipelago: palette("#FFE2B8", "#7FC4FF", "#4A8BE0", "#1E3C78"),
+	RainbowDreamland: palette("#FFD6F5", "#FF8FD6", "#C46BE0", "#5A2A7A"),
 };
 
 /** Face colours of a found variant's slot (FigCraft: ItemSlot_<Variant>). */
@@ -417,6 +425,11 @@ export const EGG_SPRITES: Record<EggType, EggSprites> = {
 		icon: "rbxassetid://92767387584946", // SkyEgg.png
 		top: "rbxassetid://75625389768762", // SkyEggTop.png
 		bottom: "rbxassetid://108227475855841", // SkyEggBottom.png
+	},
+	Dreamland: {
+		icon: "rbxassetid://113174128597054", // DreamlandEgg.png
+		top: "rbxassetid://114356555623611", // DreamlandEggTop.png
+		bottom: "rbxassetid://75858565090660", // DreamlandEggBottom.png
 	},
 };
 

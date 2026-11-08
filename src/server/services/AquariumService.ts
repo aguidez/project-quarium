@@ -25,6 +25,9 @@ const THEME_CHILD_ATTRIBUTE = "ThemeChild"; // decals / textures a theme added t
 const RIM_PARTS = ["RimFront", "RimBack", "RimLeft", "RimRight"];
 const PEARL_COLOR = Color3.fromHex("#F3ECF7");
 const PEARL_REFLECTANCE = 0.3;
+// The Aurora rims cosmetic (FinishAuroraRims, V1.2): Neon rims tagged AuroraRim, their colour drifted by the clients
+const AURORA_START = Color3.fromHex("#5CF2C0");
+type RimFinish = "Pearl" | "Aurora" | "None";
 
 /** Axis-aligned box describing the inside of a water volume (world space). */
 export interface Bounds {
@@ -59,7 +62,7 @@ export interface Aquarium {
 	ownerLabel: TextLabel;
 	owner?: Player;
 	theme?: AquariumTheme; // worn now (see applyTheme)
-	pearlRims?: boolean; // the Pearl rims finish worn now
+	rims?: RimFinish; // the rims finish worn now (Pearl / Aurora; "None")
 	decorKey?: string; // the owner's decor cosmetics placed now (sorted ids)
 	themeDecor?: Model;
 }
@@ -168,11 +171,18 @@ class AquariumServiceSingleton implements Lifecycle {
 		while (true) {
 			for (const aquarium of this.aquariums) {
 				const data = aquarium.owner ? DataService.getData(aquarium.owner) : undefined;
-				const pearlRims = data ? isCosmeticShown(data, "FinishPearlRims") : false;
+				// The two rims finishes share a group: one or none shows (both shown only in a broken save: Aurora wins)
+				const rims: RimFinish = !data
+					? "None"
+					: isCosmeticShown(data, "FinishAuroraRims")
+						? "Aurora"
+						: isCosmeticShown(data, "FinishPearlRims")
+							? "Pearl"
+							: "None";
 				const decor = data
 					? data.cosmetics.filter((cosmetic) => isDecor(cosmetic) && isCosmeticShown(data, cosmetic))
 					: [];
-				this.applyTheme(aquarium, data ? getDisplayedTheme(data) : "Basic", pearlRims, decor);
+				this.applyTheme(aquarium, data ? getDisplayedTheme(data) : "Basic", rims, decor);
 			}
 			task.wait(THEME_CHECK_INTERVAL);
 		}
@@ -188,13 +198,13 @@ class AquariumServiceSingleton implements Lifecycle {
 	 * holds parts named like the tank's (Sand, Backdrop, Base, Rim...): their look (and decals,
 	 * textures...) is copied onto the tank. Everything else is decor, cloned into the tank.
 	 */
-	private applyTheme(aquarium: Aquarium, theme: AquariumTheme, pearlRims: boolean, decorIds: CosmeticId[]) {
+	private applyTheme(aquarium: Aquarium, theme: AquariumTheme, rims: RimFinish, decorIds: CosmeticId[]) {
 		const decorKey = [...decorIds].sort().join(",");
-		if (aquarium.theme === theme && aquarium.pearlRims === pearlRims && aquarium.decorKey === decorKey) return;
+		if (aquarium.theme === theme && aquarium.rims === rims && aquarium.decorKey === decorKey) return;
 		const template = this.themes.get(theme);
 		if (!template) return;
 		aquarium.theme = theme;
-		aquarium.pearlRims = pearlRims;
+		aquarium.rims = rims;
 		aquarium.decorKey = decorKey;
 
 		aquarium.themeDecor?.Destroy();
@@ -212,16 +222,17 @@ class AquariumServiceSingleton implements Lifecycle {
 			}
 			style.Destroy();
 		}
-		// The Pearl rims finish (Ocean 300,000) goes over every theme's rims
-		if (pearlRims) {
-			for (const name of RIM_PARTS) {
-				const rim = aquarium.model.FindFirstChild(name);
-				if (!rim?.IsA("BasePart")) continue;
-				rim.Color = PEARL_COLOR;
-				rim.Material = Enum.Material.SmoothPlastic;
-				rim.MaterialVariant = "";
-				rim.Reflectance = PEARL_REFLECTANCE;
-			}
+		// A rims finish (Pearl: Ocean 300,000; Aurora: Ocean 14,000,000) goes over every theme's rims
+		for (const name of RIM_PARTS) {
+			const rim = aquarium.model.FindFirstChild(name);
+			if (!rim?.IsA("BasePart")) continue;
+			CollectionService.RemoveTag(rim, TAGS.AuroraRim);
+			if (rims === "None") continue;
+			rim.Material = rims === "Aurora" ? Enum.Material.Neon : Enum.Material.SmoothPlastic;
+			rim.MaterialVariant = "";
+			rim.Color = rims === "Aurora" ? AURORA_START : PEARL_COLOR;
+			rim.Reflectance = rims === "Aurora" ? 0 : PEARL_REFLECTANCE;
+			if (rims === "Aurora") CollectionService.AddTag(rim, TAGS.AuroraRim);
 		}
 		for (const part of decor.GetDescendants()) {
 			// Decor never blocks a click on the water or a coin, nor a character

@@ -20,6 +20,7 @@ export type FishType =
 	| "FoxBetta"
 	| "CloudWhale"
 	| "PegasusSeahorse"
+	| "KittyKoi"
 	| "FrenchFish"
 	| "AlienFish"
 	| "Sugar";
@@ -60,6 +61,7 @@ export type CoinType =
 	| "Frost"
 	| "Cloud"
 	| "Feather"
+	| "PawPrint"
 	| "Croissant"
 	| "Sugar";
 export const COIN_TYPES: readonly CoinType[] = [
@@ -84,6 +86,7 @@ export const COIN_TYPES: readonly CoinType[] = [
 	"Frost",
 	"Cloud",
 	"Feather",
+	"PawPrint",
 	"Croissant",
 	"Sugar",
 ];
@@ -487,6 +490,20 @@ export const FISH_TYPES: Record<FishType, FishConfig> = {
 		scaleMax: 1.1,
 		speedMin: 1.3,
 		speedMax: 2.3,
+		hunger: DEFAULT_HUNGER,
+	},
+	// Species 22, the Rainbow Dreamland's (rebirth 11, the Dreamland Egg): a quick one (8 s) after the slow Pegasus
+	KittyKoi: {
+		displayName: "Kitty Koi",
+		rarity: "Mythic",
+		income: 53760000, // 6,720,000/s
+		oceanPoints: 210000,
+		coin: "PawPrint",
+		incomeInterval: 8, // a calico koi with kitten ears: little paw prints
+		scaleMin: 0.95,
+		scaleMax: 1.1,
+		speedMin: 1.8,
+		speedMax: 3,
 		hunger: DEFAULT_HUNGER,
 	},
 	// Easter egg (see EasterEggConfig): its coin is a croissant worth half the tank's income per minute

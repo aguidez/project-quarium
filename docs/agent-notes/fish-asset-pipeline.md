@@ -112,4 +112,13 @@ with `tools/blender/studio/export_fish.luau` + `tools/obj-receiver.js`, upload w
   - Rejected generations of this step (owner's account, archive in the Creator Dashboard if wanted): Cloud Whale A
     72791660852423, Pegasus A 111998331410662, crabs 77720864614867 (A, the bumps), 74484774844341, 138048021018014,
     130734970860281, the star-shaped "cloud" coin 131393861371572.
+- **2026-11-08 (V1.2 M5: Kitty Koi, Rainbow Dreamland)**: a hybrid prompt can split into **two creatures** ("a koi
+  with cat ears" gave a koi with a little cat riding on it, twice) or a standing cat-mermaid. What worked: "a fish with the
+  head of a kitten: two triangular cat ears growing straight up from the top of the fish's own head ... one single
+  creature" (a round calico kitten-fish, face on the front of the nose: its sticker at yaw 35°, not 75°). Write "no
+  whiskers": one candidate had thin white whiskers at the mouth anyway (rejected, CLAUDE.md §7). "Smooth glossy round
+  pebbles in pastel colours" piled up like **jelly beans / pills**: left out (the roadmap rules out pill-like candies),
+  replaced by glass sphere Parts (bubbles), nothing uploaded. A theme can reuse another theme's generated props by
+  re-tinting their SurfaceAppearance (the Sky clouds in pastel). Rejected generations (owner's account): Kitty Koi
+  71788116537992, 98527050185153, 95784287651571, 91853431735806, 125390009512075; pebbles 135588567495428.
 

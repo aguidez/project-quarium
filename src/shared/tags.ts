@@ -2,6 +2,8 @@
 export const TAGS = {
 	/** An aquarium model. Attributes: "PlotIndex" (number), "OwnerUserId" (number, absent when free). */
 	Aquarium: "Aquarium",
+	/** A tank rim wearing the Aurora rims finish (AquariumService): AuroraRimsController drifts its Neon colour. */
+	AuroraRim: "AuroraRim",
 	/** The water volume of an aquarium. Clicking it drops food. */
 	AquariumWater: "AquariumWater",
 	/**

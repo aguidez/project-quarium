@@ -15,7 +15,8 @@ export type EggType =
 	| "Crystal"
 	| "Cosmic"
 	| "Aurora"
-	| "Sky";
+	| "Sky"
+	| "Dreamland";
 
 export interface EggOdds {
 	fishType: FishType;
@@ -209,6 +210,18 @@ export const EGG_TYPES: Record<EggType, EggConfig> = {
 		],
 		order: 14,
 		requires: "Aurora",
+	},
+	// ~17x rebirth 11 (tools/balance-v1.2-plan.js): run 11's long wall, after a rebirth only x3.1 the last one
+	Dreamland: {
+		displayName: "Dreamland Egg",
+		price: 50e15,
+		hatchTime: 180,
+		odds: [
+			{ fishType: "PegasusSeahorse", chance: 55 },
+			{ fishType: "KittyKoi", chance: 45 },
+		],
+		order: 15,
+		requires: "Sky",
 	},
 };
 

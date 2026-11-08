@@ -28,7 +28,9 @@ export type OceanRewardId =
 	| "Aquarium27"
 	| "HermitCrab"
 	| "Aquarium29"
-	| "QuickPantry";
+	| "QuickPantry"
+	| "Aquarium31"
+	| "AuroraRims";
 
 /**
  * A companion upgrade multiplies what the companion does: the Snail's crawling speed, the Pelican's
@@ -221,6 +223,21 @@ export const OCEAN_MILESTONES: readonly OceanMilestone[] = [
 		title: "Quick pantry",
 		description: "A portion of your food reserve comes back in 7 seconds.",
 		reward: { kind: "Perk", perk: "FoodRefill3" },
+	},
+	// Rebirth 11 (ROADMAP_V1.2 M5): the tank 31 comes with its release (~19h53), then a cosmetic goal
+	{
+		id: "Aquarium31",
+		points: 9000000,
+		title: "Dreamland aquarium",
+		description: "Your aquarium holds 31 fish.",
+		reward: { kind: "Capacity", capacity: 31 },
+	},
+	{
+		id: "AuroraRims",
+		points: 14000000,
+		title: "Aurora rims",
+		description: "The rims of your aquarium glow with the colours of the northern lights, whatever its theme.",
+		reward: { kind: "Cosmetic", cosmetics: ["FinishAuroraRims"] },
 	},
 ];
 

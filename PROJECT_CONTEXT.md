@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-08 (V1.1.22: rebirth 10 and the Sky Archipelago, the Cloud Whale and the Pegasus Seahorse (species 20–21), the Sky Egg, tank 29, the Hermit Crab with its live variant luck, the Quick pantry (ROADMAP_V1.2 M4)).
+> Last updated: 2026-11-08 (V1.1.23: rebirth 11 and the Rainbow Dreamland, the Kitty Koi (species 22), the Dreamland Egg, tank 31, the Aurora rims (ROADMAP_V1.2 M5)).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -32,8 +32,8 @@ coins. Around that core loop:
   Points, Lucky, +50% Coins, and the Water Hen / Swordfish / Jellyfish passes sold from their quest lines;
 - rebirths: restart the run for a permanent coin multiplier and a new aquarium theme (10 levels: Lagoon, Neon Coral,
   Pirate Wreck, Atlantis, Mariana Trench, Volcanic Temple, Crystal Caverns, Cosmic Sanctuary, then V1.2's Aurora
-  Glacier and Sky Archipelago);
-- cosmetics: titles above the head, decor in the tank, Pearl rims; the player can pick the theme, title and shown
+  Glacier, Sky Archipelago and Rainbow Dreamland);
+- cosmetics: titles above the head, decor in the tank, Pearl or Aurora rims; the player can pick the theme, title and shown
   decor (Customize button); the leaderboard titles are held, not earned: the day's top 10 of each board wears its
   title on a nameplate (gold #1, silver #2, bronze #3, navy #4–#10) until the next day's ranking;
 - easter eggs: secret fish hidden in every egg (the French Fish), made by an event (the Alien Fish of the UFO
@@ -259,7 +259,7 @@ ProjectQuarium/
    │     │                   upgrades, its perks): the line under its ability on the companion card
    │     ├─ customization.ts ThemeChoice (a reached theme or "Auto"), TitleChoice (a title held, "Auto" = the best,
    │     │                   "None"); getUnlockedThemes / getThemeOrder, getDisplayedTheme, isHideable (Decor / Finish),
-   │     │                   isCosmeticShown; titles: TitleData, getOwnedTitles (leaderboard titles held, best rank first,
+   │     │                   isCosmeticShown (finishes: Pearl rims and, V1.2, Aurora rims, grouped "Rims": one shows); titles: TitleData, getOwnedTitles (leaderboard titles held, best rank first,
    │     │                   then the earned ones in TITLE_ORDER), getBestTitle, getTitleRank, getDisplayedTitle
    │     ├─ cosmetics.ts     CosmeticId / COSMETICS (kind Title / Decor / Finish; `leaderboard` on the three leaderboard
    │     │                   titles TitleOceanLegend / TitleTankTycoon / TitleDevotedKeeper, never in PlayerData.cosmetics),
@@ -269,7 +269,7 @@ ProjectQuarium/
    │     │                   getPassById, getPassCoinMultiplier (x1.5) / getPassOceanMultiplier (x2) /
    │     │                   getPassVariantLuck (x2) / getPassCompanionSlots (+1). The companion passes (WaterHenPass,
    │     │                   SwordfishPass, JellyfishPass) are sold from their quest line, picture = the companion's sticker
-   │     ├─ quests.ts        QUESTS (Story1–9, Voyage1–20 the main line, WaterHen1–3 / Swordfish1–3 / Jellyfish1–3 the paid
+   │     ├─ quests.ts        QUESTS (Story1–9, Voyage1–22 the main line, WaterHen1–3 / Swordfish1–3 / Jellyfish1–3 the paid
    │     │                   companion lines, HermitCrab1–3 the free one (eggs with its full bonus), Hatchery1–5 / Collector1–6 / Ocean1–2 / BigCatch1–5 / FishKeeper1–3 the free side lines,
    │     │                   Daily* / Weekly*), DAILY_QUEST_POOL / WEEKLY_QUEST_POOL (7 each, 3 drawn per period),
    │     │                   STORY_LINES (Start / Ocean / Rebirth (shown "Voyage") / Snail / Pelican / Hatchery /
@@ -328,7 +328,7 @@ ProjectQuarium/
    │     │                   EVENT_ATTRIBUTES, LURKING_ATTRIBUTE, ADMIN_EVENT_ORDER, getActiveEvent,
    │     │                   getEventCoinMultiplier(owner), EventSource, getRecurringEvents, getRecurringChance,
    │     │                   EVENT_IMMUNE_ATTRIBUTE + isEventImmune (tutorial)
-   │     ├─ rebirths.ts      REBIRTHS (price, multiplier, start money, theme; 10 since V1.1.22), AQUARIUM_THEMES (Basic + the 10 themes, AuroraGlacier and SkyArchipelago the V1.2 ones),
+   │     ├─ rebirths.ts      REBIRTHS (price, multiplier, start money, theme; 11 since V1.1.23), AQUARIUM_THEMES (Basic + the 11 themes, AuroraGlacier, SkyArchipelago and RainbowDreamland the V1.2 ones),
    │     │                   getNextRebirth, getRebirthMultiplier, getAquariumTheme, getRebirthOceanPoints
    │     ├─ likes.ts         Like rules (1 per hour given, x2 coins for 5 min, restarted by each like), board offset, helpers
    │     ├─ onboarding.ts    Onboarding steps + rules (what is allowed / free at each step), ONBOARDING_REWARD,
@@ -363,7 +363,8 @@ ProjectQuarium/
    │     ├─ AquariumService  Registers Studio tanks, assigns one per player, owner nameplate (OwnerPlate SurfaceGui on the
    │     │                   Base), runtime folders (Fish/Food/Coins/Companions), focus reports ("SetFocus") + isTending /
    │     │                   isAtOwnAquarium; dresses each tank in its owner's displayed theme (polled every second; free
-   │     │                   tanks Basic), the Pearl rims finish (pearly F3ECF7 rims, Reflectance 0.3, any theme) and the
+   │     │                   tanks Basic), a rims finish (Pearl: pearly F3ECF7 rims, Reflectance 0.3; Aurora, V1.2: Neon
+   │     │                   rims tagged `AuroraRim`, coloured by the clients; any theme; Aurora wins in a broken save) and the
    │     │                   decor cosmetics (DecorTemplate clones at DECOR_SLOTS), rebuilt when any of them changes; `decorCovers`
    │     │                   (each decor piece's footprint and top in the tank's frame, from its visible parts);
    │     │                   clears the INCOME_ATTRIBUTES of a freed tank
@@ -559,6 +560,8 @@ ProjectQuarium/
       │  │                   Crab (rig_boxes.py: LegsL / R shuffle on the crawl phase, ClawL / R pinch sideways, Head nod;
       │  │                   its shell on the root, never moved); every frame
       │  │                   within 60 studs, every 2nd to 110, every 4th beyond, frozen off screen; no budget
+      │  ├─ AuroraRimsController  The Aurora rims cosmetic (V1.2): drifts the Neon colour of every rim tagged `AuroraRim`
+      │  │                   (AquariumService.applyTheme tags them) through the northern lights' colours, 20 updates a second
       │  ├─ PelicanChargesController  Charge gauge above the local player's on-demand Pelican / Jellyfish (BillboardGui): one
       │  │                   slot per charge, a pellet growing while it refills; hidden while MaxCharges is 0
       │  ├─ ChatTitleController  TextChatService.OnIncomingMessage: the sender's title as a coloured tag before their name in
@@ -722,7 +725,7 @@ ProjectQuarium/
   Catfish, PirateFish (a new model since V1.1.3, its tricorn rigid on the head), BlueTang, BabySunfish, Lanternfish,
   Lionfish, Dragonfish (7-bone spine), WolfDogfish (the Husky Dogfish), BunnyShark (EarL / EarR), MiniLeviathan (rigged
   in its own space, the template keeps its -30° pitch), FoxBetta (V1.2, EarL / EarR), CloudWhale (V1.2, vertical stroke, its cloud
-  rigid), PegasusSeahorse (V1.2, a box rig): every species of the 10 aquariums, plus Sugar, AlienFish and the
+  rigid), PegasusSeahorse (V1.2, a box rig), KittyKoi (V1.2, EarL / EarR, no jaw): every species of the 11 aquariums, plus Sugar, AlienFish and the
   abyss `LanternFish` (EventFish; work files `AbyssLantern`; its stalk rigid under the welded lit Lure, no jaw). Still
   without bones: the K-pop idol (its template lost its texture, see §4: it only puffs on the beat until it is rigged)
   and the UFO (a ship the server glides, spins and tilts: no rig needed, tag `Ufo`, never a fish). The Swordfish companion too
@@ -731,7 +734,7 @@ ProjectQuarium/
   `Rig` attribute: ShopKeeperController finds his bones) (rig settings per species in design/rigs/<Fish>.json; ids in design/meshes/manifest.json:
   `rigModelId`, `rigMeshId`, `staticMeshId`).
 - **`ServerStorage.Assets`**:
-  - `Fish/` (tag `FishTemplate`, attr `FishType`): the 21 species + `FrenchFish`, `AlienFish` and `Sugar` (no
+  - `Fish/` (tag `FishTemplate`, attr `FishType`): the 22 species + `FrenchFish`, `AlienFish` and `Sugar` (no
     FishVariants).
     Copied on demand into `ReplicatedStorage.Assets.Fish` (server/fishAssets); `ReplicatedStorage.Assets` is an empty
     folder in the place, filled at runtime. Oddities: the Golden Guppy's ColorMap is a 1024² copy (the generated one

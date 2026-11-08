@@ -61,6 +61,8 @@ let FISH = {
 	// V1.2 (ROADMAP_V1.2 M4, V1.1.22): the Sky Archipelago's species
 	CloudWhale: { income: 33600000, interval: 20, ocean: 82000 },
 	PegasusSeahorse: { income: 100800000, interval: 30, ocean: 131000 },
+	// V1.2 M5 (V1.1.23): the Rainbow Dreamland's
+	KittyKoi: { income: 53760000, interval: 8, ocean: 210000 },
 };
 if (plan.FISH) FISH = plan.FISH;
 // Easter egg fish (fish.ts FishConfig.easterEgg): hidden chance (percent) per egg opened, taken from the egg's
@@ -121,6 +123,7 @@ let EGGS = [
 	{ name: "Cosmic", price: 2.6e12, hatch: 180, odds: { WolfDogfish: 25, BunnyShark: 55, MiniLeviathan: 20 } },
 	{ name: "Aurora", price: 400e12, hatch: 180, odds: { MiniLeviathan: 55, FoxBetta: 45 } },
 	{ name: "Sky", price: 770e12, hatch: 180, odds: { FoxBetta: 25, CloudWhale: 55, PegasusSeahorse: 20 } },
+	{ name: "Dreamland", price: 50e15, hatch: 180, odds: { PegasusSeahorse: 55, KittyKoi: 45 } },
 ];
 if (plan.EGGS) EGGS = plan.EGGS;
 // Rebirth n is REBIRTHS[n - 1] (rebirths.ts): price, total coin multiplier, start money
@@ -135,6 +138,7 @@ let REBIRTHS = [
 	{ price: 2.2e12, mult: 8000, start: 300 },
 	{ price: 200e12, mult: 25000, start: 300 },
 	{ price: 640e12, mult: 120000, start: 300 },
+	{ price: 3e15, mult: 375000, start: 300 },
 ];
 if (plan.REBIRTHS) REBIRTHS = plan.REBIRTHS;
 // Capacity milestones (oceanRewards.ts, kind "Capacity"): the tank holds `capacity` fish from `points` Ocean Points
@@ -147,11 +151,12 @@ let CAPACITY = [
 	{ points: 450000, capacity: 25 },
 	{ points: 1.5e6, capacity: 27 },
 	{ points: 4e6, capacity: 29 },
+	{ points: 9e6, capacity: 31 },
 ];
 if (plan.CAPACITY) CAPACITY = plan.CAPACITY;
 let OCEAN_MILESTONES = [
 	50, 100, 200, 500, 1500, 5000, 8000, 25000, 40000, 70000, 85000, 120000, 180000, 200000, 300000, 450000, 1000000,
-	1500000, 2500000, 4000000, 6000000,
+	1500000, 2500000, 4000000, 6000000, 9000000, 14000000,
 ]; // oceanRewards.ts (only reported, except the capacity / incubator ones)
 if (plan.OCEAN_MILESTONES) OCEAN_MILESTONES = plan.OCEAN_MILESTONES;
 // Incubator milestones (oceanRewards.ts, kind "Incubator"): from `points` Ocean Points, `count` eggs of the same type
@@ -174,8 +179,9 @@ const LIVE_QUEST_REWARDS = {
 		MiniLeviathan: 5,
 		FoxBetta: 5,
 		PegasusSeahorse: 5,
+		KittyKoi: 5,
 	},
-	rebirth: { 2: 500, 3: 1500, 4: 4000, 5: 10000, 6: 25000, 7: 60000, 8: 150000, 9: 375000, 10: 900000 },
+	rebirth: { 2: 500, 3: 1500, 4: 4000, 5: 10000, 6: 25000, 7: 60000, 8: 150000, 9: 375000, 10: 900000, 11: 2200000 },
 };
 const QUEST_REWARDS = Object.assign({ discover: {}, rebirth: {} }, plan.QUEST_REWARDS || LIVE_QUEST_REWARDS);
 // The free side lines (quests.ts, live since V0.46). Hatchery: minutes of income at each total of fish hatched.
@@ -235,7 +241,7 @@ const P = Object.assign(
 		weeklyFromRebirth: 3,
 		boostMult: 2,
 		checkpoints: [15, 30, 60, 90, 120, 150, 180, 240, 300, 360],
-		horizon: 24 * 3600, // V1.2 so far ends with the Pegasus Seahorse after rebirth 10 (~19 h); room for the slowest players
+		horizon: 28 * 3600, // V1.2 so far ends with the Kitty Koi after rebirth 11 (~23h40 in the plan); room for the slowest players
 		players: 2000,
 		sizeMax: 15, // the Size score's range (shared/types/size SIZE_MAX, live since V1.1.16); 0 = none
 	},
