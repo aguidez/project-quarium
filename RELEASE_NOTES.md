@@ -11,6 +11,14 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.2.10 — 2026-11-08
+
+**Changes**
+- The Ocean Creator title is lit from its whole length: a soft golden glow behind the word and sun rays all along it,
+  above and below, fanning outward and swaying gently (no longer a single burst behind its middle).
+
+---
+
 ## V1.2.9 — 2026-11-08
 
 **Changes**
