@@ -3,10 +3,16 @@ import { Lifecycle } from "shared/framework";
 import {
 	COSMETICS,
 	CosmeticId,
+	CREATOR_AURA_COLOR,
+	CREATOR_TITLE,
+	CREATOR_TITLE_COLOR,
 	EARNED_TITLE_COLOR,
+	isCreatorTitle,
 	TITLE_ATTRIBUTE,
 	TITLE_RANK_ATTRIBUTE,
 } from "shared/types/cosmetics";
+import { TAGS } from "shared/tags";
+import { isCreator } from "../admins";
 import { getDisplayedTitle, getTitleRank } from "shared/types/customization";
 import {
 	getTitleTier,
@@ -49,6 +55,15 @@ class TitleServiceSingleton implements Lifecycle {
 
 	public onInit() {
 		Players.PlayerRemoving.Connect((player) => this.shown.delete(player));
+		// The creator's title: given to the creator at each join, taken from anyone else (never earned)
+		DataService.onLoaded((player, save) => {
+			const cosmetics = save.player.cosmetics;
+			const index = cosmetics.indexOf(CREATOR_TITLE);
+			if (isCreator(player) && index < 0) {
+				cosmetics.push(CREATOR_TITLE);
+				save.player.titleChoice = CREATOR_TITLE; // worn the first time it is given (another one can be picked after)
+			} else if (!isCreator(player) && index >= 0) cosmetics.remove(index);
+		});
 	}
 
 	public onStart() {
@@ -81,6 +96,7 @@ class TitleServiceSingleton implements Lifecycle {
 	}
 
 	private buildText(head: BasePart, title: CosmeticId) {
+		if (isCreatorTitle(title)) return this.buildCreator(head, title);
 		const billboard = this.billboard(UDim2.fromScale(4.2, 0.65)); // studs: readable from the lobby without hiding the tank
 		const label = new Instance("TextLabel");
 		label.Size = UDim2.fromScale(1, 1);
@@ -91,6 +107,41 @@ class TitleServiceSingleton implements Lifecycle {
 		label.TextColor3 = EARNED_TITLE_COLOR;
 		this.stroke(label, OUTLINE, 2);
 		label.Parent = billboard;
+		billboard.Parent = head;
+	}
+
+	/**
+	 * The creator's title: bright red letters with a dark outline, over the same text drawn with a wide, soft, lighter red
+	 * stroke (its aura, tagged TitleAura: each client pulses it, TitleAuraController). A little bigger than the earned ones.
+	 */
+	private buildCreator(head: BasePart, title: CosmeticId) {
+		const billboard = this.billboard(UDim2.fromScale(4.8, 0.75));
+		const text = COSMETICS[title].displayName.upper();
+		const layer = (name: string, zIndex: number) => {
+			const label = new Instance("TextLabel");
+			label.Name = name;
+			label.Size = UDim2.fromScale(1, 1);
+			label.BackgroundTransparency = 1;
+			label.Font = Enum.Font.LuckiestGuy;
+			label.Text = text;
+			label.TextScaled = true;
+			label.ZIndex = zIndex;
+			label.Parent = billboard;
+			return label;
+		};
+		const aura = layer("Aura", 1);
+		aura.TextColor3 = CREATOR_AURA_COLOR;
+		aura.TextTransparency = 0.35;
+		const glow = new Instance("UIStroke");
+		glow.Color = CREATOR_AURA_COLOR;
+		glow.Thickness = 7;
+		glow.Transparency = 0.55;
+		glow.LineJoinMode = Enum.LineJoinMode.Round;
+		glow.Parent = aura;
+		glow.AddTag(TAGS.TitleAura);
+		const front = layer("Title", 2);
+		front.TextColor3 = CREATOR_TITLE_COLOR;
+		this.stroke(front, Color3.fromHex("#3A0505"), 2);
 		billboard.Parent = head;
 	}
 

@@ -14,6 +14,7 @@ import type { LeaderboardId } from "./leaderboards";
 export type CosmeticKind = "Title" | "Decor" | "Finish";
 
 export type CosmeticId =
+	| "TitleOceanCreator"
 	| "TitleOceanGuardian"
 	| "TitleMasterAquarist"
 	| "TitleCollector"
@@ -46,6 +47,11 @@ export interface CosmeticConfig {
 	/** A leaderboard title: held by the top 10 of this board, for a day. */
 	leaderboard?: LeaderboardId;
 	/**
+	 * The creator's title: never earned, given at each join to the creator's accounts only (server/admins.ts isCreator,
+	 * TitleService) and taken from anyone else; worn before every other title, in red with a pulsing aura.
+	 */
+	creator?: boolean;
+	/**
 	 * Decor sharing one spot of the tank (the same DECOR_SLOTS position): at most one of a group shows, the player
 	 * picks which or none (CustomizationService, DataService.addCosmetic, sanitizeSave: getGroupMates).
 	 */
@@ -53,6 +59,12 @@ export interface CosmeticConfig {
 }
 
 export const COSMETICS: Record<CosmeticId, CosmeticConfig> = {
+	TitleOceanCreator: {
+		kind: "Title",
+		displayName: "Ocean Creator",
+		description: "The title of the game's creator.",
+		creator: true,
+	},
 	TitleOceanGuardian: {
 		kind: "Title",
 		displayName: "Ocean Guardian",
@@ -226,6 +238,15 @@ export const TITLE_RANK_ATTRIBUTE = "TitleRank";
 
 /** Gold of the earned titles: their text above the head and their tag in the chat. */
 export const EARNED_TITLE_COLOR = Color3.fromHex("#FFD54A");
+
+/** The creator's title (COSMETICS creator): bright red text, its aura a lighter red that pulses (TitleAuraController). */
+export const CREATOR_TITLE: CosmeticId = "TitleOceanCreator";
+export const CREATOR_TITLE_COLOR = Color3.fromHex("#FF2B2B");
+export const CREATOR_AURA_COLOR = Color3.fromHex("#FF6A4D");
+
+export function isCreatorTitle(id: CosmeticId): boolean {
+	return COSMETICS[id].creator === true;
+}
 
 export function isLeaderboardTitle(id: CosmeticId): boolean {
 	return COSMETICS[id].leaderboard !== undefined;

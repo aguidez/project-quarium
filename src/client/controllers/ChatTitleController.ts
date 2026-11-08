@@ -2,8 +2,10 @@ import { Players, TextChatService } from "@rbxts/services";
 import { Lifecycle } from "shared/framework";
 import {
 	COSMETICS,
+	CREATOR_TITLE_COLOR,
 	EARNED_TITLE_COLOR,
 	isCosmeticId,
+	isCreatorTitle,
 	TITLE_ATTRIBUTE,
 	TITLE_RANK_ATTRIBUTE,
 } from "shared/types/cosmetics";
@@ -35,7 +37,11 @@ class ChatTitleControllerSingleton implements Lifecycle {
 		if (!isCosmeticId(title)) return undefined;
 		const rank = player?.GetAttribute(TITLE_RANK_ATTRIBUTE);
 		const ranked = typeIs(rank, "number");
-		const color = ranked ? TITLE_TIER_STYLES[getTitleTier(rank)].chat : EARNED_TITLE_COLOR;
+		const color = ranked
+			? TITLE_TIER_STYLES[getTitleTier(rank)].chat
+			: isCreatorTitle(title)
+				? CREATOR_TITLE_COLOR
+				: EARNED_TITLE_COLOR;
 		const label = COSMETICS[title].displayName.upper() + (ranked ? ` #${rank}` : "");
 		return `<font color="#${color.ToHex()}">[${label}]</font>`;
 	}

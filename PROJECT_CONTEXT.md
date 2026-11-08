@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-08 (V1.2.7: the Alien Fish says "tchiki" (SfxConfig region and fallback); V1.2.6: the admin panel's CLOSE OLD SERVERS).
+> Last updated: 2026-11-08 (V1.2.8: the creator's title Ocean Creator, red with a pulsing aura; V1.2.7: the Alien Fish says "tchiki").
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -264,7 +264,8 @@ ProjectQuarium/
    │     │                   isCosmeticShown (finishes: Pearl rims and, V1.2, Aurora and Galaxy rims, grouped "Rims": one shows); titles: TitleData, getOwnedTitles (leaderboard titles held, best rank first,
    │     │                   then the earned ones in TITLE_ORDER), getBestTitle, getTitleRank, getDisplayedTitle
    │     ├─ cosmetics.ts     CosmeticId / COSMETICS (kind Title / Decor / Finish; `leaderboard` on the three leaderboard
-   │     │                   titles TitleOceanLegend / TitleTankTycoon / TitleDevotedKeeper, never in PlayerData.cosmetics),
+   │     │                   titles TitleOceanLegend / TitleTankTycoon / TitleDevotedKeeper, never in PlayerData.cosmetics;
+   │     │                   `creator` on TitleOceanCreator, the creator's own: CREATOR_TITLE, CREATOR_TITLE_COLOR red),
    │     │                   TITLE_ORDER (earned titles), LEADERBOARD_TITLES, isLeaderboardTitle, DECOR_SLOTS (tank-local
    │     │                   position per decor id; a group's decor share one spot: Statue = Whale Statue / Pearl Throne, Trophy, Incubator = Golden / Diamond), isDecor, TITLE_ATTRIBUTE / TITLE_RANK_ATTRIBUTE, EARNED_TITLE_COLOR
    │     ├─ gamepasses.ts    GamePass / GAME_PASSES (name, shop text, Roblox id, icon, badge, shopOrder), getShopPasses,
@@ -348,7 +349,8 @@ ProjectQuarium/
    │  ├─ admins.ts           isGameOwner (the place's user, or rank 255 of its group) / isAdmin (the owner, the group's ranks ≥ 254 =
    │  │                      GROUP_ADMIN_RANK: the Manager role, + ADMIN_USER_IDS), checked server-side;
    │  │                      canUseAdminPanel (live: ADMIN_PANEL_USER_IDS only, the developer's account, by the
-   │  │                      owner's choice rather than a group rank; Studio: everyone)
+   │  │                      owner's choice rather than a group rank; Studio: everyone); isCreator (CREATOR_USER_IDS: the
+   │  │                      creator's title, live and Studio)
    │  ├─ saveData.ts         SaveData (profile: PlayerData + saved tank + stats + leaderboardBanned), SavedFish (its
    │  │                      Size score `size`: 0 in older saves), SAVE_TEMPLATE, sanitizeSave
    │  ├─ playerStats.ts      PlayerStats (server only, never synced): sessions, days, play / tending seconds, milestones
@@ -476,7 +478,10 @@ ProjectQuarium/
    │     │                   an earned title is gold LuckiestGuy text (4.2 × 0.65 studs); a leaderboard title a nameplate in
    │     │                   its rank's tier (pill + rank badge + board icon, laid out in design px and drawn in scale, 0.65
    │     │                   stud tall); MaxDistance 120, rebuilt when the title or its rank changes, removed without one;
-   │     │                   also sets the Player attributes `Title` / `TitleRank` (the chat tag)
+   │     │                   also sets the Player attributes `Title` / `TitleRank` (the chat tag). The creator's title
+   │     │                   (Ocean Creator): given at each load to isCreator only (worn the first time, taken from anyone
+   │     │                   else), first in getOwnedTitles; bright red text over a lighter red copy whose UIStroke is
+   │     │                   tagged `TitleAura` (4.8 × 0.75 studs)
    │     ├─ GamePassService  The only writer of PlayerData.passes: at join asks Roblox for each pass on sale
    │     │                   (UserOwnsGamePassAsync, 3 tries; no answer keeps the saved state; passes without an id are
    │     │                   dropped), grants a purchase from PromptGamePassPurchaseFinished (thank-you Reward),
@@ -576,10 +581,12 @@ ProjectQuarium/
       │  ├─ AuroraRimsController  The glowing rims cosmetics (V1.2): drifts the Neon colour of every rim tagged `GlowRim`
       │  │                   (AquariumService.applyTheme tags them) through its `RimFinish` palette (Aurora: the northern
       │  │                   lights; Galaxy: night blue, violet, pink), 20 updates a second
+      │  ├─ TitleAuraController  Pulses the creator title's aura (UIStrokes tagged `TitleAura`): thickness 5-10 and
+      │  │                   transparency on a 1.6 s sine, every frame, locally
       │  ├─ PelicanChargesController  Charge gauge above the local player's on-demand Pelican / Jellyfish (BillboardGui): one
       │  │                   slot per charge, a pellet growing while it refills; hidden while MaxCharges is 0
       │  ├─ ChatTitleController  TextChatService.OnIncomingMessage: the sender's title as a coloured tag before their name in
-      │  │                   the chat window ("[OCEAN LEGEND #1]", tier colour; earned titles gold), from the Player attributes
+      │  │                   the chat window ("[OCEAN LEGEND #1]", tier colour; earned titles gold, the creator's red), from the Player attributes
       │  ├─ StatsReportController  Once a minute sends "ReportClientStats" (platform, average fps, memory)
       │  ├─ ShopKeeperController  The fisherman's shop (tag ShopKeeper): isNearby / onNearbyChanged (opens on a ShopZone,
       │  │                   closes 2 studs past its edges; without any ShopZone in the place, the old rule: within 9 studs

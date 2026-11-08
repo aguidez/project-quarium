@@ -11,6 +11,14 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.2.8 — 2026-11-08
+
+**New**
+- **Ocean Creator**: the title of the game's creator, worn only by them, in bright red with a softly pulsing aura above
+  their head and a red tag in the chat.
+
+---
+
 ## V1.2.7 — 2026-11-08
 
 **Changes**

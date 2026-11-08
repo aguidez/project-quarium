@@ -37,6 +37,14 @@ export function isAdmin(player: Player): boolean {
  */
 const ADMIN_PANEL_USER_IDS: number[] = [10580349267];
 
+/** The game's creator, by UserId: the only accounts with the creator's title (Ocean Creator, TitleService). DOT_Pinpin. */
+const CREATOR_USER_IDS: number[] = [10580349267];
+
+/** Whether the player is the game's creator (the creator's title), on live servers and in Studio alike. */
+export function isCreator(player: Player): boolean {
+	return CREATOR_USER_IDS.includes(player.UserId);
+}
+
 /**
  * Who may open the admin panel (AdminService): ADMIN_PANEL_USER_IDS on live servers (its events reach every
  * server), and everyone in a Studio playtest (they only act on the playtest's own server).

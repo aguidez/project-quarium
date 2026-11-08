@@ -5,6 +5,7 @@ import { StarfallEventController } from "./controllers/StarfallEventController";
 import { AquariumInteractionController } from "./controllers/AquariumInteractionController";
 import { AudioController } from "./controllers/AudioController";
 import { AuroraRimsController } from "./controllers/AuroraRimsController";
+import { TitleAuraController } from "./controllers/TitleAuraController";
 import { ChatTitleController } from "./controllers/ChatTitleController";
 import { CapacityPlaqueController } from "./controllers/CapacityPlaqueController";
 import { IncomePlaqueController } from "./controllers/IncomePlaqueController";
@@ -50,4 +51,5 @@ bootstrap([
 	StatsReportController,
 	ChatTitleController,
 	AuroraRimsController,
+	TitleAuraController,
 ]);

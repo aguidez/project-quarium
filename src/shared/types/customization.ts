@@ -1,4 +1,4 @@
-import { COSMETICS, CosmeticId, LEADERBOARD_TITLES, TITLE_ORDER } from "./cosmetics";
+import { COSMETICS, CosmeticId, CREATOR_TITLE, LEADERBOARD_TITLES, TITLE_ORDER } from "./cosmetics";
 import { LEADERBOARD_IDS, LeaderboardId } from "./leaderboards";
 import { AquariumTheme, AQUARIUM_THEMES, getAquariumTheme, REBIRTHS } from "./rebirths";
 
@@ -60,8 +60,8 @@ export function getTitleRank(data: TitleData, title: CosmeticId): number | undef
 }
 
 /**
- * Every title the player may wear, the most prestigious first: the leaderboard titles held (best rank first, the boards'
- * order between equal ranks), then the earned ones (TITLE_ORDER).
+ * Every title the player may wear, the most prestigious first: the creator's (only ever on the creator's save), the
+ * leaderboard titles held (best rank first, the boards' order between equal ranks), then the earned ones (TITLE_ORDER).
  */
 export function getOwnedTitles(data: TitleData): CosmeticId[] {
 	const held = new Array<{ title: CosmeticId; rank: number; order: number }>();
@@ -70,7 +70,9 @@ export function getOwnedTitles(data: TitleData): CosmeticId[] {
 		if (rank !== undefined) held.push({ title: LEADERBOARD_TITLES[board], rank, order });
 	});
 	held.sort((a, b) => (a.rank !== b.rank ? a.rank < b.rank : a.order < b.order));
-	const titles = held.map((entry) => entry.title);
+	const titles = new Array<CosmeticId>();
+	if (data.cosmetics.includes(CREATOR_TITLE)) titles.push(CREATOR_TITLE);
+	for (const entry of held) titles.push(entry.title);
 	for (const title of TITLE_ORDER) if (data.cosmetics.includes(title)) titles.push(title);
 	return titles;
 }

@@ -7,6 +7,11 @@ export const TAGS = {
 	 * finish: AuroraRimsController drifts its Neon colour through that finish's palette.
 	 */
 	GlowRim: "GlowRim",
+	/**
+	 * The aura of the creator's title above their head (TitleService, a TextLabel's UIStroke): each client pulses it
+	 * (TitleAuraController).
+	 */
+	TitleAura: "TitleAura",
 	/** The water volume of an aquarium. Clicking it drops food. */
 	AquariumWater: "AquariumWater",
 	/**
