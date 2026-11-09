@@ -56,7 +56,7 @@ interface Sway {
  * What is left of V1's fish animation now that every species swims with bones (FishRigController):
  * - the beat puff of the music events, for every fish, event guest and fish-shaped companion;
  * - a fallback for a template without a bone rig (warned once in the output): a local fish sways as a whole; an event
- *   guest (a server model, the K-pop idol until it is rigged) only puffs.
+ *   guest without bones (a server model) only puffs.
  * Purely visual and local: FishRenderController builds and moves the models from the server's swim segments.
  */
 class FishAnimationControllerSingleton implements Lifecycle {

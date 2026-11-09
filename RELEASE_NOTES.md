@@ -11,6 +11,19 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.2.16 — 2026-11-09
+
+**New**
+- **The K-pop idol dances**: the K-pop event's guest, the last one that only glided, now dances to the music in
+  every tank: it rocks from side to side, nods on every beat, its ponytail swings behind it, its fins wave and its
+  tail sways.
+
+**Fixes**
+- **The K-pop idol has its colours again**: since the game moved to its group (V0.60.5), the K-pop event's guest
+  visited the tanks plain grey. Its purple skin, yellow jacket, pink headset and rainbow tail are back.
+
+---
+
 ## V1.2.15 — 2026-11-09
 
 The first real players' data (6,400 players since the release): half of them left during the tutorial, and almost

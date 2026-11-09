@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-09 (V1.2.15: gamepad play in the tank, forgiving taps, the "Next goal" card after the tutorial).
+> Last updated: 2026-11-09 (V1.2.16: the K-pop idol's texture back, on bones, dancing on the beat).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -156,6 +156,8 @@ ProjectQuarium/
 │                            Universe / Use) the use of assets of the owner's account (private audio)
 ├─ tools/obj-receiver.js     Local receiver of the OBJ (and .b64 texture) files a Studio script exports, on
 │                            127.0.0.1:34999, the address in Studio's MCP HTTP allowlist (agent note fish-asset-pipeline)
+├─ tools/asset-thumbnail.js  An image asset's public 420² thumbnail to a PNG (a rig preview's colour texture)
+├─ tools/rbxl-read.js        Read-only look into a binary .rbxl (Studio auto-saves): a class's string properties
 ├─ tools/player-stats.js     Real players vs the simulator (`npm run stats`): reads every profile of PlayerData_v1 through
 │                            Open Cloud (read-only key in workspace.local.json; universe 10774507209), prints attendance,
 │                            play time at each milestone (vs BALANCE.md §2), coin pickup share, dailies / weeklies
@@ -537,14 +539,16 @@ ProjectQuarium/
       │  │                   BillboardGuis straight in PlayerGui, ResetOnSpawn off
       │  ├─ FishAnimationController  The beat puffs of the music events (every fish, event guest and the Swordfish), and the
       │  │                   fallback of a template without `Rig = "Bones"` (warned once): a local fish sways as a whole
-      │  │                   on a local Weld, an event guest (the K-pop idol for now) only puffs
+      │  │                   on a local Weld, an event guest without bones only puffs
       │  ├─ FishRigController  Bone swim of the templates with `Rig = "Bones"`: turns the bones of their skinned `Mesh`
       │  │                   (rig_fish.py names: Head, Spine<n>, Tail1/2, FinTop/Bottom, FinL/R, Jaw, Ear*) with V1's
       │  │                   beats, each fish at its own phase; rest / cruise / sprint from its speed vs its species'
       │  │                   (speedMin / Max), turns bend the spine, Weak droops, Asleep swims lazily; moments from the
       │  │                   local attributes (fed, GrowthStage up, Exit Released / Eaten / Abducted). Companions and
       │  │                   box rigs are found by a bone name (Jellyfish Bell, Snail SnailHead, Pelican / Water Hen
-      │  │                   Torso, Pegasus `Curl`, Hermit Crab LegsL, Sea Turtle `FlipperFL`, Baby Kraken `ArmsL`);
+      │  │                   Torso, Pegasus `Curl`, Hermit Crab LegsL, Sea Turtle `FlipperFL`, Baby Kraken `ArmsL`, K-pop
+      │  │                   idol `Hair`: it dances on the beat MusicEventController hands it each frame, `setDanceBeat`,
+      │  │                   or at an idle tempo, half as much, without a playing track);
       │  │                   FishConfig.stroke "Vertical" (Cloud Whale) waves around the side axis. Every frame within
       │  │                   60 studs, every 2nd to 110, every 4th beyond, frozen off screen
       │  ├─ AuroraRimsController  The glowing rims cosmetics: drifts the Neon colour of every rim tagged `GlowRim`
@@ -718,10 +722,11 @@ ProjectQuarium/
   scales the bones too; a change of `Size` alone leaves them where they were, so a template's bones must match its
   `Size` (swap_template.luau's `fitBones` places them at mesh-space position x Size / MeshSize; without it the mesh
   crumples); the beat puff's short Size change is fine. On bones: every species, the three easter eggs, the abyss
-  `LanternFish`, every companion and the shop's Fisherman (no `Rig` attribute: ShopKeeperController finds his bones);
-  oddities: MiniLeviathan rigged in its own space (template pitched -30°), box rigs (rig_boxes.py) for the Pegasus
-  Seahorse, Sea Turtle and Baby Kraken, the Cloud Whale's vertical stroke. Without bones: the K-pop idol (lost its
-  texture, ROADMAP_FIXES: only puffs on the beat) and the UFO (a ship, tag `Ufo`). Rig settings per species in
+  `LanternFish`, the K-pop idol, every companion and the shop's Fisherman (no `Rig` attribute: ShopKeeperController
+  finds his bones); oddities: MiniLeviathan rigged in its own space (template pitched -30°), box rigs (rig_boxes.py) for
+  the Pegasus Seahorse, Sea Turtle, Baby Kraken and the K-pop idol (upright: Torso, Head with its headset and mic,
+  Hair, FinL / FinR, Tail; no jaw), the Cloud Whale's vertical stroke. Without bones: the UFO (a ship, tag `Ufo`). Rig
+  settings per species in
   design/rigs/<Fish>.json; ids in design/meshes/manifest.json (`rigModelId`, `rigMeshId`, `staticMeshId`).
 - **`ServerStorage.Assets`**:
   - `Fish/` (tag `FishTemplate`, attr `FishType`): the 24 species + `FrenchFish`, `AlienFish` and `Sugar` (no
@@ -738,7 +743,8 @@ ProjectQuarium/
   - `Coins/` (tag `CoinTemplate`, attr `CoinType`): one per species' coin + `CroissantCoin` (French Fish) and
     `SugarCube` (Sugar: pink, a white heart on its front); object
     meshes come with their front on local −X: rotated so they face the glass.
-  - `EventFish/` (tag `EventFishTemplate`, attr `EventType`): `KpopIdol` (Kpop), `LanternFish` (Abyss: near-black
+  - `EventFish/` (tag `EventFishTemplate`, attr `EventType`): `KpopIdol` (Kpop; its look a SurfaceAppearance
+    ColorMap, the TextureID the V0.60.5 mesh swap had cleared), `LanternFish` (Abyss: near-black
     anglerfish, welded parts lit / faded by the client: `Lure` and per eye an `EyeShell`, a red Neon `Eye` and a
     `Pupil`), `Ufo` (Ufo: silver saucer, root `Body` 8 × 4 × 8), `SaxCrab` (Island: a coral crab with a golden saxophone, 54
     Parts, nothing uploaded; Motor6D `Dance` Body → `Hips`, `Sway` Hips → `SaxRoot`, two `Arm` Motor6Ds with a `Grip`
@@ -983,8 +989,9 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
   (K-pop, admin): `FishService.dropBeatCoins(chance)` on every beat. *Paced* (Island Breeze, recurring): on one beat
   out of 2, `dropPacedBeatCoins(seconds)`, each fish dropping with chance seconds / its payout interval, the boost
   growing 0.5 → 1.5 (every fish earns ~x2 its income); a finale drops every fish's coin once. Client:
-  MusicEventController (music, beats, `onBeat` → FishAnimationController puffs, banner, guest effects). Guests:
-  "Swim" (K-pop idol) wanders like a fish; "Walk" (the saxophone crab) steps sideways on the sand facing the glass and
+  MusicEventController (music, beats, `onBeat` → FishAnimationController puffs, the beat position each frame →
+  FishRigController.setDanceBeat, banner, guest effects). Guests: "Swim" (K-pop idol) wanders like a fish and dances
+  on its bones (head nod on the beat, rock over 2 beats each way, ponytail swing, fins, tail); "Walk" (the saxophone crab) steps sideways on the sand facing the glass and
   dances (client `Transform` of its `GUEST_DANCE_JOINTS` Motor6Ds on the track's position, `getCarryPose`: the sax
   swings side to side on an 8-beat cycle, never past the face).
 - **Abyssal raid.** `AbyssService.run`: per owned tank, a loop waits for a coin (`findCoinToSteal`: most valuable, ≥

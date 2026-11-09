@@ -16,6 +16,7 @@ import {
 import { EVENT_BANNER_STYLES } from "client/ui/theme";
 import { AudioController } from "./AudioController";
 import { FishAnimationController } from "./FishAnimationController";
+import { FishRigController } from "./FishRigController";
 
 const NOTES = ["♪", "♫", "♬", "♩"];
 
@@ -256,6 +257,7 @@ class MusicEventControllerSingleton implements Lifecycle {
 		const music = this.music;
 		const playing = config?.kind === "Music" && music !== undefined && music.IsPlaying;
 		const beat = playing ? (music.TimePosition - config.beatOffset) / getBeatLength(config) : 0;
+		FishRigController.setDanceBeat(playing && beat >= 0 ? beat : undefined); // the bone dancers (the K-pop idol)
 		for (const [, guest] of this.guests) {
 			const dance = guest.dance;
 			if (!dance) continue;

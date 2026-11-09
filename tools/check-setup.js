@@ -22,7 +22,9 @@ function run(cmd, args) {
 		return execFileSync(cmd, args, {
 			encoding: "utf8",
 			stdio: ["ignore", "pipe", "ignore"],
-			shell: process.platform === "win32",
+			// Windows needs the shell for bare names found on PATH (.cmd shims), but cmd.exe would split a full
+			// path at its spaces ("C:\Program Files\..."): full paths run directly.
+			shell: process.platform === "win32" && !path.isAbsolute(cmd),
 		}).trim();
 	} catch {
 		return undefined;

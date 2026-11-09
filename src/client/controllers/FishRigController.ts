@@ -151,6 +151,21 @@ const TURTLE_HEAD_NOD = math.rad(5);
 const KRAKEN_BOB = 0.03; // × its height
 const KRAKEN_ROCK = math.rad(4);
 const KRAKEN_ARM_SWAY = math.rad(8);
+// The K-pop idol, the K-pop event's guest (V1.2, design/rigs/KpopIdol.json, a box rig: Torso the root, Head, Hair the
+// ponytail, FinL/R, Tail): it dances on the track's beat (MusicEventController.setDanceBeat): its body rocks from side
+// to side over two beats each way and dips on every beat, its head nods on the beat, its ponytail swings behind the
+// rock and bounces after each nod, its fins wave, its tail sways. No jaw: its headset's mic is on the Head bone, so it
+// never moves against the mouth (CLAUDE.md §7). Without a playing track it keeps dancing, slower and smaller
+const IDOL_ROCK = math.rad(6);
+const IDOL_BOB = 0.03; // × its height: the dip on each beat
+const IDOL_HEAD_NOD = math.rad(8);
+const IDOL_HEAD_COUNTER = 0.5; // × the rock: the head tilts back against it
+const IDOL_HAIR_SWING = math.rad(14);
+const IDOL_HAIR_BOUNCE = math.rad(5);
+const IDOL_FIN_WAVE = math.rad(25);
+const IDOL_TAIL_SWAY = math.rad(12);
+const IDOL_IDLE_BEATS = 1.5; // beats per second without a playing track ...
+const IDOL_IDLE_AMOUNT = 0.5; // ... at this share of the moves
 // Side letter of a rim / tentacle bone -> its direction from the axis, in mesh space (front -Z, right +X)
 const JELLY_SIDES: Record<string, Vector3> = {
 	F: new Vector3(0, 0, -1),
@@ -277,6 +292,9 @@ function boneAxis(mesh: MeshPart, bone: Bone, meshAxis: Vector3): Vector3 {
 class FishRigControllerSingleton implements Lifecycle {
 	private fishes = new Map<Model, RiggedFish>();
 	private frame = 0;
+	private danceBeat?: number; // the music event's beat position (MusicEventController), undefined without a playing track
+	private beatNow = 0; // this frame's beat for the dancers (the track's, or an idle tempo) ...
+	private danceAmount = IDOL_IDLE_AMOUNT; // ... and the share of their moves
 
 	public onInit() {
 		// The tanks' fish (built by FishRenderController), the event guests and the companions with a bone rig (the
@@ -291,6 +309,11 @@ class FishRigControllerSingleton implements Lifecycle {
 	public onStart() {
 		print("[Client] FishRigController started.");
 		RunService.RenderStepped.Connect(() => this.update());
+	}
+
+	/** The event track's beat position (beats since its first beat, fractional), every frame; undefined when silent. */
+	public setDanceBeat(beat: number | undefined) {
+		this.danceBeat = beat;
 	}
 
 	private track(instance: Instance) {
@@ -359,6 +382,7 @@ class FishRigControllerSingleton implements Lifecycle {
 	private findBones(mesh: MeshPart, companion: unknown, fishType: unknown): DrivenBone[] {
 		if (companion === "Pelican" || companion === "WaterHen") return this.findBirdBones(mesh, companion);
 		if (companion === "HermitCrab") return this.findCrabBones(mesh);
+		if (mesh.FindFirstChild("Hair", true)?.IsA("Bone")) return this.findIdolBones(mesh);
 		if (mesh.FindFirstChild("Curl", true)?.IsA("Bone")) return this.findSeahorseBones(mesh);
 		if (fishType === "SeaTurtle") return this.findTurtleBones(mesh);
 		if (fishType === "BabyKraken") return this.findKrakenBones(mesh);
@@ -583,6 +607,59 @@ class FishRigControllerSingleton implements Lifecycle {
 		return found;
 	}
 
+	/** The K-pop idol's bones (tools/blender/rig_boxes.py, design/rigs/KpopIdol.json): a dance on the beat. */
+	private findIdolBones(mesh: MeshPart): DrivenBone[] {
+		const found = new Array<DrivenBone>();
+		// Rock: one side over two beats, the other over the next two (as the saxophone crab's)
+		const rock = () => this.danceAmount * IDOL_ROCK * math.cos((math.pi * this.beatNow) / 2);
+		for (const bone of mesh.GetDescendants()) {
+			if (!bone.IsA("Bone")) continue;
+			const name = bone.Name;
+			if (name === "Torso") {
+				const up = boneAxis(mesh, bone, UP);
+				const dip = IDOL_BOB * mesh.Size.Y;
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, LENGTH),
+					drive: () => rock(),
+					// lowest on the beat, up in between
+					offset: () => up.mul(dip * this.danceAmount * math.abs(math.sin(math.pi * this.beatNow))),
+				});
+			} else if (name === "Head") {
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, SIDE),
+					// down on the beat (its top toward the front, -Z)
+					drive: () => -this.danceAmount * IDOL_HEAD_NOD * 0.5 * (1 + math.cos(TAU * this.beatNow)),
+					tiltAxis: boneAxis(mesh, bone, LENGTH),
+					tilt: () => -IDOL_HEAD_COUNTER * rock(),
+				});
+			} else if (name === "Hair") {
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, UP),
+					drive: () => this.danceAmount * IDOL_HAIR_SWING * math.sin((math.pi * this.beatNow) / 2 - 0.9),
+					tiltAxis: boneAxis(mesh, bone, SIDE),
+					tilt: () => this.danceAmount * IDOL_HAIR_BOUNCE * math.cos(TAU * this.beatNow - 0.6),
+				});
+			} else if (name === "FinL" || name === "FinR") {
+				const sign = name === "FinR" ? 1 : -1;
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, LENGTH),
+					drive: () => sign * this.danceAmount * IDOL_FIN_WAVE * math.sin(math.pi * this.beatNow),
+				});
+			} else if (name === "Tail") {
+				found.push({
+					bone,
+					axis: boneAxis(mesh, bone, LENGTH),
+					drive: () => this.danceAmount * IDOL_TAIL_SWAY * math.sin((math.pi * this.beatNow) / 2 - 1.2),
+				});
+			}
+		}
+		return found;
+	}
+
 	/** The Pegasus Seahorse's bones (tools/blender/rig_boxes.py, design/rigs/PegasusSeahorse.json). */
 	private findSeahorseBones(mesh: MeshPart): DrivenBone[] {
 		const found = new Array<DrivenBone>();
@@ -682,6 +759,8 @@ class FishRigControllerSingleton implements Lifecycle {
 		if (!camera) return;
 		this.frame += 1;
 		const now = os.clock();
+		this.beatNow = this.danceBeat ?? now * IDOL_IDLE_BEATS;
+		this.danceAmount = this.danceBeat !== undefined ? 1 : IDOL_IDLE_AMOUNT;
 		const eye = camera.CFrame.Position;
 		const viewport = camera.ViewportSize;
 		for (const [model, fish] of this.fishes) {

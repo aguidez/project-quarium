@@ -16,7 +16,7 @@ simulators, but not test in Studio). Run `npm run doctor` at the end: it checks 
 | **VS Code** | latest | editor; accept the recommended extensions (roblox-ts, ESLint, Rojo, Claude Code) | https://code.visualstudio.com |
 | **Claude Code** | latest | the AI agent (CLI or VS Code extension) | https://claude.com/claude-code |
 | **Blender** | 5.2 LTS (pinned, the same on every machine) | *V1.1 animations*: rigs the meshes, driven by the agent through the official Blender Lab MCP | https://www.blender.org/download/ (macOS: the Apple Silicon `.dmg`, into `/Applications`; Windows: the installer, default folder). Not `brew install --cask blender`: it installs the newest version, not the LTS |
-| **uv** | latest | *V1.1 animations*: runs the Blender MCP server (Python; uv fetches its own Python 3.10+) | macOS: `brew install uv`; Windows: `winget install astral-sh.uv` (or https://docs.astral.sh/uv/) |
+| **uv** | latest | *V1.1 animations*: runs the Blender MCP server (Python; uv fetches its own Python 3.10+) | macOS: `brew install uv`; Windows: `winget install astral-sh.uv`, or without winget (no admin needed) `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 \| iex"` (https://docs.astral.sh/uv/) |
 | **FigCraft** | 0.11–0.12 | *optional*: UI design (`design/ui/*.figcraft`, FigCraft MCP); needs **both** the app and `figcraft-cli` (the MCP attaches to the running app) | Windows: portable build (both side by side), unzip it anywhere outside the repo. macOS: the `.dmg` holds the app only, the CLI is a separate download (e.g. `/Applications/FigCraft CLI/figcraft-cli`) |
 
 Accounts: the **Roblox account that owns the game** (or Team Create access to it) to open the place and publish.

@@ -67,7 +67,8 @@ with `tools/blender/studio/export_fish.luau` + `tools/obj-receiver.js`, upload w
   model swap whose old variant textures no longer fit (new UVs) waits in an **untagged** staging folder
   (`ServerStorage._V11Staging`) until the variants, stickers and rig are ready, so a publish meanwhile breaks nothing.
 - **`ApplyMesh` clears `TextureID`** (2026-11-06): a template whose look is a TextureID loses it in a mesh swap (the K-pop
-  idol after V0.60.5's group swap: plain grey since). Before any `ApplyMesh` / mesh replacement, turn a TextureID into
+  idol after V0.60.5's group swap: plain grey until V1.2.16, its TextureID found in the PC's Studio auto-saves with
+  tools/rbxl-read.js). Before any `ApplyMesh` / mesh replacement, turn a TextureID into
   a SurfaceAppearance ColorMap (it survives), and check the look afterwards with a capture. An Edit capture with
   camera arguments needs `workspace.CurrentCamera.CameraType` Custom (after a Scriptable sticker sheet, put it back).
 

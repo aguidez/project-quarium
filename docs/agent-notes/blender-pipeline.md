@@ -19,7 +19,8 @@ server's code (checked: the only URLs are in its bundled Blender docs).
   `tools/blender/vendor/mcp-server-1.0.3/` (unpacked from the release's `.mcpb`, a zip). Env `BLENDER_MCP_HOST`,
   `BLENDER_MCP_PORT`, `BLENDER_PATH` (for its `blender --background` tools) are set by `tools/mcp/blender.js`.
 
-**Install on a machine:** Blender 5.2 LTS + `uv` (macOS `brew install uv`, Windows `winget install astral-sh.uv`),
+**Install on a machine:** Blender 5.2 LTS + `uv` (macOS `brew install uv`, Windows `winget install astral-sh.uv` or the
+installer below),
 then, **Blender closed**, `npm run blender-setup` (`tools/blender/setup.js`). Closed because an open Blender saves
 its preferences when it quits and wipes the add-on's activation. `npm run doctor` checks Blender's version, uv and
 the installed server. Installing the add-on by drag-and-drop in Blender only adds the "Blender Lab" *repository*
@@ -30,6 +31,15 @@ script does both through `blender --command extension install-file -r user_defau
 (default scene: Camera, Cube, Light) and waits for the port; the MCP handshake answers in ~5 s cold, ~0.5 s with
 Blender already open. Blender stays open after the session. `get_screenshot_of_window_as_image` returns a PNG
 (~660 KB on the Mac's Retina screen). A new server in `.mcp.json` only shows up in Claude Code after a reload.
+On the Windows PC (2026-11-09, Blender 5.2.3): handshake ~14 s cold (Blender start + uv), 26 tools listed; checked
+end to end from Claude Code (OBJ import of `design/meshes/Clownfish.obj` + window screenshot).
+
+**Windows install (2026-11-09):** `winget` wasn't on the PC's PATH; uv went in with its official installer, no admin
+(`powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`, into `~/.local/bin`, which
+`uvPath()` finds even before VS Code's PATH picks it up). `npm run doctor` used to print "Blender (version
+unreadable)": its `run()` used `shell: true` on Windows and cmd.exe split `C:\Program Files\...` at the space; full
+paths now run without the shell. Test the launcher outside Claude Code with a stdio `initialize` + `tools/list`
+sent to `node tools/mcp/blender.js` (it opens Blender if needed).
 
 **Quirks met (2026-11-06, "Blender: Connection closed" in Claude Code while the terminal test worked):**
 - VS Code opened from the Dock doesn't get the shell's PATH: `spawn uv ENOENT` (Homebrew's `/opt/homebrew/bin`
@@ -51,6 +61,22 @@ Blender already open. Blender stays open after the session. `get_screenshot_of_w
 `get_screenshot_of_window_as_image` / `_area_as_image` (images the agent can see), `render_viewport_to_path`,
 `render_thumbnail_to_path`, `jump_to_*` (focus an object / tab), `search_api_docs`, `get_python_api_docs`,
 `search_manual_docs` (offline Blender docs: use them before guessing a `bpy` API).
+
+**Export without Studio's HTTP (2026-11-09, the K-pop idol on the PC).** `export_fish.luau` posts to a local
+receiver that Studio's assistant now refuses. When `design/meshes/<Fish>.obj` already exists (the V0.60.5 group
+re-upload wrote them all on the PC, git-ignored; check its header's mesh id against the template's), skip step 1's
+Studio part: `node tools/asset-thumbnail.js <ColorMap id> design/rigs/work/<Fish>_color.png` (420², fine for a
+preview: the texture isn't in the GLB) and write `design/rigs/work/<Fish>.json` = `{ "tint": [r, g, b] }` from the
+SurfaceAppearance's Color. Upright guests (the idol) are box rigs: rig_boxes.py needs `t` and `h` in every box;
+the three-quarter preview (seen from above) hides them, render "front" and "side" frames too for the owner's GIF.
+Upload directories and asset scopes in Studio's MCP Permissions are **per machine**: on a new machine the first upload
+fails ("not inside a directory approved for uploads") until the owner adds `<repo>/design/rigs/work` there.
+Checking a rig's motions in a playtest: a fish off the player's screen is frozen (FishRigController), so clone the
+guest **client-side** in front of `workspace.CurrentCamera` (its tag comes along, the controllers drive the clone,
+anchored, nothing replicates), then read each bone's own rotation in mesh space: `rest = bone.WorldCFrame *
+bone.Transform:Inverse()`, `delta = WorldCFrame.Rotation * rest.Rotation:Inverse()`, applied to a mesh axis (the
+idol, 2026-11-09: head up.Z < 0 on the beat = a forward nod, both fin tips' dY of the same sign). A 60 s admin event
+can end mid-test: check the event track is playing before reading the music-driven amplitudes.
 
 **Batch checklist (one species = a few calls).** Paths from the repo root.
 1. *Export* (Studio, Edit): `node tools/obj-receiver.js design/rigs/work` in the background; run

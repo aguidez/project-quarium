@@ -1,0 +1,22 @@
+{
+	"//": "The K-pop idol (EventFish template KpopIdol, the K-pop event's guest), a box rig (tools/blender/rig_boxes.py): it stands upright (3.3 tall, 2.3 deep), so no spine wave. Boxes from a t / side / height scan with the texture's colours (2026-11-09): the Torso root carries the yellow jacket (h 0.25-0.47); the Head takes everything above h 0.47 (face, headset, its mic, the hair tuft), so the mic never moves against the mouth (CLAUDE.md 7: no jaw bone); the Hair bone, a child of the Head, takes the pink and blue ponytail behind it (t > 0.7, its root near the top of the head moves least); the purple FinL / FinR at the sides (h 0.29-0.43, |side| > 0.42; the left one barely sticks out of the jacket, so their boxes leave out the jacket's yellow with exclude_hue [30, 235], purple ~270 kept) come before the Head so the headset's ear cups above them stay on it; the pink Tail below h 0.24 curls to the left (-side).",
+	"rig": "boxes",
+	"root": { "name": "Torso", "head": [0, 0.4, 0.28], "tail": [0, 0.4, 0.46] },
+	"bones": [
+		{ "name": "Tail", "head": [0, 0.42, 0.26], "tail": [-0.6, 0.42, 0.03], "box": { "t": [-0.05, 1.05], "h": [-0.05, 0.24] }, "fade": 0.05 },
+		{ "name": "FinL", "head": [-0.45, 0.4, 0.37], "tail": [-0.9, 0.4, 0.36], "box": { "side": [-1.1, -0.42], "t": [0.2, 0.62], "h": [0.29, 0.43], "exclude_hue": [30, 235] }, "fade": 0.03 },
+		{ "name": "FinR", "head": [0.45, 0.4, 0.37], "tail": [0.9, 0.4, 0.36], "box": { "side": [0.42, 1.1], "t": [0.2, 0.62], "h": [0.29, 0.43], "exclude_hue": [30, 235] }, "fade": 0.03 },
+		{ "name": "Head", "head": [0, 0.4, 0.46], "tail": [0, 0.4, 0.8], "box": { "t": [-0.05, 1.05], "h": [0.47, 1.05] }, "fade": 0.04 },
+		{ "name": "Hair", "parent": "Head", "head": [0, 0.6, 0.88], "tail": [0, 0.95, 0.5], "box": { "t": [0.7, 1.05], "h": [0.42, 1.05] }, "fade": 0.05 }
+	],
+	"preview": [
+		{ "bone": "Torso", "axis": [0, 1, 0], "deg": 5, "cycles": 1 },
+		{ "bone": "Head", "axis": [1, 0, 0], "deg": 7, "cycles": 2 },
+		{ "bone": "Head", "axis": [0, 1, 0], "deg": -4, "cycles": 1 },
+		{ "bone": "Hair", "axis": [0, 0, 1], "deg": 14, "cycles": 1, "phase": 0.9 },
+		{ "bone": "Hair", "axis": [1, 0, 0], "deg": -4, "cycles": 2, "phase": 0.6 },
+		{ "bone": "FinL", "axis": [0, 1, 0], "deg": 25, "cycles": 2 },
+		{ "bone": "FinR", "axis": [0, 1, 0], "deg": -25, "cycles": 2 },
+		{ "bone": "Tail", "axis": [0, 1, 0], "deg": 12, "cycles": 1, "phase": 1.2 }
+	]
+}
