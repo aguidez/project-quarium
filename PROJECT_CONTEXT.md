@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-09 (V1.2.17: hunger / AFK badges over one's own fish only; headless Blender runner).
+> Last updated: 2026-11-09 (V1.2.18: a closed server sends its newcomers straight to a new server, no relay loop).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -488,7 +488,9 @@ ProjectQuarium/
    │     │                   or still there 20 s later) is tried again to any public server, kick with a message after 3.
    │     │                   closeOldServers (the soft update, topic QuariumClose: servers on V1.2.6 code or newer): an
    │     │                   old server stays for its players (told once), registers `closed`, and sends every newcomer
-   │     │                   through the relay; a moving server too (teleport data updateHops: after 2 hops a player stays). No teleport in
+   │     │                   straight to an open server of the newest version with room (registry, `sendToNewest`), none
+   │     │                   listed: the newcomer stays (never the relay: its public fallback brought them back, a loop);
+   │     │                   a moving server sends them through the relay (teleport data updateHops: after 2 hops a player stays). No teleport in
    │     │                   Studio (a notice instead)
    │     └─ DevCommandService  Studio-only chat commands (TextChatCommands created only when RunService.IsStudio(), only
    │                         for the game's admins, server/admins.ts): "/datareset" then "/datareset confirm" within 15 s (wipes the save,

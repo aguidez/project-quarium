@@ -11,6 +11,16 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.2.18 — 2026-11-09
+
+**Fixes**
+- **CLOSE OLD SERVERS no longer loops**: a player arriving on a closed server was sent through the in-between server,
+  which, without an open server of the new version, let Roblox pick one, and Roblox put them back on the same closed
+  server, again and again. A closed server now sends a newcomer straight to an open server of the new version, and
+  when there is none the newcomer simply stays and plays. Applies to the servers running this version or newer.
+
+---
+
 ## V1.2.17 — 2026-11-09
 
 **Fixes**

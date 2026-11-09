@@ -67,15 +67,18 @@ export function isUpdateRelayServer(): boolean {
  * which sends them on to a public server a few seconds later. An old server keeps moving whoever joins it until it is
  * empty and closes. Teleports don't work in Studio: there, the move only says so.
  * "Close the old servers" is the soft way (V1.2.6, only on servers running that code or newer: CLOSE_TOPIC): an old
- * server keeps its players, tells them once that a new version is out, and sends every newcomer on through the relay;
- * it closes by itself once empty. The relay sends a group to a server of the newest version with room (the registry)
- * rather than to any public one, which could be an old server again; a player sent on MAX_UPDATE_HOPS times stays.
+ * server keeps its players, tells them once that a new version is out, and sends every newcomer straight to an open
+ * server of the newest version with room (the registry); when none is listed the newcomer stays (V1.2.18: through the
+ * relay, public matchmaking put them back on the closed server, a loop). It closes by itself once empty. The relay (the
+ * MOVE) sends a group to a server of the newest version with room rather than to any public one, which could be an old
+ * server again; a player sent on MAX_UPDATE_HOPS times stays.
  */
 class ServerUpdateServiceSingleton implements Lifecycle {
 	private relay = isUpdateRelayServer();
 	private key = game.JobId !== "" ? game.JobId : `Studio-${HttpService.GenerateGUID(false)}`;
 	private moving = false;
 	private closed = false;
+	private closedFor = 0; // the newest place version that closed this server (its newcomers go to a server of it)
 
 	public onInit() {
 		if (this.relay) {
@@ -87,7 +90,11 @@ class ServerUpdateServiceSingleton implements Lifecycle {
 			// to newcomers: on to the newest version, unless they already hopped enough (never a loop of teleports)
 			if (!this.moving && !this.closed) return;
 			const hops = getUpdateHops(player);
-			if (hops < MAX_UPDATE_HOPS) task.spawn(() => this.moveToRelay([player], hops + 1));
+			if (hops >= MAX_UPDATE_HOPS) return;
+			// A closed server sends a newcomer straight to an open server of the newest version, never through the relay:
+			// with no such server the relay fell back on public matchmaking, which put them back here, again and again
+			if (this.moving) task.spawn(() => this.moveToRelay([player], hops + 1));
+			else task.spawn(() => this.sendToNewest(player, hops + 1));
 		});
 	}
 
@@ -224,6 +231,7 @@ class ServerUpdateServiceSingleton implements Lifecycle {
 	private onClose(version: number) {
 		if (this.closed || this.moving || game.PlaceVersion >= version) return;
 		this.closed = true;
+		this.closedFor = version;
 		this.register(); // the panel sees it CLOSED at once
 		print(`[Server] Place version ${game.PlaceVersion} < ${version}: closed to newcomers, open for its players.`);
 		task.delay(CLOSE_NOTICE_DELAY, () => {
@@ -261,10 +269,34 @@ class ServerUpdateServiceSingleton implements Lifecycle {
 	}
 
 	/**
-	 * A live server of the newest version (the relay's own: a new server runs the newest) with room for `count` more
-	 * players, the fullest first (players together); undefined when the registry lists none.
+	 * A closed server's newcomer: straight to an open server of the newest version with room (the registry), with their
+	 * hop count. None listed, or the teleport refused: they stay and play here (an old version beats a loop of loading
+	 * screens; a player who leaves and joins again gets another chance once a new server is up).
 	 */
-	private findNewestServer(count: number): string | undefined {
+	private sendToNewest(player: Player, hops: number) {
+		const target = this.findNewestServer(1, this.closedFor);
+		if (target === undefined || target === this.key) {
+			print(`[Server] Closed server: no open server of place version ${this.closedFor} listed, ${player.Name} stays.`);
+			return;
+		}
+		if (RunService.IsStudio()) {
+			DataService.notify(player, "Studio can't teleport: a live server would send you to the new version now.", "warning");
+			return;
+		}
+		const [ok, problem] = pcall(() => {
+			const options = new Instance("TeleportOptions");
+			options.ServerInstanceId = target;
+			options.SetTeleportData({ updateHops: hops });
+			TeleportService.TeleportAsync(game.PlaceId, [player], options);
+		});
+		if (!ok) warn(`[Server] Closed server: ${player.Name} stays, the teleport to ${target} failed (${problem}).`);
+	}
+
+	/**
+	 * A live server of `minVersion` or newer (by default the relay's own: a new server runs the newest) with room for
+	 * `count` more players, not closed, the fullest first (players together); undefined when the registry lists none.
+	 */
+	private findNewestServer(count: number, minVersion = game.PlaceVersion): string | undefined {
 		const [ok, items] = pcall(() =>
 			MemoryStoreService.GetSortedMap(REGISTRY).GetRangeAsync(Enum.SortDirection.Ascending, REGISTRY_READ_SIZE),
 		);
@@ -273,7 +305,7 @@ class ServerUpdateServiceSingleton implements Lifecycle {
 		let bestPlayers = -1;
 		for (const item of items as ReadonlyArray<{ key: string; value: unknown }>) {
 			const entry = item.value;
-			if (!isEntry(entry) || entry.closed === true || entry.version < game.PlaceVersion) continue;
+			if (!isEntry(entry) || entry.closed === true || entry.version < minVersion) continue;
 			if (entry.players + count > Players.MaxPlayers || entry.players <= bestPlayers) continue;
 			best = item.key;
 			bestPlayers = entry.players;
