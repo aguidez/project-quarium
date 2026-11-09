@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-08 (V1.2.14; players walk through each other: PlayerCollisionService).
+> Last updated: 2026-11-09 (V1.2.15: gamepad play in the tank, forgiving taps, the "Next goal" card after the tutorial).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -308,6 +308,8 @@ ProjectQuarium/
    │     ├─ likes.ts         Like rules (1 per hour given, x2 coins for 5 min, restarted by each like), board offset, helpers
    │     ├─ onboarding.ts    Onboarding steps + rules (what is allowed / free at each step), ONBOARDING_REWARD,
    │     │                   STORY_QUEST_HINT_DELAY
+   │     ├─ goals.ts         First goals after the tutorial (NewEgg, HatchFish: 5 fish ever hatched), derived from the
+   │     │                   save: isFirstGoalDone, getFirstGoalStep (the step the "Next goal" card shows), getTotalHatched
    │     └─ aquarium.ts      Tank dimensions, getAquariumFrame, isInFocusZone (front-of-glass zone), INCOME_ATTRIBUTES
    │                         (IncomePerSecond / IncomeMultiplier / IncomePaused on an owned aquarium model)
    ├─ server/
@@ -327,7 +329,7 @@ ProjectQuarium/
    │  │                      Size score `size`: 0 in older saves), SAVE_TEMPLATE, sanitizeSave
    │  ├─ playerStats.ts      PlayerStats (server only, never synced): sessions, days, play / tending seconds, milestones
    │  │                      {tending, play, days, at} ("Onboarding:<step>", "Rebirth<n>", "Species:<type>", "AllSpecies",
-   │  │                      "Ocean:<id>", "Quest:<id>"; tending -1 = reached before the stats existed: `legacy`), coins
+   │  │                      "Ocean:<id>", "Quest:<id>", "Goal:<first goal>"; tending -1 = reached before the stats existed: `legacy`), coins
    │  │                      dropped / clicked / by a companion, meals by hand, quests claimed, boost minutes, likes given,
    │  │                      platforms, per-device fps / memory / swim budget, testSpeed / testSpeedUsed, testNoPasses,
    │  │                      staff (isAdmin, checked at each join); createPlayerStats, sanitizePlayerStats, getTestSpeed
@@ -427,6 +429,8 @@ ProjectQuarium/
    │     │                   likes (onLikeGiven); "ReportClientStats" action (once a minute: platform, fps, memory;
    │     │                   validated, ≥ 45 s apart). Creator Dashboard (AnalyticsService, all in pcall):
    │     │                   onboarding funnel, one-time "Progression" funnel (Onboarding:Done, Rebirth<n>, AllSpecies),
+   │     │                   one-time "FirstGoals" funnel (Onboarding:Done, Goal:NewEgg, Goal:HatchFish, Quest:Story1,
+   │     │                   Quest:Story9, Rebirth1; only players done with the tutorial since FIRST_GOALS_SINCE),
    │     │                   custom events MilestoneMinutes, SessionMinutes / SessionMinutesInGame, CoinPickupPercent,
    │     │                   DailyQuestClaimed / WeeklyQuestClaimed; legacy saves stay out of the funnels, the owner's test
    │     │                   profiles (testSpeedUsed / testNoPasses) and the staff's (stats.staff = isAdmin, set at each
@@ -518,7 +522,10 @@ ProjectQuarium/
       │  │                   once the fly-in lands); hides the characters between the camera and the glass (local
       │  │                   transparency, and their BillboardGuis such as the title, turned back on when they leave)
       │  ├─ AquariumInteractionController  Clicks in focus view → CatchStar (a star under the cursor), CollectCoin (a
-      │  │                   coin) or DropFood (only with a portion ready in the food reserve, else onFoodDenied listeners)
+      │  │                   coin) or DropFood (only with a portion ready in the food reserve, else onFoodDenied listeners);
+      │  │                   a click / tap that misses still gets a coin or star drawn close by (TOUCH_SLACK / MOUSE_SLACK of
+      │  │                   the screen height); gamepad: A (not over a selected UI button) or R2 acts on the star / coin
+      │  │                   nearest the screen's middle, else drops food there
       │  ├─ FishRenderController  Builds / moves the local fish models of the watched tanks (own tank in 2.5D, else tanks
       │  │                   within 160 studs of the camera) from FishSync segments; growth, weak tint, exits (Abducted:
       │  │                   sucked into the UFO); UFO mutations (green / red tint + sparkles + glow, a "z Z z" bubble and
@@ -565,7 +572,8 @@ ProjectQuarium/
       │  │                   through the `Master` SoundGroup (SoundService), whose Volume is the player's volume
       │  │                   (setMasterVolume; UiController applies the saved one at the first sync); Sounds appearing
       │  │                   without a group in Workspace / SoundService / the player (character sounds) join it
-      │  ├─ OnboardingController  3D onboarding hints (floor marker, pointer over the frozen coin)
+      │  ├─ OnboardingController  3D onboarding hints (floor marker, pointer over the frozen coin: "Click!" / "Tap!" /
+      │  │                   "Press A!"); lets go of the gamepad's UI selection at CollectCoin and Feed (A then reaches the tank)
       │  ├─ CapacityPlaqueController  "n / capacity" plaque on the own tank
       │  ├─ IncomePlaqueController  Brass plaque on the left of every owned tank's base: "+X$/s  x250" (or "paused"), from
       │  │                   the aquarium's INCOME_ATTRIBUTES
@@ -620,7 +628,13 @@ ProjectQuarium/
          │                   step, never over the bottom-left buttons: navy plate, one round slot per portion (a pellet,
          │                   or one growing back with its seconds left, over FoodRefillTime), "FOOD n/slots" chip (6 portions fit, centred); an empty click flashes it red and
          │                   shakes it ("REFILLING..."); FoodPellet (also the Feed card's icon), getFoodReserveTop
-         ├─ OnboardingPanel  Onboarding instruction card (`bottom`: lifted above the food reserve)
+         ├─ OnboardingPanel  Onboarding instruction card (`bottom`: lifted above the food reserve), its verbs from the input
+         ├─ inputKind.ts     The player's input (Mouse / Touch / Gamepad: last input, else the device): getInputKind,
+         │                   onInputKindChanged, useInputKind, getPressVerb ("Click" / "Tap" / "Press A")
+         ├─ GoalTracker      "Next goal" card, right of the tank view (App: in the view, no panel / reveal / reward / starfall):
+         │                   the first goals (buy an egg, open it, hatch 5 fish; the shop's egg gets the tutorial's ring and
+         │                   hand through ShopBar `guideEgg`), then First steps (Story1), then the Voyage line's quest; a quest
+         │                   done turns it to CLAIM! and a click opens the Quests book. getTrackedGoal, getGoalEgg
          ├─ RewardPopup      Reward celebration (money / companion / feature, optional image or fishType: its sticker)
          ├─ EventBanner      Running event banner (style per event, EVENT_BANNER_STYLES: beat flashes / slow glow), formatTime
          ├─ AdminPanel       Admin panel (FigCraft admin-panel.figcraft), opened by the purple ADMIN button (bottom-left,
@@ -1017,7 +1031,10 @@ New actions: `DataService.registerAction(name, tCheck, handler)` on the server, 
 - **Onboarding.** EnterView → BuyEgg (free) → Hatching → OpenEgg → CollectCoin (frozen coin) → CoinCollected →
   Feed (the food reserve appears, the card above it) → Done (+300 $). Menus (side buttons) appear only once the onboarding is Done.
   `STORY_QUEST_HINT_DELAY` later, a coach bubble on the Quests button points at the Snail quest (client-only: shows only
-  if the onboarding was played in this session and Story1 is still to claim; ends when the book is opened).
+  if the onboarding was played in this session and Story1 is still to claim, after the first goals; ends when the book
+  is opened). Then the **first goals** (`goals.ts`, GoalTracker): buy a second egg, open it, hatch 5 fish, with the
+  shop's egg pointed at; the "Next goal" card then follows Story1 and the Voyage line. The instructions name the
+  player's input (click, tap, A on a gamepad).
 - **Gamepasses.** Shop card → `BuyGamePass` → GamePassService checks the pass has an id and isn't owned, then
   `MarketplaceService.PromptGamePassPurchase`; Roblox fires `PromptGamePassPurchaseFinished` on the server, which adds
   the pass to `PlayerData.passes`, syncs and sends a thank-you Reward. Passes are asked again from Roblox at each join

@@ -2,6 +2,7 @@ import { AnalyticsService, Players, Workspace } from "@rbxts/services";
 import { t } from "@rbxts/t";
 import { Lifecycle } from "shared/framework";
 import { FISH_TYPES, FishType, isEasterEgg } from "shared/types/fish";
+import { FIRST_GOALS, isFirstGoalDone } from "shared/types/goals";
 import { isOnboardingDone, ONBOARDING_STEPS } from "shared/types/onboarding";
 import { QuestConfig } from "shared/types/quests";
 import { REBIRTHS } from "shared/types/rebirths";
@@ -29,6 +30,18 @@ const isClientReport = t.interface({
 
 /** The one-time "Progression" funnel of the Creator Dashboard: its steps, in order. */
 const PROGRESSION_FUNNEL = ["Onboarding:Done", ...REBIRTHS.map((_, i) => `Rebirth${i + 1}`), "AllSpecies"];
+/**
+ * The one-time "FirstGoals" funnel (V1.2.15): from the tutorial's end to the first rebirth through the "Next goal"
+ * card's steps. Only for the players who finished the tutorial since FIRST_GOALS_SINCE: the others never saw the card.
+ */
+const FIRST_GOALS_FUNNEL = [
+	"Onboarding:Done",
+	...FIRST_GOALS.map((goal) => `Goal:${goal}`),
+	"Quest:Story1",
+	"Quest:Story9",
+	"Rebirth1",
+];
+const FIRST_GOALS_SINCE = 1794240000; // 2026-11-09 16:00 UTC, just before V1.2.15 went live
 
 /** What only lasts the session (summed up into the Creator Dashboard when the player leaves). */
 interface Session {
@@ -197,6 +210,19 @@ class StatsServiceSingleton implements Lifecycle {
 		if (speciesFound >= species) reached.push("AllSpecies");
 		for (const id of data.oceanRewardsClaimed) reached.push(`Ocean:${id}`);
 		for (const id of reached) this.stamp(player, save.stats, id, unknownTime);
+
+		// The first goals (after Onboarding:Done, stamped above): a player who was past them before they existed gets
+		// them without a time, like a legacy save
+		if (!isOnboardingDone(data.onboarding)) return;
+		const goalsKnown = !unknownTime && this.sawFirstGoals(save.stats);
+		for (const goal of FIRST_GOALS)
+			if (isFirstGoalDone(data, goal)) this.stamp(player, save.stats, `Goal:${goal}`, !goalsKnown);
+	}
+
+	/** The player finished the tutorial once the "Next goal" card existed (FIRST_GOALS_SINCE). */
+	private sawFirstGoals(stats: PlayerStats): boolean {
+		const done = stats.milestones["Onboarding:Done"];
+		return done !== undefined && done.at >= FIRST_GOALS_SINCE;
 	}
 
 	private stamp(player: Player, stats: PlayerStats, id: string, unknownTime: boolean) {
@@ -225,6 +251,12 @@ class StatsServiceSingleton implements Lifecycle {
 		if (funnelStep >= 0 && !stats.legacy) {
 			this.safely(player, () =>
 				AnalyticsService.LogFunnelStepEvent(player, "Progression", tostring(player.UserId), funnelStep + 1, id),
+			);
+		}
+		const goalStep = FIRST_GOALS_FUNNEL.indexOf(id);
+		if (goalStep >= 0 && !stats.legacy && this.sawFirstGoals(stats)) {
+			this.safely(player, () =>
+				AnalyticsService.LogFunnelStepEvent(player, "FirstGoals", tostring(player.UserId), goalStep + 1, id),
 			);
 		}
 		this.logCustom(player, "MilestoneMinutes", time.tending / 60, id, tostring(math.min(time.days, 30)));

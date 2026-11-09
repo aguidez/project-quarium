@@ -26,6 +26,8 @@ import { AdminActions, AdminPanel } from "./AdminPanel";
 import { EventBanner } from "./EventBanner";
 import { FishIndexPanel } from "./FishIndexPanel";
 import { FoodReserve, getFoodReserveTop } from "./FoodReserve";
+import { getGoalEgg, getTrackedGoal, GoalTracker } from "./GoalTracker";
+import { isFirstGoalDone } from "shared/types/goals";
 import { AquariumPanel } from "./AquariumPanel";
 import { CosmeticId } from "shared/types/cosmetics";
 import { getOwnedTitles, ThemeChoice, TitleChoice } from "shared/types/customization";
@@ -68,6 +70,8 @@ const FULL_REMINDER_COOLDOWN = 180;
 // while it stays so (opening the menu restarts the cooldown). The button's gold halo stays all along.
 const REBIRTH_REMINDER_TIME = 8;
 const REBIRTH_REMINDER_COOLDOWN = 240;
+// Seconds between two reads of the clock while the first goals run (GoalTracker: an egg ready to open)
+const GOAL_CLOCK_PERIOD = 0.5;
 
 export interface AppProps {
 	data?: PlayerData;
@@ -214,8 +218,29 @@ export function App(props: AppProps) {
 		const thread = task.delay(STORY_QUEST_HINT_DELAY, () => setQuestHint(true));
 		return () => task.cancel(thread);
 	}, [onboardingStep]);
+	// "Next goal" card: during the first goals it re-reads the clock (an egg turns ready on its own)
+	const firstGoalsRunning = menusVisible && !isFirstGoalDone(data, "HatchFish");
+	const [serverNow, setServerNow] = useState(() => Workspace.GetServerTimeNow());
+	useEffect(() => {
+		if (!firstGoalsRunning) return;
+		let alive = true;
+		task.spawn(() => {
+			while (alive) {
+				setServerNow(Workspace.GetServerTimeNow());
+				task.wait(GOAL_CLOCK_PERIOD);
+			}
+		});
+		return () => {
+			alive = false;
+		};
+	}, [firstGoalsRunning]);
+	const trackedGoal = menusVisible
+		? getTrackedGoal(data, math.max(serverNow, Workspace.GetServerTimeNow()))
+		: undefined;
+
 	const firstQuest = data?.quests.lines.Start;
-	const questCoach = questHint && firstQuest?.id === "Story1" && !firstQuest.claimed;
+	// The first goals come first: the bubble waits for their end (or the book opened meanwhile)
+	const questCoach = questHint && firstQuest?.id === "Story1" && !firstQuest.claimed && trackedGoal?.kind !== "First";
 
 	// "Aquarium full" reminder: the player taps a ready egg but has no room (the server refuses it anyway)
 	const [fullReminder, setFullReminder] = useState<"Ocean" | "Quests">();
@@ -297,7 +322,7 @@ export function App(props: AppProps) {
 				ZIndex={5} // the eggs' odds tooltips hang over the boost pills below it (the menus' Modal is at 20)
 			>
 				<uiscale Scale={scale} />
-				<ShopBar data={props.data} onBuy={props.onBuy} onOpen={openEgg} />
+				<ShopBar data={props.data} onBuy={props.onBuy} onOpen={openEgg} guideEgg={getGoalEgg(trackedGoal)} />
 			</frame>
 			<OnboardingPanel
 				key="Onboarding"
@@ -412,6 +437,24 @@ export function App(props: AppProps) {
 					scale={scale}
 				/>
 			)}
+			{menusVisible &&
+				trackedGoal &&
+				props.inView &&
+				openPanel === undefined &&
+				!props.reveal &&
+				!props.reward &&
+				!starfall && (
+					<GoalTracker
+						key="GoalTracker"
+						goal={trackedGoal}
+						data={data}
+						scale={uiScale}
+						onOpenQuests={() => {
+							setOpenPanel("Quests");
+							setQuestHint(false);
+						}}
+					/>
+				)}
 			{menusVisible && (
 				<SideButtons
 					key="SideButtons"

@@ -49,5 +49,16 @@ metadata:
   `npm run stats -- --out snap.json`, then script over the snapshot (onboarding step by step, `player.rebirths`,
   `stats.platforms`, last milestone vs `playSeconds` to see where each player stopped). Boards open late (dailies at
   rebirth 2, weeklies at 3): count quest stats only over players who have them.
+- **Fetching takes ~30 min** (6,410 profiles on 2026-11-09, Open Cloud pages of 50, ~250 profiles a minute at 8 requests
+  in parallel) and `npm run stats` prints nothing meanwhile: for a big snapshot, write a resumable script that appends
+  each profile to an NDJSON file as it arrives (a single failed request then costs nothing).
+- **First real-player read** (2026-11-09, players of V1.0.0 to V1.2.14, 6,408 players in 4.7 days, ~1,500 new a day): median play **76 s**,
+  41 % gone within a minute (no platform report yet), tutorial done by 47 % (biggest drop CollectCoin → CoinCollected),
+  1,329 of the 3,031 who finished it never bought a 2nd egg with their 300 $, rebirth 1 for 2 %, ~3 % back another day
+  (but 45 % of the 30 min+ players), average ~4 concurrent players. **Gamepad players are blocked**: the tank's clicks
+  (AquariumInteractionController) only read MouseButton1 / Touch, 9 % of them finish the tutorial. Touch is ~90 % of the
+  known platforms (47 fps on average). V1.2.15 answered with the "Next goal" card, gamepad play and forgiving taps:
+  compare the next read with this one (same 8 onboarding steps; the new "FirstGoals" funnel and the `Goal:NewEgg` /
+  `Goal:HatchFish` milestones only count players who finished the tutorial after 2026-11-09 16:00 UTC).
 - **Node 24 quirk**: `node - <<'EOF'` runs stdin as TypeScript and a `"\n"` in a search string no longer matches the
   file's `\n`: use the Edit tool for strings with escapes.

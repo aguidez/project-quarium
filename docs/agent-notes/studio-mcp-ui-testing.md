@@ -75,6 +75,13 @@ Related: [[lobby-decor-constraints]]
   `OpenEgg` the run's egg every 4 s). Send chat commands from execute_luau inside `task.spawn` + `pcall`:
   `SendAsync` can block until the call times out. "Asset content representation is being generated" lines when a new
   species first spawns are Studio's asset processing, not a game error.
+- **`user_mouse_input` x / y are not the same space for the UI and the world** (2026-11-09, 1618 × 1152 viewport, 58 px
+  topbar): a click on a React button lands where its `AbsolutePosition` says (viewport space, the ScreenGuis ignore the
+  inset), but the click's `InputObject.Position` is that x / y as given, read as screen space by `ScreenPointToRay`. So a
+  3D target (a coin) is clicked at `camera:WorldToScreenPoint(part.Position)` (viewport y − 58), a button at its
+  `AbsolutePosition` centre. Check with `PlayerGui:GetGuiObjectsAtPosition(x, y)` before blaming the code. The
+  developer's account is staff, so a playtest never fires AnalyticsService: check the milestones in the test save
+  (`Data.stats.milestones`) after stopping instead.
 - **Playing the onboarding on a fresh profile** (2026-11-03, the food reserve): point `STORE_NAME` at an empty test store (`"PlayerData_<Name>Test"; // TEMP TEST`), build, check the sync, play: the owner starts from step 1. Drive it with intents (`BuyEgg "Common"`, then `OpenEgg "Common"` every second until the frozen coin shows, `Interact:FireServer("CollectCoin", coin)`), then wait for the Feed step. Afterwards stop, restore `PlayerData_v1`, rebuild, check the sync, `RemoveAsync("Player_<UserId>")` in the test store from Edit. Such a profile has no `testSpeedUsed`: it does send one onboarding funnel to the Creator Dashboard. Real clicks with `user_mouse_input` use viewport coordinates (the capture is scaled down, see above): a click "above the water" in capture pixels lands outside the tank and silently does nothing. A 0.7 s UI flash is shorter than a capture's delay: record it from a watcher loop started in a Client script (texts / colours into a local attribute), click, then read the attribute.
 - **Previewing the UI on a phone** (2026-11-04, V0.60.8): Studio's device emulator can't be driven by MCP. TEMP
   harness (`// TEMP TEST`, reverted with `git checkout` + a grep for TEMP TEST): `screenScale.getViewportSize` returns

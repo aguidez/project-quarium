@@ -11,6 +11,32 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.2.15 — 2026-11-09
+
+The first real players' data (6,400 players since the release): half of them left during the tutorial, and almost
+half of those who finished it left with its 300 $ without buying a second egg.
+
+**New**
+- **"Next goal" card**: on the right of the tank view, it says what to do next. Right after the tutorial it walks the
+  player through their first eggs (buy a new egg, open it, hatch 5 fish), the shop's egg glowing with the tutorial's
+  pointing hand; then it follows the "Coin Collector" quest and the Voyage line. A quest done turns the card gold
+  ("CLAIM!"): a click opens the Quests book.
+- **"FirstGoals" funnel** in the Creator Dashboard (tutorial's end → new egg → 5 fish → Coin Collector → Saving Up →
+  rebirth 1), for the players who finish the tutorial from this version on.
+
+**Changes**
+- **Gamepads play in the tank**: A (or R2) collects the coin or catches the star nearest the middle of the screen,
+  otherwise drops food there.
+- **Easier taps**: a tap or click just beside a coin or a star still collects it (wider for fingers).
+- The tutorial's instructions name the player's input: "Click", "Tap" or "Press A".
+- The quest book's bubble after the tutorial waits for the first goals to be done.
+
+**Fixes**
+- Gamepad players were stuck in the tutorial: nothing could collect its coin (9 % of them finished it). The shop's
+  selected egg no longer catches A at the coin and feeding steps.
+
+---
+
 ## V1.2.14 — 2026-11-08
 
 **Changes**

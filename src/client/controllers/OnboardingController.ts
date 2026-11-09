@@ -1,4 +1,4 @@
-import { CollectionService, Players, TweenService, Workspace } from "@rbxts/services";
+import { CollectionService, GuiService, Players, TweenService, Workspace } from "@rbxts/services";
 import { Lifecycle } from "shared/framework";
 import { getRemoteEvent } from "shared/network";
 import { TAGS } from "shared/tags";
@@ -7,6 +7,7 @@ import { OnboardingStep } from "shared/types/onboarding";
 import { PlayerData } from "shared/types/playerData";
 import { FocusController } from "./FocusController";
 import { getWorldLabelScale } from "client/ui/screenScale";
+import { getInputKind, getPressVerb } from "client/ui/inputKind";
 
 const UPDATE_INTERVAL = 0.25;
 const MARKER_COLOR = Color3.fromHex("#FFC93C");
@@ -64,7 +65,12 @@ class OnboardingControllerSingleton implements Lifecycle {
 
 	public onInit() {
 		this.syncRemote.OnClientEvent.Connect((data: PlayerData) => {
+			const previous = this.step;
 			this.step = data.onboarding;
+			// A gamepad opened the egg through the shop's selected slot: A would keep pressing that slot instead of
+			// reaching the coin and the water, so the selection is let go when the tank needs A
+			if (previous !== this.step && (this.step === "CollectCoin" || this.step === "Feed"))
+				GuiService.SelectedObject = undefined;
 		});
 
 		CollectionService.GetInstanceAddedSignal(TAGS.Coin).Connect((coin) => this.onCoinAdded(coin));
@@ -80,13 +86,13 @@ class OnboardingControllerSingleton implements Lifecycle {
 		}
 	}
 
-	/** Frozen (onboarding) coins of the local player's tank get a "Click!" pointer. */
+	/** Frozen (onboarding) coins of the local player's tank get a "Click!" pointer ("Tap!", "Press A!" to match the input). */
 	private onCoinAdded(coin: Instance) {
 		if (!coin.IsA("BasePart") || coin.GetAttribute("Frozen") !== true) return;
 		const aquarium = FocusController.getOwnAquarium();
 		if (!aquarium || !coin.IsDescendantOf(aquarium)) return;
 		// Parented to the coin: destroyed along with it once collected
-		createPointer("Click!", coin, coin.Size.Y / 2 + 2.5).Parent = coin;
+		createPointer(`${getPressVerb(getInputKind())}!`, coin, coin.Size.Y / 2 + 2.5).Parent = coin;
 	}
 
 	private updateFloorMarker() {

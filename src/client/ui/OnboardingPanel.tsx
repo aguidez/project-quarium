@@ -5,6 +5,7 @@ import { SfxName } from "shared/sounds";
 import { FOOD_REFILL_TIME, FOOD_RESERVE_SLOTS } from "shared/types/food";
 import { OnboardingStep } from "shared/types/onboarding";
 import { FoodPellet } from "./FoodReserve";
+import { getPressVerb, InputKind, useInputKind } from "./inputKind";
 import { TextStroke } from "./kit";
 import { COLORS, FONT_BOLD, FONT_TITLE, NAVY, OUTLINE, PALETTES, verticalGradient } from "./theme";
 
@@ -25,7 +26,8 @@ interface StepContent {
 	/** Drawn instead of the glyph: a food pellet like the reserve's. */
 	pellet?: boolean;
 	title: string;
-	body: string;
+	/** The instruction, with the verb of the player's input ("Click", "Tap", "Press A"). */
+	body: (kind: InputKind) => string;
 	number: number; // "STEP n / STEP_COUNT"
 }
 
@@ -34,44 +36,50 @@ const STEP_CONTENT: Partial<Record<OnboardingStep, StepContent>> = {
 	EnterView: {
 		icon: "👋",
 		title: "Welcome to your aquarium!",
-		body: "Walk up to the glass of your aquarium to look after it.",
+		body: () => "Walk up to the glass of your aquarium to look after it.",
 		number: 1,
 	},
 	BuyEgg: {
 		icon: "🥚",
 		title: "Buy your first egg!",
-		body: "Click the Common Egg in the shop above. This one is free!",
+		body: (kind) =>
+			`${kind === "Gamepad" ? "Select" : getPressVerb(kind)} the Common Egg in the shop above. This one is free!`,
 		number: 2,
 	},
 	Hatching: {
 		icon: "⏳",
 		title: "Your egg is incubating...",
-		body: "Every fish comes from an egg. Wait until it is ready to hatch!",
+		body: () => "Every fish comes from an egg. Wait until it is ready to hatch!",
 		number: 3,
 	},
 	OpenEgg: {
 		icon: "🐣",
 		title: "Your egg is ready!",
-		body: "Click it in the shop above to open it and discover your fish.",
+		body: (kind) =>
+			`${kind === "Gamepad" ? "Select" : getPressVerb(kind)} it in the shop above to open it and discover your fish.`,
 		number: 3,
 	},
 	CollectCoin: {
 		icon: "💰",
 		title: "Your fish drops coins!",
-		body: "Click the coin in the water to collect it.",
+		body: (kind) =>
+			kind === "Gamepad"
+				? "Press A to collect the coin in the water."
+				: `${getPressVerb(kind)} the coin in the water to collect it.`,
 		number: 4,
 	},
 	CoinCollected: {
 		icon: "🎉",
 		title: "Well done!",
-		body: "Your fish drop coins over time: collect them to earn money.",
+		body: () => "Your fish drop coins over time: collect them to earn money.",
 		number: 4,
 	},
 	Feed: {
 		icon: "",
 		pellet: true,
 		title: "Your fish is hungry!",
-		body: `Click the water to drop food. Food is free! Your reserve below holds ${FOOD_RESERVE_SLOTS} portions: an empty one refills in ${FOOD_REFILL_TIME} seconds.`,
+		body: (kind) =>
+			`${kind === "Gamepad" ? "Press A" : `${getPressVerb(kind)} the water`} to drop food. Food is free! Your reserve below holds ${FOOD_RESERVE_SLOTS} portions: an empty one refills in ${FOOD_REFILL_TIME} seconds.`,
 		number: 5,
 	},
 };
@@ -97,7 +105,7 @@ function useTimeSinceMount(): React.Binding<number> {
 }
 
 /** One instruction card (FigCraft: OnboardingCard frame, horizontal auto layout); pops in, then breathes. */
-function OnboardingCard(props: { content: StepContent; screenScale: number; bottom: number }) {
+function OnboardingCard(props: { content: StepContent; screenScale: number; bottom: number; inputKind: InputKind }) {
 	const time = useTimeSinceMount();
 	const content = props.content;
 	// The card fades in at its final size (scaling it would make its text wobble), and the breathing is
@@ -214,7 +222,7 @@ function OnboardingCard(props: { content: StepContent; screenScale: number; bott
 						AutomaticSize={Enum.AutomaticSize.XY}
 						BackgroundTransparency={1}
 						Font={FONT_BOLD}
-						Text={content.body}
+						Text={content.body(props.inputKind)}
 						TextSize={20}
 						TextColor3={COLORS.white}
 						TextWrapped={true}
@@ -233,6 +241,7 @@ function OnboardingCard(props: { content: StepContent; screenScale: number; bott
 export function OnboardingPanel(props: OnboardingPanelProps) {
 	const step = props.step;
 	const screenScale = useUiScale(MAX_SCREEN_SCALE);
+	const inputKind = useInputKind();
 	const previousStep = useRef<OnboardingStep>();
 
 	useEffect(() => {
@@ -249,6 +258,7 @@ export function OnboardingPanel(props: OnboardingPanelProps) {
 			key={`Card${step}`}
 			content={content}
 			screenScale={screenScale}
+			inputKind={inputKind}
 			bottom={props.bottom ?? BOTTOM_MARGIN * screenScale}
 		/>
 	);

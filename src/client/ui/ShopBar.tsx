@@ -53,6 +53,8 @@ export interface ShopBarProps {
 	data?: PlayerData;
 	onBuy: (eggType: EggType) => void;
 	onOpen: (eggType: EggType) => void;
+	/** The egg the "Next goal" card asks for (GoalTracker): pulsing ring and pointing hand, as in the tutorial. */
+	guideEgg?: EggType;
 }
 
 /**
@@ -198,7 +200,9 @@ export function ShopBar(props: ShopBarProps) {
 				}
 				gatedHint={!unlocked && requires ? `Buy a ${EGG_TYPES[requires].displayName} to unlock` : undefined}
 				disabled={disabled}
-				highlight={(step === "BuyEgg" || step === "OpenEgg") && eggType === STARTER_EGG}
+				highlight={
+					((step === "BuyEgg" || step === "OpenEgg") && eggType === STARTER_EGG) || eggType === props.guideEgg
+				}
 				onBuy={() => props.onBuy(eggType)}
 				onOpen={() => props.onOpen(eggType)}
 				aquariumFull={aquariumFull}

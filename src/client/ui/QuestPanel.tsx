@@ -127,7 +127,7 @@ function getRewardDisplay(reward: QuestReward): RewardDisplay {
 }
 
 /** Picture of what a quest counts, in the disc left of its card (money: a coin). */
-function getStatImage(config: QuestConfig): string | undefined {
+export function getStatImage(config: QuestConfig): string | undefined {
 	const stat: QuestStat = config.stat;
 	if (stat === "FishInTank") return FISH_ICONS.Clownfish.Normal;
 	if (stat === "OceanPoints" || stat === "FishReleased") return FEATURES.Ocean.image;

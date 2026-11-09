@@ -24,3 +24,8 @@ The owner develops on **both** a Windows PC (where the project and SETUP.md were
 - **Missing dev packages after switching** (2026-11-02): `Cannot find module '@resvg/resvg-js'` on the PC: added on
   the Mac, never installed here. `npm install` after a pull that touched package.json.
 - On the Mac, Node comes from Homebrew (`/opt/homebrew/bin`, may need adding to the PATH in shell commands).
+- **Pull before anything** (2026-11-09): a whole task (analysis, V1.2.15 code, a Studio test) was done on a PC clone 66
+  commits behind (V1.0.1 while the game was at V1.2.14); the push refused it and it had to be rebased, renumbered and
+  tested again, and meanwhile Rojo had synced the old scripts into the owner's Studio. Run `git fetch` and compare with
+  `origin/main` (then pull, `npm install`, `npx rbxtsc`) before reading the code or connecting Rojo. After a rebase that
+  adds files, Rojo may miss them: check them in Studio and recreate the `out/` file to trigger the sync.
