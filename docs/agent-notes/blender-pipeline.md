@@ -78,6 +78,13 @@ bone.Transform:Inverse()`, `delta = WorldCFrame.Rotation * rest.Rotation:Inverse
 idol, 2026-11-09: head up.Z < 0 on the beat = a forward nod, both fin tips' dY of the same sign). A 60 s admin event
 can end mid-test: check the event track is playing before reading the music-driven amplitudes.
 
+**Headless (2026-11-09).** `npm run blender -- convert <Fish> [<Fish>...]` (tools/blender/run.js →
+batch_convert.py) runs step 2 without a Blender window or the MCP: same .blend / .glb / frames (the idol's GLB came
+out byte-identical to the MCP run), ~33 s a fish on the PC with Blender's start-up and the 30 EEVEE frames, one
+`RESULT {json}` line per fish, exit 1 if one failed or left an unweighted vertex. convert_fish's window override is a
+no-op without a window. Any other script: `npm run blender -- <script.py> [args]`. The MCP stays the way to look,
+probe and tune; the runner is for batches.
+
 **Batch checklist (one species = a few calls).** Paths from the repo root.
 1. *Export* (Studio, Edit): `node tools/obj-receiver.js design/rigs/work` in the background; run
    `tools/blender/studio/export_fish.luau` once for the batch with its `FISHES` list set (execute_luau takes the
@@ -125,7 +132,7 @@ can end mid-test: check the event track is playing before reading the music-driv
 7. *Playtest*: the fish on bones (`Rig` attribute, a bone's Transform changing), no V1 rig on it. No dev command
    brings a species into a tank: from the Server datamodel, clone the templates (tag `FishTemplate` removed, parts
    anchored) in a row in front of the player and tag them `Fish`; the client's FishRigController animates them.
-8. *Ship*: a patch (RELEASE_NOTES, `GAME_VERSION`), PROJECT_CONTEXT's "Converted so far", the roadmap box; ask the
+8. *Ship*: a patch (RELEASE_NOTES, `GAME_VERSION`), PROJECT_CONTEXT's "Converted so far"; ask the
    owner to **save + publish** the place (the templates live in it).
 
 Lighter copy of a heavy mesh (spare, owner-approved for the Flame Gourami): Decimate modifier, Collapse, ratio

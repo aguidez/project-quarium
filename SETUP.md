@@ -99,7 +99,7 @@ change. The Blender MCP launcher then starts Blender by itself when Claude Code 
 - Open the repo folder in VS Code (or run `claude` in it). The project's MCP servers come from `.mcp.json`; they start
   through `node tools/mcp/*.js`, which work on every OS and read `workspace.local.json`. Approve them on first launch,
   then check with `/mcp` that **Roblox_Studio** (Studio open), **FigCraft** and **Blender** (after `npm run blender-setup`) are connected.
-- Rules and context the agent reads: `CLAUDE.md`, `PROJECT_CONTEXT.md`, `BALANCE.md`, `ROADMAP_FIXES.md`,
+- Rules and context the agent reads: `CLAUDE.md`, `PROJECT_CONTEXT.md`, `BALANCE.md`,
   `RELEASE_NOTES.md` and the notes in `docs/agent-notes/` (the working knowledge that used to live in the old
   machine's Claude memory).
 - Personal Claude settings for this machine go in `.claude/settings.local.json` (git-ignored); shared ones in
@@ -110,6 +110,7 @@ change. The Blender MCP launcher then starts Blender by itself when Claude Code 
 ```sh
 npm run doctor        # Node, packages, Rojo version, Studio MCP, fonts, FigCraft, Blender + uv + Blender MCP
 npm run blender-setup # (Blender closed) installs the Blender Lab MCP add-on + server
+npm run blender -- convert <Fish>  # headless Blender (no window, no MCP): a batch of rigs; or -- <script.py> [args]
 npx rbxtsc            # zero errors
 npm run sim           # economy simulator (BALANCE.md)
 npm run stats         # real players' statistics vs the simulator (needs robloxOpenCloudKey)

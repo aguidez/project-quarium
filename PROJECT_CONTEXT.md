@@ -4,7 +4,7 @@
 > whenever you add / rename / remove a file, a service, a remote, a PlayerData field, a tag or a game system.**
 > It describes the game **as it is now**: the history of each change goes in `RELEASE_NOTES.md`, the numbers in
 > `BALANCE.md`; don't copy them here.
-> Last updated: 2026-11-09 (V1.2.16: the K-pop idol's texture back, on bones, dancing on the beat).
+> Last updated: 2026-11-09 (V1.2.17: hunger / AFK badges over one's own fish only; headless Blender runner).
 
 **The game.** An incremental aquarium game on Roblox. Each player owns one of 6 aquariums placed around a
 beach lobby. They walk up to the glass to enter a 2.5D "focus" view. In that view they buy eggs, which hatch
@@ -42,7 +42,7 @@ coins. Around that core loop:
 
 24 species (+ 3 secret), 16 eggs, 12 rebirths (V1 + the V1.2 content). **`BALANCE.md`** holds the expected
 progression (rebirth 1 ~17 min … all 24 species ~25h for a player of 1 h a day), every number and the design rules.
-How to add content: `docs/agent-notes/content-recipes.md`. **`ROADMAP_FIXES.md`**: small fixes noted along the way.
+How to add content: `docs/agent-notes/content-recipes.md`.
 
 ---
 
@@ -73,7 +73,6 @@ ProjectQuarium/
 ├─ PROJECT_CONTEXT.md        This file
 ├─ RELEASE_NOTES.md          Every change of the game, patch by patch, newest on top, never deleted
 ├─ BALANCE.md                The balance: expected progression, live numbers, design rules, V1 design, history
-├─ ROADMAP_FIXES.md          Small fixes to plan
 ├─ default.project.json      Rojo mapping (see §1)
 ├─ .mcp.json                 Project MCP servers (Roblox_Studio, FigCraft, Blender), started by `node tools/mcp/*.js` on any OS
 ├─ workspace.local.example.json  Template of workspace.local.json (git-ignored): FigCraft folder / port, wgpu backend,
@@ -134,7 +133,9 @@ ProjectQuarium/
 │                            rig_jellyfish.py / rig_snail.py / rig_boxes.py (companions' and the fisherman's own
 │                            rigs, picked by their settings' "rig"; rig_boxes: bones + vertex boxes in the settings),
 │                            rgba-to-png.js
-│                            (texture pull + tint); studio/export_fish.luau and studio/swap_template.luau
+│                            (texture pull + tint); run.js (`npm run blender -- <script.py> [args]`, headless
+│                            `--background`; `-- convert <Fish>...` runs batch_convert.py: convert_fish without a
+│                            window, one RESULT JSON line per fish); studio/export_fish.luau and studio/swap_template.luau
 │                            (Studio snippets the agent runs through the MCP, never game scripts; MESH_SWAPS swaps a
 │                            MeshPart placed in the world by its path)
 ├─ design/rigs/work/        Rig work files (exported textures, .blend, render frames): git-ignored
@@ -535,7 +536,8 @@ ProjectQuarium/
       │  │                   (or rare variant texture) hasn't arrived waits in `pending`, built when the asset arrives, in
       │  │                   its normal look after 5 s; getPose blends a late segment from the old one's current pose;
       │  │                   playExit sets "Dead" and "Exit" (the cause) for the bones' exit moves
-      │  ├─ FishIndicatorController  Hunger / AFK badges above fish (from attributes), none over a sleeping fish;
+      │  ├─ FishIndicatorController  Hunger / AFK badges above the local player's own fish only (from attributes; the
+      │  │                   fish's tank = its `Aquarium`-tagged ancestor, its `OwnerUserId`), none over a sleeping fish;
       │  │                   BillboardGuis straight in PlayerGui, ResetOnSpawn off
       │  ├─ FishAnimationController  The beat puffs of the music events (every fish, event guest and the Swordfish), and the
       │  │                   fallback of a template without `Rig = "Bones"` (warned once): a local fish sways as a whole

@@ -15,6 +15,7 @@
     "stats": "node tools/player-stats.js",
     "share-assets": "node tools/share-assets.js",
     "blender-setup": "node tools/blender/setup.js",
+    "blender": "node tools/blender/run.js",
     "doctor": "node tools/check-setup.js"
   },
   "keywords": [],

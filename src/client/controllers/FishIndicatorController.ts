@@ -16,10 +16,21 @@ const BADGE_STYLES: Partial<Record<HungerState, { color: Color3; icon: string }>
 /** Owner AFK: the fish is paused (no hunger, no coins), shown instead of its hunger. */
 const PAUSED_STYLE = { color: Color3.fromRGB(90, 110, 170), icon: "💤" };
 
+/** The tank a fish model swims in (FishRenderController parents it under the aquarium's "Fish" folder). */
+function findAquarium(fish: Instance): Instance | undefined {
+	let node = fish.Parent;
+	while (node && node !== game) {
+		if (CollectionService.HasTag(node, TAGS.Aquarium)) return node;
+		node = node.Parent;
+	}
+	return undefined;
+}
+
 /**
- * Renders the hunger badge above every fish from the "Hunger" and "Paused" attributes set by the server.
- * Client-side so it can pulse smoothly without network traffic. None over a fish asleep after a UFO ("Asleep",
- * FishRenderController): its hunger is frozen and its "z Z z" bubble says it all.
+ * Renders the hunger badge above the local player's own fish from the "Hunger" and "Paused" attributes set by the
+ * server; the fish of other players' tanks get none (their state is theirs to watch). Client-side so it can pulse
+ * smoothly without network traffic. None over a fish asleep after a UFO ("Asleep", FishRenderController): its hunger
+ * is frozen and its "z Z z" bubble says it all.
  */
 class FishIndicatorControllerSingleton implements Lifecycle {
 	private janitors = new Map<Instance, Janitor>();
@@ -105,13 +116,17 @@ class FishIndicatorControllerSingleton implements Lifecycle {
 		let pulse: Tween | undefined;
 		janitor.Add(() => pulse?.Cancel(), true);
 
+		// Only over the local player's own tank (a tank changes hands when its owner leaves and another one joins)
+		const aquarium = findAquarium(fish);
+		const isOwn = () => aquarium?.GetAttribute("OwnerUserId") === Players.LocalPlayer.UserId;
+
 		const refresh = () => {
 			const hunger = fish.GetAttribute("Hunger");
 			const dead = fish.GetAttribute("Dead") === true;
 			const paused = fish.GetAttribute("Paused") === true;
 			const asleep = fish.GetAttribute("Asleep") === true;
 			const hungerStyle = typeIs(hunger, "string") ? BADGE_STYLES[hunger as HungerState] : undefined;
-			const style = dead || asleep ? undefined : paused ? PAUSED_STYLE : hungerStyle;
+			const style = dead || asleep || !isOwn() ? undefined : paused ? PAUSED_STYLE : hungerStyle;
 
 			billboard.Enabled = style !== undefined;
 			if (style) {
@@ -137,6 +152,7 @@ class FishIndicatorControllerSingleton implements Lifecycle {
 		janitor.Add(fish.GetAttributeChangedSignal("Dead").Connect(refresh));
 		janitor.Add(fish.GetAttributeChangedSignal("Paused").Connect(refresh));
 		janitor.Add(fish.GetAttributeChangedSignal("Asleep").Connect(refresh));
+		if (aquarium) janitor.Add(aquarium.GetAttributeChangedSignal("OwnerUserId").Connect(refresh));
 		refresh();
 	}
 }

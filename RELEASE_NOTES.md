@@ -11,6 +11,14 @@ Every change to the game, patch by patch. The newest version is at the top.
 
 ---
 
+## V1.2.17 — 2026-11-09
+
+**Fixes**
+- **Hunger and AFK badges only over your own fish**: the badges showed over every tank's fish, so everyone saw which
+  of the other players' fish were hungry or paused. The fish of other tanks no longer get any.
+
+---
+
 ## V1.2.16 — 2026-11-09
 
 **New**

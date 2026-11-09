@@ -4,6 +4,7 @@
 # export_fish.luau, then rgba-to-png.js). Settings: design/rigs/<Fish>.json if present (rig_fish.py DEFAULTS
 # overrides, plus "speed" for the preview). Writes into design/rigs/work/: <Fish>.blend, <Fish>.glb and the preview
 # frames <Fish>_frames/ (tools/blender/frames-to-gif.js turns a batch into one GIF for the owner).
+import contextlib
 import json
 import os
 
@@ -18,6 +19,9 @@ def _load(repo, name):
 
 
 def _window_override():
+    # Headless (blender --background, tools/blender/run.js): no window, the operators used here run without one
+    if not bpy.context.window_manager.windows:
+        return contextlib.nullcontext()
     window = bpy.context.window_manager.windows[0]
     area = next((a for a in window.screen.areas if a.type == "VIEW_3D"), None)
     if area is None:
